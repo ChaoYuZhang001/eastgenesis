@@ -1,0 +1,668 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "qa-zh-01",
+      "input": "想入坑阿加莎·克里斯蒂的推理小说，第一本读哪本比较好？别太长的",
+      "lang": "zh",
+      "expected_type": "qa",
+      "expected_capabilities": [
+        "zh"
+      ]
+    },
+    {
+      "id": "qa-zh-02",
+      "input": "帮我起草一封邮件给房东，说下个月租约到期后不续租了，语气客气一点，押金怎么退也提一句。先别发，我自己再改改",
+      "lang": "zh",
+      "expected_type": "qa",
+      "expected_capabilities": [
+        "zh"
+      ]
+    },
+    {
+      "id": "qa-zh-03",
+      "input": "帮我查一下地球到月球大概多远？",
+      "lang": "zh",
+      "expected_type": "qa",
+      "expected_capabilities": [
+        "zh"
+      ]
+    },
+    {
+      "id": "qa-zh-04",
+      "input": "公司让我开个在职证明去办签证，能给个模板吗？一般要写哪些内容",
+      "lang": "zh",
+      "expected_type": "qa",
+      "expected_capabilities": [
+        "zh"
+      ]
+    },
+    {
+      "id": "qa-en-01",
+      "input": "What does 'black tie optional' mean for a wedding dress code? I'm a guy and I don't own a tux.",
+      "lang": "en",
+      "expected_type": "qa",
+      "expected_capabilities": []
+    },
+    {
+      "id": "qa-en-02",
+      "input": "is a ball python a good first pet? my apartment is kinda small and i travel a lot for work",
+      "lang": "en",
+      "expected_type": "qa",
+      "expected_capabilities": []
+    },
+    {
+      "id": "qa-en-03",
+      "input": "this email thread is super long lol, can you tl;dr it and list anything that still needs a decision?",
+      "lang": "en",
+      "attachments": [
+        {
+          "kind": "text",
+          "name": "email_thread.txt",
+          "chars": 9400
+        }
+      ],
+      "expected_type": "qa",
+      "expected_capabilities": []
+    },
+    {
+      "id": "qa-mixed-01",
+      "input": "帮我把这段英文产品介绍改得地道一点，要放官网首页：Our app help you manage task more easy and make your team work together good.",
+      "lang": "mixed",
+      "expected_type": "qa",
+      "expected_capabilities": [
+        "zh"
+      ]
+    },
+    {
+      "id": "qa-mixed-02",
+      "input": "把这句翻成中文，要印在团队文化衫上，短一点、有劲一点：Code with heart, ship with pride.",
+      "lang": "mixed",
+      "expected_type": "qa",
+      "expected_capabilities": [
+        "zh"
+      ]
+    },
+    {
+      "id": "code-zh-01",
+      "input": "写个 Python 脚本，把一个文件夹里的 PNG 和 JPG 图片批量转成 WebP，质量 80，文件名不变，原图保留",
+      "lang": "zh",
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code",
+        "zh"
+      ]
+    },
+    {
+      "id": "code-zh-02",
+      "input": "手机号正则怎么写？1 开头、第二位 3 到 9，一共 11 位",
+      "lang": "zh",
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code",
+        "zh"
+      ]
+    },
+    {
+      "id": "code-zh-03",
+      "input": "把这段 Python 翻译成 Go，写法要地道，错误处理按 Go 的习惯来",
+      "lang": "zh",
+      "attachments": [
+        {
+          "kind": "code",
+          "name": "parser.py",
+          "chars": 3800
+        }
+      ],
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code",
+        "zh"
+      ]
+    },
+    {
+      "id": "code-zh-04",
+      "input": "写个 Shell 脚本，每天凌晨两点把日志目录打包压缩，只保留最近 7 天的。定时任务那一行怎么写也告诉我，我自己去配",
+      "lang": "zh",
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code",
+        "zh"
+      ]
+    },
+    {
+      "id": "code-en-01",
+      "input": "Write a Python function that sends an email with a PDF attachment through Gmail SMTP using smtplib. Read the app password from an env var, don't hardcode it.",
+      "lang": "en",
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code"
+      ]
+    },
+    {
+      "id": "code-en-02",
+      "input": "been searching for this bug all afternoon. TypeError: Cannot read properties of undefined (reading 'map'), only on first render. component attached",
+      "lang": "en",
+      "attachments": [
+        {
+          "kind": "code",
+          "name": "OrderList.tsx",
+          "chars": 2600
+        }
+      ],
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code"
+      ]
+    },
+    {
+      "id": "code-en-03",
+      "input": "This takes 40s on a 20M-row orders table: SELECT customer_id, SUM(total) FROM orders WHERE DATE(created_at) = '2024-06-01' GROUP BY customer_id; How do I make it fast?",
+      "lang": "en",
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code"
+      ]
+    },
+    {
+      "id": "code-en-04",
+      "input": "Implement longest increasing subsequence in O(n log n) in TypeScript, then prove why the patience-sorting approach always returns the correct length.",
+      "lang": "en",
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code",
+        "reasoning"
+      ]
+    },
+    {
+      "id": "code-mixed-01",
+      "input": "帮我 review 一下这个 diff，重点看 cache invalidation 有没有 race condition，naming 不好的地方也指出来",
+      "lang": "mixed",
+      "attachments": [
+        {
+          "kind": "code",
+          "name": "pr_1432.diff",
+          "chars": 5200
+        }
+      ],
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code",
+        "zh"
+      ]
+    },
+    {
+      "id": "code-mixed-02",
+      "input": "docker-compose up 一直报 'Bind for 0.0.0.0:8080 failed: port is already allocated'，yml 里怎么改能让 web 服务换成 8081？",
+      "lang": "mixed",
+      "expected_type": "code",
+      "expected_capabilities": [
+        "code",
+        "zh"
+      ]
+    },
+    {
+      "id": "reasoning-zh-01",
+      "input": "六个人吃饭一共 570，说好 AA。小李先付了 420，小王付了 150。剩下四个人里三个各转了 95 给小李，另一个转了 95 给小王。现在小李和小王之间还差多少、谁该给谁？",
+      "lang": "zh",
+      "expected_type": "reasoning",
+      "expected_capabilities": [
+        "reasoning",
+        "zh"
+      ]
+    },
+    {
+      "id": "reasoning-zh-02",
+      "input": "12 个外观一样的球，其中一个重量不同，但不知道偏轻还是偏重。只用一台天平，最少称几次能找出它并判断轻重？讲讲算法思路，每一步怎么分组，不用写代码",
+      "lang": "zh",
+      "expected_type": "reasoning",
+      "expected_capabilities": [
+        "reasoning",
+        "zh"
+      ]
+    },
+    {
+      "id": "reasoning-zh-03",
+      "input": "周一到周五排值班，甲乙丙丁戊每人一天。甲不能排周一，乙必须排在丙前面，丁和戊不能挨着，丙不排周五。一共有多少种排法？举一个可行的出来",
+      "lang": "zh",
+      "expected_type": "reasoning",
+      "expected_capabilities": [
+        "reasoning",
+        "zh"
+      ]
+    },
+    {
+      "id": "reasoning-zh-04",
+      "input": "证明：任意 6 个人里，一定能找到 3 个人两两认识，或者 3 个人两两都不认识。",
+      "lang": "zh",
+      "expected_type": "reasoning",
+      "expected_capabilities": [
+        "reasoning",
+        "zh"
+      ]
+    },
+    {
+      "id": "reasoning-en-01",
+      "input": "Can you crack this 3-digit lock code? 682: one digit is right and in the right place. 614: one digit is right but in the wrong place. 206: two digits are right but both in the wrong place. 738: nothing is right. 780: one digit is right but in the wrong place.",
+      "lang": "en",
+      "expected_type": "reasoning",
+      "expected_capabilities": [
+        "reasoning"
+      ]
+    },
+    {
+      "id": "reasoning-en-02",
+      "input": "Two offers. A: $95k, 50 min each way, 230 office days a year, 24 miles each way, gas $3.50/gal at 30 mpg, plus $0.16/mile for wear. B: $82k, fully remote. If my time is worth $25/hr, which one actually comes out ahead and by how much?",
+      "lang": "en",
+      "expected_type": "reasoning",
+      "expected_capabilities": [
+        "reasoning"
+      ]
+    },
+    {
+      "id": "reasoning-en-03",
+      "input": "If you cut two opposite corners off a standard chessboard, can you still cover the remaining 62 squares with 31 dominoes? Explain why or why not.",
+      "lang": "en",
+      "expected_type": "reasoning",
+      "expected_capabilities": [
+        "reasoning"
+      ]
+    },
+    {
+      "id": "reasoning-mixed-01",
+      "input": "有个经典题我一直没想通：A family has two children. At least one of them is a boy born on a Tuesday. 两个都是男孩的概率是多少？为什么不是 1/2？",
+      "lang": "mixed",
+      "expected_type": "reasoning",
+      "expected_capabilities": [
+        "reasoning",
+        "zh"
+      ]
+    },
+    {
+      "id": "vision-zh-01",
+      "input": "代码一跑就报这个错，截图里标红的那一行到底哪里写错了？帮我改好",
+      "lang": "zh",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "报错截图.png"
+        }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": [
+        "code",
+        "vision",
+        "zh"
+      ]
+    },
+    {
+      "id": "vision-zh-02",
+      "input": "孩子的几何作业，拍了照片。图里阴影部分的面积怎么求？要完整的步骤，我好讲给他听",
+      "lang": "zh",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "几何作业.jpg"
+        }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": [
+        "reasoning",
+        "vision",
+        "zh"
+      ]
+    },
+    {
+      "id": "vision-zh-03",
+      "input": "这是我外婆手写的红烧肉菜谱，字有点潦草，帮我一字一句抄成文字",
+      "lang": "zh",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "外婆的菜谱.jpg"
+        }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": [
+        "vision",
+        "zh"
+      ]
+    },
+    {
+      "id": "vision-en-01",
+      "input": "found these bugs all over my tomato plants this morning. what are they and are they bad?",
+      "lang": "en",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "tomato_leaves.jpg"
+        }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": [
+        "vision"
+      ]
+    },
+    {
+      "id": "vision-en-02",
+      "input": "Rename each of these receipt photos to store-name_date based on what's printed on the receipt, then move them into my Expenses/2024 folder.",
+      "lang": "en",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "IMG_4471.jpg"
+        },
+        {
+          "kind": "image",
+          "name": "IMG_4472.jpg"
+        },
+        {
+          "kind": "image",
+          "name": "IMG_4475.jpg"
+        }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": [
+        "tool_use",
+        "vision"
+      ]
+    },
+    {
+      "id": "vision-en-03",
+      "input": "My dishwasher shows this error code and won't drain. Here's a photo of the display and the full manual. What does it mean and what should I try first?",
+      "lang": "en",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "display.jpg"
+        },
+        {
+          "kind": "pdf",
+          "name": "DW80_user_manual.pdf",
+          "chars": 118000
+        }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": [
+        "long_context",
+        "vision"
+      ]
+    },
+    {
+      "id": "vision-mixed-01",
+      "input": "照着这张 mockup 写一个 React component，用 Tailwind，要 responsive，mobile 上 sidebar 收起来",
+      "lang": "mixed",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "dashboard_mockup.png"
+        }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": [
+        "code",
+        "vision",
+        "zh"
+      ]
+    },
+    {
+      "id": "long_context-zh-01",
+      "input": "这是我写了两年的小说初稿。帮我理一下人物关系，再挑出前后写得不一致的地方，比如人名、年龄、住址对不上的",
+      "lang": "zh",
+      "attachments": [
+        {
+          "kind": "text",
+          "name": "小说初稿.txt",
+          "chars": 312000
+        }
+      ],
+      "expected_type": "long_context",
+      "expected_capabilities": [
+        "long_context",
+        "zh"
+      ]
+    },
+    {
+      "id": "long_context-zh-02",
+      "input": "这是后端所有代码合并成的一个文件。帮我找出所有没做权限校验的接口，整理成表格，存到我桌面上",
+      "lang": "zh",
+      "attachments": [
+        {
+          "kind": "code",
+          "name": "backend_all.py",
+          "chars": 245000
+        }
+      ],
+      "expected_type": "long_context",
+      "expected_capabilities": [
+        "code",
+        "long_context",
+        "tool_use",
+        "zh"
+      ]
+    },
+    {
+      "id": "long_context-zh-03",
+      "input": "公司三年的年报都在这儿了。帮我算出每年的毛利率和自由现金流，再结合应收账款的变化，判断哪一年经营质量最好，说明理由",
+      "lang": "zh",
+      "attachments": [
+        {
+          "kind": "pdf",
+          "name": "2021年报.pdf",
+          "chars": 58000
+        },
+        {
+          "kind": "pdf",
+          "name": "2022年报.pdf",
+          "chars": 61000
+        },
+        {
+          "kind": "pdf",
+          "name": "2023年报.pdf",
+          "chars": 65000
+        }
+      ],
+      "expected_type": "long_context",
+      "expected_capabilities": [
+        "long_context",
+        "reasoning",
+        "zh"
+      ]
+    },
+    {
+      "id": "long_context-en-01",
+      "input": "quick q: does this contract have a non-compete? if yes, how long does it last after termination?",
+      "lang": "en",
+      "attachments": [
+        {
+          "kind": "pdf",
+          "name": "MSA_final_v7.pdf",
+          "chars": 142000
+        }
+      ],
+      "expected_type": "long_context",
+      "expected_capabilities": [
+        "long_context"
+      ]
+    },
+    {
+      "id": "long_context-en-02",
+      "input": "Go through all our Terraform for prod and staging and flag every security group rule that opens port 22 to 0.0.0.0/0. Tell me which environment each one is in.",
+      "lang": "en",
+      "attachments": [
+        {
+          "kind": "code",
+          "name": "prod_main.tf",
+          "chars": 61200
+        },
+        {
+          "kind": "code",
+          "name": "staging_main.tf",
+          "chars": 44300
+        }
+      ],
+      "expected_type": "long_context",
+      "expected_capabilities": [
+        "code",
+        "long_context"
+      ]
+    },
+    {
+      "id": "long_context-mixed-01",
+      "input": "这三份 user interview 的 transcript 帮我通读一遍，总结 top 5 pain points，每条配一句用户原话当 evidence",
+      "lang": "mixed",
+      "attachments": [
+        {
+          "kind": "text",
+          "name": "interview_01.txt",
+          "chars": 38000
+        },
+        {
+          "kind": "text",
+          "name": "interview_02.txt",
+          "chars": 35500
+        },
+        {
+          "kind": "text",
+          "name": "interview_03.txt",
+          "chars": 41000
+        }
+      ],
+      "expected_type": "long_context",
+      "expected_capabilities": [
+        "long_context",
+        "zh"
+      ]
+    },
+    {
+      "id": "long_context-mixed-02",
+      "input": "这是 Q2 全部客服聊天记录的导出。把提到 refund 的对话都挑出来，按原因分类统计，summary 直接发到 Slack 的 #finance 频道",
+      "lang": "mixed",
+      "attachments": [
+        {
+          "kind": "text",
+          "name": "support_chats_Q2.txt",
+          "chars": 236000
+        }
+      ],
+      "expected_type": "long_context",
+      "expected_capabilities": [
+        "long_context",
+        "tool_use",
+        "zh"
+      ]
+    },
+    {
+      "id": "tool_use-zh-01",
+      "input": "把这张证件照压缩到 500KB 以内，尺寸别动",
+      "lang": "zh",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "证件照.jpg"
+        }
+      ],
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "tool_use",
+        "zh"
+      ]
+    },
+    {
+      "id": "tool_use-zh-02",
+      "input": "明早出门要带伞吗？",
+      "lang": "zh",
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "tool_use",
+        "zh"
+      ]
+    },
+    {
+      "id": "tool_use-zh-03",
+      "input": "帮我在日历上建个日程：下周三下午两点到三点半，设计评审，地点三楼大会议室，提前 15 分钟提醒，把小周和阿凯也加进去",
+      "lang": "zh",
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "tool_use",
+        "zh"
+      ]
+    },
+    {
+      "id": "tool_use-zh-04",
+      "input": "在终端里跑一下单元测试，看哪些用例挂了。能直接改代码修好的就修掉，最后告诉我改了什么",
+      "lang": "zh",
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "code",
+        "tool_use",
+        "zh"
+      ]
+    },
+    {
+      "id": "tool_use-en-01",
+      "input": "Rename this to passport_scan_2024.jpg and move it into Documents/Travel.",
+      "lang": "en",
+      "attachments": [
+        {
+          "kind": "image",
+          "name": "IMG_2031.jpg"
+        }
+      ],
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "tool_use"
+      ]
+    },
+    {
+      "id": "tool_use-en-02",
+      "input": "How much is 1,250 euros in US dollars at today's rate?",
+      "lang": "en",
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "tool_use"
+      ]
+    },
+    {
+      "id": "tool_use-en-03",
+      "input": "Find a 1-hour slot next week when Maya (Berlin), Tom (London) and Priya (Singapore) are all free on their calendars and it's between 9am and 6pm local time for each of them. Then send all three the invite.",
+      "lang": "en",
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "reasoning",
+        "tool_use"
+      ]
+    },
+    {
+      "id": "tool_use-mixed-01",
+      "input": "帮我去 GitHub 看下 Tauri 最新的 release 是哪个版本，changelog 里有没有 breaking changes",
+      "lang": "mixed",
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "tool_use",
+        "zh"
+      ]
+    },
+    {
+      "id": "tool_use-mixed-02",
+      "input": "把会议纪要和白板照片一起发到项目组邮箱，subject 写 'Weekly Sync 纪要'，cc 给 Lisa",
+      "lang": "mixed",
+      "attachments": [
+        {
+          "kind": "text",
+          "name": "会议纪要.md",
+          "chars": 3200
+        },
+        {
+          "kind": "image",
+          "name": "whiteboard.jpg"
+        }
+      ],
+      "expected_type": "tool_use",
+      "expected_capabilities": [
+        "tool_use",
+        "zh"
+      ]
+    }
+  ]
+}

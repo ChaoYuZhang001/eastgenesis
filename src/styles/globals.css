@@ -1,0 +1,62 @@
+@import "./brand-tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* shadcn/ui 语义变量 → 品牌变量。只引用 --eg-*，不写 HEX。 */
+:root {
+  --background: var(--eg-surface);
+  --foreground: var(--eg-text-on-dark);
+  --card: var(--eg-surface-2);
+  --card-foreground: var(--eg-text-on-dark);
+  --popover: var(--eg-surface-2);
+  --popover-foreground: var(--eg-text-on-dark);
+  --primary: var(--eg-east-red);
+  --primary-foreground: var(--eg-text-on-dark);
+  --secondary: var(--eg-surface-2);
+  --secondary-foreground: var(--eg-text-on-dark);
+  --muted: var(--eg-surface-2);
+  --muted-foreground: var(--eg-text-on-dark-muted);
+  --accent: var(--eg-selected-bg);
+  --accent-foreground: var(--eg-text-on-dark);
+  /* 错误态与品牌红同色系：必须配图标和文字（BRAND.md 4.3-4） */
+  --destructive: var(--eg-east-red);
+  --destructive-foreground: var(--eg-text-on-dark);
+  --border: var(--eg-border-dark);
+  --input: var(--eg-border-dark);
+  --ring: var(--eg-east-red);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* 焦点环已带浅色外圈（红色在 --eg-surface 上不足 3:1，BRAND.md 4.3）；自绘控件用 shadow-focus-ring 类 */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--eg-focus-ring);
+  }
+  /* 覆盖 Tailwind preflight 的默认灰色占位文字 */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}

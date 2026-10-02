@@ -1,0 +1,26 @@
+node_modules/
+dist/
+target/
+src-tauri/gen/
+*.log
+*.tsbuildinfo
+.DS_Store
+.env
+.env.local
+.env.*
+# 真实 API 测试凭据只放在 /tmp/eg-test.env（仓库外）；这里兜底防止误拷进仓库
+eg-test.env
+/tmp/eg-test.env
+*.db
+*.sqlite
+eastgenesis.bundle
+# 用户从 bundle clone 出来的仓库副本
+EastGenesis-repo/
+# 挂载目录测试残留（无法在 VM 内删除）
+.symtest
+.fstest2
+.dirtest/
+.eg-unlink-test
+# pnpm 在挂载目录里 install 失败留下的临时文件，需要用户在 Mac 上删除
+/_tmp_*
+scripts/brand/__pycache__/

@@ -1,0 +1,839 @@
+{
+ "recordAt": "2026-10-02",
+ "model": "jev-latest",
+ "cases": "routing_cases.json",
+ "questions": {
+  "code": "Does handling `message` require writing, reading, debugging or explaining source code, SQL, regular expressions, shell scripts or config files?",
+  "reasoning": "Does `message` require multi-step math, logic, proofs, planning or quantitative trade-offs, beyond simple arithmetic or recall?",
+  "tool_use": "To handle `message`, must the assistant take an action (web search, run commands, call APIs, send messages, create calendar events, read or write files that are not already attached) or fetch live information such as today's weather, prices or news? Content listed in `attachments` is already provided to the assistant, so reading or summarizing it is not an action, but moving, renaming, saving or sending those files still is.",
+  "vision": "Does handling `message` require understanding what an attached image shows, rather than only moving, renaming, compressing or sending the file?"
+ },
+ "questionsSha256": "822393150e330f3f713e94ee93a3b30278731153ca5d9ca479fbde9984b74159",
+ "note": "真实 Jev 对 50 条标注样例的回答，两次独立采样，tool_use 用 v2 措辞。问题措辞一改，questionsSha256 就对不上，要用 tools/jev-eval.ts --collect 重新采样。",
+ "samplings": [
+  [
+   {
+    "id": "qa-zh-01",
+    "probs": {
+     "code": 0.02,
+     "reasoning": 0.1,
+     "tool_use": 0.05
+    }
+   },
+   {
+    "id": "qa-zh-02",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.08,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "qa-zh-03",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.04,
+     "tool_use": 0.1
+    }
+   },
+   {
+    "id": "qa-zh-04",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.04,
+     "tool_use": 0.05
+    }
+   },
+   {
+    "id": "qa-en-01",
+    "probs": {
+     "code": 0.01,
+     "reasoning": 0.03,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "qa-en-02",
+    "probs": {
+     "code": 0.02,
+     "reasoning": 0.33,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "qa-en-03",
+    "probs": {
+     "code": 0.07,
+     "reasoning": 0.15,
+     "tool_use": 0.05
+    }
+   },
+   {
+    "id": "qa-mixed-01",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.03,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "qa-mixed-02",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.04,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "code-zh-01",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.23,
+     "tool_use": 0.06
+    }
+   },
+   {
+    "id": "code-zh-02",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.2,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "code-zh-03",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.39,
+     "tool_use": 0.06
+    }
+   },
+   {
+    "id": "code-zh-04",
+    "probs": {
+     "code": 0.99,
+     "reasoning": 0.34,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "code-en-01",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.19,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "code-en-02",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.33,
+     "tool_use": 0.08
+    }
+   },
+   {
+    "id": "code-en-03",
+    "probs": {
+     "code": 0.97,
+     "reasoning": 0.57,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "code-en-04",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.97,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "code-mixed-01",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.51,
+     "tool_use": 0.06
+    }
+   },
+   {
+    "id": "code-mixed-02",
+    "probs": {
+     "code": 0.97,
+     "reasoning": 0.06,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "reasoning-zh-01",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.5,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-zh-02",
+    "probs": {
+     "code": 0.05,
+     "reasoning": 0.97,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-zh-03",
+    "probs": {
+     "code": 0.06,
+     "reasoning": 0.97,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "reasoning-zh-04",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.97,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-en-01",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.95,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-en-02",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.96,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "reasoning-en-03",
+    "probs": {
+     "tool_use": 0.02,
+     "code": 0.03,
+     "reasoning": 0.91
+    }
+   },
+   {
+    "id": "reasoning-mixed-01",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.91,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "vision-zh-01",
+    "probs": {
+     "code": 0.94,
+     "reasoning": 0.15,
+     "tool_use": 0.12,
+     "vision": 0.96
+    }
+   },
+   {
+    "id": "vision-zh-02",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.91,
+     "tool_use": 0.08,
+     "vision": 0.98
+    }
+   },
+   {
+    "id": "vision-zh-03",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.04,
+     "tool_use": 0.06,
+     "vision": 0.97
+    }
+   },
+   {
+    "id": "vision-en-01",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.05,
+     "tool_use": 0.19,
+     "vision": 0.96
+    }
+   },
+   {
+    "id": "vision-en-02",
+    "probs": {
+     "code": 0.43,
+     "reasoning": 0.32,
+     "tool_use": 0.94,
+     "vision": 0.95
+    }
+   },
+   {
+    "id": "vision-en-03",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.21,
+     "tool_use": 0.15,
+     "vision": 0.96
+    }
+   },
+   {
+    "id": "vision-mixed-01",
+    "probs": {
+     "code": 0.96,
+     "reasoning": 0.23,
+     "tool_use": 0.09,
+     "vision": 0.96
+    }
+   },
+   {
+    "id": "long_context-zh-01",
+    "probs": {
+     "code": 0.16,
+     "reasoning": 0.43,
+     "tool_use": 0.08
+    }
+   },
+   {
+    "id": "long_context-zh-02",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.56,
+     "tool_use": 0.77
+    }
+   },
+   {
+    "id": "long_context-zh-03",
+    "probs": {
+     "code": 0.2,
+     "reasoning": 0.9,
+     "tool_use": 0.08
+    }
+   },
+   {
+    "id": "long_context-en-01",
+    "probs": {
+     "code": 0.06,
+     "reasoning": 0.11,
+     "tool_use": 0.06
+    }
+   },
+   {
+    "id": "long_context-en-02",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.48,
+     "tool_use": 0.06
+    }
+   },
+   {
+    "id": "long_context-mixed-01",
+    "probs": {
+     "code": 0.06,
+     "reasoning": 0.44,
+     "tool_use": 0.06
+    }
+   },
+   {
+    "id": "long_context-mixed-02",
+    "probs": {
+     "code": 0.78,
+     "reasoning": 0.57,
+     "tool_use": 0.85
+    }
+   },
+   {
+    "id": "tool_use-zh-01",
+    "probs": {
+     "code": 0.3,
+     "reasoning": 0.15,
+     "tool_use": 0.52,
+     "vision": 0.22
+    }
+   },
+   {
+    "id": "tool_use-zh-02",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.09,
+     "tool_use": 0.92
+    }
+   },
+   {
+    "id": "tool_use-zh-03",
+    "probs": {
+     "code": 0.09,
+     "reasoning": 0.37,
+     "tool_use": 0.95
+    }
+   },
+   {
+    "id": "tool_use-zh-04",
+    "probs": {
+     "code": 0.96,
+     "reasoning": 0.29,
+     "tool_use": 0.91
+    }
+   },
+   {
+    "id": "tool_use-en-01",
+    "probs": {
+     "code": 0.23,
+     "reasoning": 0.12,
+     "tool_use": 0.93,
+     "vision": 0.07
+    }
+   },
+   {
+    "id": "tool_use-en-02",
+    "probs": {
+     "code": 0.05,
+     "reasoning": 0.09,
+     "tool_use": 0.97
+    }
+   },
+   {
+    "id": "tool_use-en-03",
+    "probs": {
+     "reasoning": 0.89,
+     "tool_use": 0.97,
+     "code": 0.29
+    }
+   },
+   {
+    "id": "tool_use-mixed-01",
+    "probs": {
+     "code": 0.16,
+     "reasoning": 0.12,
+     "tool_use": 0.98
+    }
+   },
+   {
+    "id": "tool_use-mixed-02",
+    "probs": {
+     "code": 0.05,
+     "reasoning": 0.08,
+     "tool_use": 0.82,
+     "vision": 0.12
+    }
+   }
+  ],
+  [
+   {
+    "id": "qa-zh-01",
+    "probs": {
+     "code": 0.02,
+     "reasoning": 0.11,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "qa-zh-02",
+    "probs": {
+     "code": 0.02,
+     "reasoning": 0.07,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "qa-zh-03",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.04,
+     "tool_use": 0.1
+    }
+   },
+   {
+    "id": "qa-zh-04",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.04,
+     "tool_use": 0.05
+    }
+   },
+   {
+    "id": "qa-en-01",
+    "probs": {
+     "code": 0.02,
+     "reasoning": 0.03,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "qa-en-02",
+    "probs": {
+     "code": 0.02,
+     "reasoning": 0.33,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "qa-en-03",
+    "probs": {
+     "code": 0.06,
+     "reasoning": 0.15,
+     "tool_use": 0.05
+    }
+   },
+   {
+    "id": "qa-mixed-01",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.03,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "qa-mixed-02",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.04,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "code-zh-01",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.22,
+     "tool_use": 0.07
+    }
+   },
+   {
+    "id": "code-zh-02",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.21,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "code-zh-03",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.42,
+     "tool_use": 0.06
+    }
+   },
+   {
+    "id": "code-zh-04",
+    "probs": {
+     "code": 0.99,
+     "reasoning": 0.32,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "code-en-01",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.18,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "code-en-02",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.34,
+     "tool_use": 0.07
+    }
+   },
+   {
+    "id": "code-en-03",
+    "probs": {
+     "code": 0.97,
+     "reasoning": 0.59,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "code-en-04",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.97,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "code-mixed-01",
+    "probs": {
+     "tool_use": 0.06,
+     "code": 0.98,
+     "reasoning": 0.55
+    }
+   },
+   {
+    "id": "code-mixed-02",
+    "probs": {
+     "code": 0.97,
+     "reasoning": 0.07,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "reasoning-zh-01",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.51,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-zh-02",
+    "probs": {
+     "code": 0.05,
+     "reasoning": 0.97,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-zh-03",
+    "probs": {
+     "code": 0.05,
+     "reasoning": 0.97,
+     "tool_use": 0.03
+    }
+   },
+   {
+    "id": "reasoning-zh-04",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.97,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-en-01",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.95,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-en-02",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.96,
+     "tool_use": 0.04
+    }
+   },
+   {
+    "id": "reasoning-en-03",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.91,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "reasoning-mixed-01",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.91,
+     "tool_use": 0.02
+    }
+   },
+   {
+    "id": "vision-zh-01",
+    "probs": {
+     "code": 0.93,
+     "reasoning": 0.16,
+     "tool_use": 0.12,
+     "vision": 0.96
+    }
+   },
+   {
+    "id": "vision-zh-02",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.91,
+     "tool_use": 0.07,
+     "vision": 0.97
+    }
+   },
+   {
+    "id": "vision-zh-03",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.04,
+     "tool_use": 0.06,
+     "vision": 0.97
+    }
+   },
+   {
+    "id": "vision-en-01",
+    "probs": {
+     "code": 0.03,
+     "reasoning": 0.05,
+     "tool_use": 0.19,
+     "vision": 0.96
+    }
+   },
+   {
+    "id": "vision-en-02",
+    "probs": {
+     "code": 0.42,
+     "reasoning": 0.34,
+     "tool_use": 0.93,
+     "vision": 0.95
+    }
+   },
+   {
+    "id": "vision-en-03",
+    "probs": {
+     "code": 0.04,
+     "reasoning": 0.2,
+     "tool_use": 0.15,
+     "vision": 0.96
+    }
+   },
+   {
+    "id": "vision-mixed-01",
+    "probs": {
+     "code": 0.96,
+     "reasoning": 0.24,
+     "tool_use": 0.09,
+     "vision": 0.96
+    }
+   },
+   {
+    "id": "long_context-zh-01",
+    "probs": {
+     "code": 0.18,
+     "reasoning": 0.43,
+     "tool_use": 0.07
+    }
+   },
+   {
+    "id": "long_context-zh-02",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.54,
+     "tool_use": 0.75
+    }
+   },
+   {
+    "id": "long_context-zh-03",
+    "probs": {
+     "code": 0.2,
+     "reasoning": 0.9,
+     "tool_use": 0.08
+    }
+   },
+   {
+    "id": "long_context-en-01",
+    "probs": {
+     "code": 0.07,
+     "reasoning": 0.11,
+     "tool_use": 0.07
+    }
+   },
+   {
+    "id": "long_context-en-02",
+    "probs": {
+     "code": 0.98,
+     "reasoning": 0.45,
+     "tool_use": 0.05
+    }
+   },
+   {
+    "id": "long_context-mixed-01",
+    "probs": {
+     "code": 0.07,
+     "reasoning": 0.43,
+     "tool_use": 0.06
+    }
+   },
+   {
+    "id": "long_context-mixed-02",
+    "probs": {
+     "code": 0.76,
+     "reasoning": 0.6,
+     "tool_use": 0.86
+    }
+   },
+   {
+    "id": "tool_use-zh-01",
+    "probs": {
+     "code": 0.32,
+     "reasoning": 0.18,
+     "tool_use": 0.5,
+     "vision": 0.26
+    }
+   },
+   {
+    "id": "tool_use-zh-02",
+    "probs": {
+     "reasoning": 0.09,
+     "tool_use": 0.92,
+     "code": 0.04
+    }
+   },
+   {
+    "id": "tool_use-zh-03",
+    "probs": {
+     "code": 0.1,
+     "reasoning": 0.33,
+     "tool_use": 0.95
+    }
+   },
+   {
+    "id": "tool_use-zh-04",
+    "probs": {
+     "code": 0.97,
+     "reasoning": 0.29,
+     "tool_use": 0.91
+    }
+   },
+   {
+    "id": "tool_use-en-01",
+    "probs": {
+     "code": 0.27,
+     "reasoning": 0.11,
+     "tool_use": 0.93,
+     "vision": 0.07
+    }
+   },
+   {
+    "id": "tool_use-en-02",
+    "probs": {
+     "code": 0.05,
+     "reasoning": 0.1,
+     "tool_use": 0.97
+    }
+   },
+   {
+    "id": "tool_use-en-03",
+    "probs": {
+     "code": 0.3,
+     "reasoning": 0.89,
+     "tool_use": 0.97
+    }
+   },
+   {
+    "id": "tool_use-mixed-01",
+    "probs": {
+     "code": 0.15,
+     "reasoning": 0.12,
+     "tool_use": 0.98
+    }
+   },
+   {
+    "id": "tool_use-mixed-02",
+    "probs": {
+     "code": 0.06,
+     "reasoning": 0.08,
+     "tool_use": 0.81,
+     "vision": 0.13
+    }
+   }
+  ]
+ ]
+}

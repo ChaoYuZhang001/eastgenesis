@@ -1,0 +1,123 @@
+{
+  "canonical": {
+    "east-red": {
+      "name": "东方红",
+      "hex": "#D60000"
+    },
+    "china-gold": {
+      "name": "中国金",
+      "hex": "#FFC700"
+    }
+  },
+  "swatches": {
+    "east-red": {
+      "left": "#CE0102",
+      "center": "#E1100F",
+      "right": "#FC2B2B",
+      "closest": "#D30202",
+      "delta_closest": 4.1,
+      "delta_center": 24.5
+    },
+    "china-gold": {
+      "left": "#FEB003",
+      "center": "#FEBE18",
+      "right": "#FED43D",
+      "closest": "#FDB608",
+      "delta_closest": 18.9,
+      "delta_center": 25.7
+    }
+  },
+  "measured": {
+    "hero-bg": {
+      "name": "主视觉背景（深红夜空）",
+      "hex": "#2B0000",
+      "box": [
+        20,
+        180,
+        60,
+        240
+      ]
+    },
+    "light-panel-bg": {
+      "name": "浅色面板背景",
+      "hex": "#F9FAFB",
+      "box": [
+        930,
+        20,
+        1400,
+        60
+      ]
+    },
+    "page-bg": {
+      "name": "页面底色",
+      "hex": "#FAFCFD",
+      "box": [
+        20,
+        945,
+        440,
+        975
+      ]
+    },
+    "ui-main-bg": {
+      "name": "产品界面主区背景（参考）",
+      "hex": "#363134",
+      "box": [
+        1300,
+        695,
+        1420,
+        725
+      ]
+    },
+    "ui-sidebar-bg": {
+      "name": "产品界面侧栏背景（参考）",
+      "hex": "#181717",
+      "box": [
+        1152,
+        790,
+        1195,
+        855
+      ]
+    },
+    "ui-nav-active": {
+      "name": "侧栏选中项底色（参考）",
+      "hex": "#342525",
+      "box": [
+        1140,
+        762,
+        1190,
+        780
+      ]
+    },
+    "sunrise-core": {
+      "name": "日出高光核心",
+      "hex": "#FEF29E",
+      "box": [
+        484,
+        350,
+        496,
+        358
+      ]
+    },
+    "ink": {
+      "name": "字标墨色",
+      "hex": "#060C12",
+      "pixels": 4953
+    },
+    "mark-gold": {
+      "name": "标志金色（实测）",
+      "hex": "#FBB61D",
+      "pixels": 2161
+    },
+    "mark-red": {
+      "name": "标志红色（实测）",
+      "hex": "#E2070E",
+      "pixels": 5731
+    },
+    "icon-bg": {
+      "name": "彩色图标底色（平面拟合）",
+      "hex": "#7C020B → #1A0000",
+      "css": "linear-gradient(114deg, #7C020B 0%, #1A0000 100%)",
+      "note": "板上彩色图标去掉标志后的底色，平面拟合（4173 个样本）；左上 → 右下"
+    }
+  }
+}

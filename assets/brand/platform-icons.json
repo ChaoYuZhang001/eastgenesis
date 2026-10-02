@@ -1,0 +1,364 @@
+{
+  "source": "assets/brand/icons/icon-1024.png",
+  "output_dir": "src-tauri/icons",
+  "method": "npx @tauri-apps/cli@2.5.0",
+  "attempts": [
+    {
+      "method": "npx @tauri-apps/cli@2.5.0",
+      "ok": true,
+      "output": "Appx Creating StoreLogo.png\n        Appx Creating Square30x30Logo.png\n        Appx Creating Square44x44Logo.png\n        Appx Creating Square71x71Logo.png\n        Appx Creating Square89x89Logo.png\n        Appx Creating Square107x107Logo.png\n        Appx Creating Square142x142Logo.png\n        Appx Creating Square150x150Logo.png\n        Appx Creating Square284x284Logo.png\n        Appx Creating Square310x310Logo.png\n        ICNS Creating icon.icns\n         ICO Creating icon.ico\n         PNG Creating 32x32.png\n         PNG Creating 64x64.png\n         PNG Creating 128x128.png\n         PNG Creating 128x128@2x.png\n         PNG Creating icon.png\n         PNG Creating mipmap-hdpi/ic_launcher_foreground.png\n         PNG Creating mipmap-hdpi/ic_launcher_round.png\n         PNG Creating mipmap-hdpi/ic_launcher.png\n         PNG Creating mipmap-mdpi/ic_launcher_foreground.png\n         PNG Creating mipmap-mdpi/ic_launcher_round.png\n         PNG Creating mipmap-mdpi/ic_launcher.png\n         PNG Creating mipmap-xhdpi/ic_launcher_foreground.png\n         PNG Creating mipmap-xhdpi/ic_launcher_round.png\n         PNG Creating mipmap-xhdpi/ic_launcher.png\n         PNG Creating mipmap-xxhdpi/ic_launcher_foreground.png\n         PNG Creating mipmap-xxhdpi/ic_launcher_round.png\n         PNG Creating mipmap-xxhdpi/ic_launcher.png\n         PNG Creating mipmap-xxxhdpi/ic_launcher_foreground.png\n         PNG Creating mipmap-xxxhdpi/ic_launcher_round.png\n         PNG Creating mipmap-xxxhdpi/ic_launcher.png\n         iOS Creating AppIcon-20x20@2x-1.png\n         iOS Creating AppIcon-20x20@1x.png\n         iOS Creating AppIcon-20x20@2x.png\n         iOS Creating AppIcon-20x20@3x.png\n         iOS Creating AppIcon-29x29@2x-1.png\n         iOS Creating AppIcon-29x29@1x.png\n         iOS Creating AppIcon-29x29@2x.png\n         iOS Creating AppIcon-29x29@3x.png\n         iOS Creating AppIcon-40x40@2x-1.png\n         iOS Creating AppIcon-40x40@1x.png\n         iOS Creating AppIcon-40x40@2x.png\n         iOS Creating AppIcon-40x40@3x.png\n         iOS Creating AppIcon-60x60@2x.png\n         iOS Creating AppIcon-60x60@3x.png\n         iOS Creating AppIcon-76x76@1x.png\n         iOS Creating AppIcon-76x76@2x.png\n         iOS Creating AppIcon-83.5x83.5@2x.png\n         iOS Creating AppIcon-512@2x.png"
+    }
+  ],
+  "files": [
+    {
+      "file": "src-tauri/icons/128x128.png",
+      "size": [
+        128,
+        128
+      ]
+    },
+    {
+      "file": "src-tauri/icons/128x128@2x.png",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "src-tauri/icons/32x32.png",
+      "size": [
+        32,
+        32
+      ]
+    },
+    {
+      "file": "src-tauri/icons/64x64.png",
+      "size": [
+        64,
+        64
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square107x107Logo.png",
+      "size": [
+        107,
+        107
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square142x142Logo.png",
+      "size": [
+        142,
+        142
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square150x150Logo.png",
+      "size": [
+        150,
+        150
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square284x284Logo.png",
+      "size": [
+        284,
+        284
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square30x30Logo.png",
+      "size": [
+        30,
+        30
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square310x310Logo.png",
+      "size": [
+        310,
+        310
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square44x44Logo.png",
+      "size": [
+        44,
+        44
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square71x71Logo.png",
+      "size": [
+        71,
+        71
+      ]
+    },
+    {
+      "file": "src-tauri/icons/Square89x89Logo.png",
+      "size": [
+        89,
+        89
+      ]
+    },
+    {
+      "file": "src-tauri/icons/StoreLogo.png",
+      "size": [
+        50,
+        50
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-hdpi/ic_launcher.png",
+      "size": [
+        49,
+        49
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-hdpi/ic_launcher_foreground.png",
+      "size": [
+        162,
+        162
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-hdpi/ic_launcher_round.png",
+      "size": [
+        49,
+        49
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-mdpi/ic_launcher.png",
+      "size": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-mdpi/ic_launcher_foreground.png",
+      "size": [
+        108,
+        108
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-mdpi/ic_launcher_round.png",
+      "size": [
+        48,
+        48
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xhdpi/ic_launcher.png",
+      "size": [
+        96,
+        96
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xhdpi/ic_launcher_foreground.png",
+      "size": [
+        216,
+        216
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xhdpi/ic_launcher_round.png",
+      "size": [
+        96,
+        96
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xxhdpi/ic_launcher.png",
+      "size": [
+        144,
+        144
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xxhdpi/ic_launcher_foreground.png",
+      "size": [
+        324,
+        324
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xxhdpi/ic_launcher_round.png",
+      "size": [
+        144,
+        144
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher.png",
+      "size": [
+        192,
+        192
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher_foreground.png",
+      "size": [
+        432,
+        432
+      ]
+    },
+    {
+      "file": "src-tauri/icons/android/mipmap-xxxhdpi/ic_launcher_round.png",
+      "size": [
+        192,
+        192
+      ]
+    },
+    {
+      "file": "src-tauri/icons/icon.icns",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "src-tauri/icons/icon.ico",
+      "size": [
+        256,
+        256
+      ]
+    },
+    {
+      "file": "src-tauri/icons/icon.png",
+      "size": [
+        512,
+        512
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-20x20@1x.png",
+      "size": [
+        20,
+        20
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-20x20@2x-1.png",
+      "size": [
+        40,
+        40
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-20x20@2x.png",
+      "size": [
+        40,
+        40
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-20x20@3x.png",
+      "size": [
+        60,
+        60
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-29x29@1x.png",
+      "size": [
+        29,
+        29
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-29x29@2x-1.png",
+      "size": [
+        58,
+        58
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-29x29@2x.png",
+      "size": [
+        58,
+        58
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-29x29@3x.png",
+      "size": [
+        87,
+        87
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-40x40@1x.png",
+      "size": [
+        40,
+        40
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-40x40@2x-1.png",
+      "size": [
+        80,
+        80
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-40x40@2x.png",
+      "size": [
+        80,
+        80
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-40x40@3x.png",
+      "size": [
+        120,
+        120
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-512@2x.png",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-60x60@2x.png",
+      "size": [
+        120,
+        120
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-60x60@3x.png",
+      "size": [
+        180,
+        180
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-76x76@1x.png",
+      "size": [
+        76,
+        76
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-76x76@2x.png",
+      "size": [
+        152,
+        152
+      ]
+    },
+    {
+      "file": "src-tauri/icons/ios/AppIcon-83.5x83.5@2x.png",
+      "size": [
+        167,
+        167
+      ]
+    }
+  ]
+}

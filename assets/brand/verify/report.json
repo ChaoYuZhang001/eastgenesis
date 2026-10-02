@@ -1,0 +1,319 @@
+{
+  "summary": {
+    "通过": 61,
+    "警告": 1,
+    "失败": 0
+  },
+  "checks": [
+    {
+      "name": "原图未被修改",
+      "status": "通过",
+      "detail": "SHA-256 a4f8dbf3e4d7fd21…"
+    },
+    {
+      "name": "清单文件齐全且尺寸一致",
+      "status": "通过",
+      "detail": "39 个文件"
+    },
+    {
+      "name": "区域定位无贴边 / 无兜底",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "logo-light-transparent 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "logo-light-transparent 边缘完整",
+      "status": "通过",
+      "detail": "外圈最大 alpha 0，内容离边 20px"
+    },
+    {
+      "name": "logo-dark-transparent 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "logo-dark-transparent 边缘完整",
+      "status": "通过",
+      "detail": "外圈最大 alpha 0，内容离边 6px"
+    },
+    {
+      "name": "mark-color 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "mark-color 边缘完整",
+      "status": "通过",
+      "detail": "外圈最大 alpha 0，内容离边 10px"
+    },
+    {
+      "name": "mark-for-dark-bg 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "mark-for-dark-bg 边缘完整",
+      "status": "通过",
+      "detail": "外圈最大 alpha 0，内容离边 6px"
+    },
+    {
+      "name": "wordmark-dark 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "wordmark-dark 边缘完整",
+      "status": "通过",
+      "detail": "外圈最大 alpha 0，内容离边 10px"
+    },
+    {
+      "name": "wordmark-light 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "wordmark-light 边缘完整",
+      "status": "通过",
+      "detail": "外圈最大 alpha 0，内容离边 7px"
+    },
+    {
+      "name": "mark-mono 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "mark-mono 边缘完整",
+      "status": "通过",
+      "detail": "外圈最大 alpha 0，内容离边 2px"
+    },
+    {
+      "name": "mark-mono-white 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "mark-mono-white 边缘完整",
+      "status": "通过",
+      "detail": "外圈最大 alpha 0，内容离边 2px"
+    },
+    {
+      "name": "logo-light 外圈为纯底色",
+      "status": "通过",
+      "detail": "外圈最大色差 3"
+    },
+    {
+      "name": "logo-dark 外圈为纯底色",
+      "status": "警告",
+      "detail": "外圈最大色差 211"
+    },
+    {
+      "name": "wordmark-dark 金色 i 点",
+      "status": "通过",
+      "detail": "不透明金色像素 59（下限 40）"
+    },
+    {
+      "name": "wordmark-light 金色 i 点",
+      "status": "通过",
+      "detail": "不透明金色像素 133（下限 40）"
+    },
+    {
+      "name": "logo-light-transparent 无孤立噪点",
+      "status": "通过",
+      "detail": "孤立淡像素 0（上限 3）"
+    },
+    {
+      "name": "logo-dark-transparent 无孤立噪点",
+      "status": "通过",
+      "detail": "孤立淡像素 0（上限 3）"
+    },
+    {
+      "name": "mark-color 无孤立噪点",
+      "status": "通过",
+      "detail": "孤立淡像素 0（上限 3）"
+    },
+    {
+      "name": "mark-for-dark-bg 无孤立噪点",
+      "status": "通过",
+      "detail": "孤立淡像素 0（上限 3）"
+    },
+    {
+      "name": "wordmark-dark 无孤立噪点",
+      "status": "通过",
+      "detail": "孤立淡像素 0（上限 3）"
+    },
+    {
+      "name": "wordmark-light 无孤立噪点",
+      "status": "通过",
+      "detail": "孤立淡像素 0（上限 3）"
+    },
+    {
+      "name": "mark-mono 无孤立噪点",
+      "status": "通过",
+      "detail": "孤立淡像素 0（上限 3）"
+    },
+    {
+      "name": "mark-mono-white 无孤立噪点",
+      "status": "通过",
+      "detail": "孤立淡像素 0（上限 3）"
+    },
+    {
+      "name": "彩色图标字形接近居中",
+      "status": "通过",
+      "detail": "偏移 [-0.0213, 0.0]"
+    },
+    {
+      "name": "icon-color 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "icon-color 方正、圆角外透明",
+      "status": "通过",
+      "detail": "94x94，四角 alpha 0"
+    },
+    {
+      "name": "icon-color 居中",
+      "status": "通过",
+      "detail": "字形偏移 (-0.021, +0.000)，彩色版 (-0.021, +0.000)"
+    },
+    {
+      "name": "icon-dark 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "icon-dark 方正、圆角外透明",
+      "status": "通过",
+      "detail": "94x94，四角 alpha 0"
+    },
+    {
+      "name": "icon-dark 居中",
+      "status": "通过",
+      "detail": "字形偏移 (-0.005, +0.005)，彩色版 (-0.021, +0.000)"
+    },
+    {
+      "name": "icon-light 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "icon-light 方正、圆角外透明",
+      "status": "通过",
+      "detail": "92x92，四角 alpha 0"
+    },
+    {
+      "name": "icon-light 居中",
+      "status": "通过",
+      "detail": "字形偏移 (-0.005, +0.000)，彩色版 (-0.021, +0.000)"
+    },
+    {
+      "name": "icon-mono 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "icon-mono 方正、圆角外透明",
+      "status": "通过",
+      "detail": "92x92，四角 alpha 0"
+    },
+    {
+      "name": "icon-mono 居中",
+      "status": "通过",
+      "detail": "字形偏移 (+0.000, -0.005)，彩色版 (-0.021, +0.000)"
+    },
+    {
+      "name": "icon-1024 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "icon-1024 尺寸与留白",
+      "status": "通过",
+      "detail": "(1024, 1024)，不透明区域 (100, 100, 924, 924)"
+    },
+    {
+      "name": "icon-1024 检测到标志",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "icon-1024 标志居中",
+      "status": "通过",
+      "detail": "偏移 (-0.022, +0.004)，目标 (-0.021, +0.000)"
+    },
+    {
+      "name": "icon-1024 标志比例",
+      "status": "通过",
+      "detail": "宽度比 0.743，目标 0.745（含辉光，仅供参考）"
+    },
+    {
+      "name": "icon-1024 与板上彩色图标一致",
+      "status": "通过",
+      "detail": "缩到 94px 后圆角内平均像素差 16.1（上限 25；标志取自主视觉、底色为平面拟合，不会完全一致）"
+    },
+    {
+      "name": "主视觉边界准确",
+      "status": "通过",
+      "detail": "面板 900x430；内侧浅色像素 0，外侧浅色 319/321"
+    },
+    {
+      "name": "hero-keyvisual 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "splash-bg-horizon 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "启动页背景无文字残留",
+      "status": "通过",
+      "detail": "顶部浅色文字像素 0"
+    },
+    {
+      "name": "colors.json 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "东方红 色值准确",
+      "status": "通过",
+      "detail": "标注 #D60000，色块最接近 #D30202（ΔRGB 4.1），中心 #E1100F"
+    },
+    {
+      "name": "中国金 色值准确",
+      "status": "通过",
+      "detail": "标注 #FFC700，色块最接近 #FDB608（ΔRGB 18.9），中心 #FEBE18"
+    },
+    {
+      "name": "platform-icons.json 存在",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "各平台图标齐全",
+      "status": "通过",
+      "detail": "生成方式 npx @tauri-apps/cli@2.5.0；共 50 个文件"
+    },
+    {
+      "name": "icon.png 由 icon-1024 派生",
+      "status": "通过",
+      "detail": "平均像素差 0.05"
+    },
+    {
+      "name": "生成文件无本机绝对路径",
+      "status": "通过",
+      "detail": ""
+    },
+    {
+      "name": "生成目检拼图",
+      "status": "通过",
+      "detail": "assets/brand/verify/contact-sheet.png（38 个素材）"
+    }
+  ]
+}

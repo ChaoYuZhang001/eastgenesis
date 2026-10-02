@@ -1,0 +1,31 @@
+/* 由 scripts/brand/sync_theme.mjs 从 docs/BRAND.md 生成，请勿手改。 */
+:root {
+  --eg-east-red: #D60000;
+  --eg-china-gold: #FFC700;
+  --eg-east-red-rgb: 214 0 0;
+  --eg-china-gold-rgb: 255 199 0;
+  --eg-gradient-icon: linear-gradient(114deg, #7C020B 0%, #1A0000 100%);
+  --eg-gradient-gold: linear-gradient(90deg, #FEB003 0%, #FED43D 100%);
+  --eg-gradient-sunrise: radial-gradient(120% 60% at 50% 100%, #FEF29E 0%, #FF8A1F 18%, var(--eg-east-red) 38%, #2A0505 72%);
+  --eg-night: #2B0000;
+  --eg-surface: #363134;
+  --eg-surface-2: #181717;
+  --eg-border-dark: rgb(255 255 255 / 0.10);
+  --eg-text-on-dark: #FFFFFF;
+  --eg-text-on-dark-muted: rgb(255 255 255 / 0.62);
+  --eg-paper: #F9FAFB;
+  --eg-ink: #060C12;
+  --eg-ink-muted: #6E6E73;
+  --eg-selected-bg: rgb(var(--eg-east-red-rgb) / 0.16);
+  --eg-focus-ring: 0 0 0 2px var(--eg-east-red), 0 0 0 4px var(--eg-text-on-dark-muted);
+  --eg-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --eg-font-display: "Montserrat", var(--eg-font-sans);
+  --eg-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --eg-sidebar-width: 240px;
+  --eg-panel-width: 320px;
+  --eg-input-height: 56px;
+  --eg-radius-lg: 12px;
+  --eg-radius-md: 8px;
+  --eg-radius-sm: 6px;
+  --eg-space-unit: 4px;
+}

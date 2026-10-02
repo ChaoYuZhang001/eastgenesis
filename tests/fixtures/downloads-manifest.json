@@ -1,0 +1,57 @@
+{
+  "note": "杀手场景夹具：测试把 downloads/ 复制到临时 HOME 的 Downloads，再按 days_ago 设置修改时间。expected 为 null 的文件不应被移动",
+  "topics": [
+    "技术",
+    "财务",
+    "合同",
+    "论文",
+    "其他"
+  ],
+  "files": [
+    {
+      "name": "Rust异步编程指南.pdf",
+      "days_ago": 2,
+      "expected": "技术"
+    },
+    {
+      "name": "2026Q3财务报告.pdf",
+      "days_ago": 5,
+      "expected": "财务"
+    },
+    {
+      "name": "软件采购合同.pdf",
+      "days_ago": 8,
+      "expected": "合同"
+    },
+    {
+      "name": "房屋租赁协议.pdf",
+      "days_ago": 12,
+      "expected": "合同"
+    },
+    {
+      "name": "paper_graph_routing.pdf",
+      "days_ago": 15,
+      "expected": "论文"
+    },
+    {
+      "name": "差旅报销单.pdf",
+      "days_ago": 20,
+      "expected": "财务"
+    },
+    {
+      "name": "scan_0423.pdf",
+      "days_ago": 25,
+      "expected": "其他"
+    },
+    {
+      "name": "旧版API手册.pdf",
+      "days_ago": 45,
+      "expected": null
+    },
+    {
+      "name": "会议纪要.txt",
+      "days_ago": 1,
+      "expected": null
+    }
+  ]
+}

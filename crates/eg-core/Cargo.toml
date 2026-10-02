@@ -1,0 +1,19 @@
+[package]
+name = "eg-core"
+description = "EastGenesis 核心逻辑：不依赖 Tauri，可在任何环境 cargo test"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+# PDF 的 FlateDecode 解压；与 Tauri 依赖树同一版本，Cargo.lock 已锁定
+miniz_oxide = "=0.8.9"
+
+# 内置 MCP 文件服务器（JSON-RPC over stdio）。桌面端用 `--mcp-files` 自启动同一逻辑，这个独立程序给测试和脚本用
+[[bin]]
+name = "eg-mcp-files"
+path = "src/bin/eg-mcp-files.rs"

@@ -1,0 +1,413 @@
+{
+  "cases": [
+    {
+      "id": "ho-qa-zh-01",
+      "input": "在吗？有点无聊，陪我聊两句呗",
+      "lang": "zh",
+      "expected_type": "qa",
+      "expected_capabilities": ["zh"]
+    },
+    {
+      "id": "ho-qa-zh-02",
+      "input": "随口问下，37 乘 24 等于多少？",
+      "lang": "zh",
+      "expected_type": "qa",
+      "expected_capabilities": ["zh"]
+    },
+    {
+      "id": "ho-qa-zh-03",
+      "input": "为什么天空是蓝色的？麻烦解释一下，最好让我家上小学的孩子也能听懂。",
+      "lang": "zh",
+      "expected_type": "qa",
+      "expected_capabilities": ["zh"]
+    },
+    {
+      "id": "ho-qa-en-01",
+      "input": "Can you suggest a polite way to decline a meeting invite without sounding rude?",
+      "lang": "en",
+      "expected_type": "qa",
+      "expected_capabilities": []
+    },
+    {
+      "id": "ho-qa-en-02",
+      "input": "Give me a three-bullet summary of the attached report.",
+      "lang": "en",
+      "attachments": [{ "kind": "pdf", "name": "industry_report_2025.pdf", "chars": 86000 }],
+      "expected_type": "qa",
+      "expected_capabilities": []
+    },
+    {
+      "id": "ho-qa-en-03",
+      "input": "Explain in plain English what an API is. I keep hearing it at work and just nod along.",
+      "lang": "en",
+      "expected_type": "qa",
+      "expected_capabilities": []
+    },
+    {
+      "id": "ho-qa-mixed-01",
+      "input": "帮我润色一下这段 cover letter 的开头，要听起来 confident 但别太 arrogant：“I am writing to apply for the Product Manager position at your company.”",
+      "lang": "mixed",
+      "expected_type": "qa",
+      "expected_capabilities": ["zh"]
+    },
+    {
+      "id": "ho-qa-mixed-02",
+      "input": "能不能用大白话讲讲 OAuth2、JWT、session cookie 这几个东西到底是什么关系？我老是把 access token 和 refresh token 搞混。",
+      "lang": "mixed",
+      "expected_type": "qa",
+      "expected_capabilities": ["zh"]
+    },
+    {
+      "id": "ho-qa-mixed-03",
+      "input": "Hey Claude，周末想在家做个 brunch，有没有简单的 recipe 推荐？比如 avocado toast 或者 pancake，30 分钟内能搞定的最好。",
+      "lang": "mixed",
+      "expected_type": "qa",
+      "expected_capabilities": ["zh"]
+    },
+    {
+      "id": "ho-code-zh-01",
+      "input": "写个函数判断一串括号是否合法，圆括号、方括号、花括号三种都要支持，要求线性时间。",
+      "lang": "zh",
+      "expected_type": "code",
+      "expected_capabilities": ["code", "zh"]
+    },
+    {
+      "id": "ho-code-zh-02",
+      "input": "我们的订单表有两千万行，按用户所在城市查最近的订单特别慢，该怎么建索引？顺便把查询语句也帮我改写一下。",
+      "lang": "zh",
+      "expected_type": "code",
+      "expected_capabilities": ["code", "zh"]
+    },
+    {
+      "id": "ho-code-zh-03",
+      "input": "帮我写个正则，能匹配中国大陆的手机号：11 位，1 开头，第二位是 3 到 9，前面可能带 +86 或空格。",
+      "lang": "zh",
+      "expected_type": "code",
+      "expected_capabilities": ["code", "zh"]
+    },
+    {
+      "id": "ho-code-en-01",
+      "input": "I need a debounce helper in TypeScript that supports both leading and trailing edge calls. Keep it dependency-free.",
+      "lang": "en",
+      "expected_type": "code",
+      "expected_capabilities": ["code"]
+    },
+    {
+      "id": "ho-code-en-02",
+      "input": "Solve the recurrence T(n) = 2T(n/2) + n log n, then write a small script that checks the result numerically for n up to 2^20.",
+      "lang": "en",
+      "expected_type": "code",
+      "expected_capabilities": ["code", "reasoning"]
+    },
+    {
+      "id": "ho-code-en-03",
+      "input": "Can you check my attached nginx.conf? I want all HTTP traffic redirected to HTTPS, except /health, which has to stay on port 80.",
+      "lang": "en",
+      "attachments": [{ "kind": "code", "name": "nginx.conf", "chars": 1850 }],
+      "expected_type": "code",
+      "expected_capabilities": ["code"]
+    },
+    {
+      "id": "ho-code-mixed-01",
+      "input": "这段 React 组件的 useEffect 一直无限 re-render，帮我看看是不是 dependency array 写错了：useEffect(() => { setList(data.filter(Boolean)) }, [data, list])",
+      "lang": "mixed",
+      "expected_type": "code",
+      "expected_capabilities": ["code", "zh"]
+    },
+    {
+      "id": "ho-code-mixed-02",
+      "input": "帮我写个 bash 脚本，遍历 logs/ 下所有 .gz 文件，用 zgrep 找出带 ERROR 的行，按 timestamp 排序后输出到 errors.txt。先别运行，我想自己看一遍。",
+      "lang": "mixed",
+      "expected_type": "code",
+      "expected_capabilities": ["code", "zh"]
+    },
+    {
+      "id": "ho-code-mixed-03",
+      "input": "pandas 里怎么按 user_id 做 groupby，然后每组只保留 timestamp 最新的那一行？我现在是 sort_values 加 drop_duplicates，感觉有点 low，有更优雅的写法吗",
+      "lang": "mixed",
+      "expected_type": "code",
+      "expected_capabilities": ["code", "zh"]
+    },
+    {
+      "id": "ho-reasoning-zh-01",
+      "input": "甲乙两队合修一条路，甲队单独做要 12 天，乙队单独做要 15 天。两队合作 4 天后甲队调走，剩下的由乙队单独完成，乙队还要几天？",
+      "lang": "zh",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning", "zh"]
+    },
+    {
+      "id": "ho-reasoning-zh-02",
+      "input": "请证明：对任意正整数 n，n³ − n 一定能被 6 整除，写出完整的证明过程。",
+      "lang": "zh",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning", "zh"]
+    },
+    {
+      "id": "ho-reasoning-zh-03",
+      "input": "我手上有 20 万闲钱：国债年化 3%，另一个理财年化 4.5%，但要锁五年、中途不能取。两年后我多半要拿 8 万出来付首付，到底该怎么分配？麻烦算出具体金额，把取舍讲清楚。",
+      "lang": "zh",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning", "zh"]
+    },
+    {
+      "id": "ho-reasoning-en-01",
+      "input": "Three boxes are labeled 'apples', 'oranges' and 'mixed', but every label is wrong. If I may draw one fruit from one box, how can I fix all three labels? Walk me through the logic.",
+      "lang": "en",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning"]
+    },
+    {
+      "id": "ho-reasoning-en-02",
+      "input": "A train leaves city A at 9:00 going 80 km/h. Another leaves city B, 420 km away, at 10:00 going 100 km/h toward A. When and where do they meet?",
+      "lang": "en",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning"]
+    },
+    {
+      "id": "ho-reasoning-en-03",
+      "input": "I've got three job offers. A pays 95k with 3% annual raises. B pays 88k plus a 10k signing bonus and 5% raises. C pays a flat 100k but adds 40 extra minutes of commute each way. Over four years, how should I compare them? Do the numbers and show your reasoning.",
+      "lang": "en",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning"]
+    },
+    {
+      "id": "ho-reasoning-mixed-01",
+      "input": "帮我证明一下 Cauchy-Schwarz inequality 在 R^n 上成立，最好用 discriminant 的方法，别直接引用结论。",
+      "lang": "mixed",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning", "zh"]
+    },
+    {
+      "id": "ho-reasoning-mixed-02",
+      "input": "项目 deadline 还有 4 周，我们 4 个 dev，每人每周大概 30 小时有效产出。backlog 里有 12 个 feature，估时分别是 40、60、25、80、35、50、20、45、70、30、55、65 小时，其中估时 60、80、70 的三个是 must-have。能全做完吗？不能的话该怎么排优先级、砍哪几个？",
+      "lang": "mixed",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning", "zh"]
+    },
+    {
+      "id": "ho-reasoning-mixed-03",
+      "input": "100 张 ticket 里只有 1 张中奖，100 个人依次不放回地抽，第一个人和最后一个人 win 的 probability 一样吗？请用 conditional probability 一步步推导。",
+      "lang": "mixed",
+      "expected_type": "reasoning",
+      "expected_capabilities": ["reasoning", "zh"]
+    },
+    {
+      "id": "ho-vision-zh-01",
+      "input": "这盆植物是什么品种？叶子发黄是缺水还是缺肥？",
+      "lang": "zh",
+      "attachments": [{ "kind": "image", "name": "绿萝.jpg" }],
+      "expected_type": "vision",
+      "expected_capabilities": ["vision", "zh"]
+    },
+    {
+      "id": "ho-vision-zh-02",
+      "input": "照片里是一道几何题，求阴影部分的面积，请一步步写出解题过程。",
+      "lang": "zh",
+      "attachments": [{ "kind": "image", "name": "几何题.jpg" }],
+      "expected_type": "vision",
+      "expected_capabilities": ["reasoning", "vision", "zh"]
+    },
+    {
+      "id": "ho-vision-zh-03",
+      "input": "这张发票拍得有点歪，帮我读出金额和开票日期，然后在桌面的“报销.xlsx”里新加一行记上。",
+      "lang": "zh",
+      "attachments": [{ "kind": "image", "name": "发票.jpg" }],
+      "expected_type": "vision",
+      "expected_capabilities": ["tool_use", "vision", "zh"]
+    },
+    {
+      "id": "ho-vision-en-01",
+      "input": "Can you tell me what breed this dog is, and roughly how old it looks?",
+      "lang": "en",
+      "attachments": [{ "kind": "image", "name": "dog.jpg" }],
+      "expected_type": "vision",
+      "expected_capabilities": ["vision"]
+    },
+    {
+      "id": "ho-vision-en-02",
+      "input": "Here's a screenshot of my stack trace. Which line is actually causing the crash, and how would you fix it?",
+      "lang": "en",
+      "attachments": [{ "kind": "image", "name": "crash_trace.png" }],
+      "expected_type": "vision",
+      "expected_capabilities": ["code", "vision"]
+    },
+    {
+      "id": "ho-vision-en-03",
+      "input": "Which of these two charts shows the steeper decline in Q3 revenue, and by roughly what percent?",
+      "lang": "en",
+      "attachments": [
+        { "kind": "image", "name": "chart_a.png" },
+        { "kind": "image", "name": "chart_b.png" }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": ["vision"]
+    },
+    {
+      "id": "ho-vision-mixed-01",
+      "input": "这个 UI mockup 的 spacing 和 typography 有什么问题？按 8px grid 的标准帮我挑挑刺。",
+      "lang": "mixed",
+      "attachments": [{ "kind": "image", "name": "home_mockup.png" }],
+      "expected_type": "vision",
+      "expected_capabilities": ["vision", "zh"]
+    },
+    {
+      "id": "ho-vision-mixed-02",
+      "input": "对照这张 whiteboard 的照片，看看这份 PRD 里漏掉了哪些需求点，按 module 列出来。",
+      "lang": "mixed",
+      "attachments": [
+        { "kind": "image", "name": "whiteboard.jpg" },
+        { "kind": "pdf", "name": "PRD_v3.pdf", "chars": 142000 }
+      ],
+      "expected_type": "vision",
+      "expected_capabilities": ["long_context", "vision", "zh"]
+    },
+    {
+      "id": "ho-vision-mixed-03",
+      "input": "这张 Excel 截图里的 pivot table，哪个 region 的 sales 最高？第二名差多少？",
+      "lang": "mixed",
+      "attachments": [{ "kind": "image", "name": "sales_pivot.png" }],
+      "expected_type": "vision",
+      "expected_capabilities": ["vision", "zh"]
+    },
+    {
+      "id": "ho-long_context-zh-01",
+      "input": "总结一下这份年报的核心要点，分成业务、财务、风险三块来写。",
+      "lang": "zh",
+      "attachments": [{ "kind": "pdf", "name": "2025年度报告.pdf", "chars": 186000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["long_context", "zh"]
+    },
+    {
+      "id": "ho-long_context-zh-02",
+      "input": "这份合同一共分几章？",
+      "lang": "zh",
+      "attachments": [{ "kind": "pdf", "name": "采购合同汇编.pdf", "chars": 132000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["long_context", "zh"]
+    },
+    {
+      "id": "ho-long_context-zh-03",
+      "input": "读完这份会议纪要合集，把每个人的待办整理出来，再用邮件发给各自的负责人。",
+      "lang": "zh",
+      "attachments": [{ "kind": "text", "name": "周会纪要合集.txt", "chars": 240000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["long_context", "tool_use", "zh"]
+    },
+    {
+      "id": "ho-long_context-en-01",
+      "input": "Read through this entire transcript and list every action item along with the person who owns it.",
+      "lang": "en",
+      "attachments": [{ "kind": "text", "name": "board_meeting_transcript.txt", "chars": 310000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["long_context"]
+    },
+    {
+      "id": "ho-long_context-en-02",
+      "input": "This is our whole backend repo concatenated into one file. Where is the retry logic for failed payments, and do you see any bugs in it?",
+      "lang": "en",
+      "attachments": [{ "kind": "code", "name": "backend_dump.py", "chars": 520000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["code", "long_context"]
+    },
+    {
+      "id": "ho-long_context-en-03",
+      "input": "Does this agreement contain a termination-for-convenience clause? Quote it if so.",
+      "lang": "en",
+      "attachments": [{ "kind": "pdf", "name": "master_services_agreement.pdf", "chars": 103000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["long_context"]
+    },
+    {
+      "id": "ho-long_context-mixed-01",
+      "input": "这份 PDF 是 vendor 发来的 SOW，帮我找出所有跟 SLA、penalty 和 payment terms 相关的条款，按 section 列出来。",
+      "lang": "mixed",
+      "attachments": [{ "kind": "pdf", "name": "vendor_SOW.pdf", "chars": 158000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["long_context", "zh"]
+    },
+    {
+      "id": "ho-long_context-mixed-02",
+      "input": "这是 Slack 导出的 6 个月 #product 频道聊天记录，帮我 summarize 一下大家对 dark mode 的主要 feedback。",
+      "lang": "mixed",
+      "attachments": [{ "kind": "text", "name": "product_channel_export.json", "chars": 720000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["long_context", "zh"]
+    },
+    {
+      "id": "ho-long_context-mixed-03",
+      "input": "我把整本小说的 manuscript 放进来了，帮我给每一章写一句话的 plot summary，再整理一个 character list，主角 Lena 出场的章节要标出来。",
+      "lang": "mixed",
+      "attachments": [{ "kind": "text", "name": "manuscript_final.txt", "chars": 380000 }],
+      "expected_type": "long_context",
+      "expected_capabilities": ["long_context", "zh"]
+    },
+    {
+      "id": "ho-tool_use-zh-01",
+      "input": "帮我查一下今天北京的天气，要不要带伞？",
+      "lang": "zh",
+      "expected_type": "tool_use",
+      "expected_capabilities": ["tool_use", "zh"]
+    },
+    {
+      "id": "ho-tool_use-zh-02",
+      "input": "把这几张照片按拍摄日期改个名，然后全部移到‘旅行2026’文件夹里。",
+      "lang": "zh",
+      "attachments": [
+        { "kind": "image", "name": "IMG_0412.jpg" },
+        { "kind": "image", "name": "IMG_0413.jpg" },
+        { "kind": "image", "name": "IMG_0415.jpg" }
+      ],
+      "expected_type": "tool_use",
+      "expected_capabilities": ["tool_use", "zh"]
+    },
+    {
+      "id": "ho-tool_use-zh-03",
+      "input": "下周三下午三点，在日历里建一个和产品组的评审会，一小时，提前十五分钟提醒我。",
+      "lang": "zh",
+      "expected_type": "tool_use",
+      "expected_capabilities": ["tool_use", "zh"]
+    },
+    {
+      "id": "ho-tool_use-en-01",
+      "input": "Search the web for the latest stable release of Node.js and tell me what changed.",
+      "lang": "en",
+      "expected_type": "tool_use",
+      "expected_capabilities": ["tool_use"]
+    },
+    {
+      "id": "ho-tool_use-en-02",
+      "input": "Write a Python script that renames every .jpeg file in my photos folder to .jpg, then run it and show me the output.",
+      "lang": "en",
+      "expected_type": "tool_use",
+      "expected_capabilities": ["code", "tool_use"]
+    },
+    {
+      "id": "ho-tool_use-en-03",
+      "input": "Look up today's 30-year mortgage rates, then calculate my monthly payment and total interest on a 450k home with 20% down, and compare that against a 15-year loan. Show the math.",
+      "lang": "en",
+      "expected_type": "tool_use",
+      "expected_capabilities": ["reasoning", "tool_use"]
+    },
+    {
+      "id": "ho-tool_use-mixed-01",
+      "input": "帮我 git pull 一下 main 分支，然后跑一遍 npm run build，告诉我有没有 error。",
+      "lang": "mixed",
+      "expected_type": "tool_use",
+      "expected_capabilities": ["tool_use", "zh"]
+    },
+    {
+      "id": "ho-tool_use-mixed-02",
+      "input": "去 GitHub 上搜一下 tauri 最新的 release notes，看看 2.x 有没有 breaking change。",
+      "lang": "mixed",
+      "expected_type": "tool_use",
+      "expected_capabilities": ["tool_use", "zh"]
+    },
+    {
+      "id": "ho-tool_use-mixed-03",
+      "input": "给 Tom 发条 Slack 消息：明天的 standup 改到 10:30，顺便 cc 一下 design 组的人。",
+      "lang": "mixed",
+      "expected_type": "tool_use",
+      "expected_capabilities": ["tool_use", "zh"]
+    }
+  ]
+}

@@ -1,0 +1,850 @@
+{
+  "board": "assets/brand/brand-board.png",
+  "sha256": "a4f8dbf3e4d7fd21a9aa76dd256e0d6f83aa4b722085efe6c07cd39135363102",
+  "sha256_after": "a4f8dbf3e4d7fd21a9aa76dd256e0d6f83aa4b722085efe6c07cd39135363102",
+  "size": [
+    1448,
+    1086
+  ],
+  "scale": [
+    1.0,
+    1.0
+  ],
+  "measurements": {
+    "light_mark": {
+      "bbox": [
+        957,
+        138,
+        1089,
+        272
+      ],
+      "bg": "#F9FBFB"
+    },
+    "light_word": {
+      "bbox": [
+        1112,
+        177,
+        1400,
+        247
+      ],
+      "bg": "#F9FBFB"
+    },
+    "light_bg": "#F9FBFB",
+    "hero_mark": {
+      "bbox": [
+        116,
+        82,
+        312,
+        281
+      ],
+      "bg": "#2D0000",
+      "sky": {
+        "top": [
+          "#220000",
+          "#230000"
+        ],
+        "bottom": [
+          "#360000",
+          "#450002"
+        ]
+      }
+    },
+    "hero_word": {
+      "bbox": [
+        338,
+        134,
+        775,
+        234
+      ],
+      "bg": "#2B0000",
+      "sky": {
+        "top": [
+          "#280000",
+          "#210000"
+        ],
+        "bottom": [
+          "#350000",
+          "#350000"
+        ]
+      }
+    },
+    "hero_bg": "#2D0000",
+    "slogan_cn": [
+      339,
+      269,
+      720,
+      291
+    ],
+    "slogan_en": [
+      336,
+      308,
+      736,
+      320
+    ],
+    "icon_color": {
+      "bbox": [
+        55,
+        482,
+        154,
+        576
+      ],
+      "bg": "#FCFDFD",
+      "glyph": {
+        "bbox": [
+          68,
+          495,
+          138,
+          563
+        ],
+        "ratio_w": 0.7447,
+        "offset": [
+          -0.0213,
+          0.0
+        ]
+      }
+    },
+    "icon_rr": 0.2021,
+    "icon_sq": [
+      58,
+      482,
+      152,
+      576
+    ],
+    "icon_dark": {
+      "bbox": [
+        232,
+        482,
+        329,
+        576
+      ],
+      "bg": "#FCFDFD",
+      "glyph": {
+        "bbox": [
+          249,
+          498,
+          312,
+          561
+        ],
+        "ratio_w": 0.6702,
+        "offset": [
+          -0.0053,
+          0.0053
+        ]
+      }
+    },
+    "icon_light": {
+      "bbox": [
+        402,
+        483,
+        498,
+        575
+      ],
+      "bg": "#FBFCFD",
+      "glyph": {
+        "bbox": [
+          419,
+          499,
+          480,
+          559
+        ],
+        "ratio_w": 0.663,
+        "offset": [
+          -0.0054,
+          0.0
+        ]
+      }
+    },
+    "icon_mono": {
+      "bbox": [
+        573,
+        483,
+        667,
+        575
+      ],
+      "bg": "#FBFCFD",
+      "glyph": {
+        "bbox": [
+          588,
+          497,
+          652,
+          560
+        ],
+        "ratio_w": 0.6957,
+        "offset": [
+          0.0,
+          -0.0054
+        ]
+      }
+    },
+    "min64": {
+      "bbox": [
+        759,
+        501,
+        814,
+        557
+      ],
+      "bg": "#FDFEFE"
+    },
+    "min32": {
+      "bbox": [
+        861,
+        513,
+        899,
+        552
+      ],
+      "bg": "#FDFDFE"
+    },
+    "min24": {
+      "bbox": [
+        946,
+        518,
+        977,
+        549
+      ],
+      "bg": "#FDFDFE"
+    },
+    "min16": {
+      "bbox": [
+        1023,
+        522,
+        1047,
+        546
+      ],
+      "bg": "#FDFDFE"
+    },
+    "hero_panel": [
+      0,
+      0,
+      900,
+      430
+    ],
+    "panel_splash": {
+      "bbox": [
+        493,
+        629,
+        955,
+        878
+      ],
+      "bg": "#FBFCFC",
+      "radius": 7
+    },
+    "panel_dock": {
+      "bbox": [
+        11,
+        629,
+        484,
+        878
+      ],
+      "bg": "#FBFCFD",
+      "radius": 9
+    },
+    "panel_ui": {
+      "bbox": [
+        964,
+        629,
+        1437,
+        878
+      ],
+      "bg": "#FAFBFC",
+      "radius": 9
+    },
+    "sw_red": {
+      "bbox": [
+        1108,
+        493,
+        1249,
+        547
+      ],
+      "bg": "#FDFDFE"
+    },
+    "sw_gold": {
+      "bbox": [
+        1269,
+        493,
+        1410,
+        547
+      ],
+      "bg": "#FDFDFE"
+    },
+    "colors": {
+      "canonical": {
+        "east-red": {
+          "name": "东方红",
+          "hex": "#D60000"
+        },
+        "china-gold": {
+          "name": "中国金",
+          "hex": "#FFC700"
+        }
+      },
+      "swatches": {
+        "east-red": {
+          "left": "#CE0102",
+          "center": "#E1100F",
+          "right": "#FC2B2B",
+          "closest": "#D30202",
+          "delta_closest": 4.1,
+          "delta_center": 24.5
+        },
+        "china-gold": {
+          "left": "#FEB003",
+          "center": "#FEBE18",
+          "right": "#FED43D",
+          "closest": "#FDB608",
+          "delta_closest": 18.9,
+          "delta_center": 25.7
+        }
+      },
+      "measured": {
+        "hero-bg": {
+          "name": "主视觉背景（深红夜空）",
+          "hex": "#2B0000",
+          "box": [
+            20,
+            180,
+            60,
+            240
+          ]
+        },
+        "light-panel-bg": {
+          "name": "浅色面板背景",
+          "hex": "#F9FAFB",
+          "box": [
+            930,
+            20,
+            1400,
+            60
+          ]
+        },
+        "page-bg": {
+          "name": "页面底色",
+          "hex": "#FAFCFD",
+          "box": [
+            20,
+            945,
+            440,
+            975
+          ]
+        },
+        "ui-main-bg": {
+          "name": "产品界面主区背景（参考）",
+          "hex": "#363134",
+          "box": [
+            1300,
+            695,
+            1420,
+            725
+          ]
+        },
+        "ui-sidebar-bg": {
+          "name": "产品界面侧栏背景（参考）",
+          "hex": "#181717",
+          "box": [
+            1152,
+            790,
+            1195,
+            855
+          ]
+        },
+        "ui-nav-active": {
+          "name": "侧栏选中项底色（参考）",
+          "hex": "#342525",
+          "box": [
+            1140,
+            762,
+            1190,
+            780
+          ]
+        },
+        "sunrise-core": {
+          "name": "日出高光核心",
+          "hex": "#FEF29E",
+          "box": [
+            484,
+            350,
+            496,
+            358
+          ]
+        },
+        "ink": {
+          "name": "字标墨色",
+          "hex": "#060C12",
+          "pixels": 4953
+        },
+        "mark-gold": {
+          "name": "标志金色（实测）",
+          "hex": "#FBB61D",
+          "pixels": 2161
+        },
+        "mark-red": {
+          "name": "标志红色（实测）",
+          "hex": "#E2070E",
+          "pixels": 5731
+        },
+        "icon-bg": {
+          "name": "彩色图标底色（平面拟合）",
+          "hex": "#7C020B → #1A0000",
+          "css": "linear-gradient(114deg, #7C020B 0%, #1A0000 100%)",
+          "note": "板上彩色图标去掉标志后的底色，平面拟合（4173 个样本）；左上 → 右下"
+        }
+      }
+    },
+    "icon_master": {
+      "model": "plane",
+      "coef": [
+        [
+          123.901,
+          -67.538,
+          -29.914
+        ],
+        [
+          1.513,
+          -0.883,
+          -0.481
+        ],
+        [
+          11.386,
+          -9.966,
+          -4.196
+        ]
+      ],
+      "samples": 4173,
+      "corners": {
+        "top_left": "#7C020B",
+        "top_right": "#380101",
+        "bottom_left": "#5E0107",
+        "bottom_right": "#1A0000"
+      },
+      "css": "linear-gradient(114deg, #7C020B 0%, #1A0000 100%)",
+      "ratio": 0.7447,
+      "offset": [
+        -0.0213,
+        0.0
+      ],
+      "radius_ratio": 0.2021
+    }
+  },
+  "outputs": [
+    {
+      "file": "assets/brand/logo/logo-light.png",
+      "size": [
+        483,
+        174
+      ],
+      "mode": "RGB",
+      "purpose": "浅色模式 Logo（含原浅色底）"
+    },
+    {
+      "file": "assets/brand/logo/logo-light-transparent.png",
+      "size": [
+        483,
+        174
+      ],
+      "mode": "RGBA",
+      "purpose": "浅色模式 Logo 透明版，用于浅色背景"
+    },
+    {
+      "file": "assets/brand/logo/mark-color.png",
+      "size": [
+        152,
+        154
+      ],
+      "mode": "RGBA",
+      "purpose": "彩色标志（G 标）透明版，主用"
+    },
+    {
+      "file": "assets/brand/logo/wordmark-dark.png",
+      "size": [
+        308,
+        90
+      ],
+      "mode": "RGBA",
+      "purpose": "深色字标 EastGenesis DESKTOP，用于浅色背景"
+    },
+    {
+      "file": "assets/brand/logo/logo-dark.png",
+      "size": [
+        684,
+        268
+      ],
+      "mode": "RGB",
+      "purpose": "深色模式 Logo（含原深色底与中英文标语）"
+    },
+    {
+      "file": "assets/brand/logo/mark-for-dark-bg.png",
+      "size": [
+        216,
+        219
+      ],
+      "mode": "RGBA",
+      "purpose": "彩色标志（带辉光）透明版，仅用于深色背景"
+    },
+    {
+      "file": "assets/brand/logo/wordmark-light.png",
+      "size": [
+        453,
+        116
+      ],
+      "mode": "RGBA",
+      "purpose": "白色字标 EastGenesis DESKTOP，用于深色背景"
+    },
+    {
+      "file": "assets/brand/logo/logo-dark-transparent.png",
+      "size": [
+        679,
+        219
+      ],
+      "mode": "RGBA",
+      "purpose": "深色模式 Logo 透明版，仅用于深色背景"
+    },
+    {
+      "file": "assets/brand/icons/board-crops/icon-color-raw.png",
+      "size": [
+        106,
+        106
+      ],
+      "mode": "RGB",
+      "purpose": "color 图标原始截取（含周边，供比对）"
+    },
+    {
+      "file": "assets/brand/icons/icon-color.png",
+      "size": [
+        94,
+        94
+      ],
+      "mode": "RGBA",
+      "purpose": "color 版本应用图标（圆角透明，板上分辨率）"
+    },
+    {
+      "file": "assets/brand/icons/board-crops/icon-dark-raw.png",
+      "size": [
+        106,
+        106
+      ],
+      "mode": "RGB",
+      "purpose": "dark 图标原始截取（含周边，供比对）"
+    },
+    {
+      "file": "assets/brand/icons/icon-dark.png",
+      "size": [
+        94,
+        94
+      ],
+      "mode": "RGBA",
+      "purpose": "dark 版本应用图标（圆角透明，板上分辨率）"
+    },
+    {
+      "file": "assets/brand/icons/board-crops/icon-light-raw.png",
+      "size": [
+        104,
+        104
+      ],
+      "mode": "RGB",
+      "purpose": "light 图标原始截取（含周边，供比对）"
+    },
+    {
+      "file": "assets/brand/icons/icon-light.png",
+      "size": [
+        92,
+        92
+      ],
+      "mode": "RGBA",
+      "purpose": "light 版本应用图标（圆角透明，板上分辨率）"
+    },
+    {
+      "file": "assets/brand/icons/board-crops/icon-mono-raw.png",
+      "size": [
+        104,
+        104
+      ],
+      "mode": "RGB",
+      "purpose": "mono 图标原始截取（含周边，供比对）"
+    },
+    {
+      "file": "assets/brand/icons/icon-mono.png",
+      "size": [
+        92,
+        92
+      ],
+      "mode": "RGBA",
+      "purpose": "mono 版本应用图标（圆角透明，板上分辨率）"
+    },
+    {
+      "file": "assets/brand/logo/mark-mono.png",
+      "size": [
+        70,
+        69
+      ],
+      "mode": "RGBA",
+      "purpose": "单色（黑）标志透明版（板上分辨率较低）"
+    },
+    {
+      "file": "assets/brand/logo/mark-mono-white.png",
+      "size": [
+        70,
+        69
+      ],
+      "mode": "RGBA",
+      "purpose": "单色（白）标志透明版，用于深色或彩色背景"
+    },
+    {
+      "file": "assets/brand/app-icons/board-preview-64.png",
+      "size": [
+        59,
+        60
+      ],
+      "mode": "RGB",
+      "purpose": "板上 64px 预览截图（实际 55x56px，仅作视觉参考）"
+    },
+    {
+      "file": "assets/brand/app-icons/board-preview-32.png",
+      "size": [
+        42,
+        43
+      ],
+      "mode": "RGB",
+      "purpose": "板上 32px 预览截图（实际 38x39px，仅作视觉参考）"
+    },
+    {
+      "file": "assets/brand/app-icons/board-preview-24.png",
+      "size": [
+        35,
+        35
+      ],
+      "mode": "RGB",
+      "purpose": "板上 24px 预览截图（实际 31x31px，仅作视觉参考）"
+    },
+    {
+      "file": "assets/brand/app-icons/board-preview-16.png",
+      "size": [
+        28,
+        28
+      ],
+      "mode": "RGB",
+      "purpose": "板上 16px 预览截图（实际 24x24px，仅作视觉参考）"
+    },
+    {
+      "file": "assets/brand/splash/hero-keyvisual.png",
+      "size": [
+        900,
+        430
+      ],
+      "mode": "RGB",
+      "purpose": "主视觉 Key Visual（深红夜空 + 地平线日出 + Logo + 标语）"
+    },
+    {
+      "file": "assets/brand/splash/splash-bg-horizon.png",
+      "size": [
+        900,
+        104
+      ],
+      "mode": "RGB",
+      "purpose": "启动页背景素材：无文字的地平线日出光带（横向铺满、底部对齐使用）"
+    },
+    {
+      "file": "assets/brand/splash/splash-reference.png",
+      "size": [
+        462,
+        249
+      ],
+      "mode": "RGBA",
+      "purpose": "启动加载页效果参考图（圆角 7px 透明）"
+    },
+    {
+      "file": "assets/brand/ui-reference/dock-preview.png",
+      "size": [
+        473,
+        249
+      ],
+      "mode": "RGBA",
+      "purpose": "桌面 Dock 图标效果参考图（圆角 9px 透明）"
+    },
+    {
+      "file": "assets/brand/ui-reference/product-ui.png",
+      "size": [
+        473,
+        249
+      ],
+      "mode": "RGBA",
+      "purpose": "产品界面效果参考图（圆角 9px 透明）"
+    },
+    {
+      "file": "assets/brand/colors/swatch-east-red.png",
+      "size": [
+        141,
+        54
+      ],
+      "mode": "RGBA",
+      "purpose": "东方红 色块截取（标注 #D60000）"
+    },
+    {
+      "file": "assets/brand/colors/swatch-china-gold.png",
+      "size": [
+        141,
+        54
+      ],
+      "mode": "RGBA",
+      "purpose": "中国金 色块截取（标注 #FFC700）"
+    },
+    {
+      "file": "assets/brand/icons/icon-1024.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "purpose": "应用图标母版 1024（macOS 网格留白），tauri icon 输入"
+    },
+    {
+      "file": "assets/brand/icons/icon-1024-fullbleed.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA",
+      "purpose": "满版图标 1024（无留白），用于 Web / 文档 / 小尺寸派生"
+    },
+    {
+      "file": "assets/brand/app-icons/icon-512.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "purpose": "512px 应用图标（由满版母版缩放）"
+    },
+    {
+      "file": "assets/brand/app-icons/icon-256.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "purpose": "256px 应用图标（由满版母版缩放）"
+    },
+    {
+      "file": "assets/brand/app-icons/icon-128.png",
+      "size": [
+        128,
+        128
+      ],
+      "mode": "RGBA",
+      "purpose": "128px 应用图标（由满版母版缩放）"
+    },
+    {
+      "file": "assets/brand/app-icons/icon-64.png",
+      "size": [
+        64,
+        64
+      ],
+      "mode": "RGBA",
+      "purpose": "64px 应用图标（由满版母版缩放）"
+    },
+    {
+      "file": "assets/brand/app-icons/icon-32.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "purpose": "32px 应用图标（由满版母版缩放）"
+    },
+    {
+      "file": "assets/brand/app-icons/icon-24.png",
+      "size": [
+        24,
+        24
+      ],
+      "mode": "RGBA",
+      "purpose": "24px 应用图标（由满版母版缩放）"
+    },
+    {
+      "file": "assets/brand/app-icons/icon-16.png",
+      "size": [
+        16,
+        16
+      ],
+      "mode": "RGBA",
+      "purpose": "16px 应用图标（由满版母版缩放）"
+    },
+    {
+      "file": "assets/brand/colors/colors.json",
+      "purpose": "品牌色标注值与实测值"
+    }
+  ],
+  "log": [
+    "原图 1448x1086，缩放 sx=1.0000 sy=1.0000，SHA-256 a4f8dbf3e4d7fd21a9aa76dd256e0d6f83aa4b722085efe6c07cd39135363102",
+    "== Logo ==",
+    "[light_mark] 背景 #F9FBFB，内容包围盒 (957, 138, 1089, 272)",
+    "[light_word] 背景 #F9FBFB，内容包围盒 (1112, 177, 1400, 247)",
+    "  -> assets/brand/logo/logo-light.png 483x174 RGB",
+    "  -> assets/brand/logo/logo-light-transparent.png 483x174 RGBA",
+    "  -> assets/brand/logo/mark-color.png 152x154 RGBA",
+    "  -> assets/brand/logo/wordmark-dark.png 308x90 RGBA",
+    "[hero_mark] 背景 #2D0000，内容包围盒 (116, 82, 312, 281)",
+    "[hero_word] 背景 #2B0000，内容包围盒 (338, 134, 775, 234)",
+    "  -> assets/brand/logo/logo-dark.png 684x268 RGB",
+    "[hero_mark] 逐行底色 左上 #220000 右上 #230000 左下 #360000 右下 #450002",
+    "[hero_word] 逐行底色 左上 #280000 右上 #210000 左下 #350000 右下 #350000；金色点缀 181 像素（绿通道参考 219）",
+    "  -> assets/brand/logo/mark-for-dark-bg.png 216x219 RGBA",
+    "  -> assets/brand/logo/wordmark-light.png 453x116 RGBA",
+    "  -> assets/brand/logo/logo-dark-transparent.png 679x219 RGBA",
+    "== 图标版本 ==",
+    "[icon_color] 背景 #FCFDFD，内容包围盒 (55, 482, 154, 576)",
+    "[icon_color] 圆角半径比 0.2021",
+    "  -> assets/brand/icons/board-crops/icon-color-raw.png 106x106 RGB",
+    "  -> assets/brand/icons/icon-color.png 94x94 RGBA",
+    "[icon_color] 字形宽/图标边长 = 0.745，中心偏移 (-0.021, +0.000)",
+    "[icon_dark] 背景 #FCFDFD，内容包围盒 (232, 482, 329, 576)",
+    "  -> assets/brand/icons/board-crops/icon-dark-raw.png 106x106 RGB",
+    "  -> assets/brand/icons/icon-dark.png 94x94 RGBA",
+    "[icon_dark] 字形宽/图标边长 = 0.670，中心偏移 (-0.005, +0.005)",
+    "[icon_light] 背景 #FBFCFD，内容包围盒 (402, 483, 498, 575)",
+    "  -> assets/brand/icons/board-crops/icon-light-raw.png 104x104 RGB",
+    "  -> assets/brand/icons/icon-light.png 92x92 RGBA",
+    "[icon_light] 字形宽/图标边长 = 0.663，中心偏移 (-0.005, +0.000)",
+    "[icon_mono] 背景 #FBFCFD，内容包围盒 (573, 483, 667, 575)",
+    "  -> assets/brand/icons/board-crops/icon-mono-raw.png 104x104 RGB",
+    "  -> assets/brand/icons/icon-mono.png 92x92 RGBA",
+    "[icon_mono] 字形宽/图标边长 = 0.696，中心偏移 (+0.000, -0.005)",
+    "  -> assets/brand/logo/mark-mono.png 70x69 RGBA",
+    "  -> assets/brand/logo/mark-mono-white.png 70x69 RGBA",
+    "== 最小尺寸效果（板上预览，非精确像素）==",
+    "[min64] 背景 #FDFEFE，内容包围盒 (759, 501, 814, 557)",
+    "  -> assets/brand/app-icons/board-preview-64.png 59x60 RGB",
+    "[min32] 背景 #FDFDFE，内容包围盒 (861, 513, 899, 552)",
+    "  -> assets/brand/app-icons/board-preview-32.png 42x43 RGB",
+    "[min24] 背景 #FDFDFE，内容包围盒 (946, 518, 977, 549)",
+    "  -> assets/brand/app-icons/board-preview-24.png 35x35 RGB",
+    "[min16] 背景 #FDFDFE，内容包围盒 (1023, 522, 1047, 546)",
+    "  -> assets/brand/app-icons/board-preview-16.png 28x28 RGB",
+    "== 启动页 / UI 参考 ==",
+    "  -> assets/brand/splash/hero-keyvisual.png 900x430 RGB",
+    "  -> assets/brand/splash/splash-bg-horizon.png 900x104 RGB",
+    "[panel_splash] 背景 #FBFCFC，内容包围盒 (493, 629, 955, 878)",
+    "  -> assets/brand/splash/splash-reference.png 462x249 RGBA",
+    "[panel_dock] 背景 #FBFCFD，内容包围盒 (11, 629, 484, 878)",
+    "  -> assets/brand/ui-reference/dock-preview.png 473x249 RGBA",
+    "[panel_ui] 背景 #FAFBFC，内容包围盒 (964, 629, 1437, 878)",
+    "  -> assets/brand/ui-reference/product-ui.png 473x249 RGBA",
+    "== 品牌色 ==",
+    "[sw_red] 背景 #FDFDFE，内容包围盒 (1108, 493, 1249, 547)",
+    "  -> assets/brand/colors/swatch-east-red.png 141x54 RGBA",
+    "[sw_red] 东方红 标注 #D60000；渐变 #CE0102 -> #FC2B2B，最接近 #D30202（ΔRGB 4.1）",
+    "[sw_gold] 背景 #FDFDFE，内容包围盒 (1269, 493, 1410, 547)",
+    "  -> assets/brand/colors/swatch-china-gold.png 141x54 RGBA",
+    "[sw_gold] 中国金 标注 #FFC700；渐变 #FEB003 -> #FED43D，最接近 #FDB608（ΔRGB 18.9）",
+    "== icon-1024 ==",
+    "  底色平面拟合（4173 个样本）：左上 #7C020B 右上 #380101 左下 #5E0107 右下 #1A0000；CSS 近似 linear-gradient(114deg, #7C020B 0%, #1A0000 100%)；字形比例 0.745",
+    "  -> assets/brand/icons/icon-1024.png 1024x1024 RGBA",
+    "  -> assets/brand/icons/icon-1024-fullbleed.png 1024x1024 RGBA",
+    "  -> assets/brand/app-icons/icon-512.png 512x512 RGBA",
+    "  -> assets/brand/app-icons/icon-256.png 256x256 RGBA",
+    "  -> assets/brand/app-icons/icon-128.png 128x128 RGBA",
+    "  -> assets/brand/app-icons/icon-64.png 64x64 RGBA",
+    "  -> assets/brand/app-icons/icon-32.png 32x32 RGBA",
+    "  -> assets/brand/app-icons/icon-24.png 24x24 RGBA",
+    "  -> assets/brand/app-icons/icon-16.png 16x16 RGBA",
+    "已回填 docs/BRAND.md 自动区块"
+  ]
+}

@@ -1,0 +1,36 @@
+[package]
+name = "eastgenesis-desktop"
+description = "EastGenesis Desktop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+name = "eastgenesis_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+# Tauri 的 crate 必须来自同一次发布。这里固定版本号只管得住顶层，内部 crate（tauri-utils 等）由 Cargo.lock 固定。
+# 升级时 tauri、tauri-build、tauri-plugin-sql 和 package.json 里的 @tauri-apps/* 一起改，并提交新的 Cargo.lock。
+[build-dependencies]
+tauri-build = { version = "=2.7.0", features = [] }
+
+[dependencies]
+eg-core = { path = "../crates/eg-core" }
+tauri = { version = "=2.12.0", features = [] }
+tauri-plugin-sql = { version = "=2.5.0", features = ["sqlite"] }
+serde.workspace = true
+serde_json.workspace = true
+# 同步 HTTP 客户端（默认 rustls），用于代理模型请求；Key 只在 Rust 进程内
+ureq = "=2.12.1"
+keyring = "=3.6.3"
+
+# 钥匙串后端按平台启用
+[target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "=3.6.3", features = ["apple-native"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+keyring = { version = "=3.6.3", features = ["windows-native"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+keyring = { version = "=3.6.3", features = ["sync-secret-service", "crypto-rust"] }
