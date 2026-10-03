@@ -71,7 +71,9 @@ export function asDb(get: () => RawDb): Db {
   const named = (sql: string, bind: unknown[] = []) => {
     const max = Math.max(0, ...[...sql.matchAll(/\$(\d+)/g)].map((m) => Number(m[1])));
     if (max !== bind.length) throw new Error(`占位符 ${max} 个，绑定参数 ${bind.length} 个：${sql}`);
-    return Object.fromEntries(bind.map((v, i) => [`$${i + 1}`, v === undefined ? null : typeof v === "boolean" ? Number(v) : v]));
+    // tauri-plugin-sql 怎么绑定 JSON 布尔值没有核实；archived 列有 CHECK (0, 1)，代码里只绑定数字，这里遇到布尔值直接报错
+    if (bind.some((v) => typeof v === "boolean")) throw new Error(`不要绑定布尔值：${sql}`);
+    return Object.fromEntries(bind.map((v, i) => [`$${i + 1}`, v === undefined ? null : v]));
   };
   return {
     async select<T>(sql: string, bind?: unknown[]) {

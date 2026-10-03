@@ -1,6 +1,7 @@
 // 记忆条目的校验与「记住」提议。桌面端（db-memory.ts）和浏览器模式（mock-memory.ts）共用同一套规则。
 // 只有用户确认过的内容才会成为记忆：工具和 MCP 的输出不会自动写入，注入的指令也就变不成长期指令。
 import { redact } from "@/core/redact";
+import { PROJECT_ID } from "@/decision/project";
 import type { AppError } from "./ipc";
 import type { MemoryInput, MemoryKind } from "@/platform/types";
 
@@ -15,14 +16,16 @@ export const memoryNotFound = () => fail("memory_not_found", "没有找到这条
 export const memoryFull = () => fail("memory_full", `最多保存 ${MAX_MEMORIES} 条记忆，请先删除一些`);
 export const invalidMemoryId = () => fail("invalid_memory_id", "记忆 ID 无效");
 
-/** 规整并校验；不回显内容（用户可能误粘贴了密钥） */
-export function normalizeMemory(m: MemoryInput): { kind: MemoryKind; text: string; source: "manual" | "task" } {
+/** 规整并校验；不回显内容（用户可能误粘贴了密钥）。project_id 只校验格式，项目是否存在由存储层查 */
+export function normalizeMemory(m: MemoryInput): { kind: MemoryKind; text: string; source: "manual" | "task"; project_id: string | null } {
   if (!MEMORY_KINDS.includes(m.kind)) throw fail("invalid_memory", "记忆类型只能是偏好或事实");
   const text = String(m.text ?? "").replace(/\s+/g, " ").trim();
   if (!text) throw fail("invalid_memory", "记忆内容不能为空");
   if (text.length > MAX_MEMORY_TEXT) throw fail("invalid_memory", `记忆内容最多 ${MAX_MEMORY_TEXT} 个字符`);
   if (redact(text) !== text) throw fail("invalid_memory", "内容看起来包含密钥或令牌，不能保存为记忆");
-  return { kind: m.kind, text, source: m.source === "task" ? "task" : "manual" };
+  const project_id = m.project_id ?? null;
+  if (project_id !== null && !PROJECT_ID.test(project_id)) throw fail("invalid_project_id", "项目 ID 无效");
+  return { kind: m.kind, text, source: m.source === "task" ? "task" : "manual", project_id };
 }
 
 export function newMemoryId(): string {

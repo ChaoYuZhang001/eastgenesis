@@ -1,6 +1,10 @@
 // 前端访问后端的唯一接口。桌面端由 Tauri 命令实现（tauri-backend），浏览器模式由内存 mock 实现（mock-backend）。
 // 字段名与 Rust 侧 serde 输出保持一致（snake_case）。任何方法都不返回 API Key 本身。
 import type { AppError, AppInfo } from "@/lib/ipc";
+import type { Goal, GoalChange, GoalInput } from "@/decision/goal";
+import type { Project, ProjectInput, ProjectUsage } from "@/decision/project";
+
+export type { Goal, GoalChange, GoalInput, Project, ProjectInput, ProjectUsage };
 
 export type BackendKind = "tauri" | "mock";
 export type KeySource = "keychain" | "env" | "none";
@@ -104,18 +108,21 @@ export interface Memory {
   text: string;
   /** manual：设置页添加；task：任务卡片上确认 */
   source: "manual" | "task";
+  /** 属于哪个项目；null 是全局记忆。删除项目时连带删除（软删除） */
+  project_id: string | null;
   created_at: number;
   updated_at: number;
   use_count: number;
   last_used_at: number | null;
 }
 
-/** 新建时不带 id；编辑时带 id，只改类型和内容 */
+/** 新建时不带 id；编辑时带 id，只改类型和内容（来源和所属项目不变） */
 export interface MemoryInput {
   id?: string;
   kind: MemoryKind;
   text: string;
   source?: Memory["source"];
+  project_id?: string | null;
 }
 
 /** 技能的一步：子目标和建议的工具。只读步骤额外保存参数，重复执行时直接调用，不用再问模型 */
@@ -205,6 +212,24 @@ export interface Backend {
   deleteSkill(id: string): Promise<void>;
   /** 规划参考了技能后调用：use_count 加 1，记下时间 */
   touchSkills(ids: readonly string[]): Promise<void>;
+
+  /** 项目：桌面端存 SQLite 的 projects 表，浏览器模式存内存。列表含已归档的（archived 字段区分），不含已删除的 */
+  listProjects(): Promise<Project[]>;
+  /** 新建不带 id；编辑带 id，没给的字段保持原值 */
+  saveProject(p: ProjectInput): Promise<Project>;
+  archiveProject(id: string): Promise<Project>;
+  unarchiveProject(id: string): Promise<Project>;
+  /** 删除前的二次确认用：会连带删除多少目标和记忆 */
+  projectUsage(id: string): Promise<ProjectUsage>;
+  /** 软删除，连带删除它的目标和记忆；返回连带删除的数量 */
+  deleteProject(id: string): Promise<ProjectUsage>;
+
+  /** 目标：不给 projectId 时列出全部；不含已删除的 */
+  listGoals(projectId?: string): Promise<Goal[]>;
+  /** 新建不带 id（状态 idle）；编辑带 id，没给的字段保持原值，不能换项目 */
+  saveGoal(g: GoalInput): Promise<Goal>;
+  /** 状态转换和轮次操作（decision/goal.ts applyGoalChange）；删除目标是 { op: "transition", to: "deleted" } */
+  updateGoal(id: string, change: GoalChange): Promise<Goal>;
 
   /** 非敏感设置（路由偏好、能力矩阵覆盖等），JSON 字符串 */
   loadSetting(key: string): Promise<string | null>;

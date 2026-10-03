@@ -112,7 +112,8 @@ const TRANSITIONS: Record<GoalStatus, readonly GoalStatus[]> = {
   abandoned: ["deleted"],
   deleted: [],
 };
-const isStatus = (v: unknown): v is GoalStatus => typeof v === "string" && (GOAL_STATUSES as readonly string[]).includes(v);
+export const isGoalStatus = (v: unknown): v is GoalStatus => typeof v === "string" && (GOAL_STATUSES as readonly string[]).includes(v);
+const isStatus = isGoalStatus;
 export const canTransition = (from: GoalStatus, to: GoalStatus) => TRANSITIONS[from]?.includes(to) ?? false;
 
 export type FailCause = "budget" | "streak" | "rounds";

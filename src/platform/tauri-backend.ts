@@ -2,7 +2,9 @@
 // 顶层参数用 camelCase（Tauri 自动转成 Rust 的 snake_case），嵌套结构体保持 snake_case 字段名。
 import { call, type AppInfo } from "@/lib/ipc";
 import { database, getSetting, readSchemaVersion, setSetting } from "@/lib/db";
+import { listGoals, saveGoal, updateGoal } from "@/lib/db-goal";
 import { deleteMemory, listMemories, saveMemory, touchMemories } from "@/lib/db-memory";
+import { archiveProject, deleteProject, listProjects, projectUsage, saveProject, unarchiveProject } from "@/lib/db-project";
 import { deleteSkill, listSkills, saveSkill, touchSkills } from "@/lib/db-skill";
 import type { Backend, CustomProvider, KeyStatus, McpHandlers, McpRegistry, McpServerView, ProxyRequest, ProxyResponse, SavedProvider } from "./types";
 
@@ -68,6 +70,16 @@ export function createTauriBackend(): Backend {
     saveSkill: (s) => saveSkill(s),
     deleteSkill,
     touchSkills: (ids) => touchSkills(ids),
+    // 只传声明过的参数：这些函数的第二个参数是测试用的 now
+    listProjects,
+    saveProject: (p) => saveProject(p),
+    archiveProject: (id) => archiveProject(id),
+    unarchiveProject: (id) => unarchiveProject(id),
+    projectUsage,
+    deleteProject: (id) => deleteProject(id),
+    listGoals: (projectId) => listGoals(projectId),
+    saveGoal: (g) => saveGoal(g),
+    updateGoal: (id, change) => updateGoal(id, change),
 
     loadSetting: getSetting,
     saveSetting: setSetting,

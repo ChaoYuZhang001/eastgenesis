@@ -16,8 +16,11 @@ const code = (p: Promise<unknown>) => p.then(() => "ok", (e: { code: string }) =
 
 describe("记忆校验", () => {
   it("规整空白；拒绝空内容、超长、未知类型和像密钥的内容，且不回显", () => {
-    expect(normalizeMemory({ kind: "fact", text: "  我的时区\n是 UTC+8  " })).toEqual({ kind: "fact", text: "我的时区 是 UTC+8", source: "manual" });
+    // 没给项目就是全局记忆（project_id 为 null）
+    expect(normalizeMemory({ kind: "fact", text: "  我的时区\n是 UTC+8  " })).toEqual({ kind: "fact", text: "我的时区 是 UTC+8", source: "manual", project_id: null });
     expect(normalizeMemory({ kind: "preference", text: "先给结论", source: "task" }).source).toBe("task");
+    expect(normalizeMemory({ kind: "fact", text: "x", project_id: "prj-a1" }).project_id).toBe("prj-a1");
+    expect(errOf(() => normalizeMemory({ kind: "fact", text: "x", project_id: "../etc" }))?.code).toBe("invalid_project_id");
     expect(errOf(() => normalizeMemory({ kind: "fact", text: "   " }))?.code).toBe("invalid_memory");
     expect(errOf(() => normalizeMemory({ kind: "fact", text: "字".repeat(501) }))?.code).toBe("invalid_memory");
     expect(errOf(() => normalizeMemory({ kind: "other" as "fact", text: "x" }))?.code).toBe("invalid_memory");

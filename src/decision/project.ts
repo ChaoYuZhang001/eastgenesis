@@ -20,14 +20,20 @@ export interface Project {
   updated_at: number;
 }
 
-/** 新建时不带 id；编辑时带 id。归档状态只能用 archiveProject / unarchiveProject 改 */
+/** 新建时不带 id、必须有名称；编辑时带 id，没给的字段保持原值。归档状态只能用 archiveProject / unarchiveProject 改 */
 export interface ProjectInput {
   id?: string;
-  name: string;
+  name?: string;
   description?: string;
   instructions?: string;
   context_folders?: readonly string[];
   routing_preference?: Preference | null;
+}
+
+/** 删除项目时会连带删除的数量（二次确认里显示） */
+export interface ProjectUsage {
+  goals: number;
+  memories: number;
 }
 
 export interface ProjectError {
@@ -120,6 +126,17 @@ export function normalizeProject(p: ProjectInput): NormalizedProject {
   if (instructions.length > MAX_INSTRUCTIONS) throw bad(`项目指令最多 ${MAX_INSTRUCTIONS} 个字符`);
   if ([name, description, instructions].some(looksSecret)) throw bad("内容看起来包含密钥或令牌，不能保存");
   return { name, description, instructions, context_folders: normalizeFolders(p.context_folders), routing_preference: normalizePreference(p.routing_preference) };
+}
+
+/** 编辑：没给的字段用原值补上，再整体校验；routing_preference 给 null 表示改回「不覆盖」 */
+export function mergeProject(cur: Project, p: ProjectInput): NormalizedProject {
+  return normalizeProject({
+    name: p.name ?? cur.name,
+    description: p.description ?? cur.description,
+    instructions: p.instructions ?? cur.instructions,
+    context_folders: p.context_folders ?? cur.context_folders,
+    routing_preference: p.routing_preference === undefined ? cur.routing_preference : p.routing_preference,
+  });
 }
 
 export function newId(prefix: string): string {

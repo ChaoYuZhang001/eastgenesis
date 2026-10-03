@@ -19,7 +19,8 @@ describe("记忆的 SQLite 读写", () => {
     expect(db.select.mock.calls[0]).toEqual([MEMORY_SQL.count]);
     const [sql, bind] = db.execute.mock.calls[0];
     expect(sql).toBe(MEMORY_SQL.insert);
-    expect(bind).toEqual([expect.stringMatching(/^mem-/), "fact", "我的时区是 UTC+8", "manual", 100, 100]);
+    // 第 5 个是 project_id：不属于项目时为 null
+    expect(bind).toEqual([expect.stringMatching(/^mem-/), "fact", "我的时区是 UTC+8", "manual", null, 100, 100]);
     expect(db.select.mock.calls[1]).toEqual([MEMORY_SQL.get, [bind[0]]]);
   });
 

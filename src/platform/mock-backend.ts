@@ -6,7 +6,9 @@ import type { AppError } from "@/lib/ipc";
 import { assertSettingKey } from "@/lib/db";
 import { mockReply, type MockChatMessage } from "./mock-llm";
 import { createMockMcp } from "./mock-mcp";
-import { createMockMemory } from "./mock-memory";
+import { createMockGoals } from "./mock-goal";
+import { createMockMemoryStore } from "./mock-memory";
+import { createMockProjects } from "./mock-project";
 import { createMockSkills } from "./mock-skill";
 import { ANTHROPIC_PATHS, CUSTOM_ID, OFFICIAL_BASE, OFFICIAL_PROVIDERS, OPENAI_PATHS, err, isLocalUrl, validateCustom, validateKey, validateProviderId } from "./mock-rules";
 import type { Backend, CustomProvider, KeyStatus, ProxyRequest, ProxyResponse } from "./types";
@@ -37,6 +39,17 @@ export function createMockBackend(o: MockOptions = {}): Backend {
   let jev = o.jevConfigured ?? false;
   const custom = new Map<string, CustomProvider>();
   const settings = new Map<string, string>();
+  // 项目、目标、记忆互相引用：目标和记忆挂到项目下之前查项目还在；删除项目时连带删除目标和记忆
+  const alive = (id: string) => projects.alive(id);
+  const memory = createMockMemoryStore(Date.now, alive);
+  const goals = createMockGoals(Date.now, alive);
+  const projects = createMockProjects(Date.now, {
+    usage: (id) => ({ goals: goals.countByProject(id), memories: memory.countByProject(id) }),
+    remove: (id) => {
+      memory.removeByProject(id);
+      goals.removeByProject(id);
+    },
+  });
 
   const status = (id: string): KeyStatus => {
     if (id === "ollama") return { id, configured: true, source: "none", needs_key: false };
@@ -164,8 +177,10 @@ export function createMockBackend(o: MockOptions = {}): Backend {
     providerRequest,
 
     ...createMockMcp(),
-    ...createMockMemory(),
+    ...memory.api,
     ...createMockSkills(),
+    ...projects.api,
+    ...goals.api,
 
     async loadSetting(key) {
       assertSettingKey(key);
