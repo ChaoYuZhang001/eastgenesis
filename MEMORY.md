@@ -403,6 +403,17 @@
 - Key 安全：第一轮的 Key 明文进过会话记录（2026-10-02 下午），用户已在 TypeSafe 后台轮换；第二轮用的是新 Key，跑完把 `.env.local` 删掉了。以后读 Key 只用 `set -a; . ./.env.local; set +a` 载入环境变量，不用文件读取工具、不写进命令行。
 - 复测命令见 `docs/JEV_SMOKE_TEST_REPORT.md` 末尾。没验证：第 2 级 LocalJev、服务端 429/5xx 的熔断路径、Mac 上的耗时。
 
+## M8 项目与目标基础设施（2026-10-03）
+
+- 路由偏好沿用现有 `Preference`（`economy` / `balanced` / `best`），不按设计稿改成 `cheap`：路由评分算法和设置页都用这三个值，约束不许改评分算法。`routing_preference` 为 null 表示「沿用上级」，表单里的空串也按 null 处理。
+- 目标比设计稿多 `instructions`、`routing_preference` 两个字段（继承链「任务 > 目标 > 项目 > 全局」要有目标这一层），`project_id` 可为 null（不属于任何项目的目标）。projects、memories 也加了 `deleted_at`：删除项目要连带软删除记忆。
+- 完成校验（`src/decision/evidence.ts` + `DecisionLayer.checkDoneWithEvidence`）：规则判「完成」后目标直接收尾，所以规则只在每个可核对的条件（测试命令通过、点名的文件产出、点名的输出出现）都满足时判完成，其余交给 Jev 或用户。AI 自述（`claim`）不发给 Jev，只用来区分「声称完成但无实据」和「什么都没做」。发给 Jev 的是脱敏后的路径和命令输出末尾。
+- Jev 的完成校验问句放在 `evidence.ts`，没放 `jev-config.ts`：后者按约束冻结。完成校验的 Jev 失败不计入路由的健康统计（只返回「Jev 调用失败，请你确认」）。
+- 状态机在 `src/decision/goal.ts`：设计稿的 9 条转换之外，多一个上限 `MAX_ROUNDS = 100`（防止每轮都「拿不准」、用户一直选继续时无限开轮）；运行出错（`failRound`）也计入连续失败；用户裁决的轮次不计入连续失败；预算用完但本轮「拿不准」时仍等用户，不直接判失败。暂停、放弃后迟到的执行记录还能补进被中断的那一轮。
+- 存储：所有查询过滤 `deleted_at IS NULL`；删除项目时用同一个时间戳软删除目标和记忆。同一目标的读改写在进程内排队（`db-goal.ts` 的 `serial`），多窗口或多进程同时写不在保护范围内。单条记忆删除仍是硬删除（M8 没改）。
+- 目标 store 单条写入后只替换这一条（运行时一轮里会写很多次），不整表重读；项目 store 删除后整表刷新，目标和记忆已加载过的一并刷新。
+- 留给 M10：运行时接入 checkDoneWithEvidence（engine.ts 没改）；按项目挑选记忆；删除项目时中止它正在运行的目标；任务卡片的 mode 目前只记录，不影响执行。
+
 ## 通用
 
 - Git（2026-10-02 起）：远端仓库 https://github.com/ChaoYuZhang001/eastgenesis，历史以 GitHub 为准（2026-10-02 首次推送时压成了一个提交 `fa69b1b`）。Mac 上的权威目录是 `EastGenesis-clean`。VM 不能 push（没有 SSH Key），也不需要：VM 从 GitHub clone 到临时目录、提交，再由用户同步到 Mac 后 push。项目目录是 FUSE 挂载，不能删除文件，git 不能直接在里面运行。
