@@ -4,7 +4,8 @@
 
 ### 1. 确认工作目录
 ```bash
-cd /Users/apple/Desktop/EastGenesis-clean
+# 替换为你的 EastGenesis-clean 实际路径
+cd ~/Desktop/EastGenesis-clean
 git remote -v
 # 应该显示：origin  https://github.com/ChaoYuZhang001/eastgenesis.git
 ```
