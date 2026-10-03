@@ -98,20 +98,28 @@ function KeyRow({ id, status, onSave, onDelete, children }: RowProps) {
   );
 }
 
-export function ApiKeys() {
-  const { statuses, jev, setKey, deleteKey, setJevKey, deleteJevKey } = useSettings();
+// Provider 管理：官方模型 Provider 的 Key（V3 第 8 节「模型与路由 › Provider 管理」）
+export function ProviderKeys() {
+  const { statuses, setKey, deleteKey } = useSettings();
   const official = statuses.filter((s) => !s.id.startsWith("custom:"));
   return (
+    <SettingsSection title="模型 Provider 的 API Key" description="Key 只保存在系统钥匙串，由 Rust 侧读取并代发请求；保存后界面上不再显示。也可以用环境变量提供。">
+      <ul className="space-y-3">
+        {official.map((s) => (
+          <KeyRow key={s.id} id={s.id} status={s} onSave={(k) => setKey(s.id, k)} onDelete={() => deleteKey(s.id)}>
+            {s.id === "ollama" ? <OllamaToggle /> : <RegionSelect provider={s.id} />}
+          </KeyRow>
+        ))}
+      </ul>
+    </SettingsSection>
+  );
+}
+
+// 决策层：Jev Key 和本地决策模型，和模型 Provider 的 Key 分开保存（「路由偏好」页下的一节）
+export function DecisionLayerSettings() {
+  const { jev, setJevKey, deleteJevKey } = useSettings();
+  return (
     <div className="space-y-10">
-      <SettingsSection title="模型 Provider 的 API Key" description="Key 只保存在系统钥匙串，由 Rust 侧读取并代发请求；保存后界面上不再显示。也可以用环境变量提供。">
-        <ul className="space-y-3">
-          {official.map((s) => (
-            <KeyRow key={s.id} id={s.id} status={s} onSave={(k) => setKey(s.id, k)} onDelete={() => deleteKey(s.id)}>
-              {s.id === "ollama" ? <OllamaToggle /> : <RegionSelect provider={s.id} />}
-            </KeyRow>
-          ))}
-        </ul>
-      </SettingsSection>
       <SettingsSection title="Jev 决策层 Key" description="和模型 Provider 的 Key 分开保存，只用于路由与规划决策。没有配置时自动降级：先交给下面选的本地决策模型，没有选择再交给规则引擎，任务照常运行。">
         <ul>
           <KeyRow id="jev" status={jev} onSave={setJevKey} onDelete={deleteJevKey} />

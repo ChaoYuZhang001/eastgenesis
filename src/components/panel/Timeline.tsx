@@ -11,7 +11,7 @@ const TONE_ICON: Record<Tone, LucideIcon> = { neutral: Dot, ok: CircleCheck, war
 const TONE_TEXT: Partial<Record<Tone, string>> = { warn: "注意：", error: "错误：" };
 
 // 执行时间线：任务分析 → 路由决策 → 工具调用 → 模型输出 → 反思，逐条展示用了哪个模型、成本和耗时
-export function Timeline({ events, profiles }: { events: readonly AgentEvent[]; profiles: readonly ModelProfile[] }) {
+export function Timeline({ events, profiles, showCost = true }: { events: readonly AgentEvent[]; profiles: readonly ModelProfile[]; showCost?: boolean }) {
   const items = useMemo(() => toTimeline(events, profiles), [events, profiles]);
   const reached = new Set(items.map((i) => i.stage));
   const end = useRef<HTMLLIElement>(null);
@@ -53,9 +53,9 @@ export function Timeline({ events, profiles }: { events: readonly AgentEvent[]; 
                     </span>
                   </p>
                   {it.detail && <p className="line-clamp-3 break-words text-xs text-muted-foreground">{it.detail}</p>}
-                  {(it.costTier !== undefined || it.tokens !== undefined || it.latencyMs !== undefined) && (
+                  {((showCost && it.costTier !== undefined) || it.tokens !== undefined || it.latencyMs !== undefined) && (
                     <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-                      {it.costTier !== undefined && <span>成本档位 {it.costTier}/5</span>}
+                      {showCost && it.costTier !== undefined && <span>成本档位 {it.costTier}/5</span>}
                       {it.tokens !== undefined && <span>{it.tokens} tokens</span>}
                       {it.latencyMs !== undefined && <span>{it.latencyMs} ms</span>}
                     </p>

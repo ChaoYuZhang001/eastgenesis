@@ -138,6 +138,21 @@ export const useMcp = create<McpState>((set, get) => {
 });
 
 /** 当前已连接服务器的工具（任务开始时取一次） */
-export function activeMcpTools(): Tool[] {
-  return Object.values(useMcp.getState().conns).flatMap((c) => (c.status === "running" ? c.tools : []));
+/**
+ * 右侧面板预览文件：只走内置文件服务器已注册的只读工具（read_file / read_pdf），受它的沙箱目录限制；
+ * 服务器没连上或路径不在允许目录里时返回原因，不另开读取通道。
+ */
+export async function previewFile(path: string, signal?: AbortSignal): Promise<{ ok: boolean; text: string }> {
+  const conn = useMcp.getState().conns["files"];
+  if (conn?.status !== "running") return { ok: false, text: "内置文件服务器没有运行，无法预览。" };
+  const name = /\.pdf$/i.test(path) ? "mcp__files__read_pdf" : "mcp__files__read_file";
+  const tool = conn.tools.find((t) => t.name === name && t.sideEffect === "none");
+  if (!tool) return { ok: false, text: "内置文件服务器没有注册只读的读取工具，无法预览。" };
+  const r = await tool.run({ path }, { signal: signal ?? new AbortController().signal });
+  return { ok: r.ok, text: r.content };
+}
+
+/** 已连接服务器的工具；servers 给了就只要这些服务器的（输入框「+」› 插件里勾选的） */
+export function activeMcpTools(servers: readonly string[] | null = null): Tool[] {
+  return Object.entries(useMcp.getState().conns).flatMap(([id, c]) => (c.status === "running" && (!servers || servers.includes(id)) ? c.tools : []));
 }

@@ -1,10 +1,11 @@
-// 对话式首屏：验收「首屏只有输入框和会话列表」「模型下拉来自 /models」「三级权限」
-// 「路由行可折叠且不出现内部评分」「运行中只显示当前一步，完成后折叠」「锁定模型跳过路由」
+// 首屏（docs/UI_LAYOUT_V3.md 第 2、3、5、9 节）：控件数 ≤ 16 并按区域核对；快捷建议只填入输入框；
+// 权限三档语义不变；路由下拉（自动 / 省钱 / 最强 / 手动锁定）；锁定后跳过路由决策；会话列表
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "@/App";
 import { useChat } from "@/stores/chat";
 import { useSettings } from "@/stores/settings";
-import { LONG, card, drive, resetStores, submit } from "./ui-helpers";
+import { useTasks } from "@/stores/tasks";
+import { LONG, card, drive, openRoute, resetStores, submit } from "./ui-helpers";
 
 beforeEach(() => resetStores());
 
@@ -13,30 +14,57 @@ async function boot() {
   await waitFor(() => expect(screen.getByLabelText("任务描述")).toBeEnabled(), LONG);
 }
 
-/** 首屏可交互元素：按钮、下拉、输入框、链接；不算正文输入框（textarea）和隐藏的文件选择 */
-function interactive(): HTMLElement[] {
-  const all = Array.from(document.querySelectorAll<HTMLElement>("button, select, input, a[href]"));
+/** 可交互元素：按钮、下拉、输入框、链接；不算正文输入框（textarea）、tabIndex=-1 的和隐藏的 */
+function interactive(root: ParentNode = document): HTMLElement[] {
+  const all = Array.from(root.querySelectorAll<HTMLElement>("button, select, input, a[href]"));
   return all.filter((el) => el.tabIndex !== -1 && !el.closest("[hidden]") && !(el instanceof HTMLInputElement && el.type === "hidden"));
 }
+const names = (els: HTMLElement[]) => els.map((el) => el.getAttribute("aria-label") ?? el.textContent?.trim() ?? "");
 
-describe("对话式首屏", () => {
-  it("首屏只有会话列表和输入框：可交互元素 ≤ 12，没有常驻右侧面板和内部评分", async () => {
+/** 停掉还在跑的任务并等它们收尾，用例结束后不再有状态更新 */
+async function stopAll() {
+  act(() => {
+    for (const t of useTasks.getState().tasks) useTasks.getState().cancel(t.id);
+  });
+  await waitFor(() => expect(useTasks.getState().tasks.every((t) => t.status !== "running")).toBe(true), LONG);
+}
+
+describe("首屏", () => {
+  it("控件数 16：图标栏 5 + 内容栏 4 + 输入框 4 + 快捷建议 3；没有常驻右侧面板和内部评分", async () => {
     await boot();
-    const els = interactive();
-    expect(els.length).toBeLessThanOrEqual(12);
-    const names = els.map((el) => el.getAttribute("aria-label") ?? el.textContent?.trim() ?? "");
-    for (const n of ["新任务", "搜索会话", "设置", "专家模式", "更多选项", "权限", "模型", "提交任务"]) expect(names).toContain(n);
-    expect(screen.queryByRole("complementary", { name: "执行面板" })).not.toBeInTheDocument();
+    expect(interactive()).toHaveLength(16);
+    expect(names(interactive(screen.getByRole("navigation", { name: "主导航" })))).toEqual(["工作台", "新任务", "项目", "历史", "设置"]);
+    expect(names(interactive(screen.getByRole("complementary", { name: "内容栏" })))).toEqual(["搜索", "新任务", "项目", "最近"]);
+    const form = screen.getByLabelText("任务描述").closest("form")!;
+    expect(names(interactive(form))).toEqual(["添加", "权限", "路由", "提交任务"]);
+    expect(names(interactive(screen.getByRole("list", { name: "快捷任务" })))).toEqual(["整理这个文件夹的文件", "读一下这份文档，总结要点", "帮我查一下这段代码为什么报错"]);
+    expect(screen.queryByRole("complementary", { name: "右侧面板" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "打开面板" })).not.toBeInTheDocument();
     expect(screen.queryByRole("log")).not.toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/评分|成本档位/);
   });
 
-  it("快捷任务只填进输入框，不直接提交", async () => {
+  it("快捷建议只填进输入框并聚焦，不直接提交", async () => {
     await boot();
     const quick = screen.getByRole("list", { name: "快捷任务" });
     fireEvent.click(within(quick).getAllByRole("button")[0]!);
-    expect(screen.getByLabelText("任务描述")).toHaveValue("整理这个目录里的文件，按类型分好");
+    expect(screen.getByLabelText("任务描述")).toHaveValue("整理这个文件夹的文件");
+    expect(screen.getByLabelText("任务描述")).toHaveFocus();
     expect(screen.queryByRole("article")).not.toBeInTheDocument();
+  });
+
+  it("Enter 换行，⌘↩ 或 Ctrl+Enter 发送", async () => {
+    await boot();
+    const box = screen.getByLabelText("任务描述");
+    fireEvent.change(box, { target: { value: "解释一下量子纠缠" } });
+    fireEvent.keyDown(box, { key: "Enter" });
+    expect(useTasks.getState().tasks).toHaveLength(0);
+    fireEvent.keyDown(box, { key: "Enter", ctrlKey: true });
+    expect(useTasks.getState().tasks).toHaveLength(1);
+    fireEvent.change(screen.getByLabelText("任务描述"), { target: { value: "再解释一遍" } });
+    fireEvent.keyDown(screen.getByLabelText("任务描述"), { key: "Enter", metaKey: true });
+    expect(useTasks.getState().tasks).toHaveLength(2);
+    await stopAll();
   });
 
   it("权限开关三级：完全访问 / 变更前确认 / 只读，默认变更前确认，提示随之变化", async () => {
@@ -51,31 +79,69 @@ describe("对话式首屏", () => {
     expect(document.body.textContent).not.toMatch(/有副作用的操作/);
   });
 
-  it("模型下拉：第一项是自动路由；自定义 Provider（中转站）的选项来自 /models 缓存", async () => {
+  it("路由下拉：自动（推荐）默认；省钱 / 最强写进这个任务的偏好；手动锁定按 Provider 分组，中转站来自 /models 缓存", async () => {
     await boot();
-    const sel = () => screen.getByLabelText("模型") as HTMLSelectElement;
-    expect(sel().value).toBe("");
-    expect(sel().options[0]!.text).toBe("自动路由");
-    // 默认配置了 openai、anthropic：官方分组来自能力矩阵
-    const groups = () => Array.from(sel().querySelectorAll("optgroup")).map((g) => g.label);
-    expect(groups().length).toBeGreaterThan(0);
+    let pill = screen.getByRole("button", { name: "路由" });
+    expect(pill).toHaveTextContent("自动路由");
+    fireEvent.click(pill);
+    let menu = screen.getByRole("menu", { name: "路由" });
+    const auto = within(menu).getByRole("menuitemradio", { name: /自动（推荐）/ });
+    expect(auto).toHaveAttribute("aria-checked", "true");
+    expect(auto).toHaveTextContent("当前按「平衡（来自全局设置）」");
+    fireEvent.click(within(menu).getByRole("menuitemradio", { name: /省钱模式/ }));
+    expect(useChat.getState().preference).toBe("economy");
+    expect(pill).toHaveTextContent("省钱模式");
+
+    // 任务带上这一层的偏好
+    submit("解释一下量子纠缠");
+    expect(useTasks.getState().tasks[0]).toMatchObject({ preference: "economy", preferenceSource: "task" });
+    await stopAll();
 
     // 保存一个本地中转站（无需 Key），保存后自动读取 /models 并缓存
     await act(async () => {
       await useSettings.getState().saveCustom({ id: "custom:relay", label: "中转站", base_url: "http://127.0.0.1:8080/v1", default_model: "only-registered", headers: {} });
     });
     await waitFor(() => expect(useSettings.getState().modelCache["custom:relay"]?.models).toEqual(["mock-model", "gpt-5.6-luna"]));
-    await waitFor(() => expect(groups()).toContain("中转站"));
-    const relay = Array.from(sel().querySelectorAll("optgroup")).find((g) => g.label === "中转站")!;
-    expect(Array.from(relay.querySelectorAll("option")).map((o) => o.textContent)).toEqual(["mock-model", "gpt-5.6-luna"]);
+    // 提交后输入框落到会话底部，是另一个实例；任务层偏好保留
+    pill = screen.getByRole("button", { name: "路由" });
+    expect(pill).toHaveTextContent("省钱模式");
+    fireEvent.click(pill);
+    menu = screen.getByRole("menu", { name: "路由" });
+    fireEvent.click(within(menu).getByRole("menuitem", { name: /手动锁定/ }));
+    const sub = screen.getByRole("menu", { name: "手动锁定" });
+    expect(sub).toHaveTextContent("锁定后整个任务都用它，不自动降级");
+    const relay = within(sub).getByRole("group", { name: "中转站" });
+    expect(within(relay).getAllByRole("menuitemradio").map((o) => o.textContent)).toEqual(["mock-model", "gpt-5.6-luna"]);
+    fireEvent.click(within(relay).getByRole("menuitemradio", { name: "gpt-5.6-luna" }));
+    expect(useChat.getState()).toMatchObject({ lock: "custom:relay/gpt-5.6-luna", preference: null });
+    expect(pill).toHaveTextContent("锁定 · gpt-5.6-luna");
+  });
+
+  it("路由菜单可以只用键盘操作：↓ 打开、↓↑ 移动、Esc 关闭并把焦点还给胶囊", async () => {
+    await boot();
+    const pill = screen.getByRole("button", { name: "路由" });
+    pill.focus();
+    fireEvent.keyDown(pill, { key: "ArrowDown" });
+    const menu = screen.getByRole("menu", { name: "路由" });
+    expect(within(menu).getByRole("menuitemradio", { name: /自动（推荐）/ })).toHaveFocus();
+    fireEvent.keyDown(menu, { key: "ArrowDown" });
+    expect(within(menu).getByRole("menuitemradio", { name: /省钱模式/ })).toHaveFocus();
+    fireEvent.keyDown(menu, { key: "End" });
+    expect(within(menu).getByRole("menuitem", { name: /手动锁定/ })).toHaveFocus();
+    fireEvent.keyDown(menu, { key: "Escape" });
+    expect(screen.queryByRole("menu", { name: "路由" })).not.toBeInTheDocument();
+    expect(pill).toHaveFocus();
   });
 
   it("锁定模型后跳过路由决策：路由行写明手动锁定；运行中只显示当前一步，完成后折叠成一行", async () => {
     await boot();
-    const sel = screen.getByLabelText("模型") as HTMLSelectElement;
-    const target = Array.from(sel.querySelectorAll("optgroup option"))[0] as HTMLOptionElement;
-    fireEvent.change(sel, { target: { value: target.value } });
-    expect(useChat.getState().lock).toBe(target.value);
+    fireEvent.click(screen.getByRole("button", { name: "路由" }));
+    fireEvent.click(within(screen.getByRole("menu", { name: "路由" })).getByRole("menuitem", { name: /手动锁定/ }));
+    const target = within(screen.getByRole("menu", { name: "手动锁定" })).getAllByRole("menuitemradio")[0]!;
+    const label = target.textContent!;
+    fireEvent.click(target);
+    const lock = useChat.getState().lock!;
+    expect(lock).toBeTruthy();
 
     const goal = "整理本周会议纪要并保存";
     submit(goal);
@@ -92,26 +158,25 @@ describe("对话式首屏", () => {
 
     const line = within(c).getByRole("button", { name: /查看路由决策/ });
     expect(line).toHaveTextContent(/手动锁定/);
-    fireEvent.click(line);
-    const route = within(c).getByRole("region", { name: "路由决策详情" });
-    expect(route).toHaveTextContent(`你手动锁定了 ${target.value.replace(/^custom:/, "")}，本次跳过路由决策。`);
+    const route = within(openRoute(c)).getByRole("region", { name: "路由决策详情" });
+    expect(route).toHaveTextContent(`你手动锁定了 ${lock.replace(/^custom:/, "")}，本次跳过路由决策，不会自动降级。`);
+    expect(label.length).toBeGreaterThan(0);
     expect(route.textContent).not.toMatch(/评分|成本档位/);
   });
 
-  it("会话：发送后出现在左侧列表；新任务回到首屏；点历史会话回到那一轮", async () => {
+  it("会话：发送后出现在「最近」；新任务回到首屏；点会话回到那一轮", async () => {
     await boot();
     submit("第一个会话的问题");
     const list = screen.getByRole("navigation", { name: "会话列表" });
-    const item = await within(list).findByRole("button", { name: "第一个会话的问题" });
+    const item = await within(list).findByRole("button", { name: /第一个会话的问题/ });
     expect(item).toHaveAttribute("aria-current", "page");
 
-    fireEvent.click(screen.getByRole("button", { name: "新任务" }));
+    fireEvent.click(within(screen.getByRole("navigation", { name: "主导航" })).getByRole("button", { name: "新任务" }));
     expect(screen.getByRole("heading", { level: 1, name: "你好，今天想创造什么？" })).toBeInTheDocument();
     expect(screen.queryByRole("article")).not.toBeInTheDocument();
+    expect(item).not.toHaveAttribute("aria-current");
 
     fireEvent.click(item);
     expect(card("第一个会话的问题")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("搜索会话"), { target: { value: "不存在" } });
-    expect(within(list).getByText("没有匹配的会话")).toBeInTheDocument();
   });
 });

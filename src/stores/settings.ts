@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { officialEndpoint, regionBaseUrl } from "@/core/llm/official";
 import { redact } from "@/core/redact";
-import type { LatencyPref, Preference } from "@/decision";
+import { PERMISSION_MODES, type LatencyPref, type PermissionMode, type Preference } from "@/decision";
 import {
   DEFAULT_PROVIDER_PREFS,
   DEFAULT_REQUEST_TIMEOUT_S,
@@ -121,10 +121,13 @@ interface SettingsState {
   onboarded: boolean;
   /** 回答下方显示模型思考过程的摘要；默认关闭 */
   showReasoning: boolean;
+  /** 新任务默认的权限档（设置 › Agent › 权限默认值），默认「变更前确认」 */
+  defaultPermission: PermissionMode;
   error: AppError | null;
   load(): Promise<void>;
   setTimeoutS(s: number): void;
   setShowReasoning(on: boolean): void;
+  setDefaultPermission(p: PermissionMode): void;
   markOnboarded(): Promise<void>;
   /** 重新读取某个自定义 Provider 的模型列表并写入缓存（写入后后台探测） */
   refreshModels(id: string, force?: boolean): Promise<DiscoverResult>;
@@ -162,6 +165,16 @@ export function parseRouting(raw: string | null): RoutingPrefs {
     };
   } catch {
     return DEFAULT_ROUTING;
+  }
+}
+
+/** 默认权限档：只认三档之一，其余（含旧版本没有这个设置）当作「变更前确认」 */
+export function parsePermission(raw: string | null): PermissionMode {
+  try {
+    const v = JSON.parse(raw ?? "null");
+    return (PERMISSION_MODES as readonly unknown[]).includes(v) ? (v as PermissionMode) : "confirm";
+  } catch {
+    return "confirm";
   }
 }
 
@@ -236,13 +249,14 @@ export const useSettings = create<SettingsState>((set, get) => {
     probingIds: [],
     onboarded: false,
     showReasoning: false,
+    defaultPermission: "confirm",
     error: null,
 
     async load() {
       try {
         const b = getBackend();
-        const keys = ["routing", "profiles", "provider_prefs", "net_timeout", "model_cache", "onboarded", "show_reasoning"] as const;
-        const [routing, overrides, prefs, timeout, cache, onboarded, reasoning] = await Promise.all(keys.map((k) => b.loadSetting(k)));
+        const keys = ["routing", "profiles", "provider_prefs", "net_timeout", "model_cache", "onboarded", "show_reasoning", "default_permission"] as const;
+        const [routing, overrides, prefs, timeout, cache, onboarded, reasoning, permission] = await Promise.all(keys.map((k) => b.loadSetting(k)));
         await refresh();
         set({
           loaded: true,
@@ -254,6 +268,7 @@ export const useSettings = create<SettingsState>((set, get) => {
           modelCache: parseModelCache(cache),
           onboarded: onboarded === "true",
           showReasoning: reasoning === "true",
+          defaultPermission: parsePermission(permission),
         });
         // 有 Key 但还没缓存过模型列表的自定义 Provider：后台补一次，输入框的下拉里才有真实模型
         // 有缓存但还没探测过的（例如升级前缓存的）补探测一次
@@ -274,6 +289,11 @@ export const useSettings = create<SettingsState>((set, get) => {
     setShowReasoning(on) {
       set({ showReasoning: on });
       persist("show_reasoning", on);
+    },
+    setDefaultPermission(p) {
+      if (!(PERMISSION_MODES as readonly string[]).includes(p)) return;
+      set({ defaultPermission: p });
+      persist("default_permission", p);
     },
     async markOnboarded() {
       if (get().onboarded) return;

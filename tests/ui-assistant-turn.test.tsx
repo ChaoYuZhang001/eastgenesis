@@ -3,7 +3,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import type { AgentEvent } from "@/agent";
 import { AssistantTurn } from "@/components/chat/AssistantTurn";
-import { SettingsPage } from "@/components/settings/SettingsPage";
+import { SettingsContent } from "@/components/settings/SettingsView";
 import { createMockBackend } from "@/platform";
 import { useSettings } from "@/stores/settings";
 import type { TaskCard } from "@/stores/tasks";
@@ -49,6 +49,8 @@ const turn = (events: AgentEvent[]): TaskCard =>
     projectId: null,
     goalId: null,
     mode: "quick",
+    preference: "balanced",
+    preferenceSource: "global",
   }) as TaskCard;
 
 describe("回答区", () => {
@@ -120,7 +122,7 @@ describe("回答区", () => {
 
 describe("设置页", () => {
   it("请求超时默认 90 秒，可以改；改动写进设置", () => {
-    render(<SettingsPage section="models" />);
+    render(<SettingsContent page="routing" />);
     const sel = screen.getByLabelText("请求超时") as HTMLSelectElement;
     expect(sel.value).toBe("90");
     expect(sel.selectedOptions[0]!.text).toBe("90 秒（默认）");
@@ -132,7 +134,8 @@ describe("设置页", () => {
   it("「显示模型思考过程」开关默认关闭，打开后写进设置", async () => {
     const b = createMockBackend();
     resetStores(b);
-    render(<SettingsPage section="models" />);
+    // V3：开关在「个人 › 常规」；路由偏好页不再重复放
+    render(<SettingsContent page="general" />);
     const box = screen.getByLabelText("显示模型思考过程") as HTMLInputElement;
     expect(box.checked).toBe(false);
     fireEvent.click(box);
@@ -147,8 +150,7 @@ describe("设置页", () => {
       await useSettings.getState().saveCustom({ id: "custom:relay", label: "中转站", base_url: "http://127.0.0.1:8080/v1", default_model: "gpt-x", headers: {} });
     });
     await waitFor(() => expect(useSettings.getState().modelCache["custom:relay"]?.probedAt).toBeDefined());
-    render(<SettingsPage section="models" />);
-    fireEvent.click(screen.getByRole("tab", { name: "自定义 Provider" }));
+    render(<SettingsContent page="custom" />);
     expect(await screen.findByText("探测完成：1 个模型返回 404，已从输入框的模型下拉隐藏")).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "不可用的模型（404）" })).toHaveTextContent("ghost");
   });

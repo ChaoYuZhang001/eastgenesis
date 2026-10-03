@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useRef } from "react";
-import { TriangleAlert } from "lucide-react";
+import { PanelRightOpen, TriangleAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useSessionArtifacts } from "@/components/panel/SidePanel";
+import { useUi } from "@/stores/ui";
 import { Composer } from "./Composer";
 import { AssistantTurn } from "./AssistantTurn";
 import { useChat } from "@/stores/chat";
 import { useSettings } from "@/stores/settings";
 import { useTasks } from "@/stores/tasks";
 
-// 空白首屏的三个快捷任务：点一下填进输入框，不直接提交
-const QUICK = [
-  "整理这个目录里的文件，按类型分好",
-  "读一下这份文档，总结要点和待办",
-  "帮我查一下这段代码为什么报错",
-];
+// 空白首屏的三个快捷建议（V3 2.1）：外观是文字链接，语义是按钮；点了只填进输入框并聚焦，不提交
+const QUICK = ["整理这个文件夹的文件", "读一下这份文档，总结要点", "帮我查一下这段代码为什么报错"];
 
 // 对话视图：没有会话时是欢迎语 + 输入框；有会话时上面是对话，输入框落到底部。
 // 右侧不常驻面板（docs/UI_LAYOUT_SPEC.md A 节）。
@@ -29,8 +28,26 @@ export function ChatView() {
           读取设置失败：{settingsError.message}
         </p>
       )}
+      {turns.length > 0 && <PanelToggle />}
       {turns.length === 0 ? <Home /> : <Conversation turns={turns} />}
     </main>
+  );
+}
+
+// 右侧面板入口：只在当前会话有文件、改动或命令输出时出现，所以首屏没有它（V3 7.1）
+function PanelToggle() {
+  const { files, commands } = useSessionArtifacts();
+  const open = useUi((s) => s.panel.open);
+  const openPanel = useUi((s) => s.openPanel);
+  const close = useUi((s) => s.closePanel);
+  if (!files.length && !commands.length) return null;
+  return (
+    <div className="flex justify-end px-4 pt-3">
+      <Button size="icon" variant="ghost" className="size-8" aria-label={open ? "关闭面板" : "打开面板"} aria-expanded={open}
+        onClick={() => (open ? close() : openPanel(files.length ? "files" : "terminal", null, window.innerWidth < 1180))}>
+        <PanelRightOpen aria-hidden />
+      </Button>
+    </div>
   );
 }
 
@@ -43,13 +60,16 @@ function Home() {
       <div className="mx-auto w-full max-w-3xl">
         <h1 className="mb-8 font-display text-3xl font-semibold leading-tight">你好，今天想创造什么？</h1>
         <Composer autoFocus />
-        <ul aria-label="快捷任务" className="mt-6 flex flex-wrap gap-2">
+        <ul aria-label="快捷任务" className="mt-6 flex flex-wrap gap-x-4 gap-y-2">
           {QUICK.map((q) => (
             <li key={q}>
               <button
                 type="button"
-                onClick={() => setDraft(q)}
-                className="rounded-md border border-border px-3 py-2 text-left text-xs text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+                onClick={() => {
+                  setDraft(q);
+                  document.querySelector<HTMLTextAreaElement>("textarea")?.focus();
+                }}
+                className="rounded-sm text-left text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
               >
                 {q}
               </button>

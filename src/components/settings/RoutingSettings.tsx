@@ -38,12 +38,9 @@ export function RoutingSettings() {
   const setTimeoutS = useSettings((s) => s.setTimeoutS);
   const capId = useId();
   const timeoutId = useId();
-  const showReasoning = useSettings((s) => s.showReasoning);
-  const setShowReasoning = useSettings((s) => s.setShowReasoning);
-  const reasoningId = useId();
 
   return (
-    <SettingsSection title="路由策略" description="每个任务按下面的权重给候选模型打分，得分最高的做首选，其余按分数排成备选链。">
+    <SettingsSection title="路由策略" description="每个任务按下面的权重给候选模型打分，得分最高的做首选，其余按分数排成备选链。这里是全局默认；项目、目标和单个任务可以覆盖偏好。">
       <RadioGroup legend="偏好" value={routing.preference} options={PREFERENCES} onChange={(preference) => setRouting({ preference })} />
       <RadioGroup legend="延迟" value={routing.latency} options={LATENCIES} onChange={(latency) => setRouting({ latency })} />
       <div className="max-w-xs space-y-1">
@@ -71,15 +68,6 @@ export function RoutingSettings() {
           ))}
         </Select>
         <p className="text-xs text-muted-foreground">单次模型请求超过这个时间就算超时：先等 2 秒重试一次，再失败才降级到下一个模型。中转站响应慢时可以调大。</p>
-      </div>
-      <div className="max-w-xl space-y-1">
-        <div className="flex items-center gap-2">
-          <input id={reasoningId} type="checkbox" className="size-4 accent-east-red" checked={showReasoning} onChange={(e) => setShowReasoning(e.target.checked)} />
-          <label htmlFor={reasoningId} className="text-sm">
-            显示模型思考过程
-          </label>
-        </div>
-        <p className="text-xs text-muted-foreground">默认关闭。打开后，推理模型的回答下方会多一行可展开的思考摘要，只保留和你的问题有关的中文内容。</p>
       </div>
 
       <table className="w-full max-w-xl text-left text-sm">

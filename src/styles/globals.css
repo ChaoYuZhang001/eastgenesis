@@ -52,6 +52,14 @@
   }
 }
 
+/* 设置 › 外观 › 减少动态效果：和系统设置效果相同 */
+.motion-off *,
+.motion-off *::before,
+.motion-off *::after {
+  animation: none !important;
+  transition-duration: 0.01ms !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

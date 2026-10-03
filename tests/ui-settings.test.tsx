@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { SettingsPage } from "@/components/settings/SettingsPage";
+import { SettingsContent } from "@/components/settings/SettingsView";
 import { CAP_LABEL } from "@/decision";
 import { effectiveProfiles } from "@/lib/engine";
 import type { Backend } from "@/platform";
@@ -20,7 +20,7 @@ const row = (label: string) => screen.getByText(label, { selector: "p" }).closes
 
 describe("设置页 · 模型与路由", () => {
   it("路由策略：切换偏好后权重表随之变化，并持久化", async () => {
-    render(<SettingsPage section="models" />);
+    render(<SettingsContent page="routing" />);
     const table = screen.getByRole("table", { name: "当前设置下的打分权重（按任务类型）" });
     const before = table.textContent;
     fireEvent.click(screen.getByRole("radio", { name: /^最强/ }));
@@ -34,8 +34,7 @@ describe("设置页 · 模型与路由", () => {
   it("能力矩阵：只保存和内置值不同的字段，可恢复默认", () => {
     const p = effectiveProfiles()[0];
     const cap = p.capabilities[0];
-    render(<SettingsPage section="models" />);
-    fireEvent.click(screen.getByRole("tab", { name: "能力矩阵" }));
+    render(<SettingsContent page="matrix" />);
 
     const btn = within(screen.getByRole("group", { name: `${p.id} 的能力` })).getByRole("button", { name: CAP_LABEL[cap] });
     expect(btn).toHaveAttribute("aria-pressed", "true");
@@ -54,8 +53,7 @@ describe("设置页 · 模型与路由", () => {
   });
 
   it("自定义 Provider：添加、测试连接、改地址清除 Key、两步删除", async () => {
-    render(<SettingsPage section="models" />);
-    fireEvent.click(screen.getByRole("tab", { name: "自定义 Provider" }));
+    render(<SettingsContent page="custom" />);
     fireEvent.click(screen.getByRole("button", { name: "添加自定义 Provider" }));
     const form = screen.getByRole("form", { name: "添加自定义 Provider" });
     expect(within(form).getByLabelText("名称")).toHaveFocus();
@@ -96,8 +94,7 @@ describe("设置页 · 模型与路由", () => {
   });
 
   it("自定义 Provider：选择协议、登记多个模型、读取模型列表，列表里标出能力参照", async () => {
-    render(<SettingsPage section="models" />);
-    fireEvent.click(screen.getByRole("tab", { name: "自定义 Provider" }));
+    render(<SettingsContent page="custom" />);
     fireEvent.click(screen.getByRole("button", { name: "添加自定义 Provider" }));
     const form = screen.getByRole("form", { name: "添加自定义 Provider" });
     fireEvent.change(within(form).getByLabelText("名称"), { target: { value: "Claude Relay" } });
@@ -137,9 +134,9 @@ describe("设置页 · 模型与路由", () => {
   });
 });
 
-describe("设置页 · 系统与工具", () => {
-  it("API Key：经后端保存、提交后清空输入；Jev Key 单独管理", async () => {
-    render(<SettingsPage section="system" />);
+describe("设置页 · Provider、决策层与 Agent", () => {
+  it("API Key：经后端保存、提交后清空输入；Jev Key 单独管理（在「路由偏好 › 决策层」，和 Provider 的 Key 分开）", async () => {
+    render(<SettingsContent page="providers" />);
     const google = row("Google Gemini");
     expect(within(google).queryByText(/适配器未实现/)).not.toBeInTheDocument();
     const input = within(google).getByLabelText("Google Gemini API Key");
@@ -151,13 +148,16 @@ describe("设置页 · 系统与工具", () => {
     fireEvent.click(within(google).getByRole("button", { name: "测试连接" }));
     expect(await within(google).findByText(/^连接正常（HTTP 200），可用模型 \d+ 个/)).toBeInTheDocument();
 
-    const jev = row("Jev 决策层");
+    expect(screen.queryByText("Jev 决策层", { selector: "p" })).not.toBeInTheDocument();
+    const providers = render(<SettingsContent page="routing" />);
+    const jev = within(providers.container).getByText("Jev 决策层", { selector: "p" }).closest("li")!;
     expect(within(jev).getByText("未配置")).toBeInTheDocument();
     fireEvent.change(within(jev).getByLabelText("Jev 决策层 API Key"), { target: { value: KEY } });
     fireEvent.click(within(jev).getByRole("button", { name: "保存" }));
     expect(await within(jev).findByText("已配置（系统钥匙串）")).toBeInTheDocument();
     expect(useSettings.getState().jev?.configured).toBe(true);
 
+    providers.unmount();
     const openai = row("OpenAI");
     fireEvent.click(within(openai).getByRole("button", { name: "删除 OpenAI 的 Key" }));
     expect(await within(openai).findByText("未配置")).toBeInTheDocument();
@@ -171,7 +171,7 @@ describe("设置页 · 系统与工具", () => {
   });
 
   it("地域与本机 Ollama：只有多地域的 Provider 显示地域选择；Ollama 默认不参与路由", () => {
-    render(<SettingsPage section="system" />);
+    render(<SettingsContent page="providers" />);
     expect(within(row("OpenAI")).queryByLabelText("地域")).not.toBeInTheDocument();
     const qwen = within(row("通义千问 Qwen")).getByLabelText("地域");
     expect(qwen).toHaveValue("cn");
@@ -187,7 +187,7 @@ describe("设置页 · 系统与工具", () => {
   });
 
   it("本地决策模型：只列本机服务的模型，默认不使用；选择后持久化，已不可用的选择如实标出", async () => {
-    render(<SettingsPage section="system" />);
+    render(<SettingsContent page="routing" />);
     const select = screen.getByLabelText("决策模型");
     expect(select).toHaveValue("");
     expect(select).toHaveAccessibleDescription(/超时、出错或把握不够都交给规则引擎/);
@@ -207,8 +207,7 @@ describe("设置页 · 系统与工具", () => {
   });
 
   it("MCP：登记表只读展示；启动后列出注册与未注册的工具；密钥只进不出", async () => {
-    render(<SettingsPage section="system" />);
-    fireEvent.click(screen.getByRole("tab", { name: "MCP 服务器" }));
+    render(<SettingsContent page="mcp" />);
     const echo = await screen.findByRole("listitem", { name: "echo" });
     expect(within(echo).getByText("未启动")).toBeInTheDocument();
     expect(within(screen.getByRole("list", { name: "没能登记的条目" })).getByText("remote")).toBeInTheDocument();
@@ -235,10 +234,10 @@ describe("设置页 · 系统与工具", () => {
   });
 
   it("记忆：添加、编辑、两步删除；技能库先留结构", async () => {
-    render(<SettingsPage section="system" />);
-    fireEvent.click(screen.getByRole("tab", { name: "记忆与技能库" }));
+    render(<SettingsContent page="memory" />);
     expect(await screen.findByText(/暂无记忆/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "技能库" })).toBeInTheDocument();
+    // 技能库是单独的子页（V3 第 8 节「Agent › 技能库」）
+    expect(screen.queryByRole("heading", { name: "技能库" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "添加记忆" }));
     const form = screen.getByRole("form", { name: "添加记忆" });
@@ -265,8 +264,8 @@ describe("设置页 · 系统与工具", () => {
   });
 
   it("技能库：添加、编辑、两步删除", async () => {
-    render(<SettingsPage section="system" />);
-    fireEvent.click(screen.getByRole("tab", { name: "记忆与技能库" }));
+    render(<SettingsContent page="skills" />);
+    expect(screen.getByRole("heading", { name: "技能库" })).toBeInTheDocument();
     expect(await screen.findByText(/暂无技能/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "添加技能" }));
     const form = screen.getByRole("form", { name: "添加技能" });

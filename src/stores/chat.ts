@@ -1,10 +1,10 @@
 // 会话：左侧列表的每一项。一次会话由若干轮任务组成（见 stores/tasks.ts）。
 // 只放在内存里：重启后从空白首屏开始，历史任务不持久化。
 import { create } from "zustand";
-import type { PermissionMode } from "@/decision";
+import type { PermissionMode, Preference } from "@/decision";
 import type { AttachedFile } from "@/lib/attachments";
 import { MAX_FILES } from "@/lib/attachments";
-import { useTasks, type TaskCard } from "./tasks";
+import { useTasks, type TaskCard, type TaskMode } from "./tasks";
 import { useSettings } from "./settings";
 import { useMemory } from "./memory";
 
@@ -16,6 +16,8 @@ export const MAX_HISTORY_CHARS = 6000;
 export interface Session {
   id: string;
   title: string;
+  /** 新建时所在的当前项目；null 表示不属于任何项目 */
+  projectId: string | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -32,6 +34,14 @@ interface ChatState {
   lock: string | null;
   permission: PermissionMode;
   multi: boolean;
+  /** 输入框的路由模式：null 是「自动」，按 目标 > 项目 > 全局 取值；economy / best 是这个任务覆盖 */
+  preference: Preference | null;
+  /** 「+」菜单里的模式：快速（默认）、计划模式、目标 */
+  mode: TaskMode;
+  /** 这次任务的工作目录（告诉模型文件放在哪）；null 表示没指定 */
+  workdir: string | null;
+  /** 这次任务能用哪些 MCP 服务器的工具；null 表示所有已连接的 */
+  servers: string[] | null;
   /** 会话列表的搜索词 */
   query: string;
   newSession(): void;
@@ -42,9 +52,24 @@ interface ChatState {
   setLock(v: string | null): void;
   setPermission(v: PermissionMode): void;
   setMulti(v: boolean): void;
+  setPreference(v: Preference | null): void;
+  setMode(v: TaskMode): void;
+  setWorkdir(v: string | null): void;
+  setServers(v: string[] | null): void;
   setQuery(v: string): void;
   /** 发出当前草稿：新建会话（如果还没有）并提交任务；返回任务 id */
-  send(): string | null;
+  send(opts?: SendOptions): string | null;
+  /** 从会话列表里移除（项目删除时连带）；会话只在内存里 */
+  removeSessions(ids: readonly string[]): void;
+}
+
+export interface SendOptions {
+  /** 当前项目：新会话归入它，任务带上它的 id */
+  projectId?: string | null;
+  /** 任务层路由偏好：null 表示「自动」，按 目标 > 项目 > 全局 取值 */
+  preference?: Preference | null;
+  mode?: TaskMode;
+  goalId?: string | null;
 }
 
 export const title = (goal: string) => {
@@ -84,6 +109,10 @@ export const useChat = create<ChatState>((set, get) => ({
   lock: null,
   permission: "confirm",
   multi: false,
+  preference: null,
+  mode: "quick",
+  workdir: null,
+  servers: null,
   query: "",
 
   // 回到空白首屏；锁定的模型和权限档位保留，它们是用户的偏好而不是会话数据
@@ -102,13 +131,20 @@ export const useChat = create<ChatState>((set, get) => ({
     });
   },
   removeFile: (name) => set((s) => ({ files: s.files.filter((f) => f.name !== name) })),
-  setLock: (lock) => set({ lock }),
+  // 锁定模型和「省钱 / 最强」互斥：锁定后跳过路由决策，偏好没有意义
+  setLock: (lock) => set(lock ? { lock, preference: null } : { lock }),
+  setPreference: (preference) => set({ preference, lock: null }),
+  setMode: (mode) => set({ mode }),
+  setWorkdir: (workdir) => set({ workdir }),
+  setServers: (servers) => set({ servers }),
   setPermission: (permission) => set({ permission }),
   setMulti: (multi) => set({ multi }),
   setQuery: (query) => set({ query }),
+  removeSessions: (ids) =>
+    set((s) => ({ sessions: s.sessions.filter((x) => !ids.includes(x.id)), activeId: s.activeId && ids.includes(s.activeId) ? null : s.activeId })),
 
-  send() {
-    const { draft, files, lock, permission, multi } = get();
+  send(opts = {}) {
+    const { draft, files, lock, permission, multi, preference, workdir, servers } = get();
     const goal = draft.trim();
     if (!goal) return null;
     const now = Date.now();
@@ -117,7 +153,8 @@ export const useChat = create<ChatState>((set, get) => ({
       set((s) => ({ sessions: s.sessions.map((x) => (x.id === sessionId ? { ...x, updatedAt: now } : x)) }));
     } else {
       sessionId = `s-${++seq}`;
-      set((s) => ({ sessions: [{ id: sessionId!, title: title(goal), createdAt: now, updatedAt: now }, ...s.sessions], activeId: sessionId }));
+      const projectId = opts.projectId ?? null;
+      set((s) => ({ sessions: [{ id: sessionId!, title: title(goal), projectId, createdAt: now, updatedAt: now }, ...s.sessions], activeId: sessionId }));
     }
     const tasks = useTasks.getState().tasks;
     const history = historyOf(tasks, sessionId);
@@ -128,11 +165,18 @@ export const useChat = create<ChatState>((set, get) => ({
       lock,
       permission,
       multi,
+      projectId: get().sessions.find((x) => x.id === sessionId)?.projectId ?? null,
+      ...((opts.preference ?? preference) && { preference: opts.preference ?? preference }),
+      ...((opts.mode ?? get().mode) !== "quick" && { mode: opts.mode ?? get().mode }),
+      ...(workdir && { workdir }),
+      ...(servers && { servers }),
+      ...(opts.goalId && { goalId: opts.goalId }),
       ...(history && { history }),
       ...(files.length && { files: files.map((f) => ({ name: f.name, text: f.text })) }),
       ...(aligning ? { aligning: true } : shouldOnboard(tasks) && { onboarding: true }),
     });
-    if (id) set({ draft: "", files: [] });
+    // 计划模式只管这一次；路由模式、权限、工作目录是用户的选择，保留
+    if (id) set({ draft: "", files: [], mode: "quick" });
     return id;
   },
 }));

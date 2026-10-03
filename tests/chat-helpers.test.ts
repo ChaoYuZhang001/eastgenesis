@@ -28,8 +28,8 @@ describe("会话", () => {
 
   it("会话列表按最近更新排序，搜索不分大小写", () => {
     const ss = [
-      { id: "a", title: "Alpha", createdAt: 1, updatedAt: 1 },
-      { id: "b", title: "beta", createdAt: 2, updatedAt: 5 },
+      { id: "a", title: "Alpha", projectId: null, createdAt: 1, updatedAt: 1 },
+      { id: "b", title: "beta", projectId: null, createdAt: 2, updatedAt: 5 },
     ];
     expect(visibleSessions(ss, "").map((s) => s.id)).toEqual(["b", "a"]);
     expect(visibleSessions(ss, "ALP").map((s) => s.id)).toEqual(["a"]);

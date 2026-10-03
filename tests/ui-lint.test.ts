@@ -36,6 +36,10 @@ const ARBITRARY_ALLOWED = new Set([
   // 用户那句话的气泡不占满整行
   "max-w-[80%]",
   "transition-[filter,background-color]",
+  // 图标栏宽 60（docs/UI_LAYOUT_V3.md 第 10 节第 1 条：不在 Tailwind 刻度上，登记为任意值，不改 BRAND.md）
+  "w-[60px]",
+  // 回答下方的路由浮层最高为视口的 60%，超出内部滚动（V3 5.2）
+  "max-h-[60vh]",
 ]);
 const ROUNDED_ALLOWED = /^rounded(?:-(?:t|b|l|r|s|e|tl|tr|bl|br))?-(?:sm|md|lg|full|none)$/;
 

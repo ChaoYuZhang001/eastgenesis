@@ -9,8 +9,10 @@ import { useMcp } from "@/stores/mcp";
 import { useMemory } from "@/stores/memory";
 import { useSkills } from "@/stores/skills";
 import { DEFAULT_ROUTING, useSettings } from "@/stores/settings";
+import { useGoals } from "@/stores/goals";
+import { useProjects } from "@/stores/projects";
 import { useTasks } from "@/stores/tasks";
-import { useUi } from "@/stores/ui";
+import { DEFAULT_SETTINGS_PAGE, DEFAULT_UI_PREFS, useUi, type SettingsPageId } from "@/stores/ui";
 
 export const LONG = { timeout: 5000 };
 
@@ -34,14 +36,27 @@ export function resetStores(backend: Backend = createMockBackend()): Backend {
     probingIds: [],
     onboarded: true,
     showReasoning: false,
+    defaultPermission: "confirm",
     error: null,
   });
   useTasks.setState({ tasks: [], activeId: null });
-  useChat.setState({ sessions: [], activeId: null, draft: "", files: [], lock: null, permission: "confirm", multi: false, query: "" });
+  useChat.setState({ sessions: [], activeId: null, draft: "", files: [], lock: null, permission: "confirm", multi: false, preference: null, mode: "quick", workdir: null, servers: null, query: "" });
   useMcp.setState({ registry: null, loadError: null, conns: {} });
   useMemory.setState({ loaded: false, items: [], error: null });
   useSkills.setState({ loaded: false, items: [], error: null });
-  useUi.setState({ view: "chat", expert: false, panelOpen: true });
+  useProjects.setState({ loaded: false, items: [], error: null, pendingDelete: null });
+  useGoals.setState({ loaded: false, items: [], error: null });
+  useUi.setState({
+    rail: "home",
+    main: { kind: "chat" },
+    settingsPage: DEFAULT_SETTINGS_PAGE,
+    prefs: DEFAULT_UI_PREFS,
+    autoCollapsed: false,
+    panel: { open: false, tab: "files", path: null },
+    currentProjectId: null,
+    expanded: [],
+    search: { open: false, query: "" },
+  });
   return backend;
 }
 
@@ -50,21 +65,34 @@ export function submit(goal: string) {
   fireEvent.click(screen.getByRole("button", { name: "提交任务" }));
 }
 
-/** 打开输入框里的「+」菜单（附件和多 Agent 协同开关在里面） */
+/** 打开输入框里的「+」菜单（附件、模式、多 Agent 协同、插件在里面） */
 export function openMore() {
-  fireEvent.click(screen.getByRole("button", { name: "更多选项" }));
+  fireEvent.click(screen.getByRole("button", { name: "添加" }));
+  return screen.getByRole("menu", { name: "添加" });
 }
 
-/** 进设置页某个分区 */
-export function openSettings(label?: string) {
-  fireEvent.click(screen.getByRole("button", { name: "设置" }));
-  if (label) fireEvent.click(within(screen.getByRole("navigation", { name: "设置分区" })).getByRole("button", { name: label }));
+/** 点图标栏「设置」，再在内容栏的设置分类里点某个子页 */
+export function openSettings(page?: string) {
+  if (!screen.queryByRole("navigation", { name: "设置分类" })) fireEvent.click(within(screen.getByRole("navigation", { name: "主导航" })).getByRole("button", { name: "设置" }));
+  if (page) fireEvent.click(within(screen.getByRole("navigation", { name: "设置分类" })).getByRole("button", { name: page }));
 }
 
-export const backToChat = () => fireEvent.click(screen.getByRole("button", { name: "返回对话" }));
+/** 回到工作台（对话） */
+export const backToChat = () => fireEvent.click(within(screen.getByRole("navigation", { name: "主导航" })).getByRole("button", { name: "工作台" }));
 
-/** 打开专家模式（任务画布 + 右侧执行面板） */
-export const openExpert = () => fireEvent.click(screen.getByRole("button", { name: "专家模式" }));
+/** 直接把设置主区切到某个子页（单测设置页组件时用） */
+export const settingsPage = (page: SettingsPageId) => useUi.setState({ rail: "settings", settingsPage: page });
+
+/** 点开回答下方的折叠路由行，返回浮层 */
+export function openRoute(el: HTMLElement) {
+  fireEvent.click(within(el).getByRole("button", { name: /查看路由决策/ }));
+  return within(el).getByRole("dialog", { name: "路由决策" });
+}
+
+/** 浮层里切到「执行过程」 */
+export function runTab(overlay: HTMLElement) {
+  fireEvent.click(within(overlay).getByRole("tab", { name: "执行过程" }));
+}
 
 export const card = (goal: string) => screen.getByRole("article", { name: `任务：${goal}` });
 

@@ -12,9 +12,11 @@ import { formatDuration, routeSummary } from "@/lib/route-summary";
 import { stepProgress } from "@/lib/steps";
 import { subAgentSteps, subAgentViews } from "@/lib/subagents";
 import { lastRoute } from "@/lib/timeline";
+import { ACTION_LABEL, artifactsOf, changesOf } from "@/lib/artifacts";
 import { cn } from "@/lib/utils";
 import { useSettings } from "@/stores/settings";
 import { useTasks, type TaskCard } from "@/stores/tasks";
+import { useUi } from "@/stores/ui";
 import { RouteLine } from "./RouteLine";
 
 // 会话里的一轮：用户那句话 + 助手这一轮的执行与成果。
@@ -71,10 +73,11 @@ export function AssistantTurn({ card }: { card: TaskCard }) {
               {card.status === "completed" ? "成果" : "结果"}
             </p>
             <p className="whitespace-pre-wrap text-sm">{card.summary}</p>
+            <TurnFiles events={events} />
           </section>
         )}
 
-        {summary && <RouteLine summary={summary} durationMs={card.endedAt ? duration : null} />}
+        {summary && <RouteLine summary={summary} durationMs={card.endedAt ? duration : null} card={card} />}
 
         {card.proposal && <MemoryPrompt taskId={card.id} proposal={card.proposal} />}
         {card.status === "completed" && <SaveSkill card={card} />}
@@ -87,6 +90,35 @@ export function AssistantTurn({ card }: { card: TaskCard }) {
         )}
       </div>
     </article>
+  );
+}
+
+// 本轮写入、移动、删除的文件（取自工具调用记录）。点文件名在右侧面板只读预览；面板不自动弹出（V3 第 7 节）
+function TurnFiles({ events }: { events: TaskCard["events"] }) {
+  const files = useMemo(() => changesOf(artifactsOf(events).files), [events]);
+  const openPanel = useUi((s) => s.openPanel);
+  if (!files.length) return null;
+  const narrow = () => typeof window !== "undefined" && window.innerWidth < 1180;
+  return (
+    <div className="mt-3 space-y-1 border-t border-border pt-3 text-xs">
+      <ul aria-label="改动的文件" className="space-y-1">
+        {files.map((f) => (
+          <li key={`${f.action}-${f.path}`} className="flex gap-2">
+            <span className="shrink-0 text-muted-foreground">{ACTION_LABEL[f.action]}</span>
+            {f.action === "deleted" ? (
+              <span className="break-all font-mono">{f.path}</span>
+            ) : (
+              <button type="button" onClick={() => openPanel("files", f.to ?? f.path, narrow())} className="break-all text-left font-mono underline-offset-2 hover:underline">
+                {f.to ?? f.path}
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      <button type="button" onClick={() => openPanel("changes", null, narrow())} className="text-muted-foreground hover:text-foreground">
+        查看改动（{files.length} 个文件）
+      </button>
+    </div>
   );
 }
 

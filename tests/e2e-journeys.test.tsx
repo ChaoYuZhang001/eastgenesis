@@ -6,7 +6,7 @@ import { createMockBackend, type Backend } from "@/platform";
 import { useMemory } from "@/stores/memory";
 import { useSettings } from "@/stores/settings";
 import { useSkills } from "@/stores/skills";
-import { LONG, backToChat, card, drive, openExpert, openSettings, resetStores, submit } from "./ui-helpers";
+import { LONG, backToChat, card, drive, openRoute, openSettings, resetStores, runTab, submit } from "./ui-helpers";
 
 const KEY = ["sk", "e2e", "0123456789abcdefghij"].join("-");
 let logs: string[] = [];
@@ -26,13 +26,12 @@ async function boot(backend: Backend = createMockBackend()) {
   await waitFor(() => expect(screen.getByLabelText("任务描述")).toBeEnabled(), LONG);
   return view;
 }
-const tab = (name: string) => fireEvent.click(screen.getByRole("tab", { name }));
 
 describe("端到端：首次使用到拿到成果", () => {
   it("配置 Key → 提交任务 → 确认写入 → 看到成果、路由记录 → 专家模式看时间线 → 保存为技能", async () => {
     await boot();
     // 配置 Key：输入框提交后清空，页面只显示「已配置」
-    openSettings("系统与工具");
+    openSettings("Provider 管理");
     const input = screen.getByLabelText("Google Gemini API Key");
     fireEvent.change(input, { target: { value: KEY } });
     fireEvent.click(within(input.closest("li")!).getByRole("button", { name: "保存" }));
@@ -49,30 +48,30 @@ describe("端到端：首次使用到拿到成果", () => {
     await within(c).findByText(/^已完成 · /, {}, LONG);
     expect(within(c).getByRole("region", { name: "成果" })).toHaveTextContent(`（模拟）已完成：${goal}`);
 
-    // 回答下面那行路由记录：折叠时只有模型、耗时和 token，点开才有候选链；不出现内部状态（判断来源、停用的模型）
+    // 回答下面那行路由记录：折叠时只有模型和耗时，点开是浮层；不出现内部状态（判断来源、停用的模型）
     const line = within(c).getByRole("button", { name: /查看路由决策/ });
     expect(line).toHaveTextContent(/使用 \S+ · \d+\.\d+s/);
     expect(line.textContent).not.toMatch(/评分|成本档位/);
-    fireEvent.click(line);
-    const route = within(c).getByRole("region", { name: "路由决策详情" });
+    const overlay = openRoute(c);
+    const route = within(overlay).getByRole("region", { name: "路由决策详情" });
     expect(within(route).getByText("首选")).toBeInTheDocument();
     expect(within(route).getByText("综合能力最强，匹配当前任务")).toBeInTheDocument();
+    // 路由偏好写明来自哪一层；默认不是专家模式，不出现内部评分
+    expect(route).toHaveTextContent("路由偏好平衡（来自全局设置）");
     expect(route.textContent).not.toMatch(/评分|成本档位|判断来源|Jev|没有参与的模型|已停用|Provider|规则兜底|排第一/);
 
-    // 专家模式才有完整时间线
-    openExpert();
-    const log = screen.getByRole("log", { name: "执行时间线" });
+    // 完整时间线在浮层的「执行过程」里
+    runTab(overlay);
+    const log = within(overlay).getByRole("log", { name: "执行时间线" });
     for (const s of ["任务分析", "路由决策", "工具调用", "反思", "完成"]) expect(within(log).getAllByText(s).length).toBeGreaterThan(0);
-    // 切回对话：卡片重新挂载，重新取一次
-    openExpert();
+    fireEvent.keyDown(overlay, { key: "Escape" });
     const c2 = card(goal);
 
     // 成果沉淀：保存为技能后在「记忆与技能库」里能看到
     fireEvent.click(within(c2).getByRole("button", { name: "保存为技能" }));
     fireEvent.click(within(within(c2).getByRole("form", { name: "保存为技能" })).getByRole("button", { name: "保存" }));
     await within(c2).findByText(`已保存到技能库：「${goal}」`);
-    openSettings("系统与工具");
-    tab("记忆与技能库");
+    openSettings("技能库");
     expect(within(screen.getByRole("list", { name: "技能列表" })).getByRole("listitem", { name: goal })).toBeInTheDocument();
 
     // 贯穿检查
@@ -104,10 +103,11 @@ describe("端到端：重启后恢复", () => {
       overrides: { "openai/gpt-5.6-luna": { enabled: false } },
       providerPrefs: { localJev: "ollama/qwen3:8b" },
     });
-    openSettings("系统与工具");
+    openSettings("路由偏好");
     expect(screen.getByLabelText("决策模型")).toHaveValue("ollama/qwen3:8b");
-    tab("记忆与技能库");
+    openSettings("记忆");
     expect(screen.getByText("用简体中文回答")).toBeInTheDocument();
+    openSettings("技能库");
     expect(await within(screen.getByRole("list", { name: "技能列表" })).findByRole("listitem", { name: "整理周报" })).toBeInTheDocument();
     expect(logs).toEqual([]);
   });
@@ -126,8 +126,8 @@ describe("端到端：所有模型都不可用", () => {
     // 折叠那行先说清楚没有一个模型成功，点开后逐个写明试过谁、为什么失败
     const line = within(c).getByRole("button", { name: /查看路由决策/ });
     expect(line).toHaveTextContent(/\d+ 个模型都没有成功/);
-    fireEvent.click(line);
-    const route = within(c).getByRole("region", { name: "路由决策详情" });
+    const overlay = openRoute(c);
+    const route = within(overlay).getByRole("region", { name: "路由决策详情" });
     const first = within(route).getByText("首选").nextElementSibling?.textContent ?? "";
     const model = first.match(/^[\w:.-]+\/[\w:.-]+/)?.[0];
     expect(model).toBeTruthy();
@@ -135,8 +135,8 @@ describe("端到端：所有模型都不可用", () => {
     const m = model!.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const why = new RegExp(`${m}：(服务端错误|连续失败 \\d+ 次，熔断中)`);
     expect(within(route).getByRole("list", { name: "失败记录" })).toHaveTextContent(why);
-    openExpert();
-    expect(screen.getByRole("log", { name: "执行时间线" })).toHaveTextContent(/（(服务端错误|连续失败 \d+ 次，熔断中)/);
+    runTab(overlay);
+    expect(within(overlay).getByRole("log", { name: "执行时间线" })).toHaveTextContent(/（(服务端错误|连续失败 \d+ 次，熔断中)/);
     expect(logs).toEqual([]);
   });
 });

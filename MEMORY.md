@@ -414,6 +414,17 @@
 - 目标 store 单条写入后只替换这一条（运行时一轮里会写很多次），不整表重读；项目 store 删除后整表刷新，目标和记忆已加载过的一并刷新。
 - 留给 M10：运行时接入 checkDoneWithEvidence（engine.ts 没改）；按项目挑选记忆；删除项目时中止它正在运行的目标；任务卡片的 mode 目前只记录，不影响执行。
 
+## M9 界面 V3（2026-10-03）
+
+- 依据 `docs/UI_LAYOUT_V3.md`，第 10 节 12 条都按「默认」实现（用户 2026-10-03 确认）。BRAND.md 只改了第 12 节「落地约定」里过程信息放哪的那一条（第 10 节第 5 条），其余品牌规范不动；图标栏 60 用 `w-[60px]` 并登记进 `tests/ui-lint.test.ts`，不新增 BRAND 变量（第 10 节第 1 条）。
+- 菜单（`src/components/ui/menu.tsx`）和对话框（`ui/dialog.tsx`）自己写，没有装 Radix：依赖不变；键盘按 WAI-ARIA Menu Button 模式（↓ 打开、↓↑ 移动、Home/End、→ 子菜单、← / Esc 返回、关闭后焦点回触发按钮）。V3 第 11 节列的 Radix 包和 tauri-plugin-dialog 都没装。
+- 下线：`Sidebar`、`TaskCanvas`、`TaskCard`、`TaskInput`、`RightPanel`、`AgentsPage`、`SettingsShell`、`SettingsPage`、`Placeholders`。专家模式不再切换布局，只决定路由浮层里是否显示内部评分、权重和成本档（设置 › 个人 › 常规）。旧的卡片拖拽排序、上移下移、关闭卡片随 TaskCanvas 一起下线，对应测试删除。
+- 路由偏好：任务层只有「自动 / 省钱 / 最强 / 锁定」（V3 原样）。`tasks.submit` 用 M8 的 `preferenceSource` 按 任务 > 目标 > 项目 > 全局 取值，卡片上记下 `preference` 和 `preferenceSource`，浮层写明「平衡（来自全局设置）」。打分算法、`jev-config.ts` 没动。
+- 右侧面板不自动打开：回答的成果块列出改动的文件（取自工具调用的 `step.args`，`src/lib/artifacts.ts`），点了才开；窗口 < 1180 时先收起内容栏、关面板后恢复。文件预览只走内置文件服务器已注册的只读工具（`previewFile`），没有修改前内容，所以「改动」只列文件、不显示逐行 diff。
+- 目标模式提交只新建目标并打开详情；「开始」只改状态，多轮执行留给 M10。菜单只给状态机允许的转换（`canTransition`）：未开始的目标没有「放弃」。
+- 没做（如实留空，不硬凑）：价格表与「省 $X」、调用记录持久化、会话持久化（迁移 5）、系统文件夹对话框、工作目录写进文件服务器的允许列表、计划模式的「先出计划再确认」回调。工作目录目前只作为上下文告诉模型；计划模式只记 `mode: plan`。
+- 测试：首屏控件数按区域核对（5 + 4 + 4 + 3 = 16）；10 组变异（偏好不按项目继承、拿不准时自动开下一轮、面板自动弹出、非专家显示内部评分、删除项目不二次确认、首屏多一个控件、搜索框常驻、Ctrl+Enter 不发送、窄窗口不收内容栏、撤掉改动列表）都会让测试失败。
+
 ## 通用
 
 - Git（2026-10-02 起）：远端仓库 https://github.com/ChaoYuZhang001/eastgenesis，历史以 GitHub 为准（2026-10-02 首次推送时压成了一个提交 `fa69b1b`）。Mac 上的权威目录是 `EastGenesis-clean`。VM 不能 push（没有 SSH Key），也不需要：VM 从 GitHub clone 到临时目录、提交，再由用户同步到 Mac 后 push。项目目录是 FUSE 挂载，不能删除文件，git 不能直接在里面运行。
