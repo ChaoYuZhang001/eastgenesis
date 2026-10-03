@@ -398,14 +398,14 @@
   - **54 条独立盲写 hold-out（2 轮）：降级 11.1%，整条链 96.3%（52/54）**，规则引擎单独 81.5%，Jev 单独 108/108。hold-out 只用来检验，不要拿它调规则或措辞。
   - 结论：没有过拟合迹象——hold-out 比 50 条那版的 90% 高，也高于 85% 的验收目标。50 条的 100% 是调参集上的饱和值，汇报以 hold-out 为准。
   - 阈值：0.6 在 hold-out 上最好（96.3% / 降 11.1%）；0.7 反而更低（94.4%）；0.5 两轮波动更大（96.3% / 98.1%）；0.8 掉到 92.6%。留 0.6。
-  - 剩下 2 条错（两轮相同，`ho-code-en-02`、`ho-reasoning-en-02`）都是能力标签粒度问题，不是置信度或措辞问题：需要 ≥2 项能力时，单标签结构表达不了。
+  - 剩下 2 条错（两轮相同，`ho-code-en-02`、`ho-reasoning-en-02`）：Jev 判对了，决定性置信度 0.40–0.56 低于 0.6，交给规则引擎后判错。和标签结构无关（2026-10-03 用 `evaluateChain` 回放核实，之前写的「标签粒度」是错的）。不为这两条下调阈值。
 - 延迟：P50 328ms（新 Key 复测 359ms），未达 300ms。VM 到 api.typesafe.ai 的裸往返 P50 250ms（复用连接，24 次；首次建连 1.4s），Jev 自身约 70–100ms（估）。**300ms 在当前 VM 网络下基本不可达，实际取决于客户端网络，以 Mac 复测为准**（`node tools/jev-smoke-test.mjs 10`）。Mac 上也不达标时，用户会回来找我。
 - Key 安全：第一轮的 Key 明文进过会话记录（2026-10-02 下午），用户已在 TypeSafe 后台轮换；第二轮用的是新 Key，跑完把 `.env.local` 删掉了。以后读 Key 只用 `set -a; . ./.env.local; set +a` 载入环境变量，不用文件读取工具、不写进命令行。
 - 复测命令见 `docs/JEV_SMOKE_TEST_REPORT.md` 末尾。没验证：第 2 级 LocalJev、服务端 429/5xx 的熔断路径、Mac 上的耗时。
 
 ## 通用
 
-- Git：项目目录是 FUSE 挂载，不能删除文件，git 在这里无法正常提交。改为在 VM 的临时目录建仓库并提交，每次提交后导出 `eastgenesis.bundle` 到项目根目录（已在 .gitignore 中）。在 Mac 上运行 `git clone eastgenesis.bundle` 就能拿到完整历史。
-  - Mac 副本 `EastGenesis-repo/` 的 origin 就是这个 bundle，更新用 `git pull --ff-only`。
+- Git（2026-10-02 起）：远端仓库 https://github.com/ChaoYuZhang001/eastgenesis，历史以 GitHub 为准（2026-10-02 首次推送时压成了一个提交 `fa69b1b`）。Mac 上的权威目录是 `EastGenesis-clean`。VM 不能 push（没有 SSH Key），也不需要：VM 从 GitHub clone 到临时目录、提交，再由用户同步到 Mac 后 push。项目目录是 FUSE 挂载，不能删除文件，git 不能直接在里面运行。
+  - 旧流程（到 2026-10-02 为止）：每次提交后导出 `eastgenesis.bundle` 到项目根目录，Mac 副本 `EastGenesis-repo/` 从 bundle pull。2026-10-03 用户说「不要导出 bundle，我从 GitHub 拉取」，VM 的提交怎么交给用户，由用户决定。
   - `Cargo.lock` 从 2026-09-30 起在 VM 里生成并提交（VM 已能连上 crates.io），Mac 端不再生成或提交。改了 Rust 依赖就在 VM 里更新它，检查 macOS 目标后和 Cargo.toml 一起提交，方法见「Mac 首次编译修复」。Mac 副本里有未跟踪的同名文件时，pull 会中止（已实测），要先删掉。
 - 锁文件：同步是「挂载目录 → /tmp」单向进行的，所以在 /tmp 里改过的 `pnpm-lock.yaml`、`Cargo.lock` 必须复制回挂载目录，否则下次同步会被旧版本覆盖。M3 新增的依赖就是因为这个原因没写进锁文件，到 M5 才补上。

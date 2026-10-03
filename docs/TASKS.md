@@ -225,7 +225,7 @@
   - tool_use 措辞 v2：把「附件已提供、读它不算动作」写明，同时保留「对附件本身改名、移动、保存、发送仍算动作」。采用条件先定后看（误报下降、漏报不增、链准确率不降），三条都达成：误报 27 → 0，漏报 0，链 83.3–85.2% → 96.3%。
   - 存档：`tests/fixtures/jev_recorded_2026-10-02.json`（50 条，v2）、`jev_recorded_holdout_2026-10-02.json`（54 条，v2）、`jev_recorded_holdout_v1_2026-10-02.json`（54 条，v1 对照）。每个文件自带 questions 原文和指纹，措辞一变测试会失败。
   - 测试：`tests/jev-recorded.test.ts` 重写（指纹一致性、50 条降级 <10%/链 ≥95%、hold-out 降级 <20%/链 ≥90%、v2 误报 0 且不劣于 v1）。
-  - 剩余 2 条错（`ho-code-en-02`、`ho-reasoning-en-02`，两轮相同）是能力标签粒度问题：单标签装不下「code + reasoning」这类组合，不是置信度或措辞问题。
+  - 剩余 2 条错（`ho-code-en-02`、`ho-reasoning-en-02`，两轮相同）：Jev 判对了，但决定性置信度 0.40–0.56 低于 0.6，交给规则引擎后判错。（2026-10-03 回放核实；原先写的「能力标签粒度问题」是错的。）
   - Key：跑完删除 `.env.local`（用户可再确认）。复测：tsc、Vitest 50 个文件 449 条（439 通过、10 跳过）全过。
 - 2026-10-02 按 TypeSafe 官方 skill 重审 Jev 集成：
   - 安装：`npx skills@1.7.0 add typesafe-ai/skills --skill typesafe-ai -a claude-code -y --copy`（关遥测）→ `.claude/skills/typesafe-ai/`（SKILL.md、LICENSE），`skills-lock.json` 记录来源和哈希。`.gitignore` 不排除它，进 git；`tests/dev-tools-not-bundled.test.ts` 保证不进应用包（Tauri 没有 bundle.resources，前端产物 `../dist`，vite build 产物里也没有）。
