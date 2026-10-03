@@ -122,6 +122,15 @@ describe("任务 store", () => {
     expect(useTasks.getState().submit("   ")).toBeNull();
   });
 
+  it("卡片记下所属项目、目标和模式；没给时为 null、null、quick，执行不受影响", async () => {
+    const a = useTasks.getState().submit("解释一下时区换算")!;
+    expect(task(a)).toMatchObject({ projectId: null, goalId: null, mode: "quick" });
+    const b = useTasks.getState().submit("解释一下时区换算", { projectId: "prj-a1", goalId: "goal-g1", mode: "goal" })!;
+    expect(task(b)).toMatchObject({ projectId: "prj-a1", goalId: "goal-g1", mode: "goal" });
+    await vi.waitFor(() => expect([task(a).status, task(b).status]).toEqual(["completed", "completed"]));
+    expect(task(b).events.map((e) => e.type)).toEqual(task(a).events.map((e) => e.type));
+  });
+
   it("需要确认时卡片挂起，批准后继续", async () => {
     const id = useTasks.getState().submit("整理周报并保存")!;
     await vi.waitFor(() => expect(task(id).pendingConfirm).not.toBeNull());

@@ -15,6 +15,9 @@ import { useSkills } from "./skills";
 import { useSettings } from "./settings";
 
 export type TaskStatus = "running" | RunStatus;
+/** 输入框「+」菜单里的模式：快速（一问一答）、计划模式、目标（多轮直到有实据完成）。M8 只记录，执行仍是原逻辑 */
+export type TaskMode = "quick" | "plan" | "goal";
+export const TASK_MODES: readonly TaskMode[] = ["quick", "plan", "goal"];
 
 export interface SubmitOptions {
   /** 所属会话；null 表示不属于任何会话（测试或 CLI 式直接提交） */
@@ -31,6 +34,11 @@ export interface SubmitOptions {
   aligning?: boolean;
   /** 多 Agent 协同 */
   multi?: boolean;
+  /** 所属项目；null 表示不属于任何项目 */
+  projectId?: string | null;
+  /** 所属目标（目标模式下每一轮对应的任务）；null 表示不属于任何目标 */
+  goalId?: string | null;
+  mode?: TaskMode;
 }
 
 export interface TaskCard {
@@ -57,6 +65,9 @@ export interface TaskCard {
   endedAt: number | null;
   /** 目标里明确要求记住某件事时的待确认记忆；只有用户确认才保存 */
   proposal: MemoryProposal | null;
+  projectId: string | null;
+  goalId: string | null;
+  mode: TaskMode;
 }
 
 interface TasksState {
@@ -175,6 +186,9 @@ export const useTasks = create<TasksState>((set, get) => {
         endedAt: null,
         // 刚问过对齐问题时，这一轮的回答整句作为待确认偏好
         proposal: opts.aligning ? proposeAlignment(g) : proposeMemory(g),
+        projectId: opts.projectId ?? null,
+        goalId: opts.goalId ?? null,
+        mode: opts.mode ?? "quick",
       };
       set((s) => ({ tasks: [card, ...s.tasks], activeId: id }));
       void run(id, g, opts, files);

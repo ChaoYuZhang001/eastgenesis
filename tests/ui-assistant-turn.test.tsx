@@ -46,6 +46,9 @@ const turn = (events: AgentEvent[]): TaskCard =>
     startedAt: 0,
     endedAt: 1000,
     proposal: null,
+    projectId: null,
+    goalId: null,
+    mode: "quick",
   }) as TaskCard;
 
 describe("回答区", () => {
