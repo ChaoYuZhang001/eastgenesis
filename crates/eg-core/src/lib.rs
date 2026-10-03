@@ -61,6 +61,44 @@ pub const MIGRATIONS: &[(i64, &str, &str)] = &[
          );\n\
          INSERT OR REPLACE INTO app_meta (key, value) VALUES ('schema_version', '3');",
     ),
+    (
+        4,
+        "create_projects_goals",
+        // 项目与目标（src/lib/db-project.ts、src/lib/db-goal.ts）。删除都是软删除：只写 deleted_at，
+        // 删项目时同一个 deleted_at 级联写到它的目标和记忆。context_folders、rounds 列存 JSON。
+        // routing_preference 为 NULL 表示不覆盖，沿用上一层（任务 > 目标 > 项目 > 全局默认）。
+        "CREATE TABLE IF NOT EXISTS projects (\n\
+           id TEXT PRIMARY KEY NOT NULL,\n\
+           name TEXT NOT NULL,\n\
+           description TEXT NOT NULL DEFAULT '',\n\
+           instructions TEXT NOT NULL DEFAULT '',\n\
+           context_folders TEXT NOT NULL DEFAULT '[]',\n\
+           routing_preference TEXT CHECK (routing_preference IN ('economy', 'balanced', 'best')),\n\
+           archived INTEGER NOT NULL DEFAULT 0 CHECK (archived IN (0, 1)),\n\
+           created_at INTEGER NOT NULL,\n\
+           updated_at INTEGER NOT NULL,\n\
+           deleted_at INTEGER\n\
+         );\n\
+         CREATE TABLE IF NOT EXISTS goals (\n\
+           id TEXT PRIMARY KEY NOT NULL,\n\
+           project_id TEXT REFERENCES projects(id),\n\
+           description TEXT NOT NULL,\n\
+           instructions TEXT NOT NULL DEFAULT '',\n\
+           routing_preference TEXT CHECK (routing_preference IN ('economy', 'balanced', 'best')),\n\
+           status TEXT NOT NULL DEFAULT 'idle' CHECK (status IN ('idle', 'running', 'paused', 'completed', 'failed', 'abandoned', 'deleted')),\n\
+           rounds TEXT NOT NULL DEFAULT '[]',\n\
+           max_llm_calls INTEGER NOT NULL DEFAULT 50 CHECK (max_llm_calls > 0),\n\
+           used_llm_calls INTEGER NOT NULL DEFAULT 0 CHECK (used_llm_calls >= 0),\n\
+           created_at INTEGER NOT NULL,\n\
+           updated_at INTEGER NOT NULL,\n\
+           deleted_at INTEGER\n\
+         );\n\
+         CREATE INDEX IF NOT EXISTS goals_project ON goals (project_id);\n\
+         ALTER TABLE memories ADD COLUMN project_id TEXT REFERENCES projects(id);\n\
+         ALTER TABLE memories ADD COLUMN deleted_at INTEGER;\n\
+         CREATE INDEX IF NOT EXISTS memories_project ON memories (project_id);\n\
+         INSERT OR REPLACE INTO app_meta (key, value) VALUES ('schema_version', '4');",
+    ),
 ];
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -94,6 +132,25 @@ mod tests {
     fn each_migration_records_its_schema_version() {
         for (v, _, sql) in MIGRATIONS {
             assert!(sql.contains(&format!("('schema_version', '{v}')")), "迁移 {v}");
+        }
+    }
+
+    #[test]
+    fn migration_4_adds_projects_goals_and_memory_columns() {
+        let (_, name, sql) = MIGRATIONS.iter().find(|m| m.0 == 4).expect("迁移 4");
+        assert_eq!(*name, "create_projects_goals");
+        for part in [
+            "CREATE TABLE IF NOT EXISTS projects",
+            "CREATE TABLE IF NOT EXISTS goals",
+            "ALTER TABLE memories ADD COLUMN project_id TEXT REFERENCES projects(id);",
+            "ALTER TABLE memories ADD COLUMN deleted_at INTEGER;",
+            "max_llm_calls INTEGER NOT NULL DEFAULT 50",
+        ] {
+            assert!(sql.contains(part), "缺少：{part}");
+        }
+        // 已发布的迁移不改：前三条里不出现新表
+        for (v, _, old) in MIGRATIONS.iter().filter(|m| m.0 < 4) {
+            assert!(!old.contains("projects") && !old.contains("goals"), "迁移 {v}");
         }
     }
 
