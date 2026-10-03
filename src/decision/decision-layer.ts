@@ -1,8 +1,11 @@
-// Jev 决策层：routeTask、chooseTool、checkDone、gateAction、evaluateResult、replan。
+// Jev 决策层：routeTask、chooseTool、checkDone、checkDoneWithEvidence、gateAction、evaluateResult、replan。
 // 每个决策都经过三级降级链，并在 meta 里说明由哪一级做出、跳过了哪些及原因（透明度优先）。
+// checkDoneWithEvidence（目标模式）例外：先规则后 Jev，结论里的 by 写明由谁判断。
 import type { Fetch } from "@typesafe-ai/sdk";
+import { JEV_EVIDENCE_QUESTION, MAX_GOAL_CHARS, NO_JUDGE_REASON, evidenceRecord, judgeByRules, verdictFromProbability, type Evidence, type EvidenceResult } from "./evidence";
 import {
   CloudJevBackend,
+  DEFAULT_MIN_CONFIDENCE,
   FallbackChain,
   RuleBasedBackend,
   type Decision,
@@ -12,7 +15,7 @@ import {
   type ToolSpec,
 } from "./fallback";
 import { HealthTracker } from "./health";
-import { JevClient, type JevClientOptions } from "./jev-client";
+import { JevClient, JevError, type JevClientOptions } from "./jev-client";
 import { LocalJevBackend, type LocalDecisionModel } from "./local-jev";
 import { defaultAvailability, route, type Availability, type RouteDecision, type RouteRequest } from "./router";
 import type { ModelProfile } from "./types";
@@ -79,7 +82,14 @@ export interface DecisionLayerOptions {
   health?: HealthTracker;
   /** 权限开关，默认「变更前确认」 */
   permission?: PermissionMode;
+  /** 目标完成校验用的 Jev（规则判断不了时才问）；不给则交给用户确认 */
+  judge?: EvidenceJudge | null;
+  /** Jev 结论的置信度下限，默认与决策链相同（0.6） */
+  minConfidence?: number;
 }
+
+/** checkDoneWithEvidence 只用到 Jev 的 noul；JevClient 满足这个接口 */
+export type EvidenceJudge = Pick<JevClient, "noul">;
 
 export class DecisionLayer {
   readonly health: HealthTracker;
@@ -88,6 +98,8 @@ export class DecisionLayer {
   readonly #chain: FallbackChain;
   readonly #availability: Availability;
   readonly #profiles?: readonly ModelProfile[];
+  readonly #judge: EvidenceJudge | null;
+  readonly #minConfidence: number;
 
   constructor(o: DecisionLayerOptions) {
     this.#chain = o.chain;
@@ -96,6 +108,8 @@ export class DecisionLayer {
     this.#profiles = o.profiles;
     this.health = o.health ?? new HealthTracker();
     this.permission = o.permission ?? "confirm";
+    this.#judge = o.judge ?? null;
+    this.#minConfidence = o.minConfidence ?? DEFAULT_MIN_CONFIDENCE;
   }
 
   /** 没有 TYPESAFE_API_KEY 时第 1 级自动跳过，全部由规则决策，不阻塞开发 */
@@ -125,7 +139,16 @@ export class DecisionLayer {
       minConfidence: o.minConfidence,
     });
     const health = new HealthTracker({ now: o.now });
-    return new DecisionLayer({ chain, availability: defaultAvailability(env, health), tools: o.tools, profiles: o.profiles, health, permission: o.permission });
+    return new DecisionLayer({
+      chain,
+      availability: defaultAvailability(env, health),
+      tools: o.tools,
+      profiles: o.profiles,
+      health,
+      permission: o.permission,
+      judge: client,
+      minConfidence: o.minConfidence,
+    });
   }
 
   async routeTask(req: RouteRequest, signal?: AbortSignal): Promise<{ decision: RouteDecision; meta: DecisionMeta }> {
@@ -145,6 +168,35 @@ export class DecisionLayer {
 
   checkDone(goal: string, result: string, signal?: AbortSignal): Promise<Decision<boolean>> {
     return this.#chain.run((b) => b.checkDone(goal, result, signal));
+  }
+
+  /**
+   * 目标模式的完成校验：只认执行记录（工具调用、文件改动、命令输出），模型自述不算实据。
+   * 1. 规则（evidence.ts judgeByRules）：测试没过 → not_done；只有自述 → uncertain「AI 声称完成，但无实据」；能核对的条件全部满足 → done。
+   * 2. 规则判断不了、配置了 Jev：只把目标和执行记录发给 Jev（不含自述），确定程度达到阈值才下 done / not_done。
+   * 3. 否则 uncertain，交给用户确认。Jev 出错也是 uncertain；取消时抛出 aborted。
+   * evidence 应是这个目标到目前为止所有轮次的记录（goal.ts 每轮单独保存，调用方用 mergeEvidence 合并）。
+   * context 的 taskId、projectId 留给执行时间线关联（M10）；这里不写日志。
+   */
+  async checkDoneWithEvidence(
+    goal: string,
+    evidence: Evidence,
+    context: { taskId: string; projectId?: string; signal?: AbortSignal },
+  ): Promise<EvidenceResult> {
+    const signal = context.signal;
+    if (signal?.aborted) throw new JevError("aborted");
+    const text = String(goal ?? "").slice(0, MAX_GOAL_CHARS);
+    const byRules = judgeByRules(text, evidence);
+    if (byRules) return byRules;
+    if (!this.#judge) return { verdict: "uncertain", reason: NO_JUDGE_REASON, by: "rules" };
+    try {
+      const r = await this.#judge.noul(evidenceRecord(text, evidence), JEV_EVIDENCE_QUESTION, signal);
+      return verdictFromProbability(r.noul, this.#minConfidence);
+    } catch (e) {
+      if (signal?.aborted || (e instanceof JevError && e.code === "aborted")) throw e instanceof JevError ? e : new JevError("aborted");
+      const code = e instanceof JevError ? e.code : "internal";
+      return { verdict: "uncertain", reason: `Jev 调用失败（${code}），请你确认`, by: "jev" };
+    }
   }
 
   evaluateResult(goal: string, result: string, signal?: AbortSignal): Promise<Decision<number>> {
