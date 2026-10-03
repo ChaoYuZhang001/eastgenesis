@@ -13,6 +13,8 @@ import { PREFERENCE_LABEL } from "@/lib/sidebar-rows";
 import { subAgentViews } from "@/lib/subagents";
 import { lastRoute } from "@/lib/timeline";
 import { cn } from "@/lib/utils";
+import { PRICES, SAVINGS_HINT, savedText, type Savings } from "@/lib/savings";
+import { useTaskSavings } from "@/lib/use-savings";
 import { useSettings } from "@/stores/settings";
 import type { TaskCard } from "@/stores/tasks";
 import { useUi } from "@/stores/ui";
@@ -23,6 +25,8 @@ import { useUi } from "@/stores/ui";
 export function RouteLine({ summary, durationMs, card }: { summary: RouteSummary; durationMs: number | null; card?: TaskCard }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"route" | "run">("route");
+  const savings = useTaskSavings(card);
+  const saved = savedText(savings);
   const btn = useRef<HTMLButtonElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const body = useId();
@@ -56,7 +60,9 @@ export function RouteLine({ summary, durationMs, card }: { summary: RouteSummary
         className="flex max-w-full items-center gap-1 rounded-sm text-left transition-colors hover:text-foreground"
       >
         <ChevronRight aria-hidden className={cn("size-3 shrink-0 transition-transform", open && "rotate-90")} />
-        <span className="truncate">{routeLineText(summary, durationMs)}</span>
+        <span className="truncate" title={saved ? SAVINGS_HINT : undefined}>
+          {routeLineText(summary, durationMs, saved)}
+        </span>
         <span className="shrink-0">· {summary.locked ? "查看路由决策" : "为什么选它 · 查看路由决策"}</span>
       </button>
 
@@ -82,14 +88,14 @@ export function RouteLine({ summary, durationMs, card }: { summary: RouteSummary
               </button>
             ))}
           </div>
-          {tab === "route" ? <RouteTab summary={summary} card={card} /> : <RunTab card={card} durationMs={durationMs} summary={summary} />}
+          {tab === "route" ? <RouteTab summary={summary} card={card} savings={savings} /> : <RunTab card={card} durationMs={durationMs} summary={summary} />}
         </div>
       )}
     </div>
   );
 }
 
-function RouteTab({ summary, card }: { summary: RouteSummary; card?: TaskCard }) {
+function RouteTab({ summary, card, savings }: { summary: RouteSummary; card?: TaskCard; savings: Savings }) {
   const expert = useUi((s) => s.prefs.expert);
   const overrides = useSettings((s) => s.overrides);
   const custom = useSettings((s) => s.custom);
@@ -166,6 +172,8 @@ function RouteTab({ summary, card }: { summary: RouteSummary; card?: TaskCard })
 
       {summary.retries > 0 && <p>超时后重试 {summary.retries} 次</p>}
 
+      <PriceCompare summary={summary} savings={savings} />
+
       {card?.status === "running" && (
         <section aria-label="手动干预" className="space-y-2 border-t border-border pt-3">
           <p className="text-foreground">手动干预</p>
@@ -179,6 +187,47 @@ function RouteTab({ summary, card }: { summary: RouteSummary; card?: TaskCard })
         </section>
       )}
     </div>
+  );
+}
+
+// 这次调用与基准模型的价格对比（V3 5.1）：只用价目表里核对过的官方标价；缺单价时如实写明，不估
+function PriceCompare({ summary, savings }: { summary: RouteSummary; savings: Savings }) {
+  if (!summary.used && !savings.priced) return null;
+  const base = savings.baselineModel;
+  const used = summary.used;
+  const price = (id: string | null) => (id ? PRICES[id] : undefined);
+  const per = (id: string | null) => {
+    const p = price(id);
+    return p ? `输入 $${p.input} · 输出 $${p.output}（每百万 tokens）` : "价目表里没有这个模型的单价";
+  };
+  const saved = savedText(savings);
+  return (
+    <section aria-label="价格对比" className="space-y-1 border-t border-border pt-3">
+      <p>价格对比（{SAVINGS_HINT}）</p>
+      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+        {used && (
+          <>
+            <dt>实际用的</dt>
+            <dd className="break-all text-foreground">
+              {displayModel(used)}：{per(used)}
+            </dd>
+          </>
+        )}
+        <dt>最强模式会选</dt>
+        <dd className="break-all text-foreground">{base ? `${displayModel(base)}：${per(base)}` : "没有可比较的模型"}</dd>
+        {savings.priced > 0 && (
+          <>
+            <dt>这次</dt>
+            <dd className="text-foreground">
+              约 ${savings.actual.toFixed(4)}，最强模式约 ${savings.baseline.toFixed(4)}
+              {saved ? `，${saved.replace("省 ", "省了 ")}` : "，两者一样"}
+            </dd>
+          </>
+        )}
+      </dl>
+      {savings.unpriced > 0 && <p>{savings.unpriced} 次调用没有单价，未计入金额。</p>}
+      {savings.noUsage > 0 && <p>{savings.noUsage} 次调用服务没有返回 token 用量，未计入金额。</p>}
+    </section>
   );
 }
 

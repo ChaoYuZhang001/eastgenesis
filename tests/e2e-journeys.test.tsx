@@ -48,9 +48,9 @@ describe("端到端：首次使用到拿到成果", () => {
     await within(c).findByText(/^已完成 · /, {}, LONG);
     expect(within(c).getByRole("region", { name: "成果" })).toHaveTextContent(`（模拟）已完成：${goal}`);
 
-    // 回答下面那行路由记录：折叠时只有模型和耗时，点开是浮层；不出现内部状态（判断来源、停用的模型）
+    // 回答下面那行路由记录：折叠时是模型、和最强模式比省了多少、耗时；点开是浮层；不出现内部状态（判断来源、停用的模型）
     const line = within(c).getByRole("button", { name: /查看路由决策/ });
-    expect(line).toHaveTextContent(/使用 \S+ · \d+\.\d+s/);
+    expect(line).toHaveTextContent(/使用 \S+ · (省|多花) (<\$0\.01|\$\d+\.\d{2}) · \d+\.\d+s/);
     expect(line.textContent).not.toMatch(/评分|成本档位/);
     const overlay = openRoute(c);
     const route = within(overlay).getByRole("region", { name: "路由决策详情" });
@@ -58,6 +58,10 @@ describe("端到端：首次使用到拿到成果", () => {
     expect(within(route).getByText("综合能力最强，匹配当前任务")).toBeInTheDocument();
     // 路由偏好写明来自哪一层；默认不是专家模式，不出现内部评分
     expect(route).toHaveTextContent("路由偏好平衡（来自全局设置）");
+    // 价格对比：只用价目表里的官方标价；最强模式会选谁、各自单价写明
+    const price = within(overlay).getByRole("region", { name: "价格对比" });
+    expect(price).toHaveTextContent("最强模式会选");
+    expect(price).toHaveTextContent(/每百万 tokens/);
     expect(route.textContent).not.toMatch(/评分|成本档位|判断来源|Jev|没有参与的模型|已停用|Provider|规则兜底|排第一/);
 
     // 完整时间线在浮层的「执行过程」里

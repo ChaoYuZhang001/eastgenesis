@@ -127,6 +127,9 @@ describe("首屏", () => {
     fireEvent.keyDown(menu, { key: "ArrowDown" });
     expect(within(menu).getByRole("menuitemradio", { name: /省钱模式/ })).toHaveFocus();
     fireEvent.keyDown(menu, { key: "End" });
+    // 最后一项是只读的「本月省了…」，点了跳到使用情况
+    expect(within(menu).getByRole("menuitem", { name: /本月/ })).toHaveFocus();
+    fireEvent.keyDown(menu, { key: "ArrowUp" });
     expect(within(menu).getByRole("menuitem", { name: /手动锁定/ })).toHaveFocus();
     fireEvent.keyDown(menu, { key: "Escape" });
     expect(screen.queryByRole("menu", { name: "路由" })).not.toBeInTheDocument();

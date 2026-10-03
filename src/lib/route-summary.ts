@@ -147,8 +147,8 @@ export function formatDuration(ms: number): string {
   return `${Math.floor(s / 60)} 分 ${s % 60} 秒`;
 }
 
-/** 折叠状态那一行的文字：「使用 X · 12.4s · 1.2k tokens」 */
-export function routeLineText(s: RouteSummary, durationMs: number | null): string {
+/** 折叠状态那一行的文字：「使用 X · 省 $0.12 · 12.4s · 1.2k tokens」；saved 是 savings.ts 的 savedText，没有可计价的调用时不写 */
+export function routeLineText(s: RouteSummary, durationMs: number | null, saved: string | null = null): string {
   const parts: string[] = [];
   if (s.used) {
     const more = s.models.length > 1 ? `（共 ${s.models.length} 个模型）` : "";
@@ -156,6 +156,7 @@ export function routeLineText(s: RouteSummary, durationMs: number | null): strin
   } else if (s.failures.length) parts.push(`${s.failures.length} 个模型都没有成功`);
   else if (s.noModel) parts.push("没有可用模型");
   else parts.push(`准备使用 ${displayModel(s.candidates[0]?.profileId ?? "")}`);
+  if (saved) parts.push(saved);
   if (durationMs !== null) parts.push(formatDuration(durationMs));
   if (s.calls > 0) parts.push(formatTokens(s.tokens));
   if (s.fallbacks.length) {

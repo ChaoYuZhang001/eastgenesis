@@ -1,0 +1,170 @@
+{
+  "_comment": "官方标价，美元 / 每百万 tokens，标准档（不含批量、缓存、Fast 模式折扣）。只填 2026-10-03 在官方价目页核对过的；核对不到的不填、不估。见 docs/UI_LAYOUT_V3.md 5.1。",
+  "currency": "USD",
+  "unit": "per_million_tokens",
+  "models": {
+    "openai/gpt-6-astra": {
+      "input": 10,
+      "output": 50,
+      "source": "https://developers.openai.com/api/docs/pricing",
+      "checked": "2026-10-03",
+      "note": "输入超过 272K tokens 的请求，整次按 2 倍输入、1.5 倍输出计价",
+      "long_context": {
+        "over_input_tokens": 272000,
+        "input": 20,
+        "output": 75
+      }
+    },
+    "openai/gpt-5.6-terra": {
+      "input": 2,
+      "output": 12,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-terra",
+      "checked": "2026-10-03",
+      "long_context": {
+        "over_input_tokens": 272000,
+        "input": 4,
+        "output": 18
+      }
+    },
+    "openai/gpt-5.6-luna": {
+      "input": 0.2,
+      "output": 1.2,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-luna",
+      "checked": "2026-10-03",
+      "long_context": {
+        "over_input_tokens": 272000,
+        "input": 0.4,
+        "output": 1.8
+      }
+    },
+    "anthropic/claude-fable-5-1": {
+      "input": 10,
+      "output": 50,
+      "source": "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+      "checked": "2026-10-03"
+    },
+    "anthropic/claude-opus-5-5": {
+      "input": 4,
+      "output": 20,
+      "source": "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+      "checked": "2026-10-03"
+    },
+    "anthropic/claude-sonnet-5-5": {
+      "input": 2,
+      "output": 10,
+      "source": "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+      "checked": "2026-10-03"
+    },
+    "anthropic/claude-haiku-4-5": {
+      "input": 1,
+      "output": 5,
+      "source": "https://platform.claude.com/docs/en/docs/about-claude/pricing",
+      "checked": "2026-10-03"
+    },
+    "google/gemini-3.1-pro-preview": {
+      "input": 2,
+      "output": 12,
+      "source": "https://ai.google.dev/gemini-api/docs/pricing",
+      "checked": "2026-10-03",
+      "long_context": {
+        "over_input_tokens": 200000,
+        "input": 4,
+        "output": 18
+      }
+    },
+    "google/gemini-3.8-flash": {
+      "input": 0.75,
+      "output": 3.75,
+      "source": "https://ai.google.dev/gemini-api/docs/pricing",
+      "checked": "2026-10-03",
+      "valid_until": "2026-12-31",
+      "note": "2027-01-01 起为输入 1.50、输出 7.50"
+    },
+    "google/gemini-3.5-flash-lite": {
+      "input": 0.3,
+      "output": 2.5,
+      "source": "https://ai.google.dev/gemini-api/docs/pricing",
+      "checked": "2026-10-03"
+    },
+    "deepseek/deepseek-v4-pro": {
+      "input": 1.32,
+      "output": 3.96,
+      "source": "https://api-docs.deepseek.com/quick_start/pricing",
+      "checked": "2026-10-03",
+      "note": "按高峰价计（UTC 周一至周五 01:00–04:00、06:00–10:00）；其余时段是一半"
+    },
+    "deepseek/deepseek-flash": {
+      "input": 0.3,
+      "output": 1.2,
+      "source": "https://api-docs.deepseek.com/quick_start/pricing",
+      "checked": "2026-10-03",
+      "note": "按高峰价计；其余时段是一半"
+    },
+    "qwen/qwen3.8-max": {
+      "input": 2,
+      "output": 6,
+      "source": "https://www.alibabacloud.com/help/en/model-studio/model-pricing",
+      "checked": "2026-10-03",
+      "region": "intl"
+    },
+    "qwen/qwen3.7-plus": {
+      "input": 0.4,
+      "output": 1.6,
+      "source": "https://www.alibabacloud.com/help/en/model-studio/model-pricing",
+      "checked": "2026-10-03",
+      "region": "intl",
+      "note": "标价，限时 8 折未计入；输入超过 256K 时为 1.2 / 4.8",
+      "long_context": {
+        "over_input_tokens": 256000,
+        "input": 1.2,
+        "output": 4.8
+      }
+    },
+    "qwen/qwen3.8-flash": {
+      "input": 0.15,
+      "output": 0.47,
+      "source": "https://www.alibabacloud.com/help/en/model-studio/model-pricing",
+      "checked": "2026-10-03",
+      "region": "intl"
+    },
+    "kimi/kimi-k3": {
+      "input": 3,
+      "output": 15,
+      "source": "https://platform.kimi.ai/docs/pricing/chat",
+      "checked": "2026-10-03",
+      "region": "intl"
+    },
+    "kimi/kimi-k2.6": {
+      "input": 0.95,
+      "output": 4,
+      "source": "https://platform.kimi.ai/docs/pricing/chat",
+      "checked": "2026-10-03",
+      "region": "intl"
+    },
+    "kimi/kimi-k2.7-code-highspeed": {
+      "input": 1.9,
+      "output": 8,
+      "source": "https://platform.kimi.ai/docs/pricing/chat",
+      "checked": "2026-10-03",
+      "region": "intl"
+    },
+    "ollama/qwen3:8b": {
+      "input": 0,
+      "output": 0,
+      "source": "本机运行，不按 token 计费",
+      "checked": "2026-10-03"
+    },
+    "ollama/qwen3-vl:8b": {
+      "input": 0,
+      "output": 0,
+      "source": "本机运行，不按 token 计费",
+      "checked": "2026-10-03"
+    },
+    "ollama/gpt-oss:20b": {
+      "input": 0,
+      "output": 0,
+      "source": "本机运行，不按 token 计费",
+      "checked": "2026-10-03"
+    }
+  }
+}

@@ -2,12 +2,15 @@ import { useMemo, type ReactNode } from "react";
 import { ChevronDown, Eye, Lock, Route, ShieldCheck, ShieldOff } from "lucide-react";
 import { HealthTracker, PERMISSION_HINT, PERMISSION_LABEL, PERMISSION_MODES, type PermissionMode, type Preference } from "@/decision";
 import { PREFERENCE_SOURCE_LABEL, preferenceSource } from "@/decision/project";
-import { Menu, MenuLabel, MenuRadio, MenuSeparator, SubMenu } from "@/components/ui/menu";
+import { Menu, MenuItem, MenuLabel, MenuRadio, MenuSeparator, SubMenu } from "@/components/ui/menu";
 import { effectiveProfiles, statusAvailability } from "@/lib/engine";
 import { hasOption, lockLabel, modelGroups } from "@/lib/model-options";
 import { PREFERENCE_LABEL } from "@/lib/sidebar-rows";
+import { SAVINGS_HINT, savedText } from "@/lib/savings";
+import { useTasksSavings } from "@/lib/use-savings";
 import { cn } from "@/lib/utils";
 import { useProjects } from "@/stores/projects";
+import { useTasks } from "@/stores/tasks";
 import { useSettings } from "@/stores/settings";
 import { useUi } from "@/stores/ui";
 
@@ -56,7 +59,10 @@ export function RoutingSelect({ lock, preference, onLock, onPreference }: { lock
   const cache = useSettings((s) => s.modelCache);
   const global = useSettings((s) => s.routing.preference);
   const currentId = useUi((s) => s.currentProjectId);
+  const openSettings = useUi((s) => s.openSettings);
   const project = useProjects((s) => (currentId ? s.items.find((p) => p.id === currentId) ?? null : null));
+  const month = useMonthTasks();
+  const monthSavings = useTasksSavings(month);
 
   const groups = useMemo(() => {
     const profiles = effectiveProfiles(overrides, custom);
@@ -112,6 +118,33 @@ export function RoutingSelect({ lock, preference, onLock, onPreference }: { lock
           </div>
         ))}
       </SubMenu>
+      <MenuSeparator />
+      <MenuItem onSelect={() => openSettings("usage")} hint={monthHint(monthSavings.unpriced, monthSavings.priced)}>
+        <span title={SAVINGS_HINT}>{monthText(monthSavings)}</span>
+      </MenuItem>
     </Menu>
   );
+}
+
+/** 本月（本地时区自然月）开始的任务；调用记录没持久化之前只有本次启动以来的 */
+function useMonthTasks() {
+  const tasks = useTasks((s) => s.tasks);
+  return useMemo(() => {
+    const d = new Date();
+    const start = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+    return tasks.filter((t) => t.startedAt >= start);
+  }, [tasks]);
+}
+
+function monthText(s: ReturnType<typeof useTasksSavings>): string {
+  const t = savedText(s);
+  if (!t) return s.priced ? "本月和最强模式花费相同" : "本月还没有可计价的调用";
+  return t.startsWith("省") ? `本月省了约 ${t.slice(2)}` : `本月多花了约 ${t.slice(3)}`;
+}
+
+function monthHint(unpriced: number, priced: number): string {
+  const parts = ["本次启动以来，重启后清零"];
+  if (unpriced) parts.push(`${unpriced} 次调用没有单价，未计入`);
+  else if (!priced) parts.push("按官方标价估算");
+  return parts.join("；");
 }

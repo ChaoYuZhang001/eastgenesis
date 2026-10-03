@@ -7,6 +7,8 @@ import { brand } from "@/brand/assets";
 import { canTransition, type Goal } from "@/decision/goal";
 import type { Project } from "@/decision/project";
 import { HISTORY_LABEL, goalSummary, historyBucket, matches, projectSummary, recentItems, sessionSummary, type HistoryBucket } from "@/lib/sidebar-rows";
+import { SAVINGS_HINT, savedPercent, savedText } from "@/lib/savings";
+import { useTasksSavings } from "@/lib/use-savings";
 import { cn } from "@/lib/utils";
 import { useChat, type Session } from "@/stores/chat";
 import { useGoals } from "@/stores/goals";
@@ -199,11 +201,13 @@ function SessionRow({ session, nested }: { session: Session; nested?: boolean })
   const select = useChat((s) => s.select);
   const tasks = useTasks((s) => s.tasks);
   const mine = useMemo(() => tasks.filter((t) => t.sessionId === session.id), [tasks, session.id]);
+  const saved = savedText(useTasksSavings(mine));
   return (
     <Row
       icon={<MessageSquare aria-hidden />}
       name={session.title}
-      summary={sessionSummary(mine)}
+      summary={[sessionSummary(mine), saved].filter(Boolean).join(" · ")}
+      summaryTitle={saved ? SAVINGS_HINT : undefined}
       selected={main.kind === "chat" && activeId === session.id}
       nested={nested}
       onOpen={() => {
@@ -219,6 +223,9 @@ function GoalRow({ goal, nested }: { goal: Goal; nested?: boolean }) {
   const open = useUi((s) => s.open);
   const { start, pause } = useGoals();
   const ask = useDialogs((s) => s.ask);
+  const tasks = useTasks((s) => s.tasks);
+  const mine = useMemo(() => tasks.filter((t) => t.goalId === goal.id), [tasks, goal.id]);
+  const saved = savedText(useTasksSavings(mine));
   const canPause = canTransition(goal.status, "paused");
   const canStart = canTransition(goal.status, "running");
   const canAbandon = canTransition(goal.status, "abandoned");
@@ -226,7 +233,8 @@ function GoalRow({ goal, nested }: { goal: Goal; nested?: boolean }) {
     <Row
       icon={<GoalStatusIcon goal={goal} />}
       name={goal.description}
-      summary={goalSummary(goal)}
+      summary={[goalSummary(goal), saved].filter(Boolean).join(" · ")}
+      summaryTitle={saved ? SAVINGS_HINT : undefined}
       selected={main.kind === "goal" && main.id === goal.id}
       nested={nested}
       onOpen={() => open({ kind: "goal", id: goal.id })}
@@ -283,6 +291,17 @@ function ProjectMenu({ project }: { project: Project }) {
 }
 
 // 工作台里的项目行：点了展开并设为当前项目（新任务归入它），不切换主区
+/** 项目本月的节省比例：本次启动以来、属于这个项目、本月开始的任务 */
+function useProjectPercent(projectId: string): number | null {
+  const tasks = useTasks((s) => s.tasks);
+  const mine = useMemo(() => {
+    const d = new Date();
+    const month = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+    return tasks.filter((t) => t.projectId === projectId && t.startedAt >= month);
+  }, [tasks, projectId]);
+  return savedPercent(useTasksSavings(mine));
+}
+
 function ProjectRow({ project, children, count }: { project: Project; children: ReactNode; count: number }) {
   const expanded = useUi((s) => s.expanded.includes(project.id));
   const toggle = useUi((s) => s.toggleExpanded);
@@ -290,13 +309,15 @@ function ProjectRow({ project, children, count }: { project: Project; children: 
   const setCurrent = useUi((s) => s.setCurrentProject);
   const global = useSettings((s) => s.routing.preference);
   const sum = projectSummary(project, global);
+  const pct = useProjectPercent(project.id);
+  const pctText = pct === null || pct === 0 ? null : pct > 0 ? `省 ${pct}%` : `多花 ${-pct}%`;
   return (
     <li>
       <Row
         icon={<Folder aria-hidden />}
         name={project.name}
-        summary={sum.text}
-        summaryTitle={sum.title}
+        summary={[sum.text, pctText].filter(Boolean).join(" · ")}
+        summaryTitle={pctText ? `${sum.title}；本月${pctText}，${SAVINGS_HINT}` : sum.title}
         selected={current === project.id}
         expanded={expanded}
         onOpen={() => {
