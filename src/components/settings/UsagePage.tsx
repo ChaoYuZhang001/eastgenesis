@@ -3,8 +3,8 @@ import { ChartColumn } from "lucide-react";
 import type { AgentEvent } from "@/agent";
 import { displayModel } from "@/lib/route-summary";
 import { PRICES, PRICES_CHECKED, SAVINGS_HINT, callCost, savedText } from "@/lib/savings";
-import { useTasksSavings } from "@/lib/use-savings";
 import { useTasks } from "@/stores/tasks";
+import { monthStart, savingsOfCalls, useUsage } from "@/stores/usage";
 import { EmptyState, SettingsSection } from "./controls";
 
 // 使用情况（docs/UI_LAYOUT_V3.md 第 8 节「个人 › 使用情况」）：按模型的调用、tokens、按官方标价估算的花费，
@@ -40,14 +40,41 @@ export function usageByModel(events: readonly AgentEvent[][]): UsageRow[] {
 
 const money = (n: number) => (n > 0 && n < 0.01 ? "<$0.01" : `$${n.toFixed(2)}`);
 
+/** 持久化的调用记录按模型汇总（本月） */
+export function usageRowsOfCalls(calls: readonly { profile_id: string; input_tokens: number; output_tokens: number }[]): UsageRow[] {
+  const by = new Map<string, UsageRow>();
+  for (const c of calls) {
+    const r = by.get(c.profile_id) ?? { model: c.profile_id, calls: 0, tokens: 0, cost: PRICES[c.profile_id] ? 0 : null, noUsage: 0 };
+    r.calls++;
+    r.tokens += c.input_tokens + c.output_tokens;
+    const cost = callCost(c.profile_id, c.input_tokens, c.output_tokens);
+    if (cost !== null && r.cost !== null) r.cost += cost;
+    by.set(c.profile_id, r);
+  }
+  return [...by.values()].sort((a, b) => b.calls - a.calls || a.model.localeCompare(b.model));
+}
+
 export function UsagePage() {
+  const calls = useUsage((s) => s.calls);
+  const error = useUsage((s) => s.error);
   const tasks = useTasks((s) => s.tasks);
-  const rows = useMemo(() => usageByModel(tasks.map((t) => t.events)), [tasks]);
-  const total = useTasksSavings(tasks);
+  const rows = useMemo(() => usageRowsOfCalls(calls), [calls]);
+  // 服务没返回 token 用量的调用不会记进调用记录：从本月任务的事件里另外数出来，如实写明
+  const noUsage = useMemo(() => {
+    const start = monthStart();
+    return usageByModel(tasks.filter((t) => t.startedAt >= start).map((t) => t.events)).reduce((n, r) => n + r.noUsage, 0);
+  }, [tasks]);
+  const total = { ...savingsOfCalls(calls), noUsage };
   const saved = savedText(total);
+  const month = new Date().toLocaleDateString("zh-CN", { year: "numeric", month: "long" });
   return (
     <div className="space-y-10">
-      <SettingsSection title="本次启动以来" description={`${SAVINGS_HINT}；价目表核对于 ${PRICES_CHECKED}。调用记录还没有持久化，重启后清零。`}>
+      {error && (
+        <p role="alert" className="text-sm">
+          读取调用记录失败：{error}
+        </p>
+      )}
+      <SettingsSection title={month} description={`${SAVINGS_HINT}；价目表核对于 ${PRICES_CHECKED}。按本地时区自然月统计，调用记录保存在本机。`}>
         {rows.length === 0 ? (
           <EmptyState icon={ChartColumn}>还没有模型调用。</EmptyState>
         ) : (

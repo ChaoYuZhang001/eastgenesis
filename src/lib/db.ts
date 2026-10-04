@@ -6,8 +6,9 @@ export const DB_URL = "sqlite:eastgenesis.db";
 /**
  * 数据库结构版本，等于 eg-core MIGRATIONS 里最后一条的版本（tests/db-migrations.test.ts 核对）。
  * 迁移 4：projects、goals 两张表，memories 加 project_id、deleted_at（src/lib/db-project.ts、db-goal.ts）。
+ * 迁移 5：sessions、usage_calls 两张表（src/lib/db-session.ts）。
  */
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 /** 设置项存进 app_meta 表，键加前缀，和 schema_version 等内部键分开 */
 export const SETTING_PREFIX = "settings:";
 const SETTING_KEY = /^[a-z0-9][a-z0-9_.-]{0,63}$/;

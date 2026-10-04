@@ -34,6 +34,8 @@ export interface ProjectInput {
 export interface ProjectUsage {
   goals: number;
   memories: number;
+  /** 迁移 5 起会话也持久化，删除项目时一并软删除 */
+  sessions: number;
 }
 
 export interface ProjectError {

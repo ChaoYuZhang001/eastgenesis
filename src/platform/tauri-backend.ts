@@ -5,6 +5,7 @@ import { database, getSetting, readSchemaVersion, setSetting } from "@/lib/db";
 import { listGoals, saveGoal, updateGoal } from "@/lib/db-goal";
 import { deleteMemory, listMemories, saveMemory, touchMemories } from "@/lib/db-memory";
 import { archiveProject, deleteProject, listProjects, projectUsage, saveProject, unarchiveProject } from "@/lib/db-project";
+import { deleteSession, listSessions, listUsage, recordUsage, saveSession } from "@/lib/db-session";
 import { deleteSkill, listSkills, saveSkill, touchSkills } from "@/lib/db-skill";
 import type { Backend, CustomProvider, KeyStatus, McpHandlers, McpRegistry, McpServerView, ProxyRequest, ProxyResponse, SavedProvider } from "./types";
 
@@ -80,6 +81,11 @@ export function createTauriBackend(): Backend {
     listGoals: (projectId) => listGoals(projectId),
     saveGoal: (g) => saveGoal(g),
     updateGoal: (id, change) => updateGoal(id, change),
+    listSessions,
+    saveSession: (s) => saveSession(s),
+    deleteSession: (id) => deleteSession(id),
+    recordUsage,
+    listUsage,
 
     loadSetting: getSetting,
     saveSetting: setSetting,

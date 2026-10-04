@@ -1,9 +1,10 @@
-// 会话：左侧列表的每一项。一次会话由若干轮任务组成（见 stores/tasks.ts）。
-// 只放在内存里：重启后从空白首屏开始，历史任务不持久化。
+// 会话：内容栏「最近」「历史」里的每一项。一次会话由若干轮任务组成（见 stores/tasks.ts）。
+// 迁移 5 起会话持久化：每轮结束后写回数据库，启动时读回（stores/history.ts）。
 import { create } from "zustand";
 import type { PermissionMode, Preference } from "@/decision";
 import type { AttachedFile } from "@/lib/attachments";
 import { MAX_FILES } from "@/lib/attachments";
+import { newSessionId } from "@/decision/session";
 import { useTasks, type TaskCard, type TaskMode } from "./tasks";
 import { useSettings } from "./settings";
 import { useMemory } from "./memory";
@@ -99,8 +100,6 @@ export function shouldOnboard(tasks: readonly TaskCard[]): boolean {
   return !tasks.some((t) => t.onboarding && t.status === "running");
 }
 
-let seq = 0;
-
 export const useChat = create<ChatState>((set, get) => ({
   sessions: [],
   activeId: null,
@@ -152,7 +151,7 @@ export const useChat = create<ChatState>((set, get) => ({
     if (sessionId) {
       set((s) => ({ sessions: s.sessions.map((x) => (x.id === sessionId ? { ...x, updatedAt: now } : x)) }));
     } else {
-      sessionId = `s-${++seq}`;
+      sessionId = newSessionId();
       const projectId = opts.projectId ?? null;
       set((s) => ({ sessions: [{ id: sessionId!, title: title(goal), projectId, createdAt: now, updatedAt: now }, ...s.sessions], activeId: sessionId }));
     }

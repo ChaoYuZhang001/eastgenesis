@@ -3,8 +3,9 @@
 import type { AppError, AppInfo } from "@/lib/ipc";
 import type { Goal, GoalChange, GoalInput } from "@/decision/goal";
 import type { Project, ProjectInput, ProjectUsage } from "@/decision/project";
+import type { SessionInput, StoredSession, UsageCall } from "@/decision/session";
 
-export type { Goal, GoalChange, GoalInput, Project, ProjectInput, ProjectUsage };
+export type { Goal, GoalChange, GoalInput, Project, ProjectInput, ProjectUsage, SessionInput, StoredSession, UsageCall };
 
 export type BackendKind = "tauri" | "mock";
 export type KeySource = "keychain" | "env" | "none";
@@ -230,6 +231,17 @@ export interface Backend {
   saveGoal(g: GoalInput): Promise<Goal>;
   /** 状态转换和轮次操作（decision/goal.ts applyGoalChange）；删除目标是 { op: "transition", to: "deleted" } */
   updateGoal(id: string, change: GoalChange): Promise<Goal>;
+
+  /** 会话：桌面端存 SQLite 的 sessions 表（迁移 5），浏览器模式存内存。写入前脱敏、截断（decision/session.ts） */
+  listSessions(): Promise<StoredSession[]>;
+  /** 整条写入：没有就新建，有就覆盖标题和回合 */
+  saveSession(s: SessionInput): Promise<StoredSession>;
+  /** 软删除 */
+  deleteSession(id: string): Promise<void>;
+  /** 模型调用记录（只存模型和 tokens，不存金额）；同一个 id 只记一次 */
+  recordUsage(calls: readonly UsageCall[]): Promise<void>;
+  /** created_at >= since 的调用记录，按时间先后 */
+  listUsage(since: number): Promise<UsageCall[]>;
 
   /** 非敏感设置（路由偏好、能力矩阵覆盖等），JSON 字符串 */
   loadSetting(key: string): Promise<string | null>;

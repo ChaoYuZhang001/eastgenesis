@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { ProjectDialog } from "@/components/project/ProjectDialog";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { useChat } from "@/stores/chat";
+import { deleteSession } from "@/stores/history";
+import { useTasks } from "@/stores/tasks";
 import { useDialogs } from "@/stores/dialogs";
 import { useGoals } from "@/stores/goals";
 import { useProjects } from "@/stores/projects";
@@ -28,7 +30,9 @@ export function Dialogs() {
 
   if (pending) {
     const linked = sessions.filter((s) => s.projectId === pending.id);
-    const parts = [pending.usage.goals && `${pending.usage.goals} 个目标`, linked.length && `${linked.length} 个会话`, pending.usage.memories && `${pending.usage.memories} 条记忆`].filter(Boolean);
+    // 会话数：已存进数据库的（后端数）和本次启动还没写回的，取大的
+    const n = Math.max(pending.usage.sessions ?? 0, linked.length);
+    const parts = [pending.usage.goals && `${pending.usage.goals} 个目标`, n && `${n} 个会话`, pending.usage.memories && `${pending.usage.memories} 条记忆`].filter(Boolean);
     return (
       <ConfirmDialog
         title={`删除「${pending.name}」？`}
@@ -58,6 +62,34 @@ export function Dialogs() {
   if (current.kind === "new-project" || current.kind === "edit-project") {
     const project = current.kind === "edit-project" ? projects.find((p) => p.id === current.id) ?? null : null;
     return <ProjectDialog project={project} onClose={done} />;
+  }
+  if (current.kind === "delete-session") {
+    const sid = current.id;
+    return (
+      <ConfirmDialog
+        title="删除这个会话？"
+        body={
+          <>
+            它会从列表里移除，记录仍保存在本机。
+            {note && <span role="alert" className="mt-2 block text-foreground">{note}</span>}
+          </>
+        }
+        confirm="删除"
+        busy={busy}
+        onCancel={done}
+        onConfirm={async () => {
+          setBusy(true);
+          const err = await deleteSession(sid);
+          setBusy(false);
+          if (err) return setNote(err);
+          // 进行中的回合先停掉，再从界面上移除
+          for (const t of useTasks.getState().tasks) if (t.sessionId === sid && t.status === "running") useTasks.getState().cancel(t.id);
+          useTasks.setState((s) => ({ tasks: s.tasks.filter((t) => t.sessionId !== sid) }));
+          removeSessions([sid]);
+          done();
+        }}
+      />
+    );
   }
   const goal = current.id;
   const abandonIt = current.kind === "abandon-goal";

@@ -8,7 +8,7 @@ import { proposeAlignment, proposeMemory, type MemoryProposal } from "@/lib/memo
 import { appendEvent } from "@/lib/subagents";
 import { DEMO_TOOLS, getBackend } from "@/platform";
 import type { PermissionMode, Preference } from "@/decision";
-import { preferenceSource, type PreferenceSource } from "@/decision/project";
+import { newId, preferenceSource, type PreferenceSource } from "@/decision/project";
 import { health } from "./health";
 import { activeMcpTools } from "./mcp";
 import { useMemory } from "./memory";
@@ -110,7 +110,7 @@ function resolvePreference(opts: SubmitOptions): { preference: Preference; prefe
 const MAX_EVENTS = 500;
 const controllers = new Map<string, AbortController>();
 const confirms = new Map<string, (ok: boolean) => void>();
-let seq = 0;
+let seq = Date.now();
 
 export const useTasks = create<TasksState>((set, get) => {
   // 卡片已关闭时，运行收尾的事件直接丢弃（返回原 state，不触发重新渲染）
@@ -186,7 +186,8 @@ export const useTasks = create<TasksState>((set, get) => {
       const g = goal.trim().slice(0, MAX_GOAL);
       if (!g) return null;
       const n = ++seq;
-      const id = `task-${n}`;
+      // 会话持久化后，任务 id 要跨重启唯一；seq 只用来排同一会话里的先后（读回的回合 seq 小于本次启动的）
+      const id = newId("task");
       const files = (opts.files ?? []).map((f) => ({ name: f.name, text: f.text }));
       const card: TaskCard = {
         id,

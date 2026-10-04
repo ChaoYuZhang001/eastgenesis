@@ -49,11 +49,11 @@ describe("项目 store", () => {
     await useMemory.getState().save({ kind: "preference", text: "用简体中文回答" });
 
     expect(await useProjects.getState().requestDelete(a.id)).toBeNull();
-    expect(useProjects.getState().pendingDelete).toEqual({ id: a.id, name: "A", usage: { goals: 2, memories: 1 } });
+    expect(useProjects.getState().pendingDelete).toEqual({ id: a.id, name: "A", usage: { goals: 2, memories: 1, sessions: 0 } });
     // 还没确认：什么都没删
     expect(await getBackend().listGoals(a.id)).toHaveLength(2);
 
-    expect(await useProjects.getState().confirmDelete()).toEqual({ goals: 2, memories: 1 });
+    expect(await useProjects.getState().confirmDelete()).toEqual({ goals: 2, memories: 1, sessions: 0 });
     expect(useProjects.getState().pendingDelete).toBeNull();
     expect(names()).toEqual(["B"]);
     expect(useGoals.getState().items.map((g) => g.description)).toEqual(["B 的目标"]);
@@ -71,7 +71,7 @@ describe("项目 store", () => {
 
     const listGoals = vi.spyOn(getBackend(), "listGoals");
     await useProjects.getState().requestDelete(p.id);
-    expect(await useProjects.getState().confirmDelete()).toEqual({ goals: 0, memories: 0 });
+    expect(await useProjects.getState().confirmDelete()).toEqual({ goals: 0, memories: 0, sessions: 0 });
     expect(listGoals).not.toHaveBeenCalled();
     expect(useGoals.getState().loaded).toBe(false);
   });
@@ -94,15 +94,15 @@ describe("项目 store", () => {
     setBackend({ ...backend, projectUsage: (id) => new Promise((resolve) => waits.set(id, resolve)) });
     const first = useProjects.getState().requestDelete(a.id);
     const second = useProjects.getState().requestDelete(b.id);
-    waits.get(b.id)!({ goals: 0, memories: 0 });
+    waits.get(b.id)!({ goals: 0, memories: 0, sessions: 0 });
     await second;
-    waits.get(a.id)!({ goals: 9, memories: 9 });
+    waits.get(a.id)!({ goals: 9, memories: 9, sessions: 0 });
     await first;
     expect(useProjects.getState().pendingDelete?.id).toBe(b.id);
 
     const third = useProjects.getState().requestDelete(a.id);
     useProjects.getState().cancelDelete();
-    waits.get(a.id)!({ goals: 0, memories: 0 });
+    waits.get(a.id)!({ goals: 0, memories: 0, sessions: 0 });
     await third;
     expect(useProjects.getState().pendingDelete).toBeNull();
   });

@@ -1,5 +1,5 @@
 // 项目的 SQLite 读写（桌面端）：projects 表由 eg-core 的迁移 4 创建，context_folders 列存 JSON。浏览器模式用 platform/mock-project.ts。
-// 删除是软删除：写 deleted_at，同一个时间戳连带写到这个项目的目标和记忆；所有查询都只看 deleted_at IS NULL 的行。
+// 删除是软删除：写 deleted_at，同一个时间戳连带写到这个项目的目标、记忆和会话（迁移 5）；所有查询都只看 deleted_at IS NULL 的行。
 // 占位符规则同 db-memory.ts：每条语句里 $1、$2… 按出现顺序递增，不重复使用。
 import { MAX_PROJECTS, PROJECT_ID, invalidProjectId, isPreference, mergeProject, newProjectId, normalizeProject, projectFull, projectNotFound } from "@/decision/project";
 import type { Project, ProjectInput, ProjectUsage } from "@/platform/types";
@@ -16,9 +16,10 @@ export const PROJECT_SQL = {
     "UPDATE projects SET name = $1, description = $2, instructions = $3, context_folders = $4, routing_preference = $5, updated_at = $6 WHERE id = $7 AND deleted_at IS NULL",
   archive: "UPDATE projects SET archived = $1, updated_at = $2 WHERE id = $3 AND deleted_at IS NULL",
   usage:
-    "SELECT (SELECT COUNT(*) FROM goals WHERE project_id = $1 AND deleted_at IS NULL) AS goals, (SELECT COUNT(*) FROM memories WHERE project_id = $2 AND deleted_at IS NULL) AS memories",
+    "SELECT (SELECT COUNT(*) FROM goals WHERE project_id = $1 AND deleted_at IS NULL) AS goals, (SELECT COUNT(*) FROM memories WHERE project_id = $2 AND deleted_at IS NULL) AS memories, (SELECT COUNT(*) FROM sessions WHERE project_id = $3 AND deleted_at IS NULL) AS sessions",
   // 连带删除：先记忆、再目标、最后项目。中途失败时项目还在，可以再删一次；每条都只改还没删的行，重复执行无副作用
   removeMemories: "UPDATE memories SET deleted_at = $1 WHERE project_id = $2 AND deleted_at IS NULL",
+  removeSessions: "UPDATE sessions SET deleted_at = $1, updated_at = $2 WHERE project_id = $3 AND deleted_at IS NULL",
   removeGoals: "UPDATE goals SET status = 'deleted', deleted_at = $1, updated_at = $2 WHERE project_id = $3 AND deleted_at IS NULL",
   remove: "UPDATE projects SET deleted_at = $1, updated_at = $2 WHERE id = $3 AND deleted_at IS NULL",
   alive: "SELECT 1 AS ok FROM projects WHERE id = $1 AND deleted_at IS NULL",
@@ -89,8 +90,8 @@ export const archiveProject = (id: string, now = Date.now()) => setArchived(id, 
 export const unarchiveProject = (id: string, now = Date.now()) => setArchived(id, false, now);
 
 async function usage(db: Db, id: string): Promise<ProjectUsage> {
-  const [r] = await db.select<{ goals: number; memories: number }[]>(PROJECT_SQL.usage, [id, id]);
-  return { goals: Number(r?.goals ?? 0), memories: Number(r?.memories ?? 0) };
+  const [r] = await db.select<{ goals: number; memories: number; sessions: number }[]>(PROJECT_SQL.usage, [id, id, id]);
+  return { goals: Number(r?.goals ?? 0), memories: Number(r?.memories ?? 0), sessions: Number(r?.sessions ?? 0) };
 }
 
 export async function projectUsage(id: string): Promise<ProjectUsage> {
@@ -108,6 +109,7 @@ export async function deleteProject(id: string, now = Date.now()): Promise<Proje
     await getProject(db, id);
     const n = await usage(db, id);
     await db.execute(PROJECT_SQL.removeMemories, [now, id]);
+    await db.execute(PROJECT_SQL.removeSessions, [now, now, id]);
     await db.execute(PROJECT_SQL.removeGoals, [now, now, id]);
     await db.execute(PROJECT_SQL.remove, [now, now, id]);
     return n;

@@ -99,6 +99,36 @@ pub const MIGRATIONS: &[(i64, &str, &str)] = &[
          CREATE INDEX IF NOT EXISTS memories_project ON memories (project_id);\n\
          INSERT OR REPLACE INTO app_meta (key, value) VALUES ('schema_version', '4');",
     ),
+    (
+        5,
+        "create_sessions_usage",
+        // 会话与模型调用记录（src/lib/db-session.ts）。turns 列存 JSON，写入前已脱敏、截断（src/decision/session.ts）。
+        // 删除是软删除；删项目时同一个 deleted_at 级联写到它的会话。usage_calls 只存模型和 tokens，不存金额。
+        "CREATE TABLE IF NOT EXISTS sessions (\n\
+           id TEXT PRIMARY KEY NOT NULL,\n\
+           project_id TEXT REFERENCES projects(id),\n\
+           title TEXT NOT NULL,\n\
+           turns TEXT NOT NULL DEFAULT '[]',\n\
+           created_at INTEGER NOT NULL,\n\
+           updated_at INTEGER NOT NULL,\n\
+           deleted_at INTEGER\n\
+         );\n\
+         CREATE INDEX IF NOT EXISTS sessions_project ON sessions (project_id);\n\
+         CREATE TABLE IF NOT EXISTS usage_calls (\n\
+           id TEXT PRIMARY KEY NOT NULL,\n\
+           session_id TEXT,\n\
+           task_id TEXT NOT NULL,\n\
+           goal_id TEXT,\n\
+           project_id TEXT,\n\
+           profile_id TEXT NOT NULL,\n\
+           input_tokens INTEGER NOT NULL CHECK (input_tokens >= 0),\n\
+           output_tokens INTEGER NOT NULL CHECK (output_tokens >= 0),\n\
+           baseline_profile_id TEXT,\n\
+           created_at INTEGER NOT NULL\n\
+         );\n\
+         CREATE INDEX IF NOT EXISTS usage_calls_created ON usage_calls (created_at);\n\
+         INSERT OR REPLACE INTO app_meta (key, value) VALUES ('schema_version', '5');",
+    ),
 ];
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -151,6 +181,20 @@ mod tests {
         // 已发布的迁移不改：前三条里不出现新表
         for (v, _, old) in MIGRATIONS.iter().filter(|m| m.0 < 4) {
             assert!(!old.contains("projects") && !old.contains("goals"), "迁移 {v}");
+        }
+    }
+
+    #[test]
+    fn migration_5_adds_sessions_and_usage_calls() {
+        let (_, name, sql) = MIGRATIONS.iter().find(|m| m.0 == 5).expect("迁移 5");
+        assert_eq!(*name, "create_sessions_usage");
+        for part in ["CREATE TABLE IF NOT EXISTS sessions", "CREATE TABLE IF NOT EXISTS usage_calls", "project_id TEXT REFERENCES projects(id)", "deleted_at INTEGER"] {
+            assert!(sql.contains(part), "缺少：{part}");
+        }
+        // 金额不入库：只存模型和 tokens
+        assert!(!sql.contains("cost") && !sql.contains("price"));
+        for (v, _, old) in MIGRATIONS.iter().filter(|m| m.0 < 5) {
+            assert!(!old.contains("sessions") && !old.contains("usage_calls"), "迁移 {v}");
         }
     }
 

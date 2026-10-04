@@ -12,6 +12,7 @@ import type { Backend } from "@/platform/types";
 import { GOAL_SQL } from "@/lib/db-goal";
 import { MEMORY_SQL } from "@/lib/db-memory";
 import { PROJECT_SQL } from "@/lib/db-project";
+import { SESSION_SQL } from "@/lib/db-session";
 import { goalPhase } from "@/decision/goal";
 import { CLAIM_ONLY_REASON } from "@/decision/evidence";
 import { asDb, loadSqlite, migratedDb, placeholdersAscend, type RawDb } from "./sqlite-helper";
@@ -105,8 +106,8 @@ for (const kind of ["mock", "sqlite"] as const) {
       const gb = await b.saveGoal({ project_id: other.id, description: "B 的目标" });
       await b.saveMemory({ kind: "fact", text: "A 项目用 UTC+8", project_id: a.id });
       await b.saveMemory({ kind: "preference", text: "全局：用简体中文回答" });
-      expect(await b.projectUsage(a.id)).toEqual({ goals: 2, memories: 1 });
-      expect(await b.deleteProject(a.id)).toEqual({ goals: 2, memories: 1 });
+      expect(await b.projectUsage(a.id)).toEqual({ goals: 2, memories: 1, sessions: 0 });
+      expect(await b.deleteProject(a.id)).toEqual({ goals: 2, memories: 1, sessions: 0 });
       expect((await b.listProjects()).map((p) => p.id)).toEqual([other.id]);
       expect((await b.listGoals()).map((g) => g.id)).toEqual([gb.id]);
       expect(await b.listGoals(a.id)).toEqual([]);
@@ -142,7 +143,7 @@ describe.skipIf(!sqlite)("桌面端 SQL（node:sqlite）", () => {
   });
 
   it("每条语句的占位符按出现顺序递增、不重复，个数和绑定参数一致（用例里已逐条执行）", () => {
-    for (const [name, sql] of Object.entries({ ...prefixed("project", PROJECT_SQL), ...prefixed("goal", GOAL_SQL), ...prefixed("memory", MEMORY_SQL) })) {
+    for (const [name, sql] of Object.entries({ ...prefixed("project", PROJECT_SQL), ...prefixed("goal", GOAL_SQL), ...prefixed("memory", MEMORY_SQL), ...prefixed("session", SESSION_SQL) })) {
       expect(placeholdersAscend(sql), name).toBe(true);
       const nums = [...sql.matchAll(/\$(\d+)/g)].map((m) => Number(m[1]));
       expect(nums, name).toEqual(nums.map((_, i) => i + 1));

@@ -15,7 +15,7 @@ export interface MockProjects {
   alive(id: string): boolean;
 }
 
-export function createMockProjects(now: () => number = Date.now, cascade: ProjectCascade = { usage: () => ({ goals: 0, memories: 0 }), remove: () => {} }): MockProjects {
+export function createMockProjects(now: () => number = Date.now, cascade: ProjectCascade = { usage: () => ({ goals: 0, memories: 0, sessions: 0 }), remove: () => {} }): MockProjects {
   const items = new Map<string, Project>();
   const get = (id: string): Project => {
     if (!PROJECT_ID.test(id)) throw invalidProjectId();

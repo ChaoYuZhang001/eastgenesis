@@ -202,12 +202,19 @@ function SessionRow({ session, nested }: { session: Session; nested?: boolean })
   const tasks = useTasks((s) => s.tasks);
   const mine = useMemo(() => tasks.filter((t) => t.sessionId === session.id), [tasks, session.id]);
   const saved = savedText(useTasksSavings(mine));
+  const ask = useDialogs((s) => s.ask);
   return (
     <Row
       icon={<MessageSquare aria-hidden />}
       name={session.title}
       summary={[sessionSummary(mine), saved].filter(Boolean).join(" · ")}
       summaryTitle={saved ? SAVINGS_HINT : undefined}
+      menuLabel="会话的更多操作"
+      menu={
+        <MenuItem icon={<Trash2 aria-hidden />} onSelect={() => ask({ kind: "delete-session", id: session.id })}>
+          删除会话…
+        </MenuItem>
+      }
       selected={main.kind === "chat" && activeId === session.id}
       nested={nested}
       onOpen={() => {

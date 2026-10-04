@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/app";
 import { useChat } from "@/stores/chat";
 import { useGoals } from "@/stores/goals";
+import { loadHistory, watchHistory } from "@/stores/history";
+import { useUsage } from "@/stores/usage";
 import { useMcp } from "@/stores/mcp";
 import { useMemory } from "@/stores/memory";
 import { useProjects } from "@/stores/projects";
@@ -49,6 +51,10 @@ export default function App() {
     void useGoals.getState().load();
     // 内置文件工具（~/Downloads）随应用启动连接；mock 后端没有内置服务器
     void useMcp.getState().startBuiltins();
+    // 会话持久化（迁移 5）：读回历史会话和本月的调用记录，之后每轮结束写回
+    void loadHistory();
+    void useUsage.getState().load();
+    return watchHistory();
   }, [phase]);
 
   const newTask = useCallback(() => {

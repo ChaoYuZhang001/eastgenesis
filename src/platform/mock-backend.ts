@@ -9,6 +9,7 @@ import { createMockMcp } from "./mock-mcp";
 import { createMockGoals } from "./mock-goal";
 import { createMockMemoryStore } from "./mock-memory";
 import { createMockProjects } from "./mock-project";
+import { createMockSessions } from "./mock-session";
 import { createMockSkills } from "./mock-skill";
 import { ANTHROPIC_PATHS, CUSTOM_ID, OFFICIAL_BASE, OFFICIAL_PROVIDERS, OPENAI_PATHS, err, isLocalUrl, validateCustom, validateKey, validateProviderId } from "./mock-rules";
 import type { Backend, CustomProvider, KeyStatus, ProxyRequest, ProxyResponse } from "./types";
@@ -43,11 +44,13 @@ export function createMockBackend(o: MockOptions = {}): Backend {
   const alive = (id: string) => projects.alive(id);
   const memory = createMockMemoryStore(Date.now, alive);
   const goals = createMockGoals(Date.now, alive);
+  const sessions = createMockSessions(alive);
   const projects = createMockProjects(Date.now, {
-    usage: (id) => ({ goals: goals.countByProject(id), memories: memory.countByProject(id) }),
+    usage: (id) => ({ goals: goals.countByProject(id), memories: memory.countByProject(id), sessions: sessions.countByProject(id) }),
     remove: (id) => {
       memory.removeByProject(id);
       goals.removeByProject(id);
+      sessions.removeByProject(id);
     },
   });
 
@@ -181,6 +184,7 @@ export function createMockBackend(o: MockOptions = {}): Backend {
     ...createMockSkills(),
     ...projects.api,
     ...goals.api,
+    ...sessions.api,
 
     async loadSetting(key) {
       assertSettingKey(key);
