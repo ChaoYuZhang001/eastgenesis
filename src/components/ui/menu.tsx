@@ -8,6 +8,71 @@ import { cn } from "@/lib/utils";
 interface MenuCtx {
   close(): void;
 }
+
+const MARGIN = 8;
+const GAP = 4;
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, Math.max(lo, hi)));
+
+/**
+ * 弹出层用 fixed 定位在视口里：放在滚动容器里的菜单用 absolute 会被容器的 overflow 裁掉（输入框、内容栏都在滚动容器里）。
+ * 放不下就翻面（上 ↔ 下、右 ↔ 左），最后夹在视口内。
+ */
+export function placePopup(anchor: DOMRect, pop: DOMRect, side: "top" | "bottom" | "right", align: "start" | "end"): { left: number; top: number; flipped: boolean } {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let flipped = false;
+  let left: number;
+  let top: number;
+  if (side === "right") {
+    left = anchor.right + GAP;
+    if (left + pop.width > vw - MARGIN) {
+      if (anchor.left - GAP - pop.width >= MARGIN) {
+        left = anchor.left - GAP - pop.width;
+        flipped = true;
+      } else left = vw - MARGIN - pop.width;
+    }
+    top = clamp(anchor.top, MARGIN, vh - MARGIN - pop.height);
+  } else {
+    left = clamp(align === "start" ? anchor.left : anchor.right - pop.width, MARGIN, vw - MARGIN - pop.width);
+    const above = anchor.top - GAP - pop.height;
+    const below = anchor.bottom + GAP;
+    if (side === "top") {
+      top = above;
+      if (above < MARGIN && below + pop.height <= vh - MARGIN) {
+        top = below;
+        flipped = true;
+      }
+    } else {
+      top = below;
+      if (below + pop.height > vh - MARGIN && above >= MARGIN) {
+        top = above;
+        flipped = true;
+      }
+    }
+    top = clamp(top, MARGIN, vh - MARGIN - pop.height);
+  }
+  return { left: Math.max(MARGIN, left), top, flipped };
+}
+
+/** 打开期间窗口尺寸变了、页面滚动了，位置就不准了：直接关掉（菜单自己内部的滚动不算） */
+function useCloseOnMove(open: boolean, inside: RefObject<HTMLElement>, onMove: () => void) {
+  useEffect(() => {
+    if (!open) return;
+    const scroll = (e: Event) => {
+      if (e.target instanceof Node && inside.current?.contains(e.target)) return;
+      onMove();
+    };
+    window.addEventListener("resize", onMove);
+    window.addEventListener("scroll", scroll, true);
+    return () => {
+      window.removeEventListener("resize", onMove);
+      window.removeEventListener("scroll", scroll, true);
+    };
+  }, [open, inside, onMove]);
+}
+
+type Pos = { left: number; top: number; flipped: boolean } | null;
+const popupStyle = (pos: Pos) => ({ position: "fixed" as const, left: pos?.left ?? 0, top: pos?.top ?? 0, visibility: pos ? ("visible" as const) : ("hidden" as const), maxHeight: `calc(100vh - ${MARGIN * 2}px)` });
 const Ctx = createContext<MenuCtx>({ close: () => {} });
 
 const ITEM = "[role^=menuitem]:not([aria-disabled=true])";
@@ -53,6 +118,7 @@ export interface MenuProps {
 
 export function Menu({ label, trigger, triggerClassName, menuLabel, side = "bottom", align = "start", width = "w-64", title, children }: MenuProps) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<Pos>(null);
   const btn = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -60,11 +126,19 @@ export function Menu({ label, trigger, triggerClassName, menuLabel, side = "bott
     setOpen(false);
     btn.current?.focus();
   }, []);
+  const dismiss = useCallback(() => setOpen(false), []);
 
-  useOutside(open, [btn, menu], () => setOpen(false));
+  useOutside(open, [btn, menu], dismiss);
+  useCloseOnMove(open, menu, dismiss);
+  // 先按隐藏状态渲染、量好尺寸再放到位（在绘制之前），用户看不到跳动
   useLayoutEffect(() => {
-    if (open) focusables(menu.current)[0]?.focus();
-  }, [open]);
+    if (!open || !btn.current || !menu.current) return setPos(null);
+    setPos(placePopup(btn.current.getBoundingClientRect(), menu.current.getBoundingClientRect(), side, align));
+  }, [open, side, align]);
+  // 隐藏的元素拿不到焦点：放到位以后再聚焦第一项
+  useEffect(() => {
+    if (open && pos) focusables(menu.current)[0]?.focus();
+  }, [open, pos]);
 
   return (
     <div className="relative">
@@ -94,12 +168,9 @@ export function Menu({ label, trigger, triggerClassName, menuLabel, side = "bott
           role="menu"
           aria-label={menuLabel ?? label}
           onKeyDown={(e) => onMenuKey(e, menu.current, close)}
-          className={cn(
-            "absolute z-40 rounded-md border border-border bg-popover p-1 text-sm text-popover-foreground",
-            width,
-            side === "top" ? "bottom-full mb-2" : "top-full mt-2",
-            align === "start" ? "left-0" : "right-0",
-          )}
+          data-side={pos?.flipped ? (side === "top" ? "bottom" : "top") : side}
+          style={popupStyle(pos)}
+          className={cn("z-40 overflow-y-auto rounded-md border border-border bg-popover p-1 text-sm text-popover-foreground", width)}
         >
           <Ctx.Provider value={{ close }}>{children}</Ctx.Provider>
         </div>
@@ -210,12 +281,18 @@ export function MenuSeparator() {
 export function SubMenu({ icon, label, hint, children, width = "w-64" }: { icon?: ReactNode; label: string; hint?: ReactNode; children: ReactNode; width?: string }) {
   const parent = useContext(Ctx);
   const [open, setOpen] = useState(false);
+  // 放不下就翻到左边：菜单靠窗口右边时（例如输入框右下角的路由下拉），向右展开会超出窗口
+  const [pos, setPos] = useState<Pos>(null);
   const item = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   const id = useId();
   useLayoutEffect(() => {
-    if (open) focusables(menu.current)[0]?.focus();
+    if (!open || !item.current || !menu.current) return setPos(null);
+    setPos(placePopup(item.current.getBoundingClientRect(), menu.current.getBoundingClientRect(), "right", "start"));
   }, [open]);
+  useEffect(() => {
+    if (open && pos) focusables(menu.current)[0]?.focus();
+  }, [open, pos]);
   const back = () => {
     setOpen(false);
     item.current?.focus();
@@ -262,7 +339,9 @@ export function SubMenu({ icon, label, hint, children, width = "w-64" }: { icon?
             }
             onMenuKey(e, menu.current, parent.close);
           }}
-          className={cn("absolute bottom-0 left-full z-50 ml-1 rounded-md border border-border bg-popover p-1 text-sm", width)}
+          data-side={pos?.flipped ? "left" : "right"}
+          style={popupStyle(pos)}
+          className={cn("z-50 overflow-y-auto rounded-md border border-border bg-popover p-1 text-sm", width)}
         >
           <Ctx.Provider value={parent}>{children}</Ctx.Provider>
         </div>

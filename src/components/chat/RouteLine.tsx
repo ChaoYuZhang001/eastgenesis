@@ -53,6 +53,7 @@ export function RouteLine({ summary, durationMs, card }: { summary: RouteSummary
         aria-expanded={open}
         aria-controls={body}
         aria-haspopup="dialog"
+        aria-label={`${routeLineText(summary, saved)} · 查看路由决策`}
         onClick={() => {
           if (!open) setTab("route");
           setOpen((v) => !v);
@@ -61,9 +62,9 @@ export function RouteLine({ summary, durationMs, card }: { summary: RouteSummary
       >
         <ChevronRight aria-hidden className={cn("size-3 shrink-0 transition-transform", open && "rotate-90")} />
         <span className="truncate" title={saved ? SAVINGS_HINT : undefined}>
-          {routeLineText(summary, durationMs, saved)}
+          {routeLineText(summary, saved)}
         </span>
-        <span className="shrink-0">· {summary.locked ? "查看路由决策" : "为什么选它 · 查看路由决策"}</span>
+        <span className="shrink-0">· {summary.locked ? "查看详情" : "为什么选它"}</span>
       </button>
 
       {open && (
@@ -208,13 +209,13 @@ function PriceCompare({ summary, savings }: { summary: RouteSummary; savings: Sa
         {used && (
           <>
             <dt>实际用的</dt>
-            <dd className="break-all text-foreground">
+            <dd className="break-words text-foreground">
               {displayModel(used)}：{per(used)}
             </dd>
           </>
         )}
         <dt>最强模式会选</dt>
-        <dd className="break-all text-foreground">{base ? `${displayModel(base)}：${per(base)}` : "没有可比较的模型"}</dd>
+        <dd className="break-words text-foreground">{base ? `${displayModel(base)}：${per(base)}` : "没有可比较的模型"}</dd>
         {savings.priced > 0 && (
           <>
             <dt>这次</dt>

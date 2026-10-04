@@ -2,6 +2,7 @@
 // 权限三档语义不变；路由下拉（自动 / 省钱 / 最强 / 手动锁定）；锁定后跳过路由决策；会话列表
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "@/App";
+import { placePopup } from "@/components/ui/menu";
 import { useChat } from "@/stores/chat";
 import { useSettings } from "@/stores/settings";
 import { useTasks } from "@/stores/tasks";
@@ -117,6 +118,33 @@ describe("首屏", () => {
     expect(pill).toHaveTextContent("锁定 · gpt-5.6-luna");
   });
 
+  it("弹出位置：放不下就翻面（子菜单右 → 左，向上的菜单 → 向下），并夹在窗口内", () => {
+    const rect = (left: number, top: number, width: number, height: number) => ({ left, top, width, height, right: left + width, bottom: top + height }) as DOMRect;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    // 子菜单：锚点靠右边，右边放不下 → 翻到左边
+    const sub = placePopup(rect(vw - 300, 200, 288, 40), rect(0, 0, 288, 400), "right", "start");
+    expect(sub.flipped).toBe(true);
+    expect(sub.left + 288).toBeLessThanOrEqual(vw - 300);
+    // 右边放得下 → 不翻
+    expect(placePopup(rect(100, 200, 200, 40), rect(0, 0, 200, 300), "right", "start")).toMatchObject({ flipped: false, left: 304 });
+    // 向上的菜单：锚点贴着顶，上面放不下 → 翻到下面
+    const up = placePopup(rect(100, 20, 32, 32), rect(0, 0, 256, 300), "top", "start");
+    expect(up).toMatchObject({ flipped: true, top: 56 });
+    // 右对齐、离右边很近：夹在窗口内
+    const end = placePopup(rect(vw - 40, vh - 60, 32, 32), rect(0, 0, 288, 200), "top", "end");
+    expect(end.left + 288).toBeLessThanOrEqual(vw - 8);
+    expect(end.top).toBeGreaterThanOrEqual(8);
+  });
+
+  it("菜单打开期间窗口尺寸变了就关掉（位置已经不准）", async () => {
+    await boot();
+    fireEvent.click(screen.getByRole("button", { name: "路由" }));
+    expect(screen.getByRole("menu", { name: "路由" })).toBeInTheDocument();
+    fireEvent(window, new Event("resize"));
+    await waitFor(() => expect(screen.queryByRole("menu", { name: "路由" })).not.toBeInTheDocument());
+  });
+
   it("路由菜单可以只用键盘操作：↓ 打开、↓↑ 移动、Esc 关闭并把焦点还给胶囊", async () => {
     await boot();
     const pill = screen.getByRole("button", { name: "路由" });
@@ -160,7 +188,7 @@ describe("首屏", () => {
     expect(within(c).getByRole("list", { name: "执行步骤" })).toBeVisible();
 
     const line = within(c).getByRole("button", { name: /查看路由决策/ });
-    expect(line).toHaveTextContent(/手动锁定/);
+    expect(line).toHaveTextContent(new RegExp(`^手动锁定 ${lock.replace(/^custom:/, "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}.*· 查看详情$`));
     const route = within(openRoute(c)).getByRole("region", { name: "路由决策详情" });
     expect(route).toHaveTextContent(`你手动锁定了 ${lock.replace(/^custom:/, "")}，本次跳过路由决策，不会自动降级。`);
     expect(label.length).toBeGreaterThan(0);

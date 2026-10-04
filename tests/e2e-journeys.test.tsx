@@ -48,9 +48,9 @@ describe("端到端：首次使用到拿到成果", () => {
     await within(c).findByText(/^已完成 · /, {}, LONG);
     expect(within(c).getByRole("region", { name: "成果" })).toHaveTextContent(`（模拟）已完成：${goal}`);
 
-    // 回答下面那行路由记录：折叠时是模型、和最强模式比省了多少、耗时；点开是浮层；不出现内部状态（判断来源、停用的模型）
+    // 回答下面那行路由记录（V3 5.2）：折叠时是模型和「和最强模式比省了多少」+「为什么选它」；耗时、tokens 在浮层的执行过程里
     const line = within(c).getByRole("button", { name: /查看路由决策/ });
-    expect(line).toHaveTextContent(/使用 \S+ · (省|多花) (<\$0\.01|\$\d+\.\d{2}) · \d+\.\d+s/);
+    expect(line).toHaveTextContent(/^使用 \S+ · (省|多花) (<\$0\.01|\$\d+\.\d{2})· 为什么选它$/);
     expect(line.textContent).not.toMatch(/评分|成本档位/);
     const overlay = openRoute(c);
     const route = within(overlay).getByRole("region", { name: "路由决策详情" });
@@ -64,8 +64,9 @@ describe("端到端：首次使用到拿到成果", () => {
     expect(price).toHaveTextContent(/每百万 tokens/);
     expect(route.textContent).not.toMatch(/评分|成本档位|判断来源|Jev|没有参与的模型|已停用|Provider|规则兜底|排第一/);
 
-    // 完整时间线在浮层的「执行过程」里
+    // 完整时间线、耗时和 tokens 在浮层的「执行过程」里
     runTab(overlay);
+    expect(overlay).toHaveTextContent(/耗时 \d+\.\d+s · 模型调用 \d+ 次 · [\d.]+k? tokens/);
     const log = within(overlay).getByRole("log", { name: "执行时间线" });
     for (const s of ["任务分析", "路由决策", "工具调用", "反思", "完成"]) expect(within(log).getAllByText(s).length).toBeGreaterThan(0);
     fireEvent.keyDown(overlay, { key: "Escape" });

@@ -54,13 +54,16 @@ export const CANDIDATE_WHY = {
   diverse: "不同厂商，主模型故障时备用",
   sameProvider: "同厂商次优，最后兜底",
   ruleFallback: "本地模型优先，最省钱",
+  /** 兜底选到的不是本机模型：只是「剩下的模型里最后一个兜底」，不能说它省钱（可能正好最贵） */
+  ruleFallbackCloud: "前面都失败时的最后兜底",
 } as const;
 
 function candidateWhy(e: ChainEntry): string {
   if (e.reason === "手动锁定") return "你手动锁定了这个模型";
   if (e.reason === "用户锁定" || e.reason === "用户指定下一步") return `手动干预：${e.reason}`;
   if (e.stage === "primary") return CANDIDATE_WHY.primary;
-  if (e.stage === "rule_fallback") return CANDIDATE_WHY.ruleFallback;
+  // 规则兜底优先本机模型；没有可用的本机模型时排到的是剩下的云端模型，这时不说「省钱」
+  if (e.stage === "rule_fallback") return e.provider === "ollama" ? CANDIDATE_WHY.ruleFallback : CANDIDATE_WHY.ruleFallbackCloud;
   return e.reason.startsWith("同一 Provider") ? CANDIDATE_WHY.sameProvider : CANDIDATE_WHY.diverse;
 }
 
@@ -147,18 +150,19 @@ export function formatDuration(ms: number): string {
   return `${Math.floor(s / 60)} 分 ${s % 60} 秒`;
 }
 
-/** 折叠状态那一行的文字：「使用 X · 省 $0.12 · 12.4s · 1.2k tokens」；saved 是 savings.ts 的 savedText，没有可计价的调用时不写 */
-export function routeLineText(s: RouteSummary, durationMs: number | null, saved: string | null = null): string {
+/**
+ * 折叠状态那一行的文字（docs/UI_LAYOUT_V3.md 5.2）：「使用 X · 省 $0.12」「手动锁定 X」，有降级时接上降级说明。
+ * 耗时和 tokens 不在这一行，放在浮层的「执行过程」里。saved 是 savings.ts 的 savedText，没有可计价的调用时不写
+ */
+export function routeLineText(s: RouteSummary, saved: string | null = null): string {
   const parts: string[] = [];
   if (s.used) {
     const more = s.models.length > 1 ? `（共 ${s.models.length} 个模型）` : "";
-    parts.push(`使用 ${displayModel(s.used)}${more}${s.locked ? "，手动锁定" : ""}`);
+    parts.push(s.locked ? `手动锁定 ${displayModel(s.used)}` : `使用 ${displayModel(s.used)}${more}`);
   } else if (s.failures.length) parts.push(`${s.failures.length} 个模型都没有成功`);
   else if (s.noModel) parts.push("没有可用模型");
   else parts.push(`准备使用 ${displayModel(s.candidates[0]?.profileId ?? "")}`);
   if (saved) parts.push(saved);
-  if (durationMs !== null) parts.push(formatDuration(durationMs));
-  if (s.calls > 0) parts.push(formatTokens(s.tokens));
   if (s.fallbacks.length) {
     const total = s.fallbacks.reduce((n, f) => n + f.times, 0);
     const slow = s.fallbacks.filter((f) => f.timeout).reduce((n, f) => n + f.times, 0);

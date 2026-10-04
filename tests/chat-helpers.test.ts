@@ -80,17 +80,36 @@ describe("路由行", () => {
     noModel: null,
   };
 
-  it("折叠文字写具体模型、耗时、token 和降级次数，不含内部评分", () => {
-    const t = routeLineText(base, 12_400);
-    expect(t).toBe("使用 relay/claude-x（共 2 个模型） · 12.4s · 1.5k tokens · 降级 2 次");
-    expect(t).not.toMatch(/评分|成本档位|本模型/);
-    expect(routeLineText({ ...base, used: null, failures: [{ profileId: "x", reason: "r" }] }, null)).toBe("1 个模型都没有成功 · 1.5k tokens · 降级 2 次");
+  it("折叠文字（V3 5.2）：具体模型、节省、降级次数；耗时和 tokens 不在这一行；不含内部评分", () => {
+    const t = routeLineText(base, "省 $0.12");
+    expect(t).toBe("使用 relay/claude-x（共 2 个模型） · 省 $0.12 · 降级 2 次");
+    expect(t).not.toMatch(/评分|成本档位|本模型|tokens|\ds$/);
+    expect(routeLineText(base)).toBe("使用 relay/claude-x（共 2 个模型） · 降级 2 次");
+    expect(routeLineText({ ...base, locked: true, fallbacks: [] })).toBe("手动锁定 relay/claude-x");
+    expect(routeLineText({ ...base, used: null, failures: [{ profileId: "x", reason: "r" }] })).toBe("1 个模型都没有成功 · 降级 2 次");
+  });
+
+  it("兜底的原因按实际选到的模型写：本机模型才说「最省钱」，云端模型只说是最后兜底", () => {
+    const route = (provider: string, profileId: string) =>
+      ({
+        decision: {
+          classification: { type: "qa", capabilities: [], confidence: 1, signals: [], estTokens: 10 },
+          primary: null,
+          chain: [{ profileId, provider, stage: "rule_fallback", score: 0, breakdown: {}, reason: "规则兜底：优先本地模型，其次成本、延迟最低" }],
+          weights: { capability: 0, quality: 0, cost: 0, latency: 0 },
+          reasons: [],
+          excluded: [],
+        },
+        meta: { backend: "rules", level: 3, degraded: false, confidence: 1, skipped: [], latencyMs: 0 },
+      }) as unknown as Parameters<typeof routeSummary>[0];
+    expect(routeSummary(route("ollama", "ollama/qwen3:8b"), [])!.candidates[0]!.why).toBe("本地模型优先，最省钱");
+    expect(routeSummary(route("anthropic", "anthropic/claude-fable-5-1"), [])!.candidates[0]!.why).toBe("前面都失败时的最后兜底");
   });
 
   it("因超时降级在折叠行里直接写明", () => {
     const slow = { from: "openai/b", to: "custom:relay/claude-x", reason: "请求超时（已重试 1 次）", times: 1, timeout: true };
-    expect(routeLineText({ ...base, fallbacks: [slow] }, null)).toMatch(/因超时降级 1 次$/);
-    expect(routeLineText({ ...base, fallbacks: [...base.fallbacks, slow] }, null)).toMatch(/降级 3 次（1 次因超时）$/);
+    expect(routeLineText({ ...base, fallbacks: [slow] })).toMatch(/因超时降级 1 次$/);
+    expect(routeLineText({ ...base, fallbacks: [...base.fallbacks, slow] })).toMatch(/降级 3 次（1 次因超时）$/);
     expect(fallbackVerb(slow)).toBe("因超时降级到");
     expect(fallbackVerb(base.fallbacks[0]!)).toBe("降级到");
   });
