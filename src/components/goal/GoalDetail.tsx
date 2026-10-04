@@ -1,18 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Archive, ChevronRight, CircleHelp, Ellipsis, Pause, Play, Trash2 } from "lucide-react";
+import { Archive, ChevronRight, CircleHelp, Ellipsis, LoaderCircle, Pause, Play, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu, MenuItem } from "@/components/ui/menu";
 import { FAIL_CAUSE_LABEL, canTransition, failCause, goalPhase, type Goal, type GoalRound, type RoundVerdict } from "@/decision/goal";
+import { RouteLine } from "@/components/chat/RouteLine";
 import { runGoal } from "@/lib/goal-run";
+import { routeSummary } from "@/lib/route-summary";
+import { lastRoute } from "@/lib/timeline";
 import { cn } from "@/lib/utils";
 import { savedText } from "@/lib/savings";
 import { sessionSummary } from "@/lib/sidebar-rows";
 import { useTasksSavings } from "@/lib/use-savings";
 import { useGoals } from "@/stores/goals";
-import { useTasks } from "@/stores/tasks";
+import { useTasks, type TaskCard } from "@/stores/tasks";
 import { useProjects } from "@/stores/projects";
 import { useDialogs } from "@/stores/dialogs";
+import { ConfirmPrompt } from "@/components/task/ConfirmPrompt";
+import { PlanPrompt } from "@/components/task/PlanPrompt";
 import { STEP_LABEL, StepIcon } from "@/components/task/status";
+import { stepProgress } from "@/lib/steps";
 import { GoalStatusIcon, goalStatusText } from "./GoalStatus";
 
 // 目标详情（docs/UI_LAYOUT_V3.md 2.3）：开始 / 继续都会启动自动多轮循环（lib/goal-run.ts）。
@@ -56,8 +62,9 @@ function GoalView({ goal }: { goal: Goal }) {
   const saved = savedText(useTasksSavings(mine));
   const [error, setError] = useState<string | null>(null);
   const phase = goalPhase(goal);
-  // 正在跑一轮（工作台里那一轮任务卡就是这一轮的进度）
+  // 正在跑一轮：这一轮的任务卡挂在目标上（不进会话列表），进度和确认提示都从它读
   const working = phase === "working";
+  const active = tasks.find((t) => t.id === goal.rounds.at(-1)?.task_id && t.status === "running") ?? null;
   const cause = goal.status === "failed" ? failCause(goal) : null;
   const canAbandon = canTransition(goal.status, "abandoned");
   const run = async (f: () => Promise<string | null>) => setError(await f());
@@ -126,6 +133,7 @@ function GoalView({ goal }: { goal: Goal }) {
         </header>
 
         {phase === "awaiting_user" && <AwaitingBar goal={goal} onError={setError} resolve={resolve} />}
+        {active && <ActiveRound card={active} />}
 
         <RoundsList goal={goal} />
       </div>
@@ -166,19 +174,44 @@ function AwaitingBar({ goal, resolve, onError }: { goal: Goal; resolve: (id: str
   );
 }
 
+/**
+ * 正在跑的那一轮（V3 2.3）：计划模式的计划确认、权限确认和当前步骤都落在这里。
+ * 目标轮次不进会话列表，所以这些提示必须在这一页出现，否则会一直挂着等不到人。
+ */
+function ActiveRound({ card }: { card: TaskCard }) {
+  const { respond, respondPlan } = useTasks();
+  const steps = useMemo(() => stepProgress(card.events), [card.events]);
+  const current = steps.find((s) => s.state === "running") ?? steps.find((s) => s.state === "pending") ?? null;
+  return (
+    <section role="region" aria-label="正在执行的一轮" className="space-y-3 rounded-lg border border-border bg-surface-2 p-4">
+      <p role="status" className="flex items-center gap-2 text-sm">
+        <LoaderCircle aria-hidden className="size-4 shrink-0 animate-spin" />
+        <span className="min-w-0 flex-1 truncate">{current ? current.goal : "正在准备下一步"}</span>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          第 {steps.filter((s) => s.state === "done").length} / {steps.length} 步
+        </span>
+      </p>
+      {card.pendingPlan && <PlanPrompt plan={card.pendingPlan} onRespond={(ok) => respondPlan(card.id, ok)} />}
+      {card.pendingConfirm && <ConfirmPrompt req={card.pendingConfirm} onRespond={(ok) => respond(card.id, ok)} />}
+    </section>
+  );
+}
+
 function RoundsList({ goal }: { goal: Goal }) {
   const rounds = goal.rounds;
+  // 每一轮都是一张任务卡（执行器建的），轮次记着它的 id：展开一轮能看到那一轮的执行过程
+  const tasks = useTasks((s) => s.tasks);
   if (!rounds.length) return <p className="text-sm text-muted-foreground">还没有开始任何一轮。</p>;
   return (
     <ol aria-label="轮次" className="space-y-3">
       {rounds.map((r, i) => (
-        <RoundItem key={r.index} round={r} defaultOpen={i === rounds.length - 1} />
+        <RoundItem key={r.index} round={r} defaultOpen={i === rounds.length - 1} card={tasks.find((t) => t.id === r.task_id)} />
       ))}
     </ol>
   );
 }
 
-function RoundItem({ round, defaultOpen }: { round: GoalRound; defaultOpen: boolean }) {
+function RoundItem({ round, defaultOpen, card }: { round: GoalRound; defaultOpen: boolean; card?: TaskCard }) {
   const [open, setOpen] = useState(defaultOpen);
   const first = useRef(true);
   useEffect(() => {
@@ -190,6 +223,9 @@ function RoundItem({ round, defaultOpen }: { round: GoalRound; defaultOpen: bool
     () => round.items.map((it) => ({ ...it, state: it.status === "skipped" ? ("pending" as const) : it.status })),
     [round.items],
   );
+  // 这一轮的折叠路由行（V3 5.2）：模型、降级、省了多少，点开是路由决策和执行过程
+  const events = card?.events ?? [];
+  const summary = useMemo(() => routeSummary(lastRoute(events), events), [events]);
   return (
     <li className="rounded-lg border border-border">
       <button type="button" aria-expanded={open} aria-controls={body} onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm">
@@ -214,6 +250,8 @@ function RoundItem({ round, defaultOpen }: { round: GoalRound; defaultOpen: bool
           <p className="text-muted-foreground">这一轮没有记录步骤。</p>
         )}
         {round.verdict && <p className="text-muted-foreground">{verdictText(round.verdict)}</p>}
+        {summary && card && <RouteLine summary={summary} durationMs={card.endedAt ? card.endedAt - card.startedAt : null} card={card} />}
+        {round.status === "running" && <p className="text-xs text-muted-foreground">这一轮还在跑，结束后才有判定。</p>}
       </div>
     </li>
   );

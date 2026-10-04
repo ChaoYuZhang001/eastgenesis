@@ -61,6 +61,7 @@ export const goalRunner = new GoalRunner({
     return useTasks.getState().runGoalRound(roundGoalText(goal, round, hint), {
       goalId: goal.id,
       projectId: goal.project_id,
+      mode: "goal",
       permission: useSettings.getState().defaultPermission,
       maxLlmCalls,
       ...(history && { history }),

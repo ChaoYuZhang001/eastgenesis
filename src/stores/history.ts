@@ -127,7 +127,7 @@ export async function deleteSession(id: string): Promise<string | null> {
   }
 }
 
-/** 一轮结束后：记下这一轮的模型调用（每个任务只记一次） */
+/** 一轮结束后：记下这一轮的模型调用（每个任务只记一次；目标模式的轮次也算） */
 export async function recordTurnUsage(t: TaskCard): Promise<void> {
   if (recorded.has(t.id)) return;
   recorded.add(t.id);
@@ -170,10 +170,10 @@ export function watchHistory(): () => void {
     for (const t of st.tasks) {
       const before = seen.get(t.id);
       seen.set(t.id, t.status);
-      if (before === "running" && DONE.has(t.status) && t.sessionId) {
-        void saveSession(t.sessionId);
-        void recordTurnUsage(t);
-      }
+      if (before !== "running" || !DONE.has(t.status)) continue;
+      // 目标模式的轮次不属于任何会话（不写会话表），但调用照样记进 usage_calls
+      if (t.sessionId) void saveSession(t.sessionId);
+      void recordTurnUsage(t);
     }
   });
 }
