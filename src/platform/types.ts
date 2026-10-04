@@ -92,6 +92,13 @@ export interface McpServerView {
   builtin?: boolean;
 }
 
+/** 允许访问的目录（docs/UI_LAYOUT_V3.md 第 10 节第 11 条） */
+export interface FileRoot {
+  path: string;
+  /** 默认目录（~/Downloads）：界面不提供移除 */
+  fixed: boolean;
+}
+
 export interface McpRegistry {
   /** mcp.json 的位置，家目录写成 ~ */
   path_hint: string;
@@ -187,6 +194,13 @@ export interface Backend {
   deleteCustomProvider(id: string): Promise<void>;
 
   providerRequest(req: ProxyRequest): Promise<ProxyResponse>;
+
+  /** 内置文件服务器允许访问的目录：默认项（fixed）在前，用户加的在后 */
+  fileRootsList(): Promise<FileRoot[]>;
+  /** 加入一个目录（界面选中的路径）；返回加入后的完整列表 */
+  fileRootsAdd(path: string): Promise<FileRoot[]>;
+  /** 移除一个用户加的目录；默认目录不能移除 */
+  fileRootsRemove(path: string): Promise<FileRoot[]>;
 
   /** MCP 登记表只读：服务器由用户在 mcp.json 里登记，界面不能添加或修改 */
   mcpList(): Promise<McpRegistry>;

@@ -1,6 +1,7 @@
 //! EastGenesis 核心库。Tauri 外壳（src-tauri）只做命令封装，业务逻辑都放在这里。
 
 pub mod error;
+pub mod file_roots;
 mod mcp_fields;
 pub mod mcp_files;
 pub mod mcp_guard;

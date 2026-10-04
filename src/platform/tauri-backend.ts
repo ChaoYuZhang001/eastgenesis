@@ -7,7 +7,7 @@ import { deleteMemory, listMemories, saveMemory, touchMemories } from "@/lib/db-
 import { archiveProject, deleteProject, listProjects, projectUsage, saveProject, unarchiveProject } from "@/lib/db-project";
 import { deleteSession, listSessions, listUsage, recordUsage, saveSession } from "@/lib/db-session";
 import { deleteSkill, listSkills, saveSkill, touchSkills } from "@/lib/db-skill";
-import type { Backend, CustomProvider, KeyStatus, McpHandlers, McpRegistry, McpServerView, ProxyRequest, ProxyResponse, SavedProvider } from "./types";
+import type { Backend, FileRoot, CustomProvider, KeyStatus, McpHandlers, McpRegistry, McpServerView, ProxyRequest, ProxyResponse, SavedProvider } from "./types";
 
 interface McpLinePayload {
   server: string;
@@ -54,6 +54,10 @@ export function createTauriBackend(): Backend {
     deleteCustomProvider: (id) => call<void>("delete_custom_provider", { id }),
 
     providerRequest: (req: ProxyRequest) => call<ProxyResponse>("provider_request", { req: { ...req, body: req.body ?? null } }),
+
+    fileRootsList: () => call<FileRoot[]>("file_roots_list"),
+    fileRootsAdd: (path) => call<FileRoot[]>("file_roots_add", { path }),
+    fileRootsRemove: (path) => call<FileRoot[]>("file_roots_remove", { path }),
 
     mcpList: () => call<McpRegistry>("mcp_list"),
     onMcp,

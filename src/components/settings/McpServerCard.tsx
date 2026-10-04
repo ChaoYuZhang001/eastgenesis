@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { McpServerView } from "@/platform";
 import { useMcp, type McpConn } from "@/stores/mcp";
+import { FileRoots } from "./FileRoots";
 import { McpSecrets, McpTools } from "./McpDetails";
 
 type UiStatus = "stopped" | "starting" | "running" | "failed" | "detached";
@@ -58,6 +59,7 @@ export function McpServerCard({ server: s }: { server: McpServerView }) {
         </Badge>
       </div>
 
+      {s.builtin && <FileRoots />}
       <McpSecrets server={s.id} refs={s.refs} />
 
       <div className="flex flex-wrap gap-2">

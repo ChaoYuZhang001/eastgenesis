@@ -11,6 +11,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use eg_core::mcp_service::{path_hint, McpRegistryView, McpServerView, McpService};
 use eg_core::providers::{self, CustomProvider, CustomProviderStore, ProxyRequest, ProxyResponse, SavedProvider};
 use eg_core::secrets::{validate_provider_id, KeyService, KeyStatus, JEV_ACCOUNT};
+use eg_core::file_roots::{FileRoot, FileRootsStore};
 use eg_core::{AppError, AppInfo, AppResult};
 use serde::Serialize;
 use tauri::{Emitter, Manager, State};
@@ -19,12 +20,18 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 struct AppState {
     keys: KeyService<keychain::KeyringStore>,
     custom: Mutex<CustomProviderStore>,
+    /// 内置文件服务器允许访问的目录（默认 ~/Downloads + 用户加的）
+    roots: Mutex<FileRootsStore>,
     mcp: McpService<keychain::KeyringStore>,
 }
 
 type Shared<'a> = State<'a, Arc<AppState>>;
 
 fn lock(m: &Mutex<CustomProviderStore>) -> AppResult<MutexGuard<'_, CustomProviderStore>> {
+    m.lock().map_err(|_| AppError::internal("lock poisoned"))
+}
+
+fn roots_lock(m: &Mutex<FileRootsStore>) -> AppResult<MutexGuard<'_, FileRootsStore>> {
     m.lock().map_err(|_| AppError::internal("lock poisoned"))
 }
 
@@ -112,6 +119,28 @@ fn mcp_list(state: Shared<'_>) -> McpRegistryView {
     state.mcp.list()
 }
 
+/// 内置文件服务器允许访问的目录：默认项在前（不可移除），用户加的在后
+#[tauri::command]
+fn file_roots_list(state: Shared<'_>) -> AppResult<Vec<FileRoot>> {
+    Ok(roots_lock(&state.roots)?.list())
+}
+
+/// 加入一个目录。只能由这里改：界面选中的路径经校验后写进 file-roots.json。
+#[tauri::command]
+fn file_roots_add(state: Shared<'_>, path: String) -> AppResult<Vec<FileRoot>> {
+    roots_lock(&state.roots)?.add(&path)
+}
+
+/// 移除一个用户加的目录；默认目录不能移除
+#[tauri::command]
+fn file_roots_remove(state: Shared<'_>, path: String) -> AppResult<Vec<FileRoot>> {
+    let removed = roots_lock(&state.roots)?.remove(&path)?;
+    if !removed {
+        return Err(AppError::new("root_not_found", "这个目录不在允许列表里"));
+    }
+    Ok(roots_lock(&state.roots)?.list())
+}
+
 /// 只接受服务器 ID：启动命令来自 mcp.json，webview 传不进任意命令
 #[tauri::command]
 fn mcp_start(app: tauri::AppHandle, state: Shared<'_>, server: String) -> AppResult<McpServerView> {
@@ -167,15 +196,19 @@ pub fn run() {
             // 环境变量快照：${env:NAME} 从这里取；模型 Provider 和 Jev 的 Key 变量由 McpService 剔除
             let env: HashMap<String, String> =
                 std::env::vars_os().filter_map(|(k, v)| Some((k.into_string().ok()?, v.into_string().ok()?))).collect();
-            // 内置文件服务器：应用自身以 --mcp-files 子进程方式启动，只能访问 ~/Downloads
+            // 内置文件服务器：应用自身以 --mcp-files 子进程方式启动，只能访问允许列表里的目录
+            // （默认 ~/Downloads；用户选的目录存在 file-roots.json，读不出时退回默认）
+            let home = app.path().home_dir().ok();
+            let roots = FileRootsStore::load(dir.join("file-roots.json"), home.clone()).unwrap_or_default();
             let builtin: Vec<_> = std::env::current_exe()
                 .ok()
                 .and_then(|p| p.to_str().map(String::from))
-                .map(|exe| vec![eg_core::mcp_files::builtin_entry(&exe, &["--mcp-files"])])
+                .map(|exe| vec![eg_core::mcp_files::builtin_entry(&exe, &["--mcp-files"], &roots.raw_roots())])
                 .unwrap_or_default();
             app.manage(Arc::new(AppState {
                 keys: KeyService::from_process_env(keychain::KeyringStore),
                 custom: Mutex::new(custom),
+                roots: Mutex::new(roots),
                 mcp: McpService::new(mcp_path, hint, env, keychain::KeyringStore).with_builtin(builtin),
             }));
             Ok(())
@@ -193,6 +226,9 @@ pub fn run() {
             delete_custom_provider,
             provider_request,
             mcp_list,
+            file_roots_list,
+            file_roots_add,
+            file_roots_remove,
             mcp_start,
             mcp_send,
             mcp_stop,

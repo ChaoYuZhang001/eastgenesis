@@ -23,8 +23,8 @@ use std::path::PathBuf;
 pub const SERVER_ID: &str = "files";
 pub const TOOL_NAMES: [&str; 9] =
     ["list_directory", "read_file", "write_file", "create_directory", "move_file", "delete_file", "get_file_info", "read_pdf", "get_pdf_metadata"];
-/// 默认只开放下载文件夹
-pub const DEFAULT_ROOTS: [&str; 1] = ["~/Downloads"];
+/// 默认只开放下载文件夹；用户加的目录由 eg-core::file_roots 提供，启动时一起传给子进程
+pub use crate::file_roots::DEFAULT_ROOTS;
 /// 单行请求上限
 const MAX_LINE: usize = 8 << 20;
 
@@ -32,10 +32,14 @@ const MAX_LINE: usize = 8 << 20;
 fn lit(s: &str) -> Template { Template { raw: s.into(), parts: vec![Segment::Lit(s.into())] } }
 
 /// 内置服务器的登记项：exe 是启动程序，prefix 是放在 --allow 前面的参数（桌面端为 ["--mcp-files"]）。
+/// roots_in 是用户加的目录（默认的 ~/Downloads 总是会加上去，不会重复）；每条都按字面传递，路径里的 ${ 不当作引用。
 /// 采信本服务器的标注：只读工具不弹确认，写入、移动、删除每次确认
-pub fn builtin_entry(exe: &str, prefix: &[&str]) -> McpEntry {
+pub fn builtin_entry(exe: &str, prefix: &[&str], roots_in: &[String]) -> McpEntry {
     let mut args: Vec<Template> = prefix.iter().map(|a| lit(a)).collect();
-    for r in DEFAULT_ROOTS { args.push(lit("--allow")); args.push(lit(r)); }
+    // 默认目录一定在：调用方漏传时也只是少几个用户目录，不会连 ~/Downloads 都访问不了
+    let mut roots: Vec<String> = DEFAULT_ROOTS.iter().map(|r| (*r).to_string()).collect();
+    for r in roots_in { if !roots.iter().any(|x| x == r) { roots.push(r.clone()); } }
+    for r in &roots { args.push(lit("--allow")); args.push(lit(r)); }
     McpEntry {
         id: SERVER_ID.into(),
         command: exe.into(),

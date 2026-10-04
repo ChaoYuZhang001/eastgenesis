@@ -272,12 +272,22 @@ fn serve_skips_overlong_lines() {
 
 #[test]
 fn builtin_entry_is_literal_and_whitelisted() {
-    let b = builtin_entry("/Apps/EastGenesis", &["--mcp-files"]);
+    let b = builtin_entry("/Apps/EastGenesis", &["--mcp-files"], &[]);
     assert_eq!((b.id.as_str(), b.trust_annotations), ("files", true));
     let args: Vec<&str> = b.args.iter().map(|t| t.raw.as_str()).collect();
     assert_eq!(args, ["--mcp-files", "--allow", "~/Downloads"]);
+    // 用户加的目录跟在默认目录后面，逐条按 --allow 展开
+    let extra = vec!["~/Documents/合同".to_string(), "/data/项目".to_string()];
+    let with = builtin_entry("/Apps/EastGenesis", &["--mcp-files"], &extra);
+    let args: Vec<&str> = with.args.iter().map(|t| t.raw.as_str()).collect();
+    assert_eq!(args, ["--mcp-files", "--allow", "~/Downloads", "--allow", "~/Documents/合同", "--allow", "/data/项目"]);
+    // 调用方本身就把默认目录传进来时（FileRootsStore.list 就是这么给的）也不会出现两遍
+    let dup = vec!["~/Downloads".to_string(), "/data/项目".to_string()];
+    let again = builtin_entry("/Apps/EastGenesis", &["--mcp-files"], &dup);
+    let args: Vec<&str> = again.args.iter().map(|t| t.raw.as_str()).collect();
+    assert_eq!(args, ["--mcp-files", "--allow", "~/Downloads", "--allow", "/data/项目"]);
     // 参数里的 ${ 按字面传递，不当作引用
-    assert!(builtin_entry("/x", &["${env:HOME}"]).refs().is_empty());
+    assert!(builtin_entry("/x", &["${env:HOME}"], &extra).refs().is_empty());
     assert!(TOOL_NAMES.iter().all(|t| b.allow_tools.allows(t)) && !b.allow_tools.allows("exec"));
     assert_eq!(run_cli(vec![]), 2);
     assert_eq!(run_cli(vec!["--allow".into()]), 2);

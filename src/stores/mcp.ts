@@ -26,6 +26,8 @@ interface McpState {
   start(id: string): Promise<void>;
   /** 连接所有内置服务器（应用启动时调用一次；已在连接的跳过） */
   startBuiltins(): Promise<void>;
+  /** 重启一个服务器（改了允许目录这类启动参数后调用）：先停掉再连 */
+  restart(id: string): Promise<void>;
   stop(id: string): Promise<void>;
   setSecret(server: string, name: string, value: string): Promise<string | null>;
   deleteSecret(server: string, name: string): Promise<string | null>;
@@ -117,6 +119,10 @@ export const useMcp = create<McpState>((set, get) => {
         await get().refresh();
         patch(id, { status: "failed", tools: [], error: toAppError(e).message });
       }
+    },
+    async restart(id) {
+      await get().stop(id);
+      await get().start(id);
     },
     async startBuiltins() {
       await get().refresh();

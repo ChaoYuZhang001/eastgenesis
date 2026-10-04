@@ -1,9 +1,28 @@
 // 浏览器模式的 MCP：内存里的登记表和回显服务器，行为对齐 eg-core 的 McpService：
 // 只能按 ID 启动登记过的服务器；发出的消息按启动时的 allowTools 再查一遍；密钥只记「已保存」，不保存值。
 import { err } from "./mock-rules";
-import type { Backend, McpHandlers, McpRegistry, McpServerView } from "./types";
+import type { Backend, FileRoot, McpHandlers, McpRegistry, McpServerView } from "./types";
 
-type McpBackend = Pick<Backend, "mcpList" | "onMcp" | "mcpStart" | "mcpSend" | "mcpStop" | "setMcpSecret" | "deleteMcpSecret">;
+/** 与 eg-core file_roots::validate_root 同一套规则（浏览器模式没有 Rust 侧校验，这里必须自己挡住） */
+export const MAX_ROOTS = 24;
+export function validateRoot(raw: string): string {
+  const s = raw.trim();
+  if (!s) throw err("invalid_root", "路径不能为空");
+  if (s.length > 1024) throw err("invalid_root", "路径太长");
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f]/.test(s)) throw err("invalid_root", "路径里有不可见的控制字符");
+  const path = s.replace(/([\\/])[\\/]+/g, "$1").replace(/(.+)[\\/]$/, "$1");
+  if (path === "/" || path === "//") throw err("invalid_root", "不能把整个磁盘加入允许列表");
+  if (path === "~" || /^(\/Users|\/home)\/[^/]+$/.test(path)) throw err("invalid_root", "不能把整个家目录加入允许列表；请选择具体的子目录");
+  if (!(path.startsWith("~/") || path.startsWith("/"))) throw err("invalid_root", "请写绝对路径或以 ~/ 开头的路径");
+  if (path.split(/[\\/]/).includes("..")) throw err("invalid_root", "路径里不能有 ..");
+  return path;
+}
+
+type McpBackend = Pick<
+  Backend,
+  "fileRootsList" | "fileRootsAdd" | "fileRootsRemove" | "mcpList" | "onMcp" | "mcpStart" | "mcpSend" | "mcpStop" | "setMcpSecret" | "deleteMcpSecret"
+>;
 
 const base = { args: [], env: {}, cwd: null, running: false, stderr_tail: null };
 
@@ -89,7 +108,27 @@ export function createMockMcp(): McpBackend {
     return view(e);
   };
 
+  // 允许访问的目录：默认 ~/Downloads，其余由用户添加（浏览器模式只在这次运行里有效）
+  let roots: FileRoot[] = [{ path: "~/Downloads", fixed: true }];
+
   return {
+    fileRootsList: async (): Promise<FileRoot[]> => roots.map((r) => ({ ...r })),
+    async fileRootsAdd(path: string) {
+      const p = validateRoot(path);
+      if (!roots.some((r) => r.path === p)) {
+        if (roots.length >= MAX_ROOTS) throw err("invalid_root", `最多 ${MAX_ROOTS} 个目录，请先移除一些`);
+        roots = [...roots, { path: p, fixed: false }];
+      }
+      return roots.map((r) => ({ ...r }));
+    },
+    async fileRootsRemove(path: string) {
+      const p = validateRoot(path);
+      if (roots.find((r) => r.path === p)?.fixed) throw err("invalid_root", "~/Downloads 是默认目录，不能移除");
+      const had = roots.some((r) => r.path === p);
+      if (!had) throw err("root_not_found", "这个目录不在允许列表里");
+      roots = roots.filter((r) => r.path !== p);
+      return roots.map((r) => ({ ...r }));
+    },
     mcpList: async (): Promise<McpRegistry> => ({ path_hint: "~/Library/Application Support/com.eastgenesis.desktop/mcp.json", servers: REGISTRY.map(view), errors: ERRORS }),
     async onMcp(server, h) {
       handlers.set(server, h);

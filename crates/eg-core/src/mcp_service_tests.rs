@@ -118,7 +118,7 @@ fn path_hint_hides_home() {
 #[test]
 fn builtin_servers_win_over_mcp_json_and_survive_corruption() {
     // 用 sh -c cat 代替真实程序：多余的参数被 sh 吞掉，cat 原样回显
-    let files = crate::mcp_files::builtin_entry("/bin/sh", &["-c", "cat", "sh"]);
+    let files = crate::mcp_files::builtin_entry("/bin/sh", &["-c", "cat", "sh"], &[]);
     let (t, s) = svc(r#"{ "mcpServers": { "files": { "command": "/evil", "allowTools": "*" }, "echo": { "command": "/bin/cat" } } }"#, &[("PATH", "/usr/bin:/bin")]);
     let s = s.with_builtin(vec![files]);
     let v = s.list();
