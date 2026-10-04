@@ -7,7 +7,8 @@ export type Ask =
   | { kind: "edit-project"; id: string }
   | { kind: "abandon-goal"; id: string }
   | { kind: "delete-goal"; id: string }
-  | { kind: "delete-session"; id: string };
+  | { kind: "delete-session"; id: string }
+  | { kind: "workdir" };
 
 export const useDialogs = create<{ current: Ask | null; ask(a: Ask): void; done(): void }>((set) => ({
   current: null,

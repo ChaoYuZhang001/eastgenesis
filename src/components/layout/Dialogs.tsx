@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { WorkdirDialog } from "@/components/chat/WorkdirDialog";
 import { ProjectDialog } from "@/components/project/ProjectDialog";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import { useChat } from "@/stores/chat";
@@ -63,6 +64,7 @@ export function Dialogs() {
     const project = current.kind === "edit-project" ? projects.find((p) => p.id === current.id) ?? null : null;
     return <ProjectDialog project={project} onClose={done} />;
   }
+  if (current.kind === "workdir") return <WorkdirDialog onClose={done} />;
   if (current.kind === "delete-session") {
     const sid = current.id;
     return (

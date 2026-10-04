@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, MenuCheckbox, MenuItem, MenuLabel, MenuRadio, MenuSeparator, SubMenu } from "@/components/ui/menu";
 import { ACCEPT, MAX_FILES, readTextFile } from "@/lib/attachments";
 import { useChat } from "@/stores/chat";
+import { useDialogs } from "@/stores/dialogs";
 import { useGoals } from "@/stores/goals";
 import { useMcp } from "@/stores/mcp";
 import { useProjects } from "@/stores/projects";
@@ -138,8 +139,8 @@ export function Composer({ autoFocus = false }: { autoFocus?: boolean }) {
   );
 }
 
-// 「+」菜单（V3 第 4 节）。工作目录只告诉模型文件放在哪；文件工具能访问的目录仍以内置文件服务器的允许列表为准，
-// 选择系统文件夹需要 tauri-plugin-dialog，没接入前用项目的上下文文件夹或手填。
+// 「+」菜单（V3 第 4 节）。工作目录只告诉模型文件放在哪；文件工具能访问的目录仍以内置文件服务器的允许列表为准。
+// 选择系统文件夹需要 tauri-plugin-dialog，还没有接入：先用项目的上下文文件夹，或在应用内对话框里填路径。
 function AddMenu({ onPickFiles }: { onPickFiles: () => void }) {
   const { mode, multi, workdir, servers, setMode, setMulti, setWorkdir, setServers } = useChat();
   const currentId = useUi((s) => s.currentProjectId);
@@ -155,14 +156,8 @@ function AddMenu({ onPickFiles }: { onPickFiles: () => void }) {
     setServers(running.every((r) => next.includes(r)) && next.every((n) => running.includes(n)) ? null : next);
   };
   const folders = project?.context_folders ?? [];
-  const askFolder = () => {
-    const v = window.prompt("工作目录（绝对路径，可以用 ~/ 开头）", workdir ?? "");
-    if (v === null) return;
-    const t = v.trim();
-    if (!t) return setWorkdir(null);
-    if (!t.startsWith("/") && !t.startsWith("~/")) return window.alert("请填绝对路径，或以 ~/ 开头");
-    setWorkdir(t);
-  };
+  const ask = useDialogs((s) => s.ask);
+  const askFolder = () => ask({ kind: "workdir" });
 
   return (
     <Menu

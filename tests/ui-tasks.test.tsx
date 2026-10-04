@@ -1,6 +1,7 @@
 // 任务在会话里的完整表现（V3：卡片画布已下线，过程信息在回答下方的折叠路由行浮层里，docs/UI_LAYOUT_V3.md 2.2、5.2）
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { ChatView } from "@/components/chat/ChatView";
+import { Dialogs } from "@/components/layout/Dialogs";
 import { effectiveProfiles } from "@/lib/engine";
 import { useMemory } from "@/stores/memory";
 import { useSettings } from "@/stores/settings";
@@ -15,7 +16,7 @@ beforeEach(async () => {
 
 describe("会话里的任务", () => {
   it("提交后确认工具调用，产出成果；成果块列出改动的文件", async () => {
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     submit("整理本周会议纪要并保存");
     const c = card("整理本周会议纪要并保存");
     expect(screen.getByLabelText("任务描述")).toHaveValue("");
@@ -37,7 +38,7 @@ describe("会话里的任务", () => {
   });
 
   it("拒绝写入类工具后任务停止，步骤标记为失败", async () => {
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     submit("整理周报并保存");
     const c = card("整理周报并保存");
     await drive(c, "demo_write_file");
@@ -49,7 +50,7 @@ describe("会话里的任务", () => {
 
 describe("记忆提议", () => {
   it("目标里说「记住」时回答里请用户确认，确认后才保存", async () => {
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     submit("记住：我的时区是 UTC+8");
     const c = card("记住：我的时区是 UTC+8");
     const prompt = within(c).getByRole("region", { name: "记忆提议" });
@@ -64,7 +65,7 @@ describe("记忆提议", () => {
 
 describe("保存为技能", () => {
   it("完成的任务可以把实际做完的步骤保存为技能，保存前可以修改", async () => {
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     submit("调研量子纠缠的研究进展");
     const c = card("调研量子纠缠的研究进展");
     await within(c).findByText(/^已完成 · /, {}, LONG);
@@ -79,9 +80,43 @@ describe("保存为技能", () => {
   });
 });
 
+describe("工作目录", () => {
+  it("「选择其他文件夹…」打开应用内对话框（不用 window.prompt）；路径按上下文文件夹的规则校验；标签行显示目录名，× 可移除", async () => {
+    const prompt = vi.spyOn(window, "prompt");
+    render(<><ChatView /><Dialogs /></>);
+    let menu = openMore();
+    fireEvent.click(within(menu).getByRole("menuitem", { name: /工作目录/ }));
+    fireEvent.click(within(screen.getByRole("menu", { name: "工作目录" })).getByRole("menuitem", { name: "选择其他文件夹…" }));
+    let form = screen.getByRole("form", { name: "工作目录" });
+    expect(prompt).not.toHaveBeenCalled();
+    fireEvent.change(within(form).getByLabelText("文件夹路径"), { target: { value: "relative/path" } });
+    fireEvent.click(within(form).getByRole("button", { name: "确定" }));
+    expect(within(form).getByRole("alert")).toHaveTextContent("上下文文件夹要写绝对路径（可以用 ~/ 开头）");
+    fireEvent.change(within(form).getByLabelText("文件夹路径"), { target: { value: "~/" } });
+    fireEvent.click(within(form).getByRole("button", { name: "确定" }));
+    expect(within(form).getByRole("alert")).toHaveTextContent("不能是整个磁盘或整个家目录");
+    fireEvent.change(within(form).getByLabelText("文件夹路径"), { target: { value: "~/Documents/合同/" } });
+    fireEvent.click(within(form).getByRole("button", { name: "确定" }));
+    expect(screen.queryByRole("form", { name: "工作目录" })).not.toBeInTheDocument();
+    const chips = screen.getByRole("list", { name: "这次任务的设置" });
+    expect(within(chips).getByTitle("~/Documents/合同")).toHaveTextContent("合同");
+    fireEvent.click(within(chips).getByRole("button", { name: "移除工作目录 ~/Documents/合同" }));
+    expect(screen.queryByRole("list", { name: "这次任务的设置" })).not.toBeInTheDocument();
+
+    // Esc 关闭对话框，不改原值
+    menu = openMore();
+    fireEvent.click(within(menu).getByRole("menuitem", { name: /工作目录/ }));
+    fireEvent.click(within(screen.getByRole("menu", { name: "工作目录" })).getByRole("menuitem", { name: "选择其他文件夹…" }));
+    form = screen.getByRole("form", { name: "工作目录" });
+    fireEvent.keyDown(form, { key: "Escape" });
+    expect(screen.queryByRole("form", { name: "工作目录" })).not.toBeInTheDocument();
+    prompt.mockRestore();
+  });
+});
+
 describe("计划模式", () => {
   it("在「添加」菜单里勾选后提交：先列出计划，点「开始执行」才执行；「取消」后一步都不执行", async () => {
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     let menu = openMore();
     fireEvent.click(within(menu).getByRole("menuitemcheckbox", { name: /计划模式/ }));
     expect(screen.getByPlaceholderText("描述任务，先出计划再执行...")).toBeInTheDocument();
@@ -109,7 +144,7 @@ describe("计划模式", () => {
 
 describe("多 Agent 协同", () => {
   it("在「添加」菜单里勾选后拆成子 Agent 并行执行，最后合并成果；执行过程里有拆分记录", async () => {
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     const menu = openMore();
     fireEvent.click(within(menu).getByRole("menuitemcheckbox", { name: /多 Agent 协同/ }));
     expect(within(screen.getByRole("list", { name: "这次任务的设置" })).getByText("多 Agent")).toBeInTheDocument();
@@ -134,7 +169,7 @@ describe("多 Agent 协同", () => {
 
 describe("回答下方的路由浮层", () => {
   it("执行过程：各阶段、每一步的模型；成本档和内部评分只在专家模式出现", async () => {
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     submit("写一段 Python 快速排序");
     const c = card("写一段 Python 快速排序");
     await drive(c);
@@ -164,7 +199,7 @@ describe("回答下方的路由浮层", () => {
   it("选了本地决策模型：浮层注明它为什么没接手，时间线注明反思由它判断", async () => {
     useSettings.getState().setLocalJev("ollama/qwen3:8b");
     act(() => useUi.getState().setPrefs({ expert: true }));
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     submit("写一段 Python 快速排序");
     const c = card("写一段 Python 快速排序");
     await drive(c);
@@ -176,7 +211,7 @@ describe("回答下方的路由浮层", () => {
 
   it("手动干预在任务进行中出现：锁定后，之后的模型调用都用它", async () => {
     const locked = effectiveProfiles().find((p) => p.provider === "anthropic")!.id;
-    render(<ChatView />);
+    render(<><ChatView /><Dialogs /></>);
     submit("整理本周会议纪要并保存");
     const c = card("整理本周会议纪要并保存");
     // 写入前停下来等确认：任务还在进行中，路由决策已经做完
