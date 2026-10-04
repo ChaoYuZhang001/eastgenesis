@@ -3,7 +3,7 @@ import { activeMcpTools, useMcp } from "@/stores/mcp";
 import { useSettings } from "@/stores/settings";
 import { useTasks } from "@/stores/tasks";
 
-// MCP 连接 store：浏览器模式的内存登记表（echo 只放行 echo；notes 放行全部、不信任标注、需要钥匙串密钥）
+// MCP 连接 store：浏览器模式的内存登记表（内置的 files；echo 只放行 echo；notes 放行全部、不信任标注、需要钥匙串密钥）
 let b: Backend;
 beforeEach(() => {
   b = createMockBackend();
@@ -16,7 +16,8 @@ const conn = (id: string) => useMcp.getState().conns[id];
 describe("MCP 连接", () => {
   it("启动后只注册白名单内的工具，信任标注时只读工具不需要确认；停止后工具移除", async () => {
     await useMcp.getState().refresh();
-    expect(useMcp.getState().registry?.servers.map((s) => s.id)).toEqual(["echo", "notes"]);
+    expect(useMcp.getState().registry?.servers.map((s) => s.id)).toEqual(["files", "echo", "notes"]);
+    // 内置服务器的允许目录由 file-roots 管，卡片上会多一块「允许访问的目录」
     await useMcp.getState().start("echo");
     expect(conn("echo").status).toBe("running");
     expect(conn("echo").tools.map((t) => [t.name, t.sideEffect])).toEqual([["mcp__echo__echo", "none"]]);
@@ -24,7 +25,7 @@ describe("MCP 连接", () => {
     expect(conn("echo").serverInfo).toBe("mock-echo 0.0.0");
     const out = await activeMcpTools()[0].run({ text: "hi" }, { signal: new AbortController().signal });
     expect(out).toMatchObject({ ok: true, content: "hi" });
-    expect(useMcp.getState().registry?.servers[0].running).toBe(true);
+    expect(useMcp.getState().registry?.servers.find((s) => s.id === "echo")?.running).toBe(true);
     await useMcp.getState().stop("echo");
     expect(conn("echo")).toBeUndefined();
     expect(activeMcpTools()).toEqual([]);
@@ -35,7 +36,7 @@ describe("MCP 连接", () => {
     await useMcp.getState().start("notes");
     expect(conn("notes")).toMatchObject({ status: "failed", error: "钥匙串里还没有 NOTES_TOKEN，请先在设置页保存" });
     expect(await useMcp.getState().setSecret("notes", "NOTES_TOKEN", "value-1")).toBeNull();
-    expect(useMcp.getState().registry?.servers[1].refs[0].configured).toBe(true);
+    expect(useMcp.getState().registry?.servers.find((s) => s.id === "notes")?.refs[0].configured).toBe(true);
     await useMcp.getState().start("notes");
     expect(conn("notes").tools.map((t) => [t.name, t.sideEffect])).toEqual([
       ["mcp__notes__list_notes", "external"],
@@ -48,7 +49,7 @@ describe("MCP 连接", () => {
   it("界面重新加载后留下的进程：先停掉再重新连接", async () => {
     await b.mcpStart("echo"); // 模拟上次会话留下、没有连接的进程
     await useMcp.getState().refresh();
-    expect(useMcp.getState().registry?.servers[0].running).toBe(true);
+    expect(useMcp.getState().registry?.servers.find((s) => s.id === "echo")?.running).toBe(true);
     await useMcp.getState().start("echo");
     expect(conn("echo").status).toBe("running");
     expect(activeMcpTools().map((t) => t.name)).toEqual(["mcp__echo__echo"]);

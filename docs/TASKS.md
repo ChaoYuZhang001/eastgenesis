@@ -29,7 +29,7 @@
 | Jev 集成 | 完成 | 2026-10-02 两轮真实 Key 验证：choice 冒烟 30/30；54 条独立盲写 hold-out 降级 11.1%、整条链 96.3%（规则引擎单独 81.5%），50 条训练集 100%；tool_use 问句改成 v2（附件已提供、读它不算动作）后误报 27 → 0。按 TypeSafe 官方 skill 复盘：保留一个请求并行问三问（fan-out），置信度只计入会改变结果的判断。**P50 328ms 未达 300ms**（VM 裸往返 P50 250ms），待 Mac 复测。剩余 2 条错是能力标签粒度问题（单标签装不下 code+reasoning），已如实记录。报告 `docs/JEV_SMOKE_TEST_REPORT.md` |
 | M8 项目与目标基础设施 | 完成 | 迁移 4（projects、goals 表，memories 加 project_id、deleted_at）；项目模型（说明与路由偏好继承）；目标状态机（设计稿 8 条规则，展开为 13 条合法转换，非法抛错）、轮次、模型调用上限与连续 3 次校验失败；完成校验 `checkDoneWithEvidence`（规则 → Jev → 用户，原 checkDone 不动）；SQLite 与浏览器模式存储、删除项目连带软删除；projects / goals store；任务卡片记录 projectId、goalId、mode。不改 UI 和运行时。Vitest 58 个文件 535 条全过（基线 449 条，新增 86 条），tsc、vite build、eg-core cargo test 74/74 通过 |
 | M9 界面（V3 布局） | 完成 | 双层侧栏、项目 / 目标列表与详情、输入框四元素与「+」菜单、自动路由下拉、回答下方路由浮层、按需右侧面板、设置 4 大类、价格表与「省 $X」、迁移 5（会话与调用记录持久化）、计划模式。未做：系统文件夹对话框（tauri-plugin-dialog）、工作目录写入文件服务器允许列表、中转站单价字段、使用情况的上月统计、内容栏收起的过渡动画 |
-| M10 长任务执行 | 未开始 | 目标模式接入运行时：多轮执行、证据收集、完成校验、按项目挑选记忆 |
+| M10 长任务执行 | 完成 | 目标模式自动多轮循环（`lib/goal-runner.ts` 纯循环 + `lib/goal-run.ts` 接线）：每轮开一轮 → 跑一轮任务 → 从事件收集实据 → `checkDoneWithEvidence` → 未达成自动下一轮、达成收尾、拿不准停下等你确认；预算 / 连续失败 3 次 / 轮数上限三种失败条件；暂停、放弃、删除时打断正在跑的那一轮（连它的任务一起取消）。工作目录可加入内置文件服务器的允许列表（迁移无关，写在 file-roots.json）。Vitest 69 个文件 631 条全过、eg-core cargo test 81 + 2 全过。未做：系统文件夹对话框（tauri-plugin-dialog）、中转站单价字段、使用情况的上月统计、内容栏收起过渡动画 |
 | 发布阶段（后期） | 未开始 | 签名、公证、自动更新、分发 |
 
 ## 日志
@@ -210,7 +210,7 @@
   - 测试里每次模型调用等待 300ms，工具是真实子进程：第一次 1241ms（模型 4 次），第二次 318ms（1 次），比例 0.26。
   - 全量复测：tsc、Vitest 46 个文件 416 条、eg-core 73 + 2 条、macOS 目标 cargo check、品牌自检（失败 0）、vite build、杀手场景脚本 9 项，全部通过。
 - 2026-10-01 Jev 集成准备：配置凭据、修正测试断言。
-  - /tmp/eg-test.env 写入 TYPESAFE_API_KEY（600 权限），.gitignore 已包含 .env、.env.local、/tmp/eg-test.env（之前已有）。SDK `@typesafe-ai/sdk@0.6.0` 已安装，CloudJevBackend 测试 8/8 全过（mock 响应）。修正两条断言：classifyTask 检查 type 和 capabilities，chooseTool 允许返回 null（真实调用时的边界情况）。Vitest 47 个文件 424 条全过，tsc、eg-core cargo test（73 + 2）、macOS check、品牌自检（0 失败）、vite build 全过。
+  - 临时环境文件（系统临时目录下的 eg-test.env）写入 TYPESAFE_API_KEY（600 权限），.gitignore 已包含 .env、.env.local 和这个临时文件（之前已有）。SDK `@typesafe-ai/sdk@0.6.0` 已安装，CloudJevBackend 测试 8/8 全过（mock 响应）。修正两条断言：classifyTask 检查 type 和 capabilities，chooseTool 允许返回 null（真实调用时的边界情况）。Vitest 47 个文件 424 条全过，tsc、eg-core cargo test（73 + 2）、macOS check、品牌自检（0 失败）、vite build 全过。
 - 2026-10-01 Jev 集成完成：决策层构造与路由面板显示。
   - DecisionLayer.fromEnv 从环境变量读取 TYPESAFE_API_KEY；有 Key 时构造 CloudJevBackend（第 1 级），无 Key 时第 1 级跳过并记原因；第 2 级 LocalJevBackend 未配置时也跳过，第 3 级 RuleBasedBackend 永远可用。FallbackChain 按顺序尝试可用的后端，置信度低于阈值（默认 0.6）或调用失败时降级到下一级；meta 记录后端名称、级别、是否降级、置信度、跳过列表和耗时。
   - 路由面板（TaskRoutePanel）按 meta.backend 显示决策来源：「cloud-jev」→「Jev 云端」，「local-jev」→「本地决策模型」，「rules」→「规则引擎」；标明第几级、是否降级、置信度、跳过原因。describeMeta 生成一句话总结，显示在回答下方的折叠行里。
@@ -271,3 +271,12 @@
 - 2026-09-29 执行环境恢复（Python 3.10.12、Pillow 12.3.0、Node 22，npx 能连 npm 官方源）。三个脚本编译通过；提取脚本导出 39 个文件，原图 SHA-256 前后一致；tauri icon 2.5.0 生成 50 个平台图标；首轮自检通过 50、警告 1（logo-dark 外圈含地平线辉光，属预期）、失败 0。放大目检发现两处自检没覆盖的缺陷：① 主视觉字标 i 上的点是金色，白字抠图按最小通道算 alpha，导出后变成灰白虚影（wordmark-light、logo-dark-transparent）；② 夜空越往下越亮（标志下方约 57–80，而抠图用的单一底色是 45），标志下方的星点被当成半透明前景，形成一排红色噪点，并随标志放大进 icon-1024 和全部平台图标。另外，实测图标底色上亮下暗（#6E0107 → #400102），与 BRAND.md 4.2 的估计方向相反。
 - 2026-09-29 修正缺陷并重新生成。① 白字抠图对金色像素改按绿通道求 alpha，i 点保留为金色。② 深色底抠图的底色改为逐行估计（左右边缘取下四分位，再沿竖直方向平滑）；离实心部分 2px 以外的淡像素做去噪点；主视觉两项包围盒的 min_hits 改为 4，2x2 星点不再撑大裁切框。③ 复查发现 icon-1024 的上缘取样落在金弧辉光上，整条上缘偏亮。底色改为平面拟合：把主视觉标志按同样位置放进板上彩色图标，只取标志 alpha < 5% 的像素，用 Tukey 重加权。背景像素与板上的平均差从 15.4 降到 10.8；金弧外的辉光环和 G 内腔的暗部仍无法还原。④ 兼容 Pillow 14 移除 getdata()。自检新增三类检查，其中金色 i 点、孤立噪点两项拿修复前的素材复测都会失败（wordmark-light 金色像素 0、mark-for-dark-bg 孤立噪点 13）；icon-1024 一致性一项用于发现严重偏差。BRAND.md 按实测值校正 4.2 节，补充 4.3 节深色表面对比度和第 10 节移动端说明。三个脚本按顺序重跑，自检通过 61、警告 1、失败 0，原图 SHA-256 不变。
 - 待用户决定：测试时导入脚本，生成了 `scripts/brand/__pycache__/`；`assets/brand/ui/` 是本次任务之前就有的空目录，素材实际写在 `ui-reference/`。按规则两者都没有删除。
+
+- 2026-10-05 M10（目标模式的多轮执行）：
+  - M10-1 执行器：新增 `src/lib/goal-runner.ts`（纯循环，依赖全注入）、`src/lib/run-evidence.ts`（这一轮的事件 → 实据和步骤清单）、`src/lib/goal-run.ts`（接到 store 与决策层）。每轮先登记「第 N 轮 进行中」再等结果；判定看的是到目前为止的全部记录（`mergeEvidence`），不只是这一轮。模型自述单独放 `claim`，不发给 Jev。`decision/goal.ts` 的轮次新增 `task_id`（界面靠它把轮次和任务卡对上）、`nextRoundHint`（上一轮为什么没做完就是这一轮的重点）、`set_round_items`；读旧的轮次时 `task_id` 为 null。三层说明（项目 / 目标 / 任务）进规划和回答的系统提示，`budget` 可由目标按剩余额度注入。
+  - M10-2 界面：开始 / 继续先改状态再启动循环；轮次展开后有折叠路由行；新增「正在执行的一轮」区域——目标轮次不进会话列表，计划确认和权限确认必须落在这里，否则会一直挂着等不到人（这是截图验证时发现的真实缺陷）。删项目前先停掉该项目下正在跑的目标。目标轮次的模型调用照样记进 `usage_calls`，但不写会话表。
+  - M10-3 允许目录：`eg-core/file_roots.rs`（校验 + 持久化，默认 `~/Downloads` 不可移除、拒绝相对路径 / `..` / 整个磁盘 / 整个家目录）；`builtin_entry` 接受 roots 并去重；src-tauri 三个命令；设置 › MCP 服务器 › 内置文件服务器卡片里加 / 移除，改完自动重启内置服务器。
+  - 顺带修：`lib/artifacts.ts` 的移动工具只认 `source`/`destination`，内置文件服务器用的是 `src`/`dst`，导致界面和实据里都漏掉移动记录。
+  - 复测：tsc、Vitest 69 个文件 631 条全过（10 条跳过：VM 没有 `target/debug/eg-mcp-files`），act 警告 0，vite build、品牌自检（通过 61、警告 1、失败 0）、eg-core cargo test 81 + 2 全过。变异：goal-runner 12 个、run-evidence 5 个、界面 5 个、允许目录前端 6 个、Rust 4 个，全部会被测试抓到。
+  - 界面截图验证（VM 没有浏览器：打包成单 HTML 在预览面板截图）：目标跑完一轮停在「等你确认」、正在执行的一轮 + 权限确认、两轮之后的判定和路由行、允许目录卡片，四处都正常。浏览器 mock 后端补上内置 files 服务器（原先只有 echo / notes，真机不是这样）。
+  - 没验证：`src-tauri` 的三个新命令没在真机上跑过（VM 缺 webkit2gtk，只跑了 eg-core 的 cargo test）；选中的目录在真机上能否被文件服务器访问要在 Mac 上确认。

@@ -26,14 +26,21 @@ type McpBackend = Pick<
 
 const base = { args: [], env: {}, cwd: null, running: false, stderr_tail: null };
 
-/** 演示用登记表：echo 只放行一个工具；notes 放行全部但不信任标注，并且要先在钥匙串保存密钥 */
+/** 演示用登记表：内置的 files（真机里由应用自己启动，允许目录可在此调整）；echo 只放行一个工具；notes 放行全部但不信任标注，并且要先在钥匙串保存密钥 */
 const REGISTRY: Omit<McpServerView, "refs" | "running" | "stderr_tail">[] = [
+  { ...base, id: "files", command: "EastGenesis", args: ["--mcp-files", "--allow", "~/Downloads"], allow_tools: ["list_directory", "read_file", "write_file"], trust_annotations: true, builtin: true },
   { ...base, id: "echo", command: "/usr/local/bin/mcp-echo", allow_tools: ["echo"], trust_annotations: true },
   { ...base, id: "notes", command: "/usr/local/bin/mcp-notes", env: { NOTES_TOKEN: "${keychain:NOTES_TOKEN}" }, allow_tools: "*", trust_annotations: false },
 ];
 const ERRORS = [{ id: "remote", message: "只支持本机 stdio 服务器（command + args），暂不支持 url / sse / http" }];
 
 const TOOLS: Record<string, { name: string; description: string; annotations?: Record<string, boolean> }[]> = {
+  files: [
+    { name: "list_directory", description: "列出目录（模拟）", annotations: { readOnlyHint: true } },
+    { name: "read_file", description: "读文本文件（模拟）", annotations: { readOnlyHint: true } },
+    { name: "write_file", description: "写文件（模拟，不会真正写盘）", annotations: { destructiveHint: false } },
+    { name: "delete_file", description: "删除文件（模拟，未列入白名单）", annotations: { destructiveHint: true } },
+  ],
   echo: [
     { name: "echo", description: "原样返回输入（模拟）", annotations: { readOnlyHint: true } },
     { name: "shout", description: "转成大写（模拟，未列入白名单）", annotations: { readOnlyHint: true } },

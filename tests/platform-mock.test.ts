@@ -189,19 +189,21 @@ describe("MCP 走后端", () => {
   it("登记表只读；密钥只能写 mcp.json 引用了的条目，写入后才能启动", async () => {
     const b = createMockBackend();
     const reg = await b.mcpList();
-    expect(reg.servers.map((s) => s.id)).toEqual(["echo", "notes"]);
+    expect(reg.servers.map((s) => s.id)).toEqual(["files", "echo", "notes"]);
     expect(reg.errors.map((e) => e.id)).toEqual(["remote"]);
-    expect(reg.servers[1].refs).toEqual([{ source: "keychain", name: "NOTES_TOKEN", configured: false }]);
+    // 内置的 files：应用自己启动，允许目录由 file-roots 管
+    expect(reg.servers[0]).toMatchObject({ builtin: true, trust_annotations: true });
+    expect(reg.servers.find((s) => s.id === "notes")!.refs).toEqual([{ source: "keychain", name: "NOTES_TOKEN", configured: false }]);
     expect(await code(b.mcpStart("notes"))).toBe("mcp_secret_missing");
     expect(await code(b.setMcpSecret("notes", "OTHER", "value-1"))).toBe("mcp_secret_not_referenced");
     expect(await code(b.setMcpSecret("notes", "NOTES_TOKEN", "a\nb"))).toBe("invalid_mcp_secret_value");
     await b.setMcpSecret("notes", "NOTES_TOKEN", "value-1");
     const after = await b.mcpList();
-    expect(after.servers[1].refs[0].configured).toBe(true);
+    expect(after.servers.find((s) => s.id === "notes")!.refs[0].configured).toBe(true);
     expect(JSON.stringify(after)).not.toContain("value-1");
     expect((await b.mcpStart("notes")).running).toBe(true);
     await b.mcpStop("notes");
     await b.deleteMcpSecret("notes", "NOTES_TOKEN");
-    expect((await b.mcpList()).servers[1].refs[0].configured).toBe(false);
+    expect((await b.mcpList()).servers.find((s) => s.id === "notes")!.refs[0].configured).toBe(false);
   });
 });
