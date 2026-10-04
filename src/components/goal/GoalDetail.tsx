@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Menu, MenuItem } from "@/components/ui/menu";
 import { FAIL_CAUSE_LABEL, canTransition, failCause, goalPhase, type Goal, type GoalRound, type RoundVerdict } from "@/decision/goal";
 import { cn } from "@/lib/utils";
+import { savedText } from "@/lib/savings";
+import { sessionSummary } from "@/lib/sidebar-rows";
+import { useTasksSavings } from "@/lib/use-savings";
 import { useGoals } from "@/stores/goals";
+import { useTasks } from "@/stores/tasks";
 import { useProjects } from "@/stores/projects";
 import { useDialogs } from "@/stores/dialogs";
 import { STEP_LABEL, StepIcon } from "@/components/task/status";
@@ -46,6 +50,9 @@ function GoalView({ goal }: { goal: Goal }) {
   const { start, pause, resolve } = useGoals();
   const project = useProjects((s) => (goal.project_id ? s.items.find((p) => p.id === goal.project_id) ?? null : null));
   const ask = useDialogs((s) => s.ask);
+  const tasks = useTasks((s) => s.tasks);
+  const mine = useMemo(() => tasks.filter((t) => t.goalId === goal.id), [tasks, goal.id]);
+  const saved = savedText(useTasksSavings(mine));
   const [error, setError] = useState<string | null>(null);
   const phase = goalPhase(goal);
   const cause = goal.status === "failed" ? failCause(goal) : null;
@@ -63,6 +70,8 @@ function GoalView({ goal }: { goal: Goal }) {
     goal.rounds.length ? `第 ${goal.rounds.length} 轮` : null,
     `模型调用 ${goal.used_llm_calls} / ${goal.max_llm_calls}`,
     project ? project.name : null,
+    // 路由摘要：这个目标下各轮用了哪些模型、和最强模式比省了多少（多轮执行在 M10 接入后才有）
+    mine.length ? [sessionSummary(mine), saved].filter(Boolean).join(" · ") : null,
   ].filter(Boolean);
 
   return (

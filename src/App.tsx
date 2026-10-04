@@ -21,6 +21,8 @@ import { useSkills } from "@/stores/skills";
 import { useSettings } from "@/stores/settings";
 import { contentCollapsed, useUi } from "@/stores/ui";
 
+const ROOT_FONT = { sm: "14px", md: "", lg: "18px" } as const;
+
 // V3 布局（docs/UI_LAYOUT_V3.md）：图标栏 60 + 内容栏 240（可收起）+ 主区 + 按需出现的右侧面板
 export default function App() {
   const { phase, error, bootstrap } = useAppStore();
@@ -36,6 +38,11 @@ export default function App() {
   useEffect(() => {
     void bootstrap();
   }, [bootstrap]);
+
+  // 字号：改根元素的字号。Tailwind 的字号和间距都是 rem，整页按比例缩放；中号用浏览器默认（16px）
+  useEffect(() => {
+    document.documentElement.style.fontSize = ROOT_FONT[fontSize];
+  }, [fontSize]);
 
   // 后端就绪后再读设置、记忆、技能、项目和目标
   useEffect(() => {
@@ -79,7 +86,7 @@ export default function App() {
   }, [phase, newTask]);
 
   return (
-    <div className={cn("flex h-full", fontSize === "sm" && "text-sm", fontSize === "lg" && "text-lg", reduceMotion && "motion-off")}>
+    <div className={cn("flex h-full", reduceMotion && "motion-off")}>
       {!splashGone && <Splash done={phase === "ready"} error={error} onRetry={() => void bootstrap()} onHidden={hideSplash} />}
       {phase === "ready" && (
         <>

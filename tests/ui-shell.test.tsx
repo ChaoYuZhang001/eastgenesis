@@ -108,6 +108,20 @@ describe("主界面外壳（浏览器模式）", () => {
     expect(screen.getByRole("navigation", { name: "设置分类" })).toBeInTheDocument();
   });
 
+  it("外观 › 字号改根元素字号（rem 整页缩放），中号恢复默认", async () => {
+    render(<App />);
+    await screen.findByRole("navigation", { name: "会话列表" });
+    openSettings("外观");
+    expect(document.documentElement.style.fontSize).toBe("");
+    fireEvent.click(screen.getByRole("radio", { name: /^大/ }));
+    expect(document.documentElement.style.fontSize).toBe("18px");
+    expect(useUi.getState().prefs.fontSize).toBe("lg");
+    fireEvent.click(screen.getByRole("radio", { name: /^小/ }));
+    expect(document.documentElement.style.fontSize).toBe("14px");
+    fireEvent.click(screen.getByRole("radio", { name: /^中/ }));
+    expect(document.documentElement.style.fontSize).toBe("");
+  });
+
   it("专家模式在设置 › 个人 › 常规里：只影响浮层里显示多少细节，不切换布局", async () => {
     render(<App />);
     await screen.findByRole("navigation", { name: "会话列表" });

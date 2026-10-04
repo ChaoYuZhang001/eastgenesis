@@ -17,6 +17,8 @@ import { DEFAULT_SETTINGS_PAGE, DEFAULT_UI_PREFS, useUi, type SettingsPageId } f
 export const LONG = { timeout: 5000 };
 
 export function resetStores(backend: Backend = createMockBackend()): Backend {
+  // 字号改的是根元素：用例之间不能互相影响
+  document.documentElement.style.fontSize = "";
   // 上一个用例留下的运行先停掉，避免等待中的确认永远不结束
   for (const t of useTasks.getState().tasks) useTasks.getState().cancel(t.id);
   setBackend(backend);
