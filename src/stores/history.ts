@@ -56,6 +56,7 @@ export function fromStoredTurn(t: StoredTurn, s: StoredSession): TaskCard {
     events: t.events as AgentEvent[],
     summary: t.summary,
     pendingConfirm: null,
+    pendingPlan: null,
     override: null,
     lock: t.lock,
     permission: (t.permission as PermissionMode) ?? "confirm",

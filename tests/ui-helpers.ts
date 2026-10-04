@@ -101,7 +101,8 @@ export async function drive(el: HTMLElement, reject?: string): Promise<string[]>
   const seen: string[] = [];
   for (let i = 0; i < 10; i++) {
     const next = await waitFor(() => {
-      const g = within(el).queryByRole("group");
+      // 只处理权限确认；计划模式的计划确认由用例自己点（它也是 group）
+      const g = within(el).queryAllByRole("group").find((x) => /确认/.test(x.textContent ?? "") && !/^计划/.test(x.textContent ?? "")) ?? null;
       const running = within(el).queryByRole("button", { name: "停止任务" });
       if (!g && running) throw new Error("等待中");
       return g;

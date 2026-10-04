@@ -3,6 +3,7 @@ import { Brain, ChevronRight, Circle, Paperclip, Square, Users } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { ConfirmPrompt } from "@/components/task/ConfirmPrompt";
 import { MemoryPrompt } from "@/components/task/MemoryPrompt";
+import { PlanPrompt } from "@/components/task/PlanPrompt";
 import { SaveSkill } from "@/components/task/SaveSkill";
 import { STEP_LABEL, StepIcon } from "@/components/task/status";
 import { SubAgents } from "@/components/panel/SubAgents";
@@ -22,7 +23,7 @@ import { RouteLine } from "./RouteLine";
 // 会话里的一轮：用户那句话 + 助手这一轮的执行与成果。
 // 运行中只显示当前那一步，结束后折叠成一行（docs/UI_LAYOUT_SPEC.md D 节）。
 export function AssistantTurn({ card }: { card: TaskCard }) {
-  const { cancel, respond } = useTasks();
+  const { cancel, respond, respondPlan } = useTasks();
   const running = card.status === "running";
   const events = card.events;
   const agents = useMemo(() => subAgentViews(events), [events]);
@@ -61,6 +62,7 @@ export function AssistantTurn({ card }: { card: TaskCard }) {
           <StepsDisclosure card={card} steps={steps} text={doneText(card.status, progress, formatDuration(duration))} />
         )}
 
+        {card.pendingPlan && <PlanPrompt plan={card.pendingPlan} onRespond={(ok) => respondPlan(card.id, ok)} />}
         {card.pendingConfirm && <ConfirmPrompt req={card.pendingConfirm} onRespond={(ok) => respond(card.id, ok)} />}
 
         {agents.length > 0 && <MultiAgents agents={agents} />}

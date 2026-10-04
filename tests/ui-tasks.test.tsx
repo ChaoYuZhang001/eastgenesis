@@ -79,6 +79,34 @@ describe("保存为技能", () => {
   });
 });
 
+describe("计划模式", () => {
+  it("在「添加」菜单里勾选后提交：先列出计划，点「开始执行」才执行；「取消」后一步都不执行", async () => {
+    render(<ChatView />);
+    let menu = openMore();
+    fireEvent.click(within(menu).getByRole("menuitemcheckbox", { name: /计划模式/ }));
+    expect(screen.getByPlaceholderText("描述任务，先出计划再执行...")).toBeInTheDocument();
+    submit("整理本周会议纪要并保存");
+    const c = card("整理本周会议纪要并保存");
+    const prompt = await within(c).findByRole("group", { name: /^计划（\d+ 步）/ }, LONG);
+    expect(within(prompt).getByRole("list", { name: "计划步骤" }).children.length).toBeGreaterThan(0);
+    // 批准之前没有任何工具调用（也没有权限确认）
+    expect(within(c).queryByRole("group", { name: /前需要你的确认/ })).not.toBeInTheDocument();
+    fireEvent.click(within(prompt).getByRole("button", { name: "开始执行" }));
+    await drive(c);
+    expect(within(c).getByRole("region", { name: "成果" })).toHaveTextContent("（模拟）已完成：整理本周会议纪要并保存");
+    // 计划模式只管这一次：下一轮回到快速模式
+    expect(screen.getByPlaceholderText("描述你的任务...")).toBeInTheDocument();
+
+    menu = openMore();
+    fireEvent.click(within(menu).getByRole("menuitemcheckbox", { name: /计划模式/ }));
+    submit("整理周报并保存");
+    const d = card("整理周报并保存");
+    fireEvent.click(within(await within(d).findByRole("group", { name: /^计划/ }, LONG)).getByRole("button", { name: "取消" }));
+    await within(d).findByText("你取消了这个计划，没有执行任何步骤", {}, LONG);
+    expect(within(d).queryByRole("list", { name: "改动的文件" })).not.toBeInTheDocument();
+  });
+});
+
 describe("多 Agent 协同", () => {
   it("在「添加」菜单里勾选后拆成子 Agent 并行执行，最后合并成果；执行过程里有拆分记录", async () => {
     render(<ChatView />);

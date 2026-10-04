@@ -55,6 +55,7 @@ export function progressOf(events: readonly AgentEvent[]): Progress {
         if (e.verdict === "confirm") waiting = true;
         break;
       case "confirm":
+      case "plan_review":
         waiting = false;
         break;
       case "recover":

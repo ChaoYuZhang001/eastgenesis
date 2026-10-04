@@ -61,6 +61,13 @@ export class Coordinator {
       fallback = parsed === null;
       specs = parsed ?? [{ id: "a1", role: "通用智能体", goal }];
       emit({ type: "split", agents: specs, ...(fallback ? { note: "拆分结果无法解析，改为单个智能体执行" } : {}) });
+      // 计划模式：多 Agent 时拆分就是计划，先给用户看；子 Agent 不再各自问
+      if (d.approvePlan) {
+        const ok = await d.approvePlan({ steps: specs.map((a) => ({ id: a.id, goal: `${a.role}：${a.goal}`, tool: null })), source: fallback ? "fallback" : "llm" });
+        emit({ type: "plan_review", approved: ok });
+        if (signal?.aborted) return finish("aborted", "任务已取消");
+        if (!ok) return finish("aborted", "你取消了这个计划，没有执行任何步骤");
+      }
 
       // 确认排队：一次只把一个请求交给用户；取消后排队中的请求直接视为不同意
       let queue: Promise<unknown> = Promise.resolve();
@@ -85,6 +92,7 @@ export class Coordinator {
             budget: { ...SUBAGENT_BUDGET, ...d.budget },
             idGen: () => `${runId}-${spec.id}`,
             confirm: confirmFor(spec.role),
+            approvePlan: undefined,
             onEvent: (event) => emit({ type: "subagent", agent: spec.id, event }),
           });
           try {

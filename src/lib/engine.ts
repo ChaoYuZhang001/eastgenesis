@@ -1,6 +1,6 @@
 // 桌面端和浏览器共用的引擎组装：把后端（Key 状态、代理请求）接到决策层与 Agent 运行时。
 // webview 里不出现真实 Key：适配器拿到占位 Key，请求经 proxiedFetch 交给 Rust 注入认证。
-import { AgentRuntime, Coordinator, ToolRegistry, routedLlm, type AgentDeps, type AgentEvent, type ConfirmRequest, type LlmCall, type MemoryNote, type SkillNote, type Tool } from "@/agent";
+import { AgentRuntime, Coordinator, ToolRegistry, routedLlm, type AgentDeps, type AgentEvent, type ConfirmRequest, type LlmCall, type MemoryNote, type Plan, type SkillNote, type Tool } from "@/agent";
 import {
   CloudJevBackend,
   DecisionLayer,
@@ -131,6 +131,8 @@ export interface EngineOptions {
   /** 跨任务共用，熔断状态才能保留 */
   health?: HealthTracker;
   confirm?: (req: ConfirmRequest) => Promise<boolean>;
+  /** 计划模式：规划完先给用户看，批准后才执行 */
+  approvePlan?: (plan: Plan) => Promise<boolean>;
   onEvent?: (e: AgentEvent) => void;
   /** 手动干预：每次模型调用前读取 */
   override?: () => ModelOverride | null;
@@ -167,6 +169,7 @@ export function createEngine(o: EngineOptions): { runtime: AgentRuntime; coordin
     skills: o.skills,
     llm: (route) => withOverride(route, make, profiles, o.override ?? (() => null), o.consumeNext ?? (() => {})),
     confirm: o.confirm,
+    approvePlan: o.approvePlan,
     onEvent: o.onEvent,
     onboarding: o.onboarding,
   };

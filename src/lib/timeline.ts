@@ -86,6 +86,8 @@ function itemsFor(e: AgentEvent, idx: string, profiles: readonly ModelProfile[],
       return [{ key, stage: "tool", title: `${e.step.tool}：${e.verdict === "allow" ? "允许" : e.verdict === "confirm" ? "需要确认" : "拒绝"}`, detail: e.reasons.join("；"), tone: e.verdict === "deny" ? "error" : e.verdict === "confirm" ? "warn" : "ok" }];
     case "confirm":
       return [{ key, stage: "tool", title: e.approved ? "用户已批准" : "用户已拒绝", tone: e.approved ? "ok" : "error" }];
+    case "plan_review":
+      return [{ key, stage: "analysis", title: e.approved ? "你批准了这个计划" : "你取消了这个计划", tone: e.approved ? "ok" : "warn" }];
     case "tool_result":
       return [{ key, stage: "tool", title: `${e.step.tool} ${e.ok ? "完成" : "出错"}`, detail: e.content.slice(0, 300), tone: e.ok ? "ok" : "error", latencyMs: e.latencyMs }];
     case "llm":

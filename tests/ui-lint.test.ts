@@ -61,6 +61,13 @@ describe("布局规范（BRAND.md 7.1）", () => {
     expect(bad).toEqual([]);
   });
 
+  it("带透明度的颜色类只用有 -rgb 通道的品牌色，否则 Tailwind 不生成样式（静默失效）", () => {
+    const ALPHA = new RegExp(`${B}(?:[a-z-]+:)*(?:bg|text|border|ring|from|to|via|fill|stroke|divide|outline)-([a-z0-9-]+)/\\d+${E}`, "g");
+    const ok = new Set(["east-red", "china-gold"]);
+    const bad = files.flatMap(({ file, text }) => [...text.matchAll(ALPHA)].filter((m) => !ok.has(m[1]!)).map((m) => `${file}: ${m[0]}`));
+    expect(bad).toEqual([]);
+  });
+
   it("检查规则本身有效", () => {
     const sample = ` "px-3 py-0.5 mt-[3px] gap-px gap-x-3 -mb-1 rounded rounded-xl rounded-lg hover:w-[13px] top-[32%]" `;
     expect([...sample.matchAll(SPACING)].map((m) => m[1])).toEqual(["3", "0.5", "[3px]", "px", "3", "1"]);

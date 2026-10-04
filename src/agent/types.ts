@@ -119,6 +119,8 @@ export type AgentEvent =
   | { type: "route"; profileId: string | null; reasons: string[]; decision: RouteDecision; meta: DecisionMeta }
   /** continuation：根据前面结果追加步骤的第几轮；plan 是追加后的完整计划 */
   | { type: "plan"; plan: Plan; revision: number; continuation?: number }
+  /** 计划模式：用户对计划的决定（批准后才执行第一步） */
+  | { type: "plan_review"; approved: boolean }
   | { type: "step_start"; step: PlanStep; attempt: number }
   | { type: "gate"; step: PlanStep; verdict: "allow" | "confirm" | "deny"; risk: Risk; reasons: string[]; backend: BackendName }
   | { type: "confirm"; step: PlanStep; approved: boolean }

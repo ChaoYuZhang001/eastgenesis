@@ -21,6 +21,11 @@ export interface AgentDeps {
   llm: (route: RouteDecision) => LlmCall;
   /** 需要用户确认的操作。没有提供时一律视为不同意 */
   confirm?: (req: ConfirmRequest) => Promise<boolean>;
+  /**
+   * 计划模式：规划完成后、执行第一步之前把计划交给用户；返回 false 时任务停止（aborted），一步都不执行。
+   * 没有提供时不停（快速模式）。简单问答、按技能重放这两种不经规划器的路径不问。
+   */
+  approvePlan?: (plan: Plan) => Promise<boolean>;
   /** 用户确认过的记忆（已按目标挑选），放进规划、回答、总结的系统提示 */
   memories?: readonly MemoryNote[];
   /** 用户保存的技能（已按目标挑选），只放进规划提示 */
@@ -192,6 +197,12 @@ export class AgentRuntime {
         plan = await planner.plan(goal, signal, ctx.extra);
       }
       emit({ type: "plan", plan: pubPlan(plan), revision: 0 });
+      if (d.approvePlan && !replay) {
+        const ok = await d.approvePlan(pubPlan(plan));
+        emit({ type: "plan_review", approved: ok });
+        checkAbort(signal);
+        if (!ok) throw new Stop("aborted", "你取消了这个计划，没有执行任何步骤");
+      }
       let kRound = 1;
 
       let i = 0;

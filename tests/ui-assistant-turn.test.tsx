@@ -37,6 +37,7 @@ const turn = (events: AgentEvent[]): TaskCard =>
     events,
     summary: "答案是 42",
     pendingConfirm: null,
+    pendingPlan: null,
     override: null,
     lock: null,
     permission: "confirm",

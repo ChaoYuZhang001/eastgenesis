@@ -14,7 +14,7 @@ export function ConfirmDialog({ title, body, confirm, onConfirm, onCancel, busy 
     return () => prev?.focus?.();
   }, []);
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-night/60 p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-night p-4">
       <div
         ref={boxRef}
         role="alertdialog"
@@ -73,7 +73,7 @@ export function Dialog({ title, children, onClose }: { title: string; children: 
     return () => prev?.focus?.();
   }, []);
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-night/60 p-4">
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-night p-4">
       <div
         ref={boxRef}
         role="dialog"

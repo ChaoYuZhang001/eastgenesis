@@ -1,6 +1,6 @@
 // 任务：一次任务就是会话里的一轮（用户目标 + 助手成果）。专家模式下同一份数据以卡片形式展示。
 import { create } from "zustand";
-import type { AgentEvent, ConfirmRequest, RunFile, RunStatus } from "@/agent";
+import type { AgentEvent, ConfirmRequest, Plan, RunFile, RunStatus } from "@/agent";
 import { toAttachments } from "@/lib/attachments";
 import { createEngine, withLockedModel, type ModelOverride } from "@/lib/engine";
 import { toAppError } from "@/lib/ipc";
@@ -61,6 +61,8 @@ export interface TaskCard {
   events: AgentEvent[];
   summary: string | null;
   pendingConfirm: ConfirmRequest | null;
+  /** 计划模式：等你批准的计划 */
+  pendingPlan: Plan | null;
   override: ModelOverride | null;
   /** 输入框锁定的模型；null 表示自动路由 */
   lock: string | null;
@@ -91,6 +93,8 @@ interface TasksState {
   move(id: string, toIndex: number): void;
   select(id: string): void;
   respond(id: string, approved: boolean): void;
+  /** 计划模式：批准或取消计划 */
+  respondPlan(id: string, approved: boolean): void;
   cancel(id: string): void;
   setOverride(id: string, o: ModelOverride | null): void;
   /** 保存待确认的记忆；失败返回错误说明 */
@@ -110,6 +114,7 @@ function resolvePreference(opts: SubmitOptions): { preference: Preference; prefe
 const MAX_EVENTS = 500;
 const controllers = new Map<string, AbortController>();
 const confirms = new Map<string, (ok: boolean) => void>();
+const plans = new Map<string, (ok: boolean) => void>();
 let seq = Date.now();
 
 export const useTasks = create<TasksState>((set, get) => {
@@ -119,6 +124,10 @@ export const useTasks = create<TasksState>((set, get) => {
   const settle = (id: string, ok: boolean) => {
     confirms.get(id)?.(ok);
     confirms.delete(id);
+  };
+  const settlePlan = (id: string, ok: boolean) => {
+    plans.get(id)?.(ok);
+    plans.delete(id);
   };
 
   async function run(id: string, goal: string, opts: SubmitOptions, files: readonly RunFile[]) {
@@ -153,6 +162,14 @@ export const useTasks = create<TasksState>((set, get) => {
           confirms.set(id, resolve);
           patch(id, () => ({ pendingConfirm: req }));
         }).finally(() => patch(id, () => ({ pendingConfirm: null }))),
+      // 计划模式：规划完停下来，等你批准；取消任务时视为不批准
+      ...(opts.mode === "plan" && {
+        approvePlan: (plan: Plan) =>
+          new Promise<boolean>((resolve) => {
+            plans.set(id, resolve);
+            patch(id, () => ({ pendingPlan: plan }));
+          }).finally(() => patch(id, () => ({ pendingPlan: null }))),
+      }),
       override: () => get().tasks.find((t) => t.id === id)?.override ?? null,
       consumeNext: () => patch(id, (t) => (t.override?.mode === "next" ? { override: null } : {})),
     });
@@ -172,6 +189,7 @@ export const useTasks = create<TasksState>((set, get) => {
     } finally {
       controllers.delete(id);
       settle(id, false);
+      settlePlan(id, false);
       // 对齐问题真的问出去了才算「已引导过」，否则下次开机重新问
       if (opts.onboarding && status === "completed") void useSettings.getState().markOnboarded();
       useMemory.getState().markUsed(notes.map((n) => n.id));
@@ -199,6 +217,7 @@ export const useTasks = create<TasksState>((set, get) => {
         events: [],
         summary: null,
         pendingConfirm: null,
+        pendingPlan: null,
         override: null,
         lock: opts.lock ?? null,
         permission: opts.permission ?? "confirm",
@@ -238,8 +257,10 @@ export const useTasks = create<TasksState>((set, get) => {
     },
     select: (id) => set({ activeId: id }),
     respond: (id, approved) => settle(id, approved),
+    respondPlan: (id, approved) => settlePlan(id, approved),
     cancel(id) {
       settle(id, false);
+      settlePlan(id, false);
       controllers.get(id)?.abort();
     },
     setOverride: (id, o) => patch(id, () => ({ override: o })),
