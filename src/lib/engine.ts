@@ -1,6 +1,6 @@
 // 桌面端和浏览器共用的引擎组装：把后端（Key 状态、代理请求）接到决策层与 Agent 运行时。
 // webview 里不出现真实 Key：适配器拿到占位 Key，请求经 proxiedFetch 交给 Rust 注入认证。
-import { AgentRuntime, Coordinator, ToolRegistry, routedLlm, type AgentDeps, type AgentEvent, type ConfirmRequest, type LlmCall, type MemoryNote, type Plan, type SkillNote, type Tool } from "@/agent";
+import { AgentRuntime, Coordinator, ToolRegistry, routedLlm, type AgentDeps, type AgentEvent, type Budget, type ConfirmRequest, type LlmCall, type MemoryNote, type Plan, type SkillNote, type Tool } from "@/agent";
 import {
   CloudJevBackend,
   DecisionLayer,
@@ -111,6 +111,8 @@ export function withLockedModel(custom: readonly CustomProvider[], lock: string 
 
 export interface EngineOptions {
   backend: Backend;
+  /** 单次运行的预算（目标模式按目标剩余额度给每一轮设定模型调用上限）；不给用 DEFAULT_BUDGET */
+  budget?: Partial<Budget>;
   statuses: readonly KeyStatus[];
   jev: KeyStatus | null;
   custom?: readonly CustomProvider[];
@@ -126,6 +128,8 @@ export interface EngineOptions {
   tools?: readonly Tool[];
   /** 用户确认过、已按目标挑选的记忆 */
   memories?: readonly MemoryNote[];
+  /** 项目、目标、任务三层叠加的说明（decision/project.ts resolveInstructions） */
+  instructions?: string;
   /** 用户保存、已按目标挑选的技能 */
   skills?: readonly SkillNote[];
   /** 跨任务共用，熔断状态才能保留 */
@@ -145,9 +149,9 @@ export function createEngine(o: EngineOptions): { runtime: AgentRuntime; coordin
   const profiles = effectiveProfiles(o.overrides, custom);
   const health = o.health ?? new HealthTracker();
   // 第 1 级 Jev：只有 Rust 侧确认已配置 Key 时启用；请求经代理，webview 只有占位 Key
-  const cloud = o.jev?.configured
-    ? new CloudJevBackend(new JevClient({ apiKey: PROXY_PLACEHOLDER_KEY, fetch: proxiedFetch(o.backend, "jev"), browserProxy: true }))
-    : new CloudJevBackend(null, "没有配置 Jev Key（在设置页配置）");
+  // 同一个客户端也作为完成校验的裁判（目标模式 checkDoneWithEvidence 在规则拿不准时问它）
+  const jevClient = o.jev?.configured ? new JevClient({ apiKey: PROXY_PLACEHOLDER_KEY, fetch: proxiedFetch(o.backend, "jev"), browserProxy: true }) : null;
+  const cloud = jevClient ? new CloudJevBackend(jevClient) : new CloudJevBackend(null, "没有配置 Jev Key（在设置页配置）");
   // 第 2 级本地决策模型与路由共用适配器缓存
   const providerFor = providerFactory(o.backend, custom, prefs.regions, o.timeoutMs);
   const local = localJevBackend(prefs.localJev, profiles, custom, providerFor);
@@ -160,12 +164,15 @@ export function createEngine(o: EngineOptions): { runtime: AgentRuntime; coordin
     profiles,
     health,
     permission: o.permission,
+    judge: jevClient,
   });
   const make = (r: RouteDecision) => routedLlm(r, providerFor, health);
   const deps: AgentDeps = {
     decision,
     tools,
     memories: o.memories,
+    instructions: o.instructions,
+    ...(o.budget ? { budget: o.budget } : {}),
     skills: o.skills,
     llm: (route) => withOverride(route, make, profiles, o.override ?? (() => null), o.consumeNext ?? (() => {})),
     confirm: o.confirm,

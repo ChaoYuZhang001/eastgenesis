@@ -143,7 +143,7 @@ describe("项目", () => {
 });
 
 describe("目标", () => {
-  it("「添加」菜单勾选「目标」后提交：新建目标并打开详情；开始 / 暂停 / 继续，状态行写明轮数和模型调用", async () => {
+  it("「添加」菜单勾选「目标」后提交：新建目标并打开详情；开始后自动跑一轮，暂停 / 继续，状态行写明轮数和模型调用", async () => {
     await boot();
     const menu = openMore();
     fireEvent.click(within(menu).getByRole("menuitemcheckbox", { name: /目标/ }));
@@ -157,10 +157,17 @@ describe("目标", () => {
     expect(useTasks.getState().tasks).toEqual([]);
     expect(useChat.getState().mode).toBe("quick");
 
+    // 开始：执行器立刻开一轮（mock 模型不带实据，跑完停在「等你确认」，不自动收尾）
     fireEvent.click(within(main).getByRole("button", { name: "开始" }));
-    await within(main).findByRole("button", { name: "暂停" });
-    expect(main).toHaveTextContent("进行中");
-    expect(main).toHaveTextContent("自动多轮执行还没有接入（M10）");
+    const bar = await within(main).findByRole("region", { name: "等你确认" }, LONG);
+    expect(bar).toHaveTextContent("AI 声称完成，但无实据");
+    expect(main).toHaveTextContent(/第 1 轮/);
+    expect(main).toHaveTextContent(/模型调用 [1-9]\d* \/ 50/);
+    // 这一轮对应一张任务卡（工作台里能看到它的执行过程），目标下能看到这一步的步骤
+    const rounds = within(main).getByRole("list", { name: "轮次" });
+    expect(within(rounds).getByRole("button", { name: /第 1 轮/ })).toHaveAttribute("aria-expanded", "true");
+    expect(main).toHaveTextContent("规则判定：拿不准");
+
     fireEvent.click(within(main).getByRole("button", { name: "暂停" }));
     await within(main).findByRole("button", { name: "继续" });
     expect(main).toHaveTextContent("已暂停");

@@ -5,6 +5,15 @@ import { create } from "zustand";
 import { toAppError, type AppError } from "@/lib/ipc";
 import { getBackend, type Goal, type GoalChange, type GoalInput } from "@/platform";
 
+/**
+ * 停掉正在跑的循环。执行器（lib/goal-run.ts）在加载时注册进来：暂停、放弃、删除目标时，
+ * 先在跑的那一轮要立刻停下，而不是等它自己跑完。没有注册时（单元测试里不带执行器）什么也不做。
+ */
+let stopper: ((id: string) => void) | null = null;
+export const setGoalStopper = (f: ((id: string) => void) | null): void => {
+  stopper = f;
+};
+
 interface GoalState {
   loaded: boolean;
   /** 全部未删除的目标，按最近更新排序；按项目筛选用 goalsOfProject */
@@ -24,6 +33,8 @@ interface GoalState {
   resolve(id: string, choice: "done" | "continue"): Promise<string | null>;
   /** 任意一次状态或轮次变更；成功返回变更后的目标 */
   apply(id: string, change: GoalChange): Promise<Goal | string>;
+  /** 执行器报上来的错误（一轮写回失败、完成校验没做成）：显示在目标详情里，不打断循环 */
+  reportError(message: string | null): void;
 }
 
 /** 某个项目下的目标；projectId 为 null 时是不属于任何项目的目标。返回新数组，组件里配合 useMemo 使用 */
@@ -80,16 +91,27 @@ export const useGoals = create<GoalState>((set) => {
       }
     },
     start: async (id) => message(await change(id, { op: "transition", to: "running" })),
-    pause: async (id) => message(await change(id, { op: "transition", to: "paused" })),
-    abandon: async (id) => message(await change(id, { op: "transition", to: "abandoned" })),
+    pause: async (id) => {
+      const err = message(await change(id, { op: "transition", to: "paused" }));
+      stopper?.(id);
+      return err;
+    },
+    abandon: async (id) => {
+      const err = message(await change(id, { op: "transition", to: "abandoned" }));
+      stopper?.(id);
+      return err;
+    },
     async remove(id) {
       const r = await change(id, { op: "transition", to: "deleted" });
-      return "code" in r && r.code !== "goal_not_found" ? r.message : null;
+      const err = "code" in r && r.code !== "goal_not_found" ? r.message : null;
+      if (!err) stopper?.(id);
+      return err;
     },
     resolve: async (id, choice) => message(await change(id, { op: "resolve_uncertain", choice })),
     async apply(id, c) {
       const r = await change(id, c);
       return "code" in r ? r.message : r;
     },
+    reportError: (message) => set({ error: message }),
   };
 });

@@ -44,9 +44,10 @@ export function artifactsOf(events: readonly AgentEvent[]): { files: FileTouch[]
       commands.push({ command, ok: e.ok, output: e.content });
       continue;
     }
-    const path = str(args.path) ?? str(args.source) ?? str(args.from);
+    // 两种命名都要认：内置文件服务器用 src / dst，其它 MCP 服务器常用 source / destination
+    const path = str(args.path) ?? str(args.source) ?? str(args.src) ?? str(args.from);
     if (!path) continue;
-    const to = kind === "moved" ? (str(args.destination) ?? str(args.to) ?? undefined) : undefined;
+    const to = kind === "moved" ? (str(args.destination) ?? str(args.to) ?? str(args.dst) ?? undefined) : undefined;
     const prev = files.findIndex((f) => f.path === path && f.action === kind);
     const item: FileTouch = { path, action: kind, ok: e.ok, ...(to && { to }) };
     if (prev >= 0) files[prev] = item;

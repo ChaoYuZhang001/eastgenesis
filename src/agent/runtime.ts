@@ -28,6 +28,8 @@ export interface AgentDeps {
   approvePlan?: (plan: Plan) => Promise<boolean>;
   /** 用户确认过的记忆（已按目标挑选），放进规划、回答、总结的系统提示 */
   memories?: readonly MemoryNote[];
+  /** 项目、目标、任务三层说明叠加后的文本（decision/project.ts resolveInstructions），接在系统提示后面 */
+  instructions?: string;
   /** 用户保存的技能（已按目标挑选），只放进规划提示 */
   skills?: readonly SkillNote[];
   onEvent?: (e: AgentEvent) => void;
@@ -185,7 +187,9 @@ export class AgentRuntime {
         return finish("completed", answer);
       }
 
-      const planner = new Planner({ llm, decision: d.decision, tools: d.tools, maxSteps: budget.maxSteps, notes: [memoryBlock(notes), skillBlock(skills)].filter(Boolean).join("\n\n") });
+      // 规划提示里也带三层说明：用户对「怎么做」的要求在规划阶段就要生效
+      const notesBlock = [memoryBlock(notes), skillBlock(skills), (d.instructions ?? "").trim()].filter(Boolean).join("\n\n");
+      const planner = new Planner({ llm, decision: d.decision, tools: d.tools, maxSteps: budget.maxSteps, notes: notesBlock });
       // 「再整理一次」：技能开头带参数的只读步骤直接执行，不调规划器；后面的步骤（按结果判断、写入）再交给规划器续写
       const replay = replayPlan(skills[0], goal, (n) => d.tools.get(n));
       const pending = replay ? [...replay.steps] : [];
@@ -334,10 +338,10 @@ export class AgentRuntime {
     return { ok: true, output, score: score.value };
   }
 
-  /** 基础系统提示 + 记忆段 */
+  /** 基础系统提示 + 记忆段 + 项目/目标/任务三层的说明（后写的为准，见 project.ts） */
   #system(): string {
-    const m = memoryBlock(this.deps.memories ?? []);
-    return m ? `${AGENT_SYSTEM}\n\n${m}` : AGENT_SYSTEM;
+    const blocks = [memoryBlock(this.deps.memories ?? []), (this.deps.instructions ?? "").trim()];
+    return [AGENT_SYSTEM, ...blocks.filter(Boolean)].join("\n\n");
   }
 
   #history(records: readonly StepRecord[]): string {

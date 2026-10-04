@@ -48,6 +48,8 @@ export interface GoalRound {
   status: RoundStatus;
   evidence: Evidence;
   verdict: RoundVerdict | null;
+  /** 执行这一轮的任务 id；M9 之前存下的轮次没有这个字段，读回时为 null */
+  task_id: string | null;
   started_at: number;
   finished_at: number | null;
 }
@@ -92,6 +94,8 @@ export const MAX_REASON = 500;
 /** 校验连续失败几轮就判失败 */
 export const FAIL_STREAK = 3;
 export const GOAL_ID = /^goal-[a-z0-9-]{1,48}$/;
+/** 执行一轮的任务 id（stores/tasks.ts 的 TaskCard.id，形如 task-<uuid>）：轮次据此关联到任务卡 */
+export const TASK_ID = /^task-[a-z0-9-]{1,48}$/;
 
 const bad = (message: string) => fail("invalid_goal", message);
 export const goalNotFound = () => fail("goal_not_found", "没有找到这个目标");
@@ -155,6 +159,13 @@ export function goalPhase(g: Pick<Goal, "status" | "rounds">): GoalPhase {
   return "ready";
 }
 
+/** 下一轮的提示：上一轮判定「未达成」时给出的原因（就是这一轮该解决的事）。没有上一轮或上一轮不是未达成时返回 null */
+export function nextRoundHint(g: Pick<Goal, "rounds">): string | null {
+  const v = lastRound(g)?.verdict;
+  if (!v || v.verdict !== "not_done") return null;
+  return clip(v.reason, MAX_ROUND_TITLE);
+}
+
 const interrupt = (r: GoalRound, now: number): GoalRound =>
   r.status === "running"
     ? { ...r, status: "interrupted", finished_at: now, items: r.items.map((i) => (i.status === "running" ? { ...i, status: "pending" } : i)) }
@@ -184,6 +195,8 @@ const needRunning = (g: Goal) => {
 export interface RoundPlan {
   title?: string;
   items?: readonly string[];
+  /** 执行这一轮的任务 id；界面用它把轮次和任务卡关联起来（展开这一轮能看到当时的执行过程） */
+  task_id?: string;
 }
 
 /** 开始新一轮。上一轮还在跑或在等你确认时不能开；已经到了失败条件时抛 goal_exhausted，调用方改成 failed */
@@ -203,6 +216,7 @@ export function startRound(g: Goal, plan: RoundPlan, now: number): Goal {
     status: "running",
     evidence: emptyEvidence(),
     verdict: null,
+    task_id: typeof plan.task_id === "string" && TASK_ID.test(plan.task_id) ? plan.task_id : null,
     started_at: now,
     finished_at: null,
   };
@@ -225,6 +239,21 @@ const addEvidence = (r: GoalRound, e: unknown): Evidence => {
     claim: add.claim ?? r.evidence.claim,
   });
 };
+
+/** 整轮替换步骤清单：一轮跑完后按实际执行的步骤记账（序号和状态都来自执行记录）。
+ *  只认文本和状态；条数和每条长度按 startRound 的上限截断 */
+export function setRoundItems(g: Goal, items: readonly { text: string; status: ItemStatus }[], now: number): Goal {
+  const r = runningRound(g);
+  const list = (Array.isArray(items) ? items : [])
+    .map((it, i) => ({
+      id: `r${r.index}-${i + 1}`,
+      text: planText(it?.text, MAX_ITEM_TEXT),
+      status: (ITEM_STATUSES as readonly unknown[]).includes(it?.status) ? (it.status as ItemStatus) : "skipped",
+    }))
+    .filter((it) => it.text)
+    .slice(0, MAX_ROUND_ITEMS);
+  return replaceLast(g, { ...r, items: list }, now);
+}
 
 export function updateItem(g: Goal, itemId: string, status: ItemStatus, now: number): Goal {
   if (!(ITEM_STATUSES as readonly string[]).includes(status)) throw badRound("步骤状态无效");
@@ -357,6 +386,7 @@ export type GoalChange =
   | { op: "transition"; to: GoalStatus }
   | { op: "start_round"; plan: RoundPlan }
   | { op: "update_item"; item_id: string; status: ItemStatus }
+  | { op: "set_round_items"; items: readonly { text: string; status: ItemStatus }[] }
   | { op: "append_evidence"; evidence: Evidence }
   | { op: "record_llm_calls"; count: number }
   | { op: "finish_round"; result: EvidenceResult | RoundVerdict; evidence?: Evidence }
@@ -371,6 +401,8 @@ export function applyGoalChange(g: Goal, c: GoalChange, now: number): Goal {
       return startRound(g, c.plan ?? {}, now);
     case "update_item":
       return updateItem(g, c.item_id, c.status, now);
+    case "set_round_items":
+      return setRoundItems(g, c.items, now);
     case "append_evidence":
       return appendEvidence(g, c.evidence, now);
     case "record_llm_calls":
@@ -416,6 +448,7 @@ function reviveRound(v: unknown): GoalRound | null {
     status: status as RoundStatus,
     evidence: sanitizeEvidence(v.evidence),
     verdict,
+    task_id: typeof v.task_id === "string" && TASK_ID.test(v.task_id) ? v.task_id : null,
     started_at,
     finished_at,
   };

@@ -34,7 +34,7 @@ describe("内容栏的路由摘要", () => {
 
   it("目标：状态 + 轮数；最后一轮拿不准时是「等你确认」", () => {
     expect(goalSummary(goal({}))).toBe("未开始");
-    const round = (status: string) => ({ index: 1, title: "", items: [], status, evidence: { tool_calls: [], file_changes: [], command_outputs: [] }, verdict: null, started_at: 1, finished_at: 2 });
+    const round = (status: string) => ({ index: 1, title: "", items: [], status, evidence: { tool_calls: [], file_changes: [], command_outputs: [] }, verdict: null, task_id: null, started_at: 1, finished_at: 2 });
     expect(goalSummary(goal({ status: "running", rounds: [round("not_done")] as Goal["rounds"] }))).toBe("进行中 · 第 1 轮");
     expect(goalSummary(goal({ status: "running", rounds: [round("uncertain")] as Goal["rounds"] }))).toBe("等你确认");
   });

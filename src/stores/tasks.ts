@@ -1,8 +1,11 @@
 // 任务：一次任务就是会话里的一轮（用户目标 + 助手成果）。专家模式下同一份数据以卡片形式展示。
 import { create } from "zustand";
 import type { AgentEvent, ConfirmRequest, Plan, RunFile, RunStatus } from "@/agent";
+import { emptyEvidence } from "@/decision/evidence";
 import { toAttachments } from "@/lib/attachments";
 import { createEngine, withLockedModel, type ModelOverride } from "@/lib/engine";
+import type { RoundHandle } from "@/lib/goal-runner";
+import { outcomeOf } from "@/lib/run-evidence";
 import { toAppError } from "@/lib/ipc";
 import { proposeAlignment, proposeMemory, type MemoryProposal } from "@/lib/memory";
 import { appendEvent } from "@/lib/subagents";
@@ -48,6 +51,10 @@ export interface SubmitOptions {
   workdir?: string | null;
   /** 只用这些 MCP 服务器的工具；不给表示所有已连接的 */
   servers?: readonly string[] | null;
+  /** 项目、目标、任务三层叠加的说明（decision/project.ts resolveInstructions）；目标模式由执行器传入 */
+  instructions?: string | null;
+  /** 这一轮的模型调用上限（目标模式按目标剩余额度给）；不给用运行时的默认预算 */
+  maxLlmCalls?: number;
 }
 
 export interface TaskCard {
@@ -84,10 +91,18 @@ export interface TaskCard {
   preferenceSource: PreferenceSource;
 }
 
+/** 一次运行结束后给调用方的信息：最终卡片（卡片被关掉时 undefined）和「哪些工具是只读的」判断 */
+export interface RunOutcome {
+  card: TaskCard | undefined;
+  readOnly: (tool: string) => boolean;
+}
+
 interface TasksState {
   tasks: TaskCard[];
   activeId: string | null;
   submit(goal: string, opts?: SubmitOptions): string | null;
+  /** 目标模式的一轮：同步建出任务卡（界面立刻显示第 N 轮进行中），跑完后返回这一轮的记账 */
+  runGoalRound(goal: string, opts: SubmitOptions & { goalId: string }): RoundHandle;
   close(id: string): void;
   toggleCollapse(id: string): void;
   move(id: string, toIndex: number): void;
@@ -130,7 +145,41 @@ export const useTasks = create<TasksState>((set, get) => {
     plans.delete(id);
   };
 
-  async function run(id: string, goal: string, opts: SubmitOptions, files: readonly RunFile[]) {
+  /** 建一张任务卡（不启动）：普通任务进会话，目标轮次不进（sessionId 为 null） */
+  const make = (goal: string, opts: SubmitOptions): TaskCard | null => {
+    const g = goal.trim().slice(0, MAX_GOAL);
+    if (!g) return null;
+    const n = ++seq;
+    const files = (opts.files ?? []).map((f) => ({ name: f.name, text: f.text }));
+    return {
+      id: newId("task"),
+      seq: n,
+      sessionId: opts.sessionId ?? null,
+      goal: g,
+      status: "running",
+      collapsed: false,
+      events: [],
+      summary: null,
+      pendingConfirm: null,
+      pendingPlan: null,
+      override: null,
+      lock: opts.lock ?? null,
+      permission: opts.permission ?? "confirm",
+      onboarding: opts.onboarding === true,
+      files: files.map((f) => f.name),
+      multi: opts.multi === true,
+      startedAt: Date.now(),
+      endedAt: null,
+      // 刚问过对齐问题时，这一轮的回答整句作为待确认偏好
+      proposal: opts.aligning ? proposeAlignment(g) : proposeMemory(g),
+      projectId: opts.projectId ?? null,
+      goalId: opts.goalId ?? null,
+      mode: opts.mode ?? "quick",
+      ...resolvePreference(opts),
+    };
+  };
+
+  async function run(id: string, goal: string, opts: SubmitOptions, files: readonly RunFile[]): Promise<RunOutcome> {
     const multi = opts.multi === true;
     const lock = opts.lock ?? null;
     const s = useSettings.getState();
@@ -140,6 +189,9 @@ export const useTasks = create<TasksState>((set, get) => {
     const notes = useMemory.getState().pick(goal);
     // 多 Agent 协同时不带技能：拆分后的子任务和技能对不上
     const skills = multi ? [] : useSkills.getState().pick(goal);
+    // 目标模式会把执行记录当作实据：只读工具不算「做过事」，需要按工具自己的声明判断
+    const registered = [...(backend.kind === "mock" ? DEMO_TOOLS : []), ...activeMcpTools(opts.servers ?? null)];
+    const readOnly = (name: string) => registered.find((t) => t.name === name)?.sideEffect === "none";
     const { runtime, coordinator } = createEngine({
       backend,
       statuses: s.statuses,
@@ -151,11 +203,13 @@ export const useTasks = create<TasksState>((set, get) => {
       permission: opts.permission,
       timeoutMs: s.timeoutS * 1000,
       onboarding: opts.onboarding === true,
+      ...(opts.instructions ? { instructions: opts.instructions } : {}),
+      ...(opts.maxLlmCalls ? { budget: { maxLlmCalls: Math.max(1, opts.maxLlmCalls) } } : {}),
       health,
       memories: notes,
       skills,
       // 浏览器模式另外注册演示工具；MCP 工具来自设置页里已连接的服务器（只含白名单内的）
-      tools: [...(backend.kind === "mock" ? DEMO_TOOLS : []), ...activeMcpTools(opts.servers ?? null)],
+      tools: registered,
       onEvent: (e) => patch(id, (t) => ({ events: appendEvent(t.events, e, MAX_EVENTS) })),
       confirm: (req) =>
         new Promise<boolean>((resolve) => {
@@ -195,47 +249,30 @@ export const useTasks = create<TasksState>((set, get) => {
       useMemory.getState().markUsed(notes.map((n) => n.id));
       useSkills.getState().markUsed(skills.map((x) => x.id));
     }
+    return { card: get().tasks.find((t) => t.id === id), readOnly };
   }
 
   return {
     tasks: [],
     activeId: null,
     submit(goal, opts = {}) {
-      const g = goal.trim().slice(0, MAX_GOAL);
-      if (!g) return null;
-      const n = ++seq;
-      // 会话持久化后，任务 id 要跨重启唯一；seq 只用来排同一会话里的先后（读回的回合 seq 小于本次启动的）
-      const id = newId("task");
-      const files = (opts.files ?? []).map((f) => ({ name: f.name, text: f.text }));
-      const card: TaskCard = {
-        id,
-        seq: n,
-        sessionId: opts.sessionId ?? null,
-        goal: g,
-        status: "running",
-        collapsed: false,
-        events: [],
-        summary: null,
-        pendingConfirm: null,
-        pendingPlan: null,
-        override: null,
-        lock: opts.lock ?? null,
-        permission: opts.permission ?? "confirm",
-        onboarding: opts.onboarding === true,
-        files: files.map((f) => f.name),
-        multi: opts.multi === true,
-        startedAt: Date.now(),
-        endedAt: null,
-        // 刚问过对齐问题时，这一轮的回答整句作为待确认偏好
-        proposal: opts.aligning ? proposeAlignment(g) : proposeMemory(g),
-        projectId: opts.projectId ?? null,
-        goalId: opts.goalId ?? null,
-        mode: opts.mode ?? "quick",
-        ...resolvePreference(opts),
-      };
-      set((s) => ({ tasks: [card, ...s.tasks], activeId: id }));
-      void run(id, g, opts, files);
-      return id;
+      const card = make(goal, opts);
+      if (!card) return null;
+      set((s) => ({ tasks: [card, ...s.tasks], activeId: card.id }));
+      void run(card.id, card.goal, opts, opts.files ? [...opts.files] : []);
+      return card.id;
+    },
+    runGoalRound(goal, opts) {
+      const card = make(goal, opts);
+      if (!card) throw new Error("这一轮的任务描述为空");
+      // 目标轮次不进会话列表（sessionId 为 null），也不会把会话顶到「最近」里
+      set((s) => ({ tasks: [card, ...s.tasks] }));
+      const result = run(card.id, card.goal, opts, []).then(({ card: done, readOnly }) => {
+        // 卡片被关掉时按「执行出错」记，循环据此开下一轮或判失败
+        if (!done) return { taskId: card.id, status: "aborted" as const, summary: "这一轮的任务被关掉了", evidence: emptyEvidence(), llmCalls: 0, items: [] };
+        return outcomeOf(done, readOnly);
+      });
+      return { taskId: card.id, result };
     },
     close(id) {
       get().cancel(id);

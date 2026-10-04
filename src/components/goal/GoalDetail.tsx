@@ -3,6 +3,7 @@ import { Archive, ChevronRight, CircleHelp, Ellipsis, Pause, Play, Trash2 } from
 import { Button } from "@/components/ui/button";
 import { Menu, MenuItem } from "@/components/ui/menu";
 import { FAIL_CAUSE_LABEL, canTransition, failCause, goalPhase, type Goal, type GoalRound, type RoundVerdict } from "@/decision/goal";
+import { runGoal } from "@/lib/goal-run";
 import { cn } from "@/lib/utils";
 import { savedText } from "@/lib/savings";
 import { sessionSummary } from "@/lib/sidebar-rows";
@@ -14,8 +15,8 @@ import { useDialogs } from "@/stores/dialogs";
 import { STEP_LABEL, StepIcon } from "@/components/task/status";
 import { GoalStatusIcon, goalStatusText } from "./GoalStatus";
 
-// 目标详情（docs/UI_LAYOUT_V3.md 2.3）。M9 只接 M8 的 store：「开始」只改状态，
-// 自动多轮循环、每轮调 checkDoneWithEvidence、用量上限检测在 M10 接上。
+// 目标详情（docs/UI_LAYOUT_V3.md 2.3）：开始 / 继续都会启动自动多轮循环（lib/goal-run.ts）。
+// 每一轮先改状态、再交给执行器；暂停和放弃由 store 直接停掉正在跑的那一轮。
 const ROUND_LABEL: Record<GoalRound["status"], string> = {
   running: "进行中",
   done: "已完成",
@@ -55,13 +56,22 @@ function GoalView({ goal }: { goal: Goal }) {
   const saved = savedText(useTasksSavings(mine));
   const [error, setError] = useState<string | null>(null);
   const phase = goalPhase(goal);
+  // 正在跑一轮（工作台里那一轮任务卡就是这一轮的进度）
+  const working = phase === "working";
   const cause = goal.status === "failed" ? failCause(goal) : null;
   const canAbandon = canTransition(goal.status, "abandoned");
   const run = async (f: () => Promise<string | null>) => setError(await f());
 
+  // 开始 / 继续：先改状态，成功后再启动循环（状态没改成功就不该跑）
+  const begin = async () => {
+    const err = await start(goal.id);
+    if (err) return err;
+    runGoal(goal.id);
+    return null;
+  };
   const main =
-    goal.status === "idle" ? { label: "开始", icon: Play, act: () => start(goal.id) }
-    : goal.status === "paused" ? { label: "继续", icon: Play, act: () => start(goal.id) }
+    goal.status === "idle" ? { label: "开始", icon: Play, act: begin }
+    : goal.status === "paused" ? { label: "继续", icon: Play, act: begin }
     : goal.status === "running" ? { label: "暂停", icon: Pause, act: () => pause(goal.id) }
     : null;
 
@@ -70,7 +80,7 @@ function GoalView({ goal }: { goal: Goal }) {
     goal.rounds.length ? `第 ${goal.rounds.length} 轮` : null,
     `模型调用 ${goal.used_llm_calls} / ${goal.max_llm_calls}`,
     project ? project.name : null,
-    // 路由摘要：这个目标下各轮用了哪些模型、和最强模式比省了多少（多轮执行在 M10 接入后才有）
+    // 路由摘要：这个目标下各轮用了哪些模型、和最强模式比省了多少（每轮都是一张任务卡，从它们的事件里统计）
     mine.length ? [sessionSummary(mine), saved].filter(Boolean).join(" · ") : null,
   ].filter(Boolean);
 
@@ -103,8 +113,10 @@ function GoalView({ goal }: { goal: Goal }) {
             {status.join(" · ")}
           </p>
           {cause && <p className="text-sm">失败原因：{FAIL_CAUSE_LABEL[cause]}</p>}
-          {goal.status === "running" && phase !== "awaiting_user" && (
-            <p className="text-xs text-muted-foreground">自动多轮执行还没有接入（M10），现在只记录状态。</p>
+          {working && (
+            <p role="status" className="text-xs text-muted-foreground">
+              正在执行第 {goal.rounds.length} 轮；每轮结束会按执行记录判断目标达成没有，没达成就自动开下一轮。
+            </p>
           )}
           {error && (
             <p role="alert" className="text-sm">
@@ -137,7 +149,16 @@ function AwaitingBar({ goal, resolve, onError }: { goal: Goal; resolve: (id: str
         <Button size="sm" onClick={async () => onError(await resolve(goal.id, "done"))}>
           确认已完成
         </Button>
-        <Button size="sm" variant="outline" onClick={async () => onError(await resolve(goal.id, "continue"))}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={async () => {
+            const err = await resolve(goal.id, "continue");
+            onError(err);
+            // 你确认继续之后才开下一轮：循环自己不推进 uncertain 的那一轮
+            if (!err) runGoal(goal.id);
+          }}
+        >
           继续下一轮
         </Button>
       </div>

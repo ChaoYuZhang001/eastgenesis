@@ -164,7 +164,7 @@ describe("失败条件：超过 max_llm_calls 或校验连续失败 3 次", () =
   });
 
   it(`轮数达到 ${MAX_ROUNDS} 也停（手动「继续」不花调用时的兜底）；被打断的轮次中断连续失败计数`, () => {
-    const r = (i: number): GoalRound => ({ index: i + 1, title: "", items: [], status: "interrupted", evidence: { tool_calls: [], file_changes: [], command_outputs: [] }, verdict: null, started_at: T, finished_at: T });
+    const r = (i: number): GoalRound => ({ index: i + 1, title: "", items: [], status: "interrupted", evidence: { tool_calls: [], file_changes: [], command_outputs: [] }, verdict: null, task_id: null, started_at: T, finished_at: T });
     const g = running({ rounds: Array.from({ length: MAX_ROUNDS }, (_, i) => r(i)) });
     expect(failStreak(g)).toBe(0);
     expect(failCause(g)).toBe("rounds");

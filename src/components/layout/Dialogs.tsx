@@ -6,6 +6,7 @@ import { useChat } from "@/stores/chat";
 import { deleteSession } from "@/stores/history";
 import { useTasks } from "@/stores/tasks";
 import { useDialogs } from "@/stores/dialogs";
+import { stopGoal } from "@/lib/goal-run";
 import { useGoals } from "@/stores/goals";
 import { useProjects } from "@/stores/projects";
 import { useUi } from "@/stores/ui";
@@ -49,6 +50,8 @@ export function Dialogs() {
         onConfirm={async () => {
           setBusy(true);
           const id = pending.id;
+          // 这个项目下正在跑的目标先停下（循环会取消当前那一轮的任务），再删项目
+          for (const g of useGoals.getState().items) if (g.project_id === id && g.status === "running") stopGoal(g.id);
           const r = await confirmDelete();
           setBusy(false);
           if (typeof r === "string") return setNote(r);
