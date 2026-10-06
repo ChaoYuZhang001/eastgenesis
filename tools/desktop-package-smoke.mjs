@@ -9,8 +9,10 @@ import { spawn } from "node:child_process";
 const execFileAsync = promisify(execFile);
 // Tauri 的 `--features qa-faults` 不改变 bundle 名称；默认使用最近一次
 // `pnpm tauri:build:mac:qa` 生成的 EastGenesis Desktop.app。也可显式传入路径。
-const packageBinary = process.argv[2] ?? "target/release/bundle/macos/EastGenesis Desktop.app/Contents/MacOS/eastgenesis-desktop";
+const packageArg = process.argv.slice(2).find((arg) => arg !== "--" && !arg.startsWith("-"));
+const packageBinary = packageArg ?? "target/release/bundle/macos/EastGenesis Desktop.app/Contents/MacOS/eastgenesis-desktop";
 const RESTART_CYCLES = 2;
+const jsonOutput = process.argv.includes("--json");
 
 if (process.platform !== "darwin") {
   throw new Error("desktop:package:smoke currently requires macOS; use a native runner for other platforms");
@@ -63,5 +65,29 @@ for (let cycle = 1; cycle <= RESTART_CYCLES; cycle++) {
   }
 }
 
-console.log(`desktop package smoke passed (${RESTART_CYCLES} restart cycles; qa-faults build expected): ${packageBinary}`);
-for (const launch of launches) console.log(`- cycle ${launch.cycle}: startup window ${launch.startupMs}ms, exit ${JSON.stringify(launch.exit)}`);
+const report = {
+  schemaVersion: 1,
+  kind: "desktop-package-smoke",
+  passed: true,
+  platform: process.platform,
+  packageBinary,
+  restartCycles: RESTART_CYCLES,
+  checks: {
+    providerStreamSymbol: true,
+    qaFaultSymbol: true,
+    restartableProcess: launches.length === RESTART_CYCLES,
+    controlledTermination: launches.every((launch) => launch.exit.signal === "SIGTERM" || launch.exit.code === 143 || launch.exit.code === -15),
+  },
+  launches,
+  evidenceBoundary: {
+    proven: ["QA bundle contains provider stream and fault injection symbols", "native process survives the startup window", "a controlled exit can be followed by a second startup"],
+    excluded: ["real WebView DOM interaction", "SQLite session recovery", "tool side-effect recovery", "real Provider availability", "signing/notarization"],
+  },
+};
+
+if (jsonOutput) {
+  console.log(JSON.stringify(report, null, 2));
+} else {
+  console.log(`desktop package smoke passed (${RESTART_CYCLES} restart cycles; qa-faults build expected): ${packageBinary}`);
+  for (const launch of launches) console.log(`- cycle ${launch.cycle}: startup window ${launch.startupMs}ms, exit ${JSON.stringify(launch.exit)}`);
+}

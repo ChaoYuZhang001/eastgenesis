@@ -53,6 +53,15 @@ function summarizeEvidence(name, value) {
       routingPassed: value.passed === true,
     };
   }
+  if (name === "package") {
+    return {
+      schemaVersion: value.schemaVersion ?? null,
+      restartCycles: value.restartCycles ?? 0,
+      launches: Array.isArray(value.launches) ? value.launches.length : 0,
+      checks: value.checks ?? null,
+      packagePassed: value.passed === true,
+    };
+  }
   return undefined;
 }
 
@@ -120,7 +129,7 @@ if (includePackage) {
   if (process.platform !== "darwin") {
     stages.push({ name: "package", required: false, status: "not_run", reason: "package smoke currently requires macOS" });
   } else {
-    await runIncludedStage("package", ["desktop:package:smoke"]);
+    await runCommand("package", ["--silent", "desktop:package:smoke", "--", "--json"], { json: true, required: true });
   }
 } else {
   stages.push({ name: "package", required: false, status: "not_run", reason: "use --include-package for the native QA package smoke" });
