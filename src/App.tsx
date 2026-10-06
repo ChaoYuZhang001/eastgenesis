@@ -48,6 +48,7 @@ export default function App() {
   // 后端就绪后再读设置、记忆、技能、项目和目标
   useEffect(() => {
     if (phase !== "ready") return;
+    let disposed = false;
     void useSettings
       .getState()
       .load()
@@ -64,6 +65,7 @@ export default function App() {
     // 启动时只自动打开一个明确的恢复入口：会话优先；没有会话恢复时再打开目标详情。
     // 如果用户已经提交新任务或主动切到别的主区，异步读库完成后不抢走当前焦点。
     void Promise.all([goalsReady, historyReady]).then(() => {
+      if (disposed) return;
       if (useChat.getState().activeId !== null || useUi.getState().main.kind !== "chat") return;
       const goal = useGoals
         .getState()
@@ -72,7 +74,11 @@ export default function App() {
       if (goal) useUi.getState().open({ kind: "goal", id: goal.id });
     });
     void useUsage.getState().load();
-    return watchHistory();
+    const stopHistory = watchHistory();
+    return () => {
+      disposed = true;
+      stopHistory();
+    };
   }, [phase]);
 
   const newTask = useCallback(() => {
