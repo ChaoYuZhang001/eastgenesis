@@ -94,4 +94,22 @@ describe("会话持久化", () => {
     const recovered = card("整理周报并保存");
     expect(within(recovered).getByRole("button", { name: "从未完成步骤继续" })).toBeInTheDocument();
   });
+
+  it("重启后自动打开没有终态的 running checkpoint，让恢复入口立即可见", async () => {
+    const backend = createMockBackend();
+    const first = await boot(backend);
+    submit("整理周报并保存");
+    await within(card("整理周报并保存")).findByRole("group", {}, LONG);
+    await waitFor(async () => expect((await backend.listSessions())[0]?.turns[0]?.status).toBe("running"));
+    // 先卸载订阅，再停止当前进程内的等待；数据库里仍保留退出前的 running checkpoint。
+    first.unmount();
+    act(() => {
+      for (const t of useTasks.getState().tasks) useTasks.getState().cancel(t.id);
+    });
+
+    await boot(backend);
+    expect(useChat.getState().activeId).toBe((await backend.listSessions())[0]?.id);
+    const recovered = screen.getByRole("article", { name: "任务：整理周报并保存" });
+    expect(within(recovered).getByRole("button", { name: "从未完成步骤继续" })).toBeInTheDocument();
+  });
 });

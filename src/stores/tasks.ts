@@ -94,6 +94,8 @@ export interface TaskCard {
   preferenceSource: PreferenceSource;
   /** 用户显式给这次任务的能力面提示；null 表示自动判断。 */
   surfaceHint?: WorkSurface | null;
+  /** 运行中 checkpoint 在启动时没有终态，被读回为 aborted；只用于让恢复入口可见，不写入存储。 */
+  recoveredFromRestart?: boolean;
   /** 当前 answer / summary 的流式正文；只存在运行态，不写入历史。 */
   streamingText?: string;
   /** 流式正文已经开始后请求中断，不能静默拼接另一个模型。 */

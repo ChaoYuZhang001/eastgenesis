@@ -90,6 +90,8 @@ describe("运行中会话 checkpoint", () => {
     await loadHistory();
     const recovered = useTasks.getState().tasks.find((t) => t.id === stored.id);
     expect(recovered).toMatchObject({ status: "aborted", summary: expect.stringContaining("应用在任务完成前退出") });
+    expect(recovered?.recoveredFromRestart).toBe(true);
+    expect(useChat.getState().activeId).toBe(s.id);
     expect(recovered && recoveryCheckpoint(recovered.events)).toMatchObject({ nextStepIndex: 0 });
   });
 });

@@ -83,6 +83,7 @@ export function fromStoredTurn(t: StoredTurn, s: StoredSession): TaskCard {
     preference: (t.preference as Preference) ?? "balanced",
     preferenceSource: (t.preferenceSource as PreferenceSource) ?? "global",
     surfaceHint: t.surfaceHint === "chat" || t.surfaceHint === "work" || t.surfaceHint === "codex" ? t.surfaceHint : null,
+    ...(wasInterrupted ? { recoveredFromRestart: true } : {}),
   };
 }
 
@@ -98,6 +99,16 @@ export async function loadHistory(): Promise<string | null> {
     }
     useChat.setState((st) => ({ sessions: [...st.sessions, ...sessions.filter((x) => !st.sessions.some((y) => y.id === x.id))] }));
     useTasks.setState((st) => ({ tasks: [...st.tasks, ...cards.filter((c) => !st.tasks.some((x) => x.id === c.id))] }));
+    // 有未完成 checkpoint 时直接打开对应会话，让“从未完成步骤继续”成为重启后的第一入口。
+    // 只认 fromStoredTurn 标记的 running checkpoint；用户主动停止的 aborted 历史不会被强行带回。
+    const recovered = cards
+      .filter((c) => c.recoveredFromRestart && c.sessionId)
+      .map((c) => sessions.find((s) => s.id === c.sessionId) ?? null)
+      .filter((s): s is Session => s !== null)
+      .sort((a, b) => b.updatedAt - a.updatedAt)[0];
+    if (recovered && useChat.getState().activeId === null) {
+      useChat.getState().select(recovered.id);
+    }
     lastError = null;
     return null;
   } catch (e) {

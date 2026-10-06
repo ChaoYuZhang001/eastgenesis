@@ -64,6 +64,8 @@ pnpm --silent desktop:gate -- --json --include-real
 
 会话持久化现已把运行中的回合写成脱敏 checkpoint：任务事件变化时会把 `running` 回合写回 `sessions.turns`；启动读回时，如果没有落盘的 `run_end`，就补成明确的 `aborted`，保留计划和步骤，让任务卡显示“从未完成步骤继续”。如果 `run_end` 已经先落盘，则优先使用真实终态，避免把已完成任务误报成崩溃。该行为由 `tests/session-recovery.test.ts` 和 `tests/ui-history.test.tsx` 覆盖，仍属于 TypeScript/内存后端证据；只有在真实 Tauri 进程中杀进程、重启窗口并完成恢复，才算 M21 P0 的桌面验收。
 
+当启动读回的是没有 `run_end` 的 running checkpoint，且用户尚未在本次启动中选过会话，前端会自动打开最近的恢复会话，让“从未完成步骤继续”直接出现在主区；已经有明确 `run_end=aborted` 的用户主动停止历史不会被自动抢焦点。该行为只改善 hydration 与恢复入口可见性，不能单独证明真实窗口重启、WebView DOM 或工具副作用恢复。
+
 目标模式的运行中轮次同样先写入 `goals.rounds`；启动时如果目标仍为 `running` 且最后一轮没有终态，会把目标转为 `paused`、轮次转为 `interrupted`，并显示可解释的中断原因。正常的 `uncertain` 等用户确认状态不会被当作崩溃。该恢复只重建安全的状态边界，不自动重放步骤；用户继续时仍需重新走账本探测和权限闸门。当前证据覆盖状态机、mock/SQLite 存储和目标 UI，真实 Tauri 进程退出、目标任务卡事件恢复及工具副作用仍待 P0。
 
 ## P0：Mac 真机关键路径
