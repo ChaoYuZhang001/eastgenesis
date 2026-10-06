@@ -1,5 +1,6 @@
-// 会话持久化（迁移 5）：启动时读回会话和它们已结束的回合；每轮结束、改标题、删除时整条写回。
-// 只存已结束的回合（进行中的不存：确认请求、AbortController 这些运行时状态存不了）。写入前在 decision/session.ts 脱敏。
+// 会话持久化（迁移 5）：启动时读回会话和回合；运行中的回合也会保存脱敏 checkpoint，
+// 这样桌面进程在工具账本关键窗口退出后，重启仍能看到「从未完成步骤继续」。确认请求、AbortController
+// 这类运行时状态不持久化；恢复时重新生成参数并重新走权限闸门。写入前在 decision/session.ts 脱敏。
 // 同时把每次模型调用记进 usage_calls，供「本月省了多少」跨重启统计。
 import type { AgentEvent } from "@/agent";
 import { HealthTracker } from "@/decision";
@@ -40,12 +41,22 @@ export function toStoredTurn(t: TaskCard): StoredTurn {
     mode: t.mode,
     preference: t.preference,
     preferenceSource: t.preferenceSource,
+    surfaceHint: t.surfaceHint ?? null,
   };
 }
 
 /** 读回的回合 → 任务卡片（只读回放：没有确认请求、没有运行中的状态） */
 export function fromStoredTurn(t: StoredTurn, s: StoredSession): TaskCard {
-  const status = (DONE.has(t.status as TaskStatus) ? t.status : "aborted") as TaskStatus;
+  const rawEvents = t.events as AgentEvent[];
+  // 进程可能在 runtime 发出 run_end 后、TaskCard 状态写回前退出。优先相信终态事件，
+  // 否则把持久化的 running checkpoint 转成明确的 aborted，并补一条恢复可识别的终态事件。
+  const terminal = [...rawEvents].reverse().find((e) => e?.type === "run_end") as Extract<AgentEvent, { type: "run_end" }> | undefined;
+  const recoveredStatus = terminal?.status ?? t.status;
+  const wasInterrupted = !terminal && t.status === "running";
+  const events = wasInterrupted
+    ? [...rawEvents, { type: "run_end", status: "aborted", summary: "应用在任务完成前退出，已保留执行记录，可从未完成步骤继续" } satisfies AgentEvent]
+    : rawEvents;
+  const status = (DONE.has(recoveredStatus as TaskStatus) ? recoveredStatus : "aborted") as TaskStatus;
   return {
     id: t.id,
     seq: t.seq,
@@ -53,8 +64,8 @@ export function fromStoredTurn(t: StoredTurn, s: StoredSession): TaskCard {
     goal: t.goal,
     status,
     collapsed: false,
-    events: t.events as AgentEvent[],
-    summary: t.summary,
+    events,
+    summary: t.summary ?? terminal?.summary ?? (wasInterrupted ? "应用在任务完成前退出，已保留执行记录，可从未完成步骤继续" : null),
     pendingConfirm: null,
     pendingPlan: null,
     override: null,
@@ -71,6 +82,7 @@ export function fromStoredTurn(t: StoredTurn, s: StoredSession): TaskCard {
     mode: (t.mode as TaskMode) ?? "quick",
     preference: (t.preference as Preference) ?? "balanced",
     preferenceSource: (t.preferenceSource as PreferenceSource) ?? "global",
+    surfaceHint: t.surfaceHint === "chat" || t.surfaceHint === "work" || t.surfaceHint === "codex" ? t.surfaceHint : null,
   };
 }
 
@@ -80,7 +92,10 @@ export async function loadHistory(): Promise<string | null> {
     const stored = await getBackend().listSessions();
     const sessions: Session[] = stored.map((s) => ({ id: s.id, title: s.title, projectId: s.project_id, createdAt: s.created_at, updatedAt: s.updated_at }));
     const cards = stored.flatMap((s) => s.turns.map((t) => fromStoredTurn(t, s)));
-    for (const c of cards) recorded.add(c.id);
+    // running checkpoint 尚未写入 usage_calls；恢复完成后要重新统计它包含的全部调用。
+    for (const storedTurn of stored.flatMap((s) => s.turns)) {
+      if (storedTurn.status !== "running") recorded.add(storedTurn.id);
+    }
     useChat.setState((st) => ({ sessions: [...st.sessions, ...sessions.filter((x) => !st.sessions.some((y) => y.id === x.id))] }));
     useTasks.setState((st) => ({ tasks: [...st.tasks, ...cards.filter((c) => !st.tasks.some((x) => x.id === c.id))] }));
     lastError = null;
@@ -91,7 +106,7 @@ export async function loadHistory(): Promise<string | null> {
   }
 }
 
-/** 把一个会话整条写回（只含已结束的回合）；同一会话的写入排队，后写的覆盖先写的 */
+/** 把一个会话整条写回（含已结束回合和运行中 checkpoint）；同一会话的写入排队，后写的覆盖先写的 */
 export function saveSession(id: string): Promise<unknown> {
   const prev = saving.get(id) ?? Promise.resolve();
   const next = prev
@@ -101,7 +116,7 @@ export function saveSession(id: string): Promise<unknown> {
       if (!s) return;
       const turns = useTasks
         .getState()
-        .tasks.filter((t) => t.sessionId === id && DONE.has(t.status))
+        .tasks.filter((t) => t.sessionId === id && (DONE.has(t.status) || t.status === "running"))
         .sort((a, b) => a.seq - b.seq)
         .map(toStoredTurn);
       try {
@@ -162,18 +177,32 @@ export async function recordTurnUsage(t: TaskCard): Promise<void> {
   }
 }
 
-/** 订阅：任务从进行中变为结束时写回会话、记调用。返回取消订阅 */
+/** 订阅：运行中事件和终态都写回会话；任务结束时另记调用。返回取消订阅 */
 export function watchHistory(): () => void {
-  const seen = new Map<string, TaskStatus>();
-  for (const t of useTasks.getState().tasks) seen.set(t.id, t.status);
+  const seen = new Map<string, { status: TaskStatus; events: number; sessionId: string | null }>();
+  for (const t of useTasks.getState().tasks) seen.set(t.id, { status: t.status, events: t.events.length, sessionId: t.sessionId });
   return useTasks.subscribe((st) => {
+    const present = new Set<string>();
     for (const t of st.tasks) {
+      present.add(t.id);
       const before = seen.get(t.id);
-      seen.set(t.id, t.status);
-      if (before !== "running" || !DONE.has(t.status)) continue;
-      // 目标模式的轮次不属于任何会话（不写会话表），但调用照样记进 usage_calls
-      if (t.sessionId) void saveSession(t.sessionId);
-      void recordTurnUsage(t);
+      const statusChanged = before?.status !== t.status;
+      const eventsChanged = before?.events !== t.events.length;
+      seen.set(t.id, { status: t.status, events: t.events.length, sessionId: t.sessionId });
+      if (t.sessionId && (statusChanged || (t.status === "running" && eventsChanged))) {
+        // 运行中也写回脱敏事件；saveSession 的队列会把快速连续事件串行化。
+        void saveSession(t.sessionId);
+      }
+      if (DONE.has(t.status) && before?.status !== t.status) {
+        // 目标模式的轮次不属于会话（不写 sessions），但调用照样记进 usage_calls。
+        void recordTurnUsage(t);
+      }
+    }
+    // 关闭一张仍在运行的任务卡时，清掉已经写入的 running checkpoint；已结束历史仍保留。
+    for (const [id, before] of seen) {
+      if (present.has(id)) continue;
+      if (before.status === "running" && before.sessionId) void saveSession(before.sessionId);
+      seen.delete(id);
     }
   });
 }

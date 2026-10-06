@@ -1,14 +1,17 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronRight, TriangleAlert } from "lucide-react";
 import type { AgentEvent } from "@/agent";
-import { CHAIN_STAGE_LABEL, RoutePanel } from "@/components/panel/RoutePanel";
+import { CHAIN_STAGE_LABEL, RouteEvidence, RoutePanel } from "@/components/panel/RoutePanel";
 import { Intervention } from "@/components/panel/Intervention";
 import { SubAgents } from "@/components/panel/SubAgents";
 import { Timeline } from "@/components/panel/Timeline";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/input";
+import { replayRouteDecision, routeTraceText } from "@/decision";
 import { PREFERENCE_SOURCE_LABEL } from "@/decision/project";
-import { effectiveProfiles } from "@/lib/engine";
+import { effectiveProfiles, statusAvailability } from "@/lib/engine";
 import { displayModel, fallbackVerb, formatDuration, formatTokens, routeLineText, type RouteSummary } from "@/lib/route-summary";
+import { desktopEvidenceOf } from "@/lib/desktop-evidence";
 import { PREFERENCE_LABEL } from "@/lib/sidebar-rows";
 import { subAgentViews } from "@/lib/subagents";
 import { lastRoute } from "@/lib/timeline";
@@ -16,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { PRICES, SAVINGS_HINT, savedText, type Savings } from "@/lib/savings";
 import { useTaskSavings } from "@/lib/use-savings";
 import { useSettings } from "@/stores/settings";
+import { health } from "@/stores/health";
 import type { TaskCard } from "@/stores/tasks";
 import { useUi } from "@/stores/ui";
 
@@ -97,16 +101,46 @@ export function RouteLine({ summary, durationMs, card }: { summary: RouteSummary
 }
 
 function RouteTab({ summary, card, savings }: { summary: RouteSummary; card?: TaskCard; savings: Savings }) {
+  const [evidenceStatus, setEvidenceStatus] = useState<"idle" | "copied" | "error">("idle");
   const expert = useUi((s) => s.prefs.expert);
   const overrides = useSettings((s) => s.overrides);
   const custom = useSettings((s) => s.custom);
+  const statuses = useSettings((s) => s.statuses);
+  const providerPrefs = useSettings((s) => s.providerPrefs);
   const profiles = useMemo(() => effectiveProfiles(overrides, custom), [overrides, custom]);
   const route = card ? lastRoute(card.events) : null;
+  const replay = useMemo(() => {
+    if (!route?.decision.trace?.snapshot) return null;
+    try {
+      return replayRouteDecision(route.decision, {
+        profiles,
+        availability: statusAvailability(statuses, custom, health, providerPrefs),
+      });
+    } catch {
+      // 旧记录或损坏的脱敏字段不能让回答浮层失效；基础路由证据仍然可见。
+      return null;
+    }
+  }, [custom, profiles, providerPrefs, route, statuses]);
+  const copyEvidence = async () => {
+    if (!card) return;
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("clipboard_unavailable");
+      await navigator.clipboard.writeText(JSON.stringify(desktopEvidenceOf(card), null, 2));
+      setEvidenceStatus("copied");
+    } catch {
+      setEvidenceStatus("error");
+    }
+  };
   return (
     <div role="region" aria-label="路由决策详情" className="space-y-3">
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
         <dt>任务类型</dt>
         <dd className="text-foreground">{summary.taskType}</dd>
+        <dt>工作能力</dt>
+        <dd className="text-foreground">
+          {summary.workSurfaceLabel ?? "Chat 对话"}
+          {summary.workSurfaceReason && <span className="text-muted-foreground">（{summary.workSurfaceReason}）</span>}
+        </dd>
         <dt>需要的能力</dt>
         <dd className="text-foreground">{summary.needs.length ? summary.needs.join("、") : "无特殊要求"}</dd>
         {card && !summary.locked && (
@@ -117,7 +151,27 @@ function RouteTab({ summary, card, savings }: { summary: RouteSummary; card?: Ta
             </dd>
           </>
         )}
+        {route?.decision.trace && (
+          <>
+            <dt>路由策略</dt>
+            <dd className="text-foreground">{route.decision.trace.policyVersion}</dd>
+            <dt>输入摘要</dt>
+            <dd className="text-foreground">{routeTraceText(route.decision.trace)}</dd>
+            <dt>路由证据</dt>
+            <dd className="text-foreground">
+              <RouteEvidence trace={route.decision.trace} replay={replay} />
+            </dd>
+          </>
+        )}
       </dl>
+
+      {card && (
+        <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+          <Button type="button" size="sm" variant="outline" onClick={copyEvidence}>复制脱敏证据</Button>
+          {evidenceStatus === "copied" && <span role="status">已复制，可附到 QA 记录</span>}
+          {evidenceStatus === "error" && <span role="status">当前 WebView 没有可用的剪贴板权限</span>}
+        </div>
+      )}
 
       {summary.locked ? (
         <p className="text-foreground">你手动锁定了 {displayModel(summary.candidates[0]?.profileId ?? "")}，本次跳过路由决策，不会自动降级。</p>
@@ -169,6 +223,19 @@ function RouteTab({ summary, card, savings }: { summary: RouteSummary; card?: Ta
             ))}
           </ul>
         </div>
+      )}
+
+      {(summary.stepRoutes?.length ?? 0) > 0 && (
+        <section aria-label="步骤路由" className="space-y-1 border-t border-border pt-3">
+          <p>步骤路由</p>
+          <ul className="space-y-1">
+            {summary.stepRoutes!.map((s, i) => (
+              <li key={`${s.stepId}-${i}`} className="break-words text-foreground">
+                {s.surfaceLabel} · {s.profileId ? displayModel(s.profileId) : "没有可用模型"}：{s.goal}
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {summary.retries > 0 && <p>超时后重试 {summary.retries} 次</p>}

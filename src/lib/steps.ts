@@ -25,6 +25,7 @@ export function stepProgress(events: readonly AgentEvent[]): StepView[] {
       if (recovered && !steps.some((x) => x.id === s.id)) steps = steps.map((x) => (x.id === recovered ? { id: s.id, goal: s.goal, tool: s.tool, state: "pending" } : x));
       state.set(s.id, "running");
     } else if (e.type === "tool_result") state.set(e.step.id, e.ok ? "done" : "failed");
+    else if (e.type === "probe") state.set(e.step.id, e.state === "applied" ? "done" : e.state === "conflict" ? "failed" : "running");
     else if (e.type === "confirm" && !e.approved) state.set(e.step.id, "failed");
     else if (e.type === "gate" && e.verdict === "deny") state.set(e.step.id, "failed");
     else if (e.type === "reflect" && e.step && state.get(e.step.id) === "running") state.set(e.step.id, "done");

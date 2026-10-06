@@ -50,6 +50,8 @@ export interface GoalRound {
   verdict: RoundVerdict | null;
   /** 执行这一轮的任务 id；M9 之前存下的轮次没有这个字段，读回时为 null */
   task_id: string | null;
+  /** 应用在这一轮执行期间退出时写入；用户暂停/放弃不会填这个字段。 */
+  interruption_reason?: string;
   started_at: number;
   finished_at: number | null;
 }
@@ -170,6 +172,29 @@ const interrupt = (r: GoalRound, now: number): GoalRound =>
   r.status === "running"
     ? { ...r, status: "interrupted", finished_at: now, items: r.items.map((i) => (i.status === "running" ? { ...i, status: "pending" } : i)) }
     : r;
+
+/**
+ * 页面进程退出后恢复目标状态。
+ *
+ * 目标轮次已经先写入 goals.rounds，再开始实际任务；如果进程在任务结束前退出，
+ * 数据库里会留下 status=running 的目标或 running 的最后一轮。启动时把它转换为
+ * 可继续的 paused/interrupted，而不是让 UI 永远显示“进行中”且没有任务卡。
+ * 这不会自动重放步骤；下一次点击“继续”会重新走账本探测和权限闸门。
+ */
+export function recoverGoalAfterRestart(g: Goal, now: number): Goal {
+  if (g.status !== "running") return g;
+  const r = lastRound(g);
+  // uncertain 表示已经正常停下来等用户裁决，不是进程退出的 checkpoint。
+  if (r && r.status !== "running") return g;
+  const reason = "应用在目标执行期间退出，上一轮已暂停；继续前会重新检查未完成步骤";
+  const rounds = r?.status === "running"
+    ? [...g.rounds.slice(0, -1), {
+        ...interrupt(r, now),
+        interruption_reason: reason,
+      }]
+    : g.rounds;
+  return { ...g, status: "paused", rounds, updated_at: now };
+}
 
 /**
  * 改状态。completed 要求最后一轮校验通过；failed 要求有失败原因（failCause）；
@@ -384,6 +409,8 @@ export function editGoal(g: Goal, p: GoalInput, now: number): Goal {
 /** updateGoal 的操作：桌面端和浏览器模式都在读出当前值后调用 applyGoalChange，再写回 */
 export type GoalChange =
   | { op: "transition"; to: GoalStatus }
+  /** 应用启动时把没有完成终态的目标轮次转成可继续的暂停状态。 */
+  | { op: "recover_after_restart" }
   | { op: "start_round"; plan: RoundPlan }
   | { op: "update_item"; item_id: string; status: ItemStatus }
   | { op: "set_round_items"; items: readonly { text: string; status: ItemStatus }[] }
@@ -397,6 +424,8 @@ export function applyGoalChange(g: Goal, c: GoalChange, now: number): Goal {
   switch (c?.op) {
     case "transition":
       return transitionGoal(g, c.to, now);
+    case "recover_after_restart":
+      return recoverGoalAfterRestart(g, now);
     case "start_round":
       return startRound(g, c.plan ?? {}, now);
     case "update_item":
@@ -449,6 +478,7 @@ function reviveRound(v: unknown): GoalRound | null {
     evidence: sanitizeEvidence(v.evidence),
     verdict,
     task_id: typeof v.task_id === "string" && TASK_ID.test(v.task_id) ? v.task_id : null,
+    interruption_reason: typeof v.interruption_reason === "string" && v.interruption_reason.trim() ? v.interruption_reason : undefined,
     started_at,
     finished_at,
   };

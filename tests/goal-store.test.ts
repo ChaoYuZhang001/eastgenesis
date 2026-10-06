@@ -27,6 +27,24 @@ describe("目标 store", () => {
     expect(useGoals.getState().items).toEqual(await getBackend().listGoals());
   });
 
+  it("启动读回时把没有终态的目标轮次安全暂停，避免没有任务卡的永久进行中", async () => {
+    const g = await create("重启后继续整理文件");
+    await useGoals.getState().start(g.id);
+    await useGoals.getState().apply(g.id, { op: "start_round", plan: { title: "第一轮", items: ["读取文件"] } });
+
+    // 模拟窗口进程退出后重新初始化前端 store；数据库里的目标仍是 running/running。
+    useGoals.setState({ loaded: false, items: [], error: null });
+    await useGoals.getState().load();
+
+    const recovered = useGoals.getState().items.find((x) => x.id === g.id)!;
+    expect(recovered.status).toBe("paused");
+    expect(recovered.rounds[0]).toMatchObject({
+      status: "interrupted",
+      interruption_reason: "应用在目标执行期间退出，上一轮已暂停；继续前会重新检查未完成步骤",
+    });
+    expect((await getBackend().listGoals()).find((x) => x.id === g.id)).toMatchObject({ status: "paused" });
+  });
+
   it("非法转换返回状态机的说明，store 和数据库都不变", async () => {
     const g = await create("整理下载文件夹");
     expect(await useGoals.getState().pause(g.id)).toBe("目标未开始，不能改为「已暂停」");

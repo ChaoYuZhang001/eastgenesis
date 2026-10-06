@@ -74,7 +74,20 @@ export const useGoals = create<GoalState>((set) => {
     error: null,
     async load() {
       try {
-        set({ items: await getBackend().listGoals(), loaded: true, error: null });
+        const listed = await getBackend().listGoals();
+        // 目标轮次会先落盘为 running，再启动任务卡。若页面进程在这一窗口退出，
+        // 下次启动不能留下一个永远“进行中”但没有任务卡的目标；先把它安全地暂停，
+        // 用户点击“继续”时再重新经过账本探测和权限闸门。等你确认的 uncertain 轮次不改。
+        const recovered = [];
+        for (const g of listed) {
+          const last = g.rounds.at(-1);
+          if (g.status === "running" && (!last || last.status === "running")) {
+            recovered.push(await getBackend().updateGoal(g.id, { op: "recover_after_restart" }));
+          } else {
+            recovered.push(g);
+          }
+        }
+        set({ items: recovered, loaded: true, error: null });
       } catch (e) {
         set({ loaded: true, error: toAppError(e).message });
       }

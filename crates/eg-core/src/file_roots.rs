@@ -56,6 +56,22 @@ pub fn validate_root(raw: &str, home: Option<&Path>) -> AppResult<String> {
     } else {
         collapsed
     };
+    // 原生目录选择器通常返回绝对路径；如果它位于当前用户 home 下，
+    // 统一保存成 ~/...，这样不会把同一目录同时记录成绝对路径和默认的
+    // ~/Downloads，也不会把机器的 home 前缀写进 file-roots.json。
+    let path = if let Some(home) = home {
+        if let Ok(rest) = Path::new(&path).strip_prefix(home) {
+            if rest.as_os_str().is_empty() {
+                "~".to_string()
+            } else {
+                format!("~/{}", rest.to_string_lossy().replace('\\', "/"))
+            }
+        } else {
+            path
+        }
+    } else {
+        path
+    };
     if path == "/" || path == "//" {
         return Err(invalid("不能把整个磁盘加入允许列表"));
     }
@@ -178,6 +194,7 @@ mod tests {
         let home = Some(Path::new(HOME));
         assert_eq!(validate_root("  ~/Documents/合同  ", home).unwrap(), "~/Documents/合同");
         assert_eq!(validate_root("~/a//b/", home).unwrap(), "~/a/b");
+        assert_eq!(validate_root("/home/tester/Documents", home).unwrap(), "~/Documents");
         assert_eq!(validate_root("/Users/x/Docs", home).unwrap(), "/Users/x/Docs");
         // 空、控制字符、太长
         assert!(validate_root("   ", home).is_err());
@@ -203,6 +220,7 @@ mod tests {
         assert_eq!(s.raw_roots(), vec!["~/Downloads".to_string(), "~/Documents/合同".to_string()]);
         // 再把默认目录加一遍不会重复
         s.add("~/Downloads").unwrap();
+        s.add("/home/tester/Downloads").unwrap();
         assert_eq!(s.raw_roots().len(), 2);
         assert!(!s.list()[1].fixed);
     }

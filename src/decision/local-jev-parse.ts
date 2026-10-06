@@ -15,6 +15,7 @@ export const CODE_MAP: Record<ProviderErrorCode, JevErrorCode> = {
   // 模型没拉取、地址写错：要用户处理，停用到用户在设置页重新选择或改了 Provider 配置为止
   not_found: "config",
   server: "server",
+  billing: "config",
   invalid_response: "invalid_response",
   aborted: "aborted",
   config: "config",

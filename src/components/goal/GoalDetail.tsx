@@ -2,10 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Archive, ChevronRight, CircleHelp, Ellipsis, LoaderCircle, Pause, Play, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu, MenuItem } from "@/components/ui/menu";
+import { WORK_SURFACE_LABEL } from "@/decision";
 import { FAIL_CAUSE_LABEL, canTransition, failCause, goalPhase, type Goal, type GoalRound, type RoundVerdict } from "@/decision/goal";
 import { RouteLine } from "@/components/chat/RouteLine";
 import { runGoal } from "@/lib/goal-run";
-import { routeSummary } from "@/lib/route-summary";
+import { latestSurface, routeSummary, surfaceJourneyTextFromEvents } from "@/lib/route-summary";
 import { lastRoute } from "@/lib/timeline";
 import { cn } from "@/lib/utils";
 import { savedText } from "@/lib/savings";
@@ -182,11 +183,15 @@ function ActiveRound({ card }: { card: TaskCard }) {
   const { respond, respondPlan } = useTasks();
   const steps = useMemo(() => stepProgress(card.events), [card.events]);
   const current = steps.find((s) => s.state === "running") ?? steps.find((s) => s.state === "pending") ?? null;
+  const surface = latestSurface(card.events);
+  const journey = surfaceJourneyTextFromEvents(card.events);
   return (
     <section role="region" aria-label="正在执行的一轮" className="space-y-3 rounded-lg border border-border bg-surface-2 p-4">
       <p role="status" className="flex items-center gap-2 text-sm">
         <LoaderCircle aria-hidden className="size-4 shrink-0 animate-spin" />
         <span className="min-w-0 flex-1 truncate">{current ? current.goal : "正在准备下一步"}</span>
+        {surface && <span className="shrink-0 text-xs text-muted-foreground">· {WORK_SURFACE_LABEL[surface]}</span>}
+        {journey && <span className="shrink-0 text-xs text-muted-foreground">· {journey}</span>}
         <span className="shrink-0 text-xs text-muted-foreground">
           第 {steps.filter((s) => s.state === "done").length} / {steps.length} 步
         </span>
@@ -249,6 +254,7 @@ function RoundItem({ round, defaultOpen, card }: { round: GoalRound; defaultOpen
         ) : (
           <p className="text-muted-foreground">这一轮没有记录步骤。</p>
         )}
+        {round.interruption_reason && <p role="status" className="text-muted-foreground">{round.interruption_reason}</p>}
         {round.verdict && <p className="text-muted-foreground">{verdictText(round.verdict)}</p>}
         {summary && card && <RouteLine summary={summary} durationMs={card.endedAt ? card.endedAt - card.startedAt : null} card={card} />}
         {round.status === "running" && <p className="text-xs text-muted-foreground">这一轮还在跑，结束后才有判定。</p>}

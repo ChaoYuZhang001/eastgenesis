@@ -114,6 +114,8 @@ describe("设置页 · 模型与路由", () => {
 
     const item = await screen.findByRole("listitem", { name: "Claude Relay" });
     expect(within(item).getByText("Anthropic 兼容（Messages）")).toBeInTheDocument();
+    expect(within(item).getByText("自动路由：可恢复")).toBeInTheDocument();
+    expect(within(item).getByText(/协议：Anthropic Messages · 流结束：message_stop/)).toBeInTheDocument();
     const routes = within(item).getByRole("list", { name: "Claude Relay 参与路由的模型" });
     expect(within(routes).getAllByRole("listitem").map((li) => li.textContent)).toEqual([
       "custom:claude-relay/claude-x",
@@ -139,6 +141,9 @@ describe("设置页 · Provider、决策层与 Agent", () => {
     render(<SettingsContent page="providers" />);
     const google = row("Google Gemini");
     expect(within(google).queryByText(/适配器未实现/)).not.toBeInTheDocument();
+    expect(within(google).getByText("自动路由：可恢复")).toBeInTheDocument();
+    expect(within(google).getByText(/协议：OpenAI 兼容 · 流结束：SSE \[DONE\]/)).toBeInTheDocument();
+    expect(within(google).getByText(/端点连通性仍需“测试连接”/)).toBeInTheDocument();
     const input = within(google).getByLabelText("Google Gemini API Key");
     fireEvent.change(input, { target: { value: KEY } });
     fireEvent.click(within(google).getByRole("button", { name: "保存" }));

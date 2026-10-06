@@ -1,11 +1,13 @@
 // CLI 原型：直接调用 LLMProvider，验证适配器。Key 只从环境变量读取，不打印、不落盘。
-//   pnpm eg providers
-//   pnpm eg chat -p anthropic "你好"
-//   pnpm eg chat -p custom:relay --base-url https://relay.example.com/v1 --key-env RELAY_API_KEY -m gpt-4o-mini --stream "你好"
+//   pnpm --silent eg providers
+//   pnpm --silent eg chat -p anthropic "你好"
+//   pnpm --silent eg chat -p custom:relay --base-url https://relay.example.com/v1 --key-env RELAY_API_KEY -m gpt-4o-mini --stream "你好"
+// 使用 --silent 是为了让 `eg route --json` 可以直接重定向为合法 JSON 文件。
 import { parseArgs } from "node:util";
 import {
   BUILTIN_PROVIDERS,
   ProviderError,
+  adapterRecoveryContract,
   createProvider,
   type ChatMessage,
   type ChatResponse,
@@ -16,9 +18,9 @@ import { EnvSecretSource } from "../core/secrets";
 import { redact } from "../core/redact";
 import { readFileSync } from "node:fs";
 import { DecisionLayer } from "../decision/decision-layer";
-import { formatBench } from "../decision/bench";
+import { BENCH_SCENARIOS, formatBench, runBench } from "../decision/bench";
 import { evaluate, formatReport, type RoutingCase } from "../decision/eval";
-import type { LatencyPref, Preference } from "../decision/router";
+import { defaultAvailability, replayRouteDecision, routeTraceText, type LatencyPref, type Preference, type RouteDecision } from "../decision/router";
 
 export interface CliIO {
   env: Record<string, string | undefined>;
@@ -29,10 +31,12 @@ export interface CliIO {
 
 const USAGE = `用法:
   eg providers                         列出内置 Provider 及 Key 是否就绪
+  eg providers --json                  输出脱敏的 Provider / 恢复契约清单
   eg chat [选项] <消息>                 发送一次对话
   eg route [选项] <任务描述>            显示任务分类、路由决策和降级链（不调用模型）
-  eg eval-routing [--failures]         用 50 条样例评估路由准确率
-  eg bench                             内部基准：智能路由对比固定模型（Markdown 表格，不调用模型）
+  eg route-replay <json>                用当前能力矩阵回放一条脱敏路由记录
+  eg eval-routing [--holdout] [--failures] [--json] 评估标注样例的路由准确率
+  eg bench [--json]                    内部基准：智能路由对比固定模型（Markdown 表格，不调用模型）
 选项:
   -p, --provider <id>      openai | anthropic | google | deepseek | qwen | kimi | ollama | custom:<名称>（默认 openai）
   -m, --model <name>       模型名（默认取 Provider 的 defaultModel）
@@ -41,11 +45,12 @@ const USAGE = `用法:
       --base-url <url>     自定义端点（custom:* 必填；qwen / kimi 国际站也用它指定）
       --key-env <NAME>     custom:* 读取 Key 的环境变量名
       --protocol <p>       custom:* 的协议：openai（默认）| anthropic
-      --json               以 JSON 输出完整响应
+      --json               chat：以 JSON 输出完整响应；route：以 JSON 输出路由决策
       --pref <p>           route：economy | balanced | best（默认 balanced）
       --latency <l>        route：fast | normal | patient（默认 normal）
       --max-cost <n>       route：成本上限 1–5
       --failures           eval-routing：列出失败样例
+      --holdout            eval-routing：使用独立 hold-out 样例集
 `;
 
 export async function runCli(argv: string[], io: CliIO): Promise<number> {
@@ -67,6 +72,7 @@ export async function runCli(argv: string[], io: CliIO): Promise<number> {
         latency: { type: "string" },
         "max-cost": { type: "string" },
         failures: { type: "boolean", default: false },
+        holdout: { type: "boolean", default: false },
         help: { type: "boolean", short: "h", default: false },
       },
     });
@@ -84,6 +90,23 @@ export async function runCli(argv: string[], io: CliIO): Promise<number> {
   const secrets = new EnvSecretSource(io.env);
 
   if (cmd === "providers") {
+    if (v.json) {
+      const rows = BUILTIN_PROVIDERS.map((p) => {
+        const envName = p.apiKeyRef?.slice(4) ?? null;
+        const configured = envName ? Boolean(io.env[envName]?.trim()) : true;
+        return {
+          id: p.id,
+          kind: p.kind,
+          keyEnv: envName,
+          configured,
+          readiness: envName ? (configured ? "ready" : "missing_key") : "local",
+          defaultModel: p.defaultModel,
+          recovery: adapterRecoveryContract(p.id),
+        };
+      });
+      io.out(`${JSON.stringify(rows, null, 2)}\n`);
+      return 0;
+    }
     for (const p of BUILTIN_PROVIDERS) {
       // 只打印环境变量名和是否存在，不打印值
       const envName = p.apiKeyRef?.slice(4) ?? "-";
@@ -94,8 +117,22 @@ export async function runCli(argv: string[], io: CliIO): Promise<number> {
   }
 
   if (cmd === "eval-routing" || cmd === "bench") {
-    const raw = JSON.parse(readFileSync(new URL("../../tests/fixtures/routing_cases.json", import.meta.url), "utf8"));
+    const fixtureName = cmd === "eval-routing" && v.holdout ? "routing_cases_holdout.json" : "routing_cases.json";
+    const raw = JSON.parse(readFileSync(new URL(`../../tests/fixtures/${fixtureName}`, import.meta.url), "utf8"));
     const cases = raw.cases as RoutingCase[];
+    if (v.json) {
+      if (cmd === "eval-routing") {
+        io.out(`${JSON.stringify({ schemaVersion: 1, kind: "routing-eval", dataset: v.holdout ? "holdout" : "primary", report: evaluate(cases) }, null, 2)}\n`);
+      } else {
+        io.out(`${JSON.stringify({
+          schemaVersion: 1,
+          kind: "routing-bench",
+          caseCount: cases.length,
+          scenarios: BENCH_SCENARIOS.map((s) => ({ ...s, providers: [...s.providers], rows: runBench(cases, s) })),
+        }, null, 2)}\n`);
+      }
+      return 0;
+    }
     io.out(`${cmd === "bench" ? formatBench(cases) : formatReport(evaluate(cases), { failures: v.failures })}\n`);
     return 0;
   }
@@ -124,8 +161,40 @@ export async function runCli(argv: string[], io: CliIO): Promise<number> {
       latency: latency as LatencyPref,
       maxCostTier: maxCost,
     });
+    if (v.json) {
+      // RouteDecision 只含分类、模型档案和脱敏 trace，不包含任务正文或凭据；
+      // 结构化输出供 CI 回放与策略版本比较使用。
+      io.out(`${JSON.stringify(decision, null, 2)}\n`);
+      return decision.primary ? 0 : 1;
+    }
+    if (decision.trace) {
+      io.out(`路由策略：${decision.trace.policyVersion}\n`);
+      io.out(`输入摘要：${routeTraceText(decision.trace)}\n`);
+    }
     for (const r of decision.reasons) io.out(`${r}\n`);
     return decision.primary ? 0 : 1;
+  }
+
+  if (cmd === "route-replay") {
+    const file = rest[0];
+    if (!file || rest.length !== 1) {
+      io.err("route-replay 需要一个路由 JSON 文件路径\n");
+      return 2;
+    }
+    try {
+      const parsed = JSON.parse(readFileSync(file, "utf8")) as unknown;
+      const source = parsed && typeof parsed === "object" && "decision" in parsed ? (parsed as { decision: unknown }).decision : parsed;
+      if (!source || typeof source !== "object" || !("classification" in source) || !("chain" in source) || !("trace" in source)) {
+        io.err("路由 JSON 缺少 classification、chain 或 trace\n");
+        return 2;
+      }
+      const result = replayRouteDecision(source as RouteDecision, { availability: defaultAvailability(io.env) });
+      io.out(`${JSON.stringify(result, null, 2)}\n`);
+      return 0;
+    } catch (e) {
+      io.err(`无法回放路由：${redact(String(e))}\n`);
+      return 2;
+    }
   }
 
   if (cmd !== "chat") {

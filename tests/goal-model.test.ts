@@ -16,6 +16,7 @@ import {
   normalizeGoal,
   parseRounds,
   recordLlmCalls,
+  recoverGoalAfterRestart,
   resolveUncertain,
   startRound,
   transitionGoal,
@@ -83,6 +84,21 @@ describe("状态机：合法转换", () => {
     expect(p.rounds[0].items[0].status).toBe("pending");
     expect(goalPhase(transitionGoal(p, "running", T + 5))).toBe("ready");
     expect(err(() => transitionGoal(mk(), "bogus" as GoalStatus, T)).code).toBe("invalid_goal");
+  });
+
+  it("应用重启后把运行中的目标轮次变成可继续的暂停状态", () => {
+    const g = updateItem(startRound(running(), { items: ["列出文件", "移动"] }, T + 2), "r1-1", "running", T + 3);
+    const recovered = recoverGoalAfterRestart(g, T + 9);
+    expect(recovered).toMatchObject({ status: "paused", updated_at: T + 9 });
+    expect(recovered.rounds[0]).toMatchObject({
+      status: "interrupted",
+      finished_at: T + 9,
+      interruption_reason: "应用在目标执行期间退出，上一轮已暂停；继续前会重新检查未完成步骤",
+    });
+    expect(recovered.rounds[0].items[0].status).toBe("pending");
+    expect(recoverGoalAfterRestart(mk(), T + 9)).toEqual(mk());
+    const awaiting = round(running(), uncertain);
+    expect(recoverGoalAfterRestart(awaiting, T + 9)).toEqual(awaiting);
   });
 });
 

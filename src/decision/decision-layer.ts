@@ -28,6 +28,9 @@ export interface ActionRequest {
   tool: string;
   summary: string;
   args?: Record<string, unknown>;
+  capability?: { roots?: readonly string[]; permissions?: readonly string[] };
+  /** 从上次未完成步骤恢复时的副作用保护；不能由模型文本自行设置。 */
+  recovery?: { previousInvocationId?: string; idempotent: boolean };
 }
 export type Verdict = "allow" | "confirm" | "deny";
 export interface GateDecision {
@@ -67,6 +70,28 @@ export const PERMISSION_HINT: Record<PermissionMode, string> = {
 const RANK: Record<Risk, number> = { low: 0, medium: 1, high: 2 };
 const maxRisk = (a: Risk, b: Risk): Risk => (RANK[a] >= RANK[b] ? a : b);
 const RULES_META = (): DecisionMeta => ({ backend: "rules", level: 3, degraded: false, confidence: 1, skipped: [], latencyMs: 0 });
+
+const pathArgs = (args: Record<string, unknown> | undefined): string[] =>
+  Object.entries(args ?? {})
+    .filter(([key, value]) => /^(?:path|source|src|from|destination|to|dst)$/i.test(key) && typeof value === "string")
+    .map(([, value]) => String(value));
+const pathInRoot = (path: string, root: string): boolean => {
+  const clean = (x: string) => {
+    const slash = x.replace(/\\/g, "/").replace(/\/+/g, "/");
+    const prefix = slash.startsWith("~/") ? "~/" : slash.startsWith("/") ? "/" : "";
+    const body = prefix === "~/" ? slash.slice(2) : prefix === "/" ? slash.slice(1) : slash;
+    const parts: string[] = [];
+    for (const part of body.split("/")) {
+      if (!part || part === ".") continue;
+      if (part === ".." && parts.length && parts.at(-1) !== "..") parts.pop();
+      else if (part !== "..") parts.push(part);
+    }
+    return `${prefix}${parts.join("/")}`.replace(/\/$/, "") || prefix.replace(/\/$/, "");
+  };
+  const p = clean(path);
+  const r = clean(root);
+  return p === r || p.startsWith(`${r}/`);
+};
 
 export function describeMeta(m: DecisionMeta): string {
   const skipped = m.skipped.map((s) => `${s.backend}：${s.reason}`).join("；");
@@ -218,6 +243,13 @@ export class DecisionLayer {
     if (DENY.some((r) => r.test(text))) {
       return { value: { verdict: "deny", risk: "high", reasons: ["命中禁止规则（破坏性命令）"] }, meta: RULES_META() };
     }
+    const roots = a.capability?.roots ?? [];
+    if (roots.length) {
+      const paths = pathArgs(a.args);
+      if (paths.some((path) => !roots.some((root) => pathInRoot(path, root)))) {
+        return { value: { verdict: "deny", risk: "high", reasons: [`路径不在工具允许目录内（允许：${roots.join("、")}）`] }, meta: RULES_META() };
+      }
+    }
     const mode = this.permission;
     if (mode === "readonly" && tool.sideEffect !== "none") {
       const risk: Risk = tool.sideEffect === "destructive" ? "high" : "medium";
@@ -245,6 +277,12 @@ export class DecisionLayer {
       risk = maxRisk(risk, "medium");
       strict = true;
       reasons.push("涉及敏感路径（密钥、凭据）");
+    }
+    if (a.recovery && !a.recovery.idempotent) {
+      verdict = "confirm";
+      risk = maxRisk(risk, tool.sideEffect === "destructive" ? "high" : "medium");
+      strict = true;
+      reasons.push("恢复任务：上一次调用可能已产生副作用，重新执行前必须确认");
     }
     if (strict || (verdict !== "allow" && mode !== "full")) return { value: { verdict, risk, reasons }, meta: RULES_META() };
 

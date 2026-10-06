@@ -1,4 +1,7 @@
 // @vitest-environment node
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { runCli } from "@/cli/eg";
 import type { FetchLike } from "@/core/llm";
 
@@ -43,6 +46,36 @@ describe("CLI 原型", () => {
     expect(s).not.toContain(KEY);
   });
 
+  it("providers --json 输出脱敏的协议、就绪状态和恢复契约", async () => {
+    const t = io({ OPENAI_API_KEY: KEY });
+    expect(await runCli(["providers", "--json"], t.io)).toBe(0);
+    const rows = JSON.parse(t.out.join("")) as Array<{
+      id: string;
+      kind: string;
+      keyEnv: string | null;
+      configured: boolean;
+      readiness: string;
+      recovery?: { abortSignal?: boolean; streamTerminal?: string; partialOutput?: boolean; normalizedErrors?: boolean };
+    }>;
+    expect(rows).toHaveLength(7);
+    expect(rows.find((row) => row.id === "openai")).toMatchObject({
+      kind: "openai",
+      keyEnv: "OPENAI_API_KEY",
+      configured: true,
+      readiness: "ready",
+      recovery: { abortSignal: true, streamTerminal: "sse_done", partialOutput: true, normalizedErrors: true },
+    });
+    expect(rows.find((row) => row.id === "anthropic")).toMatchObject({
+      kind: "anthropic",
+      keyEnv: "ANTHROPIC_API_KEY",
+      configured: false,
+      readiness: "missing_key",
+      recovery: { abortSignal: true, streamTerminal: "message_stop", partialOutput: true, normalizedErrors: true },
+    });
+    expect(rows.find((row) => row.id === "ollama")).toMatchObject({ keyEnv: null, configured: true, readiness: "local" });
+    expect(t.out.join("")).not.toContain(KEY);
+  });
+
   it("custom:* 缺少 --base-url 或 --key-env 时退出码 2", async () => {
     const t = io({});
     expect(await runCli(["chat", "-p", "custom:relay", "hi"], t.io)).toBe(2);
@@ -82,8 +115,48 @@ describe("CLI 原型", () => {
     const s = t.out.join("");
     expect(s).toMatch(/决策来源：rules（第 3 级/);
     expect(s).toMatch(/任务类型：工具调用/);
+    expect(s).toMatch(/工作能力：/);
+    expect(s).toMatch(/路由策略：m22\.4/);
+    expect(s).toMatch(/输入摘要：正文 \d+ 字/);
     expect(s).toMatch(/主模型 openai\//);
     expect(s).not.toContain(KEY);
+  });
+
+  it("route --json 输出脱敏追踪信息，不包含任务正文或 Key", async () => {
+    const t = io({ OPENAI_API_KEY: KEY });
+    expect(await runCli(["route", "--json", "这是一段私密任务"], t.io)).toBe(0);
+    const s = t.out.join("");
+    const parsed = JSON.parse(s) as { trace?: { policyVersion?: string; input?: { textChars?: number } } };
+    expect(parsed.trace?.policyVersion).toBe("m22.4");
+    expect(parsed.trace?.input?.textChars).toBe(8);
+    expect(s).not.toContain("这是一段私密任务");
+    expect(s).not.toContain(KEY);
+  });
+
+  it("route-replay 使用脱敏 JSON 回放当前路由，不读取原始正文", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "eg-route-replay-"));
+    const file = join(dir, "route.json");
+    const source = io({ OPENAI_API_KEY: KEY });
+    expect(await runCli(["route", "--json", "一段不会写入回放文件的任务"], source.io)).toBe(0);
+    writeFileSync(file, source.out.join(""), "utf8");
+    try {
+      const replay = io({ OPENAI_API_KEY: KEY });
+      expect(await runCli(["route-replay", file], replay.io)).toBe(0);
+      const output = JSON.parse(replay.out.join("")) as {
+        changed?: boolean;
+        sourceSnapshotAvailable?: boolean;
+        sourceSnapshotConsistent?: boolean;
+        sourceTrace?: { input?: { textChars?: number }; snapshot?: { profileSetId?: string } };
+      };
+      expect(output.changed).toBe(false);
+      expect(output.sourceSnapshotAvailable).toBe(true);
+      expect(output.sourceSnapshotConsistent).toBe(true);
+      expect(output.sourceTrace?.input?.textChars).toBe(13);
+      expect(output.sourceTrace?.snapshot?.profileSetId).toMatch(/^[0-9a-f]{8}$/);
+      expect(replay.out.join("")).not.toContain("一段不会写入回放文件的任务");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("route 没有可用模型时退出码 1；参数非法时退出码 2", async () => {
@@ -98,6 +171,25 @@ describe("CLI 原型", () => {
     expect(t.out.join("")).toMatch(/路由准确率（主类型 \+ 硬性能力）：\d+\.\d%/);
   });
 
+  it("eval-routing --json 输出可供门禁消费的脱敏聚合报告", async () => {
+    const t = io({});
+    expect(await runCli(["eval-routing", "--json"], t.io)).toBe(0);
+    const report = JSON.parse(t.out.join("")) as { schemaVersion: number; kind: string; report: { total: number; routingAccuracy: number; failures: unknown[] } };
+    expect(report).toMatchObject({ schemaVersion: 1, kind: "routing-eval", dataset: "primary" });
+    expect(report.report.total).toBe(50);
+    expect(report.report.routingAccuracy).toBeGreaterThanOrEqual(0.7);
+    expect(report.report.failures.every((failure) => !JSON.stringify(failure).includes("把"))).toBe(true);
+  });
+
+  it("eval-routing --holdout 使用独立样例集并输出数据集标记", async () => {
+    const t = io({});
+    expect(await runCli(["eval-routing", "--holdout", "--json"], t.io)).toBe(0);
+    const report = JSON.parse(t.out.join("")) as { dataset: string; report: { total: number; routingAccuracy: number } };
+    expect(report.dataset).toBe("holdout");
+    expect(report.report.total).toBe(54);
+    expect(report.report.routingAccuracy).toBeGreaterThanOrEqual(0.7);
+  });
+
   it("bench 输出两个场景的对比表", async () => {
     const t = io({});
     expect(await runCli(["bench"], t.io)).toBe(0);
@@ -108,6 +200,15 @@ describe("CLI 原型", () => {
     expect(out).toContain("智能路由（省钱）");
     expect(out).toContain("固定旗舰");
     expect(out).toContain("固定最便宜");
+  });
+
+  it("bench --json 输出两个 Provider 配置场景和智能路由聚合行", async () => {
+    const t = io({});
+    expect(await runCli(["bench", "--json"], t.io)).toBe(0);
+    const report = JSON.parse(t.out.join("")) as { schemaVersion: number; kind: string; scenarios: Array<{ id: string; rows: Array<{ model: string | null }> }> };
+    expect(report).toMatchObject({ schemaVersion: 1, kind: "routing-bench" });
+    expect(report.scenarios.map((scenario) => scenario.id)).toEqual(["A", "B"]);
+    expect(report.scenarios.every((scenario) => scenario.rows.some((row) => row.model === null))).toBe(true);
   });
 
   it("未知命令退出码 2", async () => {

@@ -1,16 +1,17 @@
 // 任务：一次任务就是会话里的一轮（用户目标 + 助手成果）。专家模式下同一份数据以卡片形式展示。
 import { create } from "zustand";
-import type { AgentEvent, ConfirmRequest, Plan, RunFile, RunStatus } from "@/agent";
+import type { AgentEvent, ConfirmRequest, Plan, ResumeState, RunFile, RunStatus, RuntimeFaultPoint } from "@/agent";
 import { emptyEvidence } from "@/decision/evidence";
 import { toAttachments } from "@/lib/attachments";
 import { createEngine, withLockedModel, type ModelOverride } from "@/lib/engine";
 import type { RoundHandle } from "@/lib/goal-runner";
 import { outcomeOf } from "@/lib/run-evidence";
+import { recoveryCheckpoint } from "@/lib/recovery";
 import { toAppError } from "@/lib/ipc";
 import { proposeAlignment, proposeMemory, type MemoryProposal } from "@/lib/memory";
 import { appendEvent } from "@/lib/subagents";
 import { DEMO_TOOLS, getBackend } from "@/platform";
-import type { PermissionMode, Preference } from "@/decision";
+import type { PermissionMode, Preference, WorkSurface } from "@/decision";
 import { newId, preferenceSource, type PreferenceSource } from "@/decision/project";
 import { health } from "./health";
 import { activeMcpTools } from "./mcp";
@@ -51,6 +52,8 @@ export interface SubmitOptions {
   workdir?: string | null;
   /** 只用这些 MCP 服务器的工具；不给表示所有已连接的 */
   servers?: readonly string[] | null;
+  /** 可选的能力面提示；不是权限开关，最终仍以决策层分类为准 */
+  surfaceHint?: WorkSurface | null;
   /** 项目、目标、任务三层叠加的说明（decision/project.ts resolveInstructions）；目标模式由执行器传入 */
   instructions?: string | null;
   /** 这一轮的模型调用上限（目标模式按目标剩余额度给）；不给用运行时的默认预算 */
@@ -89,6 +92,15 @@ export interface TaskCard {
   /** 这次实际用的路由偏好和它来自哪一层（任务 / 目标 / 项目 / 全局），回答下方的浮层里写明 */
   preference: Preference;
   preferenceSource: PreferenceSource;
+  /** 用户显式给这次任务的能力面提示；null 表示自动判断。 */
+  surfaceHint?: WorkSurface | null;
+  /** 当前 answer / summary 的流式正文；只存在运行态，不写入历史。 */
+  streamingText?: string;
+  /** 流式正文已经开始后请求中断，不能静默拼接另一个模型。 */
+  streamingInterrupted?: boolean;
+  /** 当前窗口收到的首个/最后一个正文 chunk 时间；旧历史没有这两个字段。 */
+  streamFirstChunkAt?: number | null;
+  streamLastChunkAt?: number | null;
 }
 
 /** 一次运行结束后给调用方的信息：最终卡片（卡片被关掉时 undefined）和「哪些工具是只读的」判断 */
@@ -110,6 +122,8 @@ interface TasksState {
   respond(id: string, approved: boolean): void;
   /** 计划模式：批准或取消计划 */
   respondPlan(id: string, approved: boolean): void;
+  /** 从失败、取消或预算耗尽的最后一个未完成步骤继续；不可恢复时返回 false */
+  resume(id: string): boolean;
   cancel(id: string): void;
   setOverride(id: string, o: ModelOverride | null): void;
   /** 保存待确认的记忆；失败返回错误说明 */
@@ -130,6 +144,8 @@ const MAX_EVENTS = 500;
 const controllers = new Map<string, AbortController>();
 const confirms = new Map<string, (ok: boolean) => void>();
 const plans = new Map<string, (ok: boolean) => void>();
+/** 当前进程内保留原始附件和任务输入；重启后恢复时只使用持久化的目标和计划。 */
+const inputs = new Map<string, { opts: SubmitOptions; files: RunFile[] }>();
 let seq = Date.now();
 
 export const useTasks = create<TasksState>((set, get) => {
@@ -176,10 +192,15 @@ export const useTasks = create<TasksState>((set, get) => {
       goalId: opts.goalId ?? null,
       mode: opts.mode ?? "quick",
       ...resolvePreference(opts),
+      surfaceHint: opts.surfaceHint ?? null,
+      streamingText: "",
+      streamingInterrupted: false,
+      streamFirstChunkAt: null,
+      streamLastChunkAt: null,
     };
   };
 
-  async function run(id: string, goal: string, opts: SubmitOptions, files: readonly RunFile[]): Promise<RunOutcome> {
+  async function run(id: string, goal: string, opts: SubmitOptions, files: readonly RunFile[], resume?: ResumeState): Promise<RunOutcome> {
     const multi = opts.multi === true;
     const lock = opts.lock ?? null;
     const s = useSettings.getState();
@@ -191,6 +212,8 @@ export const useTasks = create<TasksState>((set, get) => {
     const skills = multi ? [] : useSkills.getState().pick(goal);
     // 目标模式会把执行记录当作实据：只读工具不算「做过事」，需要按工具自己的声明判断
     const registered = [...(backend.kind === "mock" ? DEMO_TOOLS : []), ...activeMcpTools(opts.servers ?? null)];
+    // 仅 QA 构建从 Tauri 环境读取故障点；普通后端没有该能力，任务路径不增加故障注入。
+    const qaFaultPoint: RuntimeFaultPoint | null = backend.qaFaultPoint ? await backend.qaFaultPoint().catch(() => null) : null;
     const readOnly = (name: string) => registered.find((t) => t.name === name)?.sideEffect === "none";
     const { runtime, coordinator } = createEngine({
       backend,
@@ -210,7 +233,25 @@ export const useTasks = create<TasksState>((set, get) => {
       skills,
       // 浏览器模式另外注册演示工具；MCP 工具来自设置页里已连接的服务器（只含白名单内的）
       tools: registered,
-      onEvent: (e) => patch(id, (t) => ({ events: appendEvent(t.events, e, MAX_EVENTS) })),
+      onEvent: (e) => patch(id, (t) => {
+        // 增量只用于当前窗口的实时绘制，不写进事件历史、SQLite 或路由统计。
+        if (e.type === "llm_delta") {
+          const at = Date.now();
+          const text = `${t.streamingText ?? ""}${e.text}`.slice(0, 200_000);
+          return {
+            streamingText: text,
+            streamingInterrupted: false,
+            streamFirstChunkAt: t.streamFirstChunkAt ?? at,
+            streamLastChunkAt: at,
+          };
+        }
+        const recorded = { ...e, recordedAt: Date.now() };
+        const events = appendEvent(t.events, recorded, MAX_EVENTS);
+        if (e.type === "llm") return { events, streamingText: "", streamingInterrupted: false, streamFirstChunkAt: null, streamLastChunkAt: null };
+        if (e.type === "llm_failed") return { events, ...(e.partialOutput ? { streamingInterrupted: true } : {}) };
+        return { events };
+      }),
+      ...(qaFaultPoint && backend.qaFaultExit ? { fault: { point: qaFaultPoint, trigger: backend.qaFaultExit } } : {}),
       confirm: (req) =>
         new Promise<boolean>((resolve) => {
           confirms.set(id, resolve);
@@ -231,11 +272,12 @@ export const useTasks = create<TasksState>((set, get) => {
     const preference = get().tasks.find((t) => t.id === id)?.preference ?? s.routing.preference;
     const attachments = files.length ? toAttachments(files.map((f) => ({ ...f, bytes: f.text.length }))) : undefined;
     // 锁定模型时跳过路由决策，成本上限也不再适用（用户明确选了它）
-    const route = { preference, latency, ...(maxCostTier < 5 && !lock && { maxCostTier }), ...(lock && { lock }), ...(attachments && { attachments }) };
+    const route = { preference, latency, ...(maxCostTier < 5 && !lock && { maxCostTier }), ...(lock && { lock }), ...(attachments && { attachments }), ...(opts.surfaceHint && { surfaceHint: opts.surfaceHint }) };
     let status: TaskStatus = "failed";
     try {
       const history = [opts.workdir ? `工作目录：${opts.workdir}（文件读写优先放在这里）` : "", opts.history ?? ""].filter(Boolean).join("\n\n") || undefined;
-      const r = await (multi ? coordinator : runtime).run(goal, { signal: ctrl.signal, route, history, files });
+      const runOpts = { taskId: id, signal: ctrl.signal, route, history, files, ...(!multi && resume ? { resume } : {}) };
+      const r = await (multi ? coordinator : runtime).run(goal, runOpts);
       status = r.status;
       patch(id, () => ({ status: r.status, summary: r.summary, endedAt: Date.now() }));
     } catch (e) {
@@ -258,6 +300,7 @@ export const useTasks = create<TasksState>((set, get) => {
     submit(goal, opts = {}) {
       const card = make(goal, opts);
       if (!card) return null;
+      inputs.set(card.id, { opts: { ...opts }, files: opts.files ? [...opts.files] : [] });
       set((s) => ({ tasks: [card, ...s.tasks], activeId: card.id }));
       void run(card.id, card.goal, opts, opts.files ? [...opts.files] : []);
       return card.id;
@@ -265,6 +308,7 @@ export const useTasks = create<TasksState>((set, get) => {
     runGoalRound(goal, opts) {
       const card = make(goal, opts);
       if (!card) throw new Error("这一轮的任务描述为空");
+      inputs.set(card.id, { opts: { ...opts }, files: opts.files ? [...opts.files] : [] });
       // 目标轮次不进会话列表（sessionId 为 null），也不会把会话顶到「最近」里
       set((s) => ({ tasks: [card, ...s.tasks] }));
       const result = run(card.id, card.goal, opts, []).then(({ card: done, readOnly }) => {
@@ -276,6 +320,7 @@ export const useTasks = create<TasksState>((set, get) => {
     },
     close(id) {
       get().cancel(id);
+      inputs.delete(id);
       set((s) => {
         const tasks = s.tasks.filter((t) => t.id !== id);
         return { tasks, activeId: s.activeId === id ? (tasks[0]?.id ?? null) : s.activeId };
@@ -295,6 +340,31 @@ export const useTasks = create<TasksState>((set, get) => {
     select: (id) => set({ activeId: id }),
     respond: (id, approved) => settle(id, approved),
     respondPlan: (id, approved) => settlePlan(id, approved),
+    resume(id) {
+      const card = get().tasks.find((t) => t.id === id);
+      if (!card || card.status === "running" || card.multi) return false;
+      const checkpoint = recoveryCheckpoint(card.events);
+      if (!checkpoint) return false;
+      const saved = inputs.get(id);
+      const opts: SubmitOptions = saved
+        ? { ...saved.opts, onboarding: false, aligning: false, multi: false }
+        : {
+            sessionId: card.sessionId,
+            lock: card.lock,
+            permission: card.permission,
+            projectId: card.projectId,
+            goalId: card.goalId,
+            mode: card.mode,
+            preference: card.preference,
+            surfaceHint: card.surfaceHint,
+            multi: false,
+          };
+      const files = saved?.files ?? [];
+      patch(id, () => ({ status: "running", summary: null, endedAt: null, pendingConfirm: null, pendingPlan: null, collapsed: false, streamingText: "", streamingInterrupted: false, streamFirstChunkAt: null, streamLastChunkAt: null }));
+      set({ activeId: id });
+      void run(id, card.goal, opts, files, checkpoint).then(() => undefined);
+      return true;
+    },
     cancel(id) {
       settle(id, false);
       settlePlan(id, false);

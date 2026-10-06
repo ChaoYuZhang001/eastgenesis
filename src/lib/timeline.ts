@@ -1,7 +1,7 @@
 // 把 Agent 事件整理成执行时间线：任务分析 → 路由决策 → 工具调用 → 模型输出 → 反思。
 // 只做展示层的转换，事件本身在运行时已经脱敏。
 import type { AgentEvent } from "@/agent";
-import { TYPE_LABEL, type BackendName, type ModelProfile } from "@/decision";
+import { TYPE_LABEL, WORK_SURFACE_LABEL, type BackendName, type ModelProfile } from "@/decision";
 import { KIND_LABEL } from "./memory";
 import { PURPOSE_LABEL } from "./purpose";
 
@@ -66,11 +66,12 @@ function itemsFor(e: AgentEvent, idx: string, profiles: readonly ModelProfile[],
       return [{ key, stage: "analysis", title: `参考了 ${e.items.length} 条记忆`, detail: e.items.map((m) => `${KIND_LABEL[m.kind]}：${m.text}`).join("；"), tone: "neutral" }];
     case "route": {
       const c = e.decision.classification;
+      const surface = c.surface ? ` · ${WORK_SURFACE_LABEL[c.surface]}` : "";
       const analysis: TimelineItem = {
         key: `${key}-cls`,
         stage: "analysis",
-        title: `任务类型：${TYPE_LABEL[c.type] ?? c.type}`,
-        detail: `由${BACKEND_LABEL[e.meta.backend]}判断${e.meta.degraded ? "（已降级）" : ""}`,
+        title: `任务类型：${TYPE_LABEL[c.type] ?? c.type}${surface}`,
+        detail: `由${BACKEND_LABEL[e.meta.backend]}判断${e.meta.degraded ? "（已降级）" : ""}${c.surfaceReason ? `；${c.surfaceReason}` : ""}`,
         tone: e.meta.degraded ? "warn" : "neutral",
       };
       const routing: TimelineItem = e.profileId
@@ -78,10 +79,46 @@ function itemsFor(e: AgentEvent, idx: string, profiles: readonly ModelProfile[],
         : { key, stage: "routing", title: "没有可用模型", detail: e.reasons.at(-1), tone: "error" };
       return [analysis, routing];
     }
+    case "step_route": {
+      const surface = e.surface ? WORK_SURFACE_LABEL[e.surface] : WORK_SURFACE_LABEL[e.decision.classification.surface ?? "chat"];
+      const analysis: TimelineItem = {
+        key: `${key}-surface`,
+        stage: "analysis",
+        title: `步骤能力：${surface}`,
+        detail: [`步骤：${e.step.goal}`, e.surfaceReason ?? e.decision.classification.surfaceReason ?? ""].filter(Boolean).join("；"),
+        tone: e.meta.degraded ? "warn" : "neutral",
+      };
+      const routing: TimelineItem = e.profileId
+        ? { key, stage: "routing", title: `步骤选择 ${e.profileId}`, detail: e.decision.primary?.reason, tone: e.meta.degraded ? "warn" : "ok", profileId: e.profileId, costTier: tier(e.profileId) }
+        : { key, stage: "routing", title: "这一步没有可用模型", detail: e.reasons.at(-1), tone: "error" };
+      return [analysis, routing];
+    }
     case "plan":
       return [{ key, stage: "analysis", title: e.revision ? `重新规划（第 ${e.revision} 次）` : `规划 ${e.plan.steps.length} 个步骤`, detail: e.plan.note, tone: e.revision ? "warn" : "neutral" }];
-    case "step_start":
-      return e.step.tool ? [] : [{ key, stage: "model", title: `步骤：${e.step.goal}`, detail: e.attempt > 1 ? `第 ${e.attempt} 次尝试` : undefined, tone: "neutral" }];
+    case "step_start": {
+      // 旧事件没有能力面字段，继续隐藏工具步骤以兼容历史时间线；新事件把
+      // 能力面作为执行证据展示出来，用户可以看到一次任务如何跨 Chat/Work/Codex。
+      if (e.step.tool && !e.surface) return [];
+      return [{
+        key,
+        stage: e.step.tool ? "tool" : "model",
+        title: `步骤：${e.step.goal}`,
+        detail: [
+          e.surface ? `工作能力：${WORK_SURFACE_LABEL[e.surface]}` : "",
+          e.surfaceReason ?? "",
+          e.attempt > 1 ? `第 ${e.attempt} 次尝试` : "",
+        ].filter(Boolean).join("；") || undefined,
+        tone: "neutral",
+      }];
+    }
+    case "probe":
+      return [{
+        key,
+        stage: "tool",
+        title: `恢复前探测：${e.state === "applied" ? "已生效" : e.state === "not_applied" ? "未生效" : e.state === "conflict" ? "发现冲突" : "仍未知"}`,
+        detail: `${e.step.tool ?? "工具"}：${e.detail.slice(0, 300)}`,
+        tone: e.state === "applied" ? "ok" : e.state === "conflict" || e.state === "unknown" ? "error" : "warn",
+      }];
     case "gate":
       return [{ key, stage: "tool", title: `${e.step.tool}：${e.verdict === "allow" ? "允许" : e.verdict === "confirm" ? "需要确认" : "拒绝"}`, detail: e.reasons.join("；"), tone: e.verdict === "deny" ? "error" : e.verdict === "confirm" ? "warn" : "ok" }];
     case "confirm":

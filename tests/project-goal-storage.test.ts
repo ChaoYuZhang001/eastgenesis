@@ -88,6 +88,19 @@ for (const kind of ["mock", "sqlite"] as const) {
       expect(await code(b.saveGoal({ id: g.id, description: "改一下" }))).toBe("goal_locked");
     });
 
+    it("目标重启恢复：SQLite/mock 都把 running 轮次写回 paused/interrupted，且理由可读回", async () => {
+      const g = await b.saveGoal({ description: "重启后继续整理文件" });
+      await b.updateGoal(g.id, { op: "transition", to: "running" });
+      await b.updateGoal(g.id, { op: "start_round", plan: { title: "第一轮", items: ["读取文件"] } });
+      const recovered = await b.updateGoal(g.id, { op: "recover_after_restart" });
+      expect(recovered).toMatchObject({ status: "paused" });
+      expect(recovered.rounds[0]).toMatchObject({
+        status: "interrupted",
+        interruption_reason: "应用在目标执行期间退出，上一轮已暂停；继续前会重新检查未完成步骤",
+      });
+      expect((await b.listGoals())[0]).toEqual(recovered);
+    });
+
     it("删除目标是软删除：之后列表里没有，再操作报 goal_not_found", async () => {
       const g = await b.saveGoal({ description: "临时目标" });
       expect((await b.updateGoal(g.id, { op: "transition", to: "deleted" })).status).toBe("deleted");

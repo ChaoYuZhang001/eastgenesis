@@ -6,6 +6,7 @@ export * from "./router";
 export * from "./jev-client";
 export * from "./fallback";
 export * from "./classification";
+export * from "./work-surface";
 export { LOCAL_CONFIDENCE_CAP, LOCAL_JEV_MARK, LOCAL_JEV_TIMEOUT_MS, LocalJevBackend, type LocalDecisionModel } from "./local-jev";
 export * from "./decision-layer";
 export * from "./eval";

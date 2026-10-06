@@ -1,4 +1,5 @@
 // 把路由结果变成运行时用的模型调用：每次调用都沿降级链执行（超时先重试一次，限流、出错时换下一个模型）。
+import { ProviderError } from "../core/llm/errors";
 import type { LLMProvider } from "../core/llm/types";
 import type { HealthTracker } from "../decision/health";
 import { modelName } from "../decision/profiles";
@@ -19,19 +20,41 @@ export function llmEvent(purpose: LlmPurpose, r: LlmReply): Extract<AgentEvent, 
 /** 一次没用上的尝试：中文原因 + 错误码（界面据此标「因超时降级」） */
 const fallbackOf = (a: Attempt): LlmFallback => ({ profileId: a.profileId, reason: attemptText(a), ...(a.errorCode ? { code: a.errorCode } : {}) });
 
+/**
+ * 静态路由准入之外的最后一道运行时保险。旧的测试 Provider 可以不声明
+ * recovery（按历史行为继续运行），但一旦声明，就不能只声明一半能力。
+ */
+function recoveryContractReady(p: LLMProvider): boolean {
+  const c = p.capabilities?.recovery;
+  if (!c) return true;
+  return c.abortSignal && c.partialOutput && c.normalizedErrors && (!p.capabilities.streaming || c.streamTerminal !== false);
+}
+
 /** 整条降级链都失败时的事件；其他错误（用户取消等）返回 null，由调用方原样抛出 */
 export function llmFailedEvent(purpose: LlmPurpose, err: unknown): Extract<AgentEvent, { type: "llm_failed" }> | null {
   if (!(err instanceof RouteExhaustedError)) return null;
   const retries = err.attempts.filter((a) => a.action === "retry").length;
   const attempts = err.attempts.filter((a) => a.action !== "retry").map(fallbackOf);
-  return { type: "llm_failed", purpose, attempts, ...(retries ? { retries } : {}) };
+  return { type: "llm_failed", purpose, attempts, ...(retries ? { retries } : {}), ...(err.partialOutput ? { partialOutput: true } : {}) };
 }
 
 /** 包一层：成功发 llm 事件，整条链失败发 llm_failed 事件后原样抛出 */
 export function emittingLlm(call: LlmCall, emit: (e: AgentEvent) => void): LlmCall {
   return async (req, signal) => {
+    // 只对最终回答和总结开启流式。规划、工具参数和反思仍然等完整 JSON，避免
+    // 把结构化输出的半截内容暴露到用户界面。
+    const streamable = req.purpose === "answer" || req.purpose === "summary";
+    const request = streamable
+      ? {
+          ...req,
+          onDelta: (delta: { text: string; profileId: string }) => {
+            emit({ type: "llm_delta", purpose: req.purpose, profileId: delta.profileId, text: delta.text });
+            req.onDelta?.(delta);
+          },
+        }
+      : req;
     try {
-      const r = await call(req, signal);
+      const r = await call(request, signal);
       emit(llmEvent(req.purpose, r));
       return r;
     } catch (e) {
@@ -53,7 +76,41 @@ export function routedLlm(
       route.chain,
       async (e) => {
         const p = await providerFor(e);
-        return p.chat({ model: modelName({ id: e.profileId, provider: e.provider }), messages: req.messages, maxTokens: req.maxTokens, signal });
+        if (!recoveryContractReady(p)) {
+          throw new ProviderError("config", e.provider, { detail: "适配器缺少可恢复执行契约" });
+        }
+        const model = modelName({ id: e.profileId, provider: e.provider });
+        // Provider 可以声明暂不支持 SSE；保持模型调用可用，退回完整响应而不是把能力缺口当成路由失败。
+        if (!req.onDelta || p.capabilities?.streaming === false) return p.chat({ model, messages: req.messages, maxTokens: req.maxTokens, signal });
+
+        let emitted = false;
+        try {
+          let response: Awaited<ReturnType<LLMProvider["chat"]>> | null = null;
+          for await (const ev of p.stream({ model, messages: req.messages, maxTokens: req.maxTokens, signal })) {
+            if (ev.type === "delta") {
+              if (!ev.text) continue;
+              emitted = true;
+              req.onDelta({ text: ev.text, profileId: e.profileId });
+            } else {
+              response = ev.response;
+            }
+          }
+          if (!response) throw new ProviderError("invalid_response", e.provider, { detail: "流式响应没有结束事件", partialOutput: emitted });
+          return response;
+        } catch (err) {
+          // 已经把正文交给 UI 后不能静默换模型，否则用户会看到两段不同模型的半截答案。
+          // 仍然沿用统一错误码，但把 partialOutput 传给策略层让它停止降级链。
+          if (!emitted) throw err;
+          if (err instanceof ProviderError) {
+            throw new ProviderError(err.code, e.provider, {
+              ...(err.status !== null ? { status: err.status } : {}),
+              ...(err.detail ? { detail: err.detail } : {}),
+              message: err.message,
+              partialOutput: true,
+            });
+          }
+          throw new ProviderError("network", e.provider, { detail: String(err), partialOutput: true });
+        }
       },
       { health, signal, sleep: opts.sleep },
     );

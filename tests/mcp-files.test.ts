@@ -144,4 +144,34 @@ describe.skipIf(!existsSync(BIN))("内置文件 MCP 服务器", () => {
       await transport.close();
     }
   });
+
+  it("恢复前确认写入已经落地时不重复写文件，也不再弹确认", async () => {
+    const { home, dl } = sandbox();
+    const file = join(dl, "report.md");
+    writeFileSync(file, "已完成");
+    const { transport, registry } = await connect(home);
+    try {
+      const decision = DecisionLayer.fromEnv({ OPENAI_API_KEY: "x" }, { tools: registry.defs() });
+      const step = { id: "s1", goal: "写入报告", tool: "mcp__files__write_file", args: { path: "~/Downloads/report.md", content: "已完成", overwrite: true } };
+      const events: import("@/agent").AgentEvent[] = [];
+      const asked: ConfirmRequest[] = [];
+      const r = await new AgentRuntime({
+        decision,
+        tools: registry,
+        llm: () => fakeLlm({ steps: [step] }),
+        confirm: async (req) => (asked.push(req), true),
+        onEvent: (event) => events.push(event),
+      }).run("写入报告", {
+        taskId: "task-mcp-probe",
+        resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown" }], nextStepIndex: 0 },
+      });
+      expect(r.status).toBe("completed");
+      expect(asked).toEqual([]);
+      expect(events.find((event) => event.type === "probe")).toMatchObject({ state: "applied" });
+      expect(r.steps.at(-1)).toMatchObject({ status: "done", executionState: "applied" });
+      expect(readFileSync(file, "utf8")).toBe("已完成");
+    } finally {
+      await transport.close();
+    }
+  });
 });

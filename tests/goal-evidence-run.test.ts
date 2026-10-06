@@ -63,6 +63,20 @@ describe("evidenceOf：文件改动与命令", () => {
     ]);
   });
 
+  it("恢复前探测确认已落地也算工具实据和文件改动", () => {
+    const e = evidenceOf([
+      {
+        type: "probe",
+        step: step("mcp__files__write_file", { path: "~/Downloads/report.md", content: "完成" }),
+        state: "applied",
+        detail: "目标文件内容一致",
+        artifacts: [{ kind: "file", action: "modify", path: "~/Downloads/report.md", ok: true }],
+      },
+    ], () => false);
+    expect(e.tool_calls).toEqual([{ tool: "mcp__files__write_file", read_only: false, ok: true, target: "~/Downloads/report.md" }]);
+    expect(e.file_changes).toEqual([{ path: "~/Downloads/report.md", action: "modified" }]);
+  });
+
   it("命令工具的成改写进退出码：成功 0、失败 1，输出原样带上", () => {
     const e = evidenceOf(
       [toolResult("mcp__shell__run_command", true, { command: "pnpm test" }, "Tests 4 passed"), toolResult("mcp__shell__run_command", false, { command: "pnpm build" }, "报错了")],

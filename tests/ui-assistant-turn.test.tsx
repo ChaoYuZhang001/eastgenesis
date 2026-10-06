@@ -54,7 +54,39 @@ const turn = (events: AgentEvent[]): TaskCard =>
     preferenceSource: "global",
   }) as TaskCard;
 
+const streamingTurn = (overrides: Partial<TaskCard> = {}): TaskCard => ({
+  ...turn([]),
+  status: "running",
+  summary: null,
+  endedAt: null,
+  streamingText: "已经收到的一部分答案",
+  streamingInterrupted: false,
+  ...overrides,
+});
+
 describe("回答区", () => {
+  it("运行中显示当前能力面和已经经过的统一能力链", () => {
+    const step = (id: string, surface: "work" | "codex" | "chat"): AgentEvent => ({
+      type: "step_start",
+      step: { id, goal: "执行下一步", tool: null },
+      attempt: 1,
+      surface,
+    });
+    render(<AssistantTurn card={streamingTurn({ events: [step("w", "work"), step("c", "codex"), step("a", "chat")] })} />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("· Chat 对话");
+    expect(status).toHaveTextContent("· 能力链 Work → Codex → Chat");
+  });
+
+  it("运行中显示流式增量；中断后保留已收到的部分输出并明确标记", () => {
+    const { rerender } = render(<AssistantTurn card={streamingTurn()} />);
+    expect(screen.getByRole("region", { name: "正在生成" })).toHaveTextContent("已经收到的一部分答案");
+
+    rerender(<AssistantTurn card={streamingTurn({ status: "failed", streamingInterrupted: true })} />);
+    expect(screen.getByRole("region", { name: "部分输出" })).toHaveTextContent("生成中断，保留已收到的部分输出");
+    expect(screen.getByRole("region", { name: "部分输出" })).toHaveTextContent("已经收到的一部分答案");
+  });
+
   it("默认不显示思考过程；设置里打开后折叠成「思考过程 · N 字」，展开只有摘要，不泄露系统提示", () => {
     const leaky = ["你是 EastGenesis 的智能体，按步骤完成用户目标。", "Output JSON only, then reflect on the plan.", "先拆成两步"].join("\n");
     const card = turn([route, { type: "llm", purpose: "answer", profileId: "custom:relay/deepseek-reasoner", latencyMs: 1, usage: null, reasoning: leaky }]);

@@ -5,6 +5,7 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "dialog:allow-open",
     "sql:allow-load",
     "sql:allow-select",
     "sql:allow-execute",

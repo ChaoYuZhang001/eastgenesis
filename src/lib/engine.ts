@@ -1,6 +1,6 @@
 // 桌面端和浏览器共用的引擎组装：把后端（Key 状态、代理请求）接到决策层与 Agent 运行时。
 // webview 里不出现真实 Key：适配器拿到占位 Key，请求经 proxiedFetch 交给 Rust 注入认证。
-import { AgentRuntime, Coordinator, ToolRegistry, routedLlm, type AgentDeps, type AgentEvent, type Budget, type ConfirmRequest, type LlmCall, type MemoryNote, type Plan, type SkillNote, type Tool } from "@/agent";
+import { AgentRuntime, Coordinator, ToolRegistry, routedLlm, type AgentDeps, type AgentEvent, type Budget, type ConfirmRequest, type LlmCall, type MemoryNote, type Plan, type RuntimeFaultPoint, type SkillNote, type Tool } from "@/agent";
 import {
   CloudJevBackend,
   DecisionLayer,
@@ -141,6 +141,8 @@ export interface EngineOptions {
   /** 手动干预：每次模型调用前读取 */
   override?: () => ModelOverride | null;
   consumeNext?: () => void;
+  /** QA 构建的桌面故障夹具；普通任务不提供。 */
+  fault?: { point: RuntimeFaultPoint; trigger: (point: RuntimeFaultPoint) => Promise<void> };
 }
 
 export function createEngine(o: EngineOptions): { runtime: AgentRuntime; coordinator: Coordinator; decision: DecisionLayer; profiles: ModelProfile[] } {
@@ -179,6 +181,16 @@ export function createEngine(o: EngineOptions): { runtime: AgentRuntime; coordin
     approvePlan: o.approvePlan,
     onEvent: o.onEvent,
     onboarding: o.onboarding,
+    ...(o.fault ? { faultHooks: { onPoint: async ({ point }: { point: RuntimeFaultPoint }) => { if (point === o.fault!.point) await o.fault!.trigger(point); } } } : {}),
+    ...(o.backend.getToolInvocation && o.backend.saveToolInvocation ? {
+      ledger: {
+        get: (key) => o.backend.getToolInvocation!(key),
+        put: (record) => o.backend.saveToolInvocation!(record),
+        ...(o.backend.claimToolInvocation ? { claim: (key, owner, now, ttlMs) => o.backend.claimToolInvocation!(key, owner, now, ttlMs) } : {}),
+        ...(o.backend.renewToolInvocation ? { renew: (key, owner, now, ttlMs) => o.backend.renewToolInvocation!(key, owner, now, ttlMs) } : {}),
+        ...(o.backend.releaseToolInvocation ? { release: (key, owner) => o.backend.releaseToolInvocation!(key, owner) } : {}),
+      },
+    } : {}),
   };
   // 单 Agent 和多 Agent 协同共用同一套决策层、工具、模型调用和确认渠道
   return { runtime: new AgentRuntime(deps), coordinator: new Coordinator(deps), decision, profiles };

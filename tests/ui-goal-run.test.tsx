@@ -66,6 +66,7 @@ describe("目标模式：多轮执行", () => {
     const { id, main } = await startGoal("把下载文件夹里的合同归档并保存一份清单");
     // 目标轮次不进会话列表，所以确认提示出现在详情页的「正在执行的一轮」里
     const running = await within(main).findByRole("region", { name: "正在执行的一轮" }, LONG);
+    expect(running).toHaveTextContent(/· Work 工作/);
     await within(running).findByRole("group", { name: /确认/ }, LONG);
 
     fireEvent.click(within(main).getByRole("button", { name: "暂停" }));

@@ -3,6 +3,7 @@
 // 调用记录（usage_calls）只存模型和 tokens，不存金额：金额按当前价目表在显示时计算（5.1）。
 import { redact } from "../core/redact";
 import { PROJECT_ID, fail, newId, type ProjectError } from "./project";
+import type { WorkSurface } from "./types";
 
 export const SESSION_ID = /^ses-[a-z0-9-]{1,48}$/;
 export const MAX_SESSIONS = 500;
@@ -38,6 +39,8 @@ export interface StoredTurn {
   mode: string;
   preference: string;
   preferenceSource: string;
+  /** 能力面提示；旧会话没有此字段时按自动判断恢复。 */
+  surfaceHint?: WorkSurface | null;
 }
 
 export interface StoredSession {
@@ -114,6 +117,7 @@ export function normalizeTurn(t: Partial<StoredTurn>): StoredTurn {
     mode: str(t.mode ?? "quick", 16),
     preference: str(t.preference ?? "balanced", 16),
     preferenceSource: str(t.preferenceSource ?? "global", 16),
+    surfaceHint: t.surfaceHint === "chat" || t.surfaceHint === "work" || t.surfaceHint === "codex" ? t.surfaceHint : null,
   };
 }
 

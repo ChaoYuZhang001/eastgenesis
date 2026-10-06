@@ -6,7 +6,10 @@ import {
   attemptText,
   defaultAvailability,
   executeWithFallback,
+  failurePolicy,
+  replayRouteDecision,
   route,
+  ROUTER_POLICY_VERSION,
   type Availability,
   type ChainEntry,
 } from "@/decision/router";
@@ -39,6 +42,67 @@ const run = (text: string, extra: Record<string, unknown> = {}, availability = A
   route({ text, ...extra }, { profiles: PROFILES, availability });
 
 describe("路由评分", () => {
+  it("路由追踪只保存策略版本和脱敏输入摘要", () => {
+    const d = run("秘密任务", {
+      preference: "economy",
+      latency: "fast",
+      maxCostTier: 3,
+      surfaceHint: "work",
+      attachments: [
+        { kind: "text", name: "/Users/alice/secret.pdf", chars: 42 },
+        { kind: "image", name: "token-name", chars: 0 },
+      ],
+    });
+    expect(d.trace).toMatchObject({
+      policyVersion: ROUTER_POLICY_VERSION,
+      input: {
+        textChars: 4,
+        attachmentCount: 2,
+        attachmentKinds: ["image", "text"],
+        attachmentChars: 42,
+        surfaceHint: "work",
+        preference: "economy",
+        latency: "fast",
+        maxCostTier: 3,
+      },
+    });
+    expect(d.trace?.snapshot).toMatchObject({
+      profileSetId: expect.stringMatching(/^[0-9a-f]{8}$/),
+      availabilitySetId: expect.stringMatching(/^[0-9a-f]{8}$/),
+      profiles: expect.arrayContaining([expect.objectContaining({ id: "openai/big", provider: "openai", costTier: 5 })]),
+      availability: expect.arrayContaining([expect.objectContaining({ profileId: "openai/big", ok: true, health: 1 })]),
+    });
+    const serialized = JSON.stringify(d.trace);
+    expect(serialized).not.toContain("秘密");
+    expect(serialized).not.toContain("secret.pdf");
+    expect(serialized).not.toContain("Users");
+  });
+
+  it("可以用脱敏路由记录在当前健康状态下回放，不需要原始正文", () => {
+    const source = run("这是不会被回放读取的正文", { preference: "economy", latency: "fast" });
+    const same = replayRouteDecision(source, { profiles: PROFILES, availability: ALL_OK });
+    expect(same.changed).toBe(false);
+    expect(same.sourceSnapshotAvailable).toBe(true);
+    expect(same.sourceSnapshotConsistent).toBe(true);
+    expect(same.profileSnapshotChanged).toBe(false);
+    expect(same.availabilitySnapshotChanged).toBe(false);
+    expect(same.sourcePrimary).toBe(source.primary?.profileId ?? null);
+    expect(same.currentChain).toEqual(source.chain.map((entry) => entry.profileId));
+    const changed = replayRouteDecision(source, {
+      profiles: PROFILES,
+      availability: (p) => (p.id === source.primary?.profileId ? { ok: false, reason: "回放时 Provider 不可用" } : { ok: true, health: 1 }),
+    });
+    expect(changed.changed).toBe(true);
+    expect(changed.profileSnapshotChanged).toBe(false);
+    expect(changed.availabilitySnapshotChanged).toBe(true);
+    expect(changed.sourceTrace.input.textChars).toBe(Array.from("这是不会被回放读取的正文").length);
+
+    const changedProfiles = PROFILES.map((p) => (p.id === source.primary?.profileId ? { ...p, quality_tier: 1 } : p));
+    const profileChanged = replayRouteDecision(source, { profiles: changedProfiles, availability: ALL_OK });
+    expect(profileChanged.profileSnapshotChanged).toBe(true);
+    expect(profileChanged.currentProfileSetId).not.toBe(profileChanged.sourceProfileSetId);
+  });
+
   it("代码任务 + 最强：质量相同时选更便宜的；备选换 Provider；最后是规则兜底", () => {
     const d = run("Refactor this function to remove the recursion", { preference: "best" });
     expect(d.classification.type).toBe("code");
@@ -131,6 +195,7 @@ describe("手动锁定模型", () => {
     const d = run("What is the capital of Australia?", { preference: "economy", maxCostTier: 2, lock: "openai/big" });
     expect(d.chain.map((c) => [c.profileId, c.stage, c.reason])).toEqual([["openai/big", "primary", "手动锁定"]]);
     expect(d.primary?.profileId).toBe("openai/big");
+    expect(d.trace?.input.lock).toBe("openai/big");
     expect(d.reasons).toContain("手动锁定：openai/big，跳过路由决策");
     expect(d.reasons.join("\n")).not.toMatch(/总分|权重/);
   });
@@ -164,6 +229,21 @@ const fail = (code: ConstructorParameters<typeof ProviderError>[0]) => new Provi
 const NO_WAIT = async () => {};
 
 describe("执行降级链", () => {
+  it("失败策略矩阵：每种错误只对应一种可解释的恢复动作", () => {
+    expect(failurePolicy("timeout")).toEqual({ disposition: "retry", recordsHealthFailure: false, userAborted: false });
+    expect(failurePolicy("timeout", { retried: true })).toEqual({ disposition: "next", recordsHealthFailure: true, userAborted: false });
+    expect(failurePolicy("auth")).toEqual({ disposition: "skip_provider", recordsHealthFailure: false, userAborted: false });
+    expect(failurePolicy("billing")).toEqual({ disposition: "skip_provider", recordsHealthFailure: false, userAborted: false });
+    expect(failurePolicy("config")).toEqual({ disposition: "skip_provider", recordsHealthFailure: false, userAborted: false });
+    expect(failurePolicy("bad_request", { badRequests: 1 })).toEqual({ disposition: "stop", recordsHealthFailure: false, userAborted: false });
+    expect(failurePolicy("bad_request", { badRequests: 0 })).toEqual({ disposition: "next", recordsHealthFailure: true, userAborted: false });
+    expect(failurePolicy("rate_limit")).toEqual({ disposition: "next", recordsHealthFailure: true, userAborted: false });
+    expect(failurePolicy("network")).toEqual({ disposition: "next", recordsHealthFailure: true, userAborted: false });
+    expect(failurePolicy("server")).toEqual({ disposition: "next", recordsHealthFailure: true, userAborted: false });
+    expect(failurePolicy("unknown")).toEqual({ disposition: "next", recordsHealthFailure: true, userAborted: false });
+    expect(failurePolicy("aborted")).toEqual({ disposition: "stop", recordsHealthFailure: false, userAborted: true });
+  });
+
   it("限流换下一个，并记入健康度", async () => {
     const health = new HealthTracker();
     const r = await executeWithFallback([E("a/1"), E("b/1")], async (e) => {

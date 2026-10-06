@@ -7,6 +7,7 @@ import { customModels, type CustomProvider, type SavedProvider } from "@/platfor
 import { useSettings, type TestResult } from "@/stores/settings";
 import { ResultNote, SettingsSection } from "./controls";
 import { CustomProviderForm } from "./CustomProviderForm";
+import { ProviderRecoveryNote } from "./ProviderRecoveryNote";
 
 /** 参与路由的模型及其路由 ID；沿用内置能力档位的标出参照来源（透明度优先） */
 function ModelRoutes({ c }: { c: CustomProvider }) {
@@ -150,6 +151,7 @@ export function CustomProviders() {
                     <p className="font-medium">{c.label}</p>
                     <p className="break-all font-mono text-xs text-muted-foreground">{c.base_url}</p>
                     <p className="text-xs text-muted-foreground">{c.protocol === "anthropic" ? "Anthropic 兼容（Messages）" : "OpenAI 兼容（Chat Completions）"}</p>
+                    <ProviderRecoveryNote protocol={c.protocol ?? "openai"} />
                     <ModelRoutes c={c} />
                     <ModelCacheNote id={c.id} />
                     {Object.keys(c.headers).length > 0 && <p className="text-xs text-muted-foreground">附加请求头：{Object.keys(c.headers).join("、")}</p>}
