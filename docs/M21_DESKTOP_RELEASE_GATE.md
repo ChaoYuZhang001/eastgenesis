@@ -34,7 +34,7 @@ spctl --assess --type execute --verbose=4 \
   "target/release/bundle/macos/EastGenesis Desktop.app"
 ```
 
-它检查打包二进制含有 `provider_stream` 和 QA 故障入口，连续两轮启动后各保持 4 秒、发送 `SIGTERM` 并确认退出，用于发现一次退出后无法再次启动的进程生命周期问题。该命令不点击界面、不提交任务，也不证明 Tauri webview、SQLite 会话恢复或真实 Provider 已通过。
+它在隔离临时 `HOME` 中检查打包二进制含有 `provider_stream` 和 QA 故障入口，连续两轮启动后各保持 4 秒、发送 `SIGTERM` 并确认退出，再用 `sqlite3` 检查 schema 7、`sessions`、`tool_invocations` 和 lease index 在两轮之间仍可读取，用于发现进程和数据库结构生命周期问题。该命令不点击界面、不提交任务，也不证明 Tauri webview、任务行/会话内容恢复、工具副作用恢复或真实 Provider 已通过。
 
 仓库新增 `.github/workflows/desktop.yml`，在 Ubuntu、Windows 和 macOS runner 上统一执行前端测试、普通与 `qa-faults` Rust workspace 测试、无凭据夹具烟测、脱敏路由质量门禁和 `pnpm tauri:build:qa`，并上传未签名桌面包以及 `provider-recovery-matrix.json`、`routing-quality.json`。工作流同时支持 GitHub Actions 的手动 `workflow_dispatch`，方便在不制造无关提交的情况下复测目标 runner。WebDriver 步骤失败时仍会阻断 job，但会先为每个场景写入失败边界 JSON 和 `webdriver-quality-*.log`；上传步骤使用 `always()`，避免失败本身抹掉诊断证据。该工作流只提供可重复的构建和确定性测试证据；签名、notarization、真实 Provider 账号和人工 WebView 验收仍需单独配置。
 
