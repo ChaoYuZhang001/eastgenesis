@@ -98,6 +98,8 @@ export const FAIL_STREAK = 3;
 export const GOAL_ID = /^goal-[a-z0-9-]{1,48}$/;
 /** 执行一轮的任务 id（stores/tasks.ts 的 TaskCard.id，形如 task-<uuid>）：轮次据此关联到任务卡 */
 export const TASK_ID = /^task-[a-z0-9-]{1,48}$/;
+/** 启动恢复时写入的固定原因；UI 用它区分崩溃恢复和用户主动暂停。 */
+export const RESTART_INTERRUPTION_REASON = "应用在目标执行期间退出，上一轮已暂停；继续前会重新检查未完成步骤";
 
 const bad = (message: string) => fail("invalid_goal", message);
 export const goalNotFound = () => fail("goal_not_found", "没有找到这个目标");
@@ -186,14 +188,19 @@ export function recoverGoalAfterRestart(g: Goal, now: number): Goal {
   const r = lastRound(g);
   // uncertain 表示已经正常停下来等用户裁决，不是进程退出的 checkpoint。
   if (r && r.status !== "running") return g;
-  const reason = "应用在目标执行期间退出，上一轮已暂停；继续前会重新检查未完成步骤";
   const rounds = r?.status === "running"
     ? [...g.rounds.slice(0, -1), {
         ...interrupt(r, now),
-        interruption_reason: reason,
+        interruption_reason: RESTART_INTERRUPTION_REASON,
       }]
     : g.rounds;
   return { ...g, status: "paused", rounds, updated_at: now };
+}
+
+/** 是否是本次启动刚刚恢复的目标；不把普通暂停或用户主动中断当成崩溃恢复。 */
+export function wasGoalInterruptedByRestart(g: Goal): boolean {
+  const last = lastRound(g);
+  return g.status === "paused" && last?.status === "interrupted" && last.interruption_reason === RESTART_INTERRUPTION_REASON;
 }
 
 /**

@@ -14,8 +14,9 @@ import { LONG, resetStores } from "./ui-helpers";
 beforeEach(() => resetStores());
 
 async function boot() {
-  render(<App />);
+  const view = render(<App />);
   await waitFor(() => expect(screen.getByLabelText("任务描述")).toBeEnabled(), LONG);
+  return view;
 }
 
 /** 新建一个目标、打开详情页并开始（返回详情主区） */
@@ -187,5 +188,27 @@ describe("目标模式：多轮执行", () => {
     expect(useGoals.getState().items.find((g) => g.id === id)?.rounds[0].task_id).toBe(taskId);
     // 旧数据（没有 task_id 的轮次）读回后是 null，不出错
     expect(emptyEvidence()).toEqual({ tool_calls: [], file_changes: [], command_outputs: [] });
+  });
+
+  it("重启后自动打开被打断的目标详情，让继续入口可见", async () => {
+    const backend = resetStores();
+    const first = await boot();
+    let id = "";
+    await act(async () => {
+      const g = await useGoals.getState().save({ description: "重启后继续整理资料" });
+      if (typeof g === "string") throw new Error(g);
+      id = g.id;
+      expect(await useGoals.getState().start(id)).toBeNull();
+      expect(await useGoals.getState().apply(id, { op: "start_round", plan: { title: "第一轮", items: ["读取资料"] } })).toEqual(expect.objectContaining({ status: "running" }));
+    });
+    expect((await backend.listGoals()).find((g) => g.id === id)?.status).toBe("running");
+    // 模拟窗口退出：下一次 boot 会把 running/running 安全恢复为 paused/interrupted。
+    first.unmount();
+    resetStores(backend);
+    await boot();
+    await waitFor(() => expect(useUi.getState().main).toEqual({ kind: "goal", id }), LONG);
+    const main = screen.getByRole("main", { name: "目标" });
+    expect(main).toHaveTextContent("应用在目标执行期间退出");
+    expect(within(main).getByRole("button", { name: "继续" })).toBeInTheDocument();
   });
 });

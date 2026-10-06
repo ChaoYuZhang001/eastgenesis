@@ -1,4 +1,4 @@
-import { goalPhase, newGoal, normalizeGoal } from "@/decision/goal";
+import { goalPhase, newGoal, normalizeGoal, RESTART_INTERRUPTION_REASON, wasGoalInterruptedByRestart } from "@/decision/goal";
 import { createMockBackend, getBackend, setBackend, type Backend, type Goal } from "@/platform";
 import { goalsOfProject, useGoals } from "@/stores/goals";
 
@@ -40,8 +40,9 @@ describe("目标 store", () => {
     expect(recovered.status).toBe("paused");
     expect(recovered.rounds[0]).toMatchObject({
       status: "interrupted",
-      interruption_reason: "应用在目标执行期间退出，上一轮已暂停；继续前会重新检查未完成步骤",
+      interruption_reason: RESTART_INTERRUPTION_REASON,
     });
+    expect(wasGoalInterruptedByRestart(recovered)).toBe(true);
     expect((await getBackend().listGoals()).find((x) => x.id === g.id)).toMatchObject({ status: "paused" });
   });
 

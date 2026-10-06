@@ -8,6 +8,7 @@ import { SidePanel } from "@/components/panel/SidePanel";
 import { ProjectOverview } from "@/components/project/ProjectOverview";
 import { SettingsView } from "@/components/settings/SettingsView";
 import { Splash } from "@/components/Splash";
+import { wasGoalInterruptedByRestart } from "@/decision/goal";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/app";
 import { useChat } from "@/stores/chat";
@@ -55,11 +56,21 @@ export default function App() {
     void useMemory.getState().load();
     void useSkills.getState().load();
     void useProjects.getState().load();
-    void useGoals.getState().load();
+    const goalsReady = useGoals.getState().load();
     // 内置文件工具（~/Downloads）随应用启动连接；mock 后端没有内置服务器
     void useMcp.getState().startBuiltins();
     // 会话持久化（迁移 5）：读回历史会话和本月的调用记录，之后每轮结束写回
-    void loadHistory();
+    const historyReady = loadHistory();
+    // 启动时只自动打开一个明确的恢复入口：会话优先；没有会话恢复时再打开目标详情。
+    // 如果用户已经提交新任务或主动切到别的主区，异步读库完成后不抢走当前焦点。
+    void Promise.all([goalsReady, historyReady]).then(() => {
+      if (useChat.getState().activeId !== null || useUi.getState().main.kind !== "chat") return;
+      const goal = useGoals
+        .getState()
+        .items.filter(wasGoalInterruptedByRestart)
+        .sort((a, b) => b.updated_at - a.updated_at)[0];
+      if (goal) useUi.getState().open({ kind: "goal", id: goal.id });
+    });
     void useUsage.getState().load();
     return watchHistory();
   }, [phase]);
