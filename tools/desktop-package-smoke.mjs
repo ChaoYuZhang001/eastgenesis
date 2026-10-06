@@ -29,6 +29,7 @@ for (const symbol of ["provider_stream", "EASTGENESIS_QA_FAULT_POINT"]) {
 
 const launches = [];
 const databaseChecks = [];
+const sessionRowChecks = [];
 const isolatedHome = await mkdtemp(join(tmpdir(), "eastgenesis-package-smoke-"));
 const databasePath = join(isolatedHome, "Library", "Application Support", "com.eastgenesis.desktop", "eastgenesis.db");
 
@@ -48,6 +49,18 @@ async function inspectDatabase(cycle) {
     throw new Error(`SQLite schema check failed (cycle ${cycle}): ${JSON.stringify(check)}`);
   }
   databaseChecks.push(check);
+}
+
+async function seedSessionSentinel() {
+  await execFileAsync("sqlite3", [databasePath, "INSERT OR REPLACE INTO sessions (id, title, turns, created_at, updated_at) VALUES ('qa-restart-sentinel', 'QA restart sentinel', '[]', 1, 1);"]);
+}
+
+async function inspectSessionSentinel() {
+  const result = await execFileAsync("sqlite3", ["-readonly", "-json", databasePath, "SELECT COUNT(*) AS n FROM sessions WHERE id = 'qa-restart-sentinel' AND deleted_at IS NULL;"]);
+  const row = JSON.parse(result.stdout.trim())[0];
+  const present = Number(row?.n) === 1;
+  if (!present) throw new Error("SQLite session sentinel was not preserved across restart");
+  sessionRowChecks.push({ present });
 }
 
 try {
@@ -85,6 +98,8 @@ try {
         throw new Error(`QA package did not exit from SIGTERM (cycle ${cycle}): ${JSON.stringify(exitResult)}`);
       }
       await inspectDatabase(cycle);
+      if (cycle === 1) await seedSessionSentinel();
+      if (cycle === RESTART_CYCLES) await inspectSessionSentinel();
       launches.push({ cycle, startupMs: Math.round(performance.now() - startedAt), exit: exitResult });
     } finally {
       if (!exited) child.kill("SIGKILL");
@@ -109,12 +124,13 @@ const report = {
     controlledTermination: launches.every((launch) => launch.exit.signal === "SIGTERM" || launch.exit.code === 143 || launch.exit.code === -15),
     sqliteSchema: databaseChecks.length === RESTART_CYCLES && databaseChecks.every((check) => check.schemaVersion === 7),
     sqliteTables: databaseChecks.length === RESTART_CYCLES && databaseChecks.every((check) => check.sessions && check.toolInvocations && check.leaseIndex),
+    sqliteSessionRow: sessionRowChecks.length === 1 && sessionRowChecks[0].present,
   },
   launches,
-  database: { isolatedHome: true, checks: databaseChecks },
+  database: { isolatedHome: true, checks: databaseChecks, sessionRow: sessionRowChecks },
   evidenceBoundary: {
-    proven: ["QA bundle contains provider stream and fault injection symbols", "native process survives the startup window", "a controlled exit can be followed by a second startup", "Tauri SQLite schema 7 and recovery ledger tables persist across the isolated restart"],
-    excluded: ["real WebView DOM interaction", "session/task row recovery with a killed UI", "tool side-effect recovery", "real Provider availability", "signing/notarization"],
+    proven: ["QA bundle contains provider stream and fault injection symbols", "native process survives the startup window", "a controlled exit can be followed by a second startup", "Tauri SQLite schema 7 and recovery ledger tables persist across the isolated restart", "a synthetic session row remains in SQLite after the second process"],
+    excluded: ["real WebView DOM interaction", "UI hydration of the persisted session", "task event recovery with a killed UI", "tool side-effect recovery", "real Provider availability", "signing/notarization"],
   },
 };
 
