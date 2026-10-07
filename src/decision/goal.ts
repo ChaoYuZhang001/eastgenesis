@@ -1,3 +1,4 @@
+import type { GoalQuotaProjection, GoalQuotaPublication } from "@/lib/goal-quota-storage";
 // 目标：一个可以跑多轮的长任务。状态机、轮次和完成校验的数据结构，桌面端（lib/db-goal.ts）和浏览器模式（platform/mock-goal.ts）共用。
 // 合法转换：idle → running；running → paused；paused → running；running → completed；running → failed（超过 max_llm_calls 或校验连续失败 3 次）；
 // running → abandoned；paused → abandoned；任意状态 → deleted（软删除）。非法转换抛错。
@@ -7,6 +8,7 @@ import { redact } from "../core/redact";
 import { emptyEvidence, sanitizeEvidence, type Evidence, type EvidenceResult, type EvidenceVerdict } from "./evidence";
 import { PROJECT_ID, cleanLine, cleanText, fail, looksSecret, newId, normalizePreference, type ProjectError } from "./project";
 import type { Preference } from "./router";
+import { ACCOUNTING_CALL_LIMIT, ACCOUNTING_RUN_ID, normalizeRecoveryAccounting, normalizeTurn, type StoredTurn } from "./session";
 
 export type GoalStatus = "idle" | "running" | "paused" | "completed" | "failed" | "abandoned" | "deleted";
 export const GOAL_STATUSES: readonly GoalStatus[] = ["idle", "running", "paused", "completed", "failed", "abandoned", "deleted"];
@@ -40,6 +42,7 @@ export interface RoundVerdict {
   by: "rules" | "jev" | "user" | "runtime";
 }
 
+export interface LlmSettlement { run_id: string; llm_calls: number }
 export interface GoalRound {
   /** 从 1 开始 */
   index: number;
@@ -50,10 +53,18 @@ export interface GoalRound {
   verdict: RoundVerdict | null;
   /** 执行这一轮的任务 id；M9 之前存下的轮次没有这个字段，读回时为 null */
   task_id: string | null;
+  /** 脱敏后的任务账本快照。崩溃恢复只能复用这个任务，不得凭空新开一轮。 */
+  task_checkpoint?: StoredTurn | null;
+  /** 每次完整运行的绝对计数凭据；与 used_llm_calls 在同一次 Goal 保存中更新。 */
+  llm_settlements?: LlmSettlement[];
+  /** 应用在这一轮执行期间退出时写入；用户暂停/放弃不会填这个字段。 */
+  interruption_reason?: string;
   started_at: number;
   finished_at: number | null;
 }
 export interface Goal {
+  /** New desktop protocol: canonical occupied permits, never reconstructed from main receipts. */
+  quota?: GoalQuotaProjection;
   id: string;
   /** null：不属于任何项目 */
   project_id: string | null;
@@ -96,6 +107,8 @@ export const FAIL_STREAK = 3;
 export const GOAL_ID = /^goal-[a-z0-9-]{1,48}$/;
 /** 执行一轮的任务 id（stores/tasks.ts 的 TaskCard.id，形如 task-<uuid>）：轮次据此关联到任务卡 */
 export const TASK_ID = /^task-[a-z0-9-]{1,48}$/;
+/** 启动恢复时写入的固定原因；UI 用它区分崩溃恢复和用户主动暂停。 */
+export const RESTART_INTERRUPTION_REASON = "应用在目标执行期间退出，上一轮已暂停；继续前会重新检查未完成步骤";
 
 const bad = (message: string) => fail("invalid_goal", message);
 export const goalNotFound = () => fail("goal_not_found", "没有找到这个目标");
@@ -148,6 +161,34 @@ export function failCause(g: Pick<Goal, "rounds" | "max_llm_calls" | "used_llm_c
 }
 export const remainingLlmCalls = (g: Pick<Goal, "max_llm_calls" | "used_llm_calls">) => Math.max(0, g.max_llm_calls - g.used_llm_calls);
 
+/** 只用于展示已保存的调用统计；不授权预算，也不补记缺失的历史凭据。 */
+export function hasUnknownGoalCalls(g: Pick<Goal, "id" | "status" | "rounds">): boolean {
+  return g.rounds.some((r) => {
+    if (r.llm_settlements === undefined) return true;
+    const checkpoint = r.task_checkpoint;
+    if (!checkpoint) return g.status !== "running" || r.status !== "running";
+    if (!r.task_id || checkpoint.id !== r.task_id || checkpoint.goalId !== g.id) return true;
+    const accounting = normalizeRecoveryAccounting(checkpoint.recovery_accounting, r.task_id);
+    if (!accounting) return true;
+    const active = g.status === "running" && r.status === "running";
+    // 正常运行中的下界还在增长；停止后的非终态记录不能冒充完整历史。
+    if (!accounting.final) return !(active && checkpoint.status === "running");
+    let latestRun: unknown;
+    let terminal = false;
+    for (let i = checkpoint.events.length - 1; i >= 0; i--) {
+      const event = checkpoint.events[i];
+      if (!event || typeof event !== "object") continue;
+      const e = event as Record<string, unknown>;
+      if (e.type === "run_end") terminal = true;
+      if (e.type === "run_start") { latestRun = e.runId; break; }
+    }
+    if (!terminal || latestRun !== accounting.run_id) return true;
+    // 当前运行的终态可能正在结算；不能因此把 live 运行误标成旧历史未知。
+    if (active) return false;
+    return !r.llm_settlements.some((receipt) => receipt.run_id === accounting.run_id && receipt.llm_calls === accounting.llm_calls);
+  });
+}
+
 /** 进行中的目标再细分：working 正在跑一轮；ready 可以开下一轮；awaiting_user 上一轮结论是 uncertain，等你确认 */
 export type GoalPhase = Exclude<GoalStatus, "running"> | "working" | "ready" | "awaiting_user";
 export const lastRound = (g: Pick<Goal, "rounds">): GoalRound | undefined => g.rounds[g.rounds.length - 1];
@@ -170,6 +211,34 @@ const interrupt = (r: GoalRound, now: number): GoalRound =>
   r.status === "running"
     ? { ...r, status: "interrupted", finished_at: now, items: r.items.map((i) => (i.status === "running" ? { ...i, status: "pending" } : i)) }
     : r;
+
+/**
+ * 页面进程退出后恢复目标状态。
+ *
+ * 目标轮次已经先写入 goals.rounds，再开始实际任务；如果进程在任务结束前退出，
+ * 数据库里会留下 status=running 的目标或 running 的最后一轮。启动时把它转换为
+ * 可继续的 paused/interrupted，而不是让 UI 永远显示“进行中”且没有任务卡。
+ * 这不会自动重放步骤；下一次点击“继续”会重新走账本探测和权限闸门。
+ */
+export function recoverGoalAfterRestart(g: Goal, now: number): Goal {
+  if (g.status !== "running") return g;
+  const r = lastRound(g);
+  // uncertain 表示已经正常停下来等用户裁决，不是进程退出的 checkpoint。
+  if (r && r.status !== "running") return g;
+  const rounds = r?.status === "running"
+    ? [...g.rounds.slice(0, -1), {
+        ...interrupt(r, now),
+        interruption_reason: RESTART_INTERRUPTION_REASON,
+      }]
+    : g.rounds;
+  return { ...g, status: "paused", rounds, updated_at: now };
+}
+
+/** 是否是本次启动刚刚恢复的目标；不把普通暂停或用户主动中断当成崩溃恢复。 */
+export function wasGoalInterruptedByRestart(g: Goal): boolean {
+  const last = lastRound(g);
+  return g.status === "paused" && last?.status === "interrupted" && last.interruption_reason === RESTART_INTERRUPTION_REASON;
+}
 
 /**
  * 改状态。completed 要求最后一轮校验通过；failed 要求有失败原因（failCause）；
@@ -217,6 +286,7 @@ export function startRound(g: Goal, plan: RoundPlan, now: number): Goal {
     evidence: emptyEvidence(),
     verdict: null,
     task_id: typeof plan.task_id === "string" && TASK_ID.test(plan.task_id) ? plan.task_id : null,
+    ...(typeof plan.task_id === "string" && TASK_ID.test(plan.task_id) ? { llm_settlements: [] } : {}),
     started_at: now,
     finished_at: null,
   };
@@ -271,7 +341,38 @@ export function appendEvidence(g: Goal, e: unknown, now: number): Goal {
 }
 
 /** 记录模型调用次数。暂停或结束后才返回的调用也要记上（钱已经花了）；已删除的不记 */
-export function recordLlmCalls(g: Goal, n: number, now: number): Goal {
+export function recordLlmCalls(g: Goal, n: number, now: number, identity?: { task_id: string; run_id: string }): Goal {
+  if (identity) {
+    if (!Number.isInteger(n) || n < 0 || n > ACCOUNTING_CALL_LIMIT || !TASK_ID.test(identity.task_id) || !ACCOUNTING_RUN_ID.test(identity.run_id)) throw badRound("调用结算身份或次数无效");
+    if (g.status === "deleted") throw goalNotFound();
+    const index = g.rounds.findIndex((r) => r.task_id === identity.task_id);
+    if (index < 0) throw badRound("调用结算不属于这个目标");
+    const r = g.rounds[index];
+    const receipts = r.llm_settlements;
+    if (!receipts) throw badRound("历史运行调用结算未知，不能自动补记或分配预算");
+    const previous = receipts.find((x) => x.run_id === identity.run_id);
+    // 已存在的完整凭据可幂等重送，包括下一次恢复已经替换 checkpoint 的情况。
+    if (previous) {
+      if (previous.llm_calls !== n) throw badRound("同一运行的调用结算次数不一致");
+      return g;
+    }
+    const checkpoint = r.task_checkpoint;
+    const a = normalizeRecoveryAccounting(checkpoint?.recovery_accounting, identity.task_id);
+    let terminal = false;
+    let latestRun: unknown;
+    for (let i = (checkpoint?.events.length ?? 0) - 1; i >= 0; i--) {
+      const event = checkpoint!.events[i];
+      if (!event || typeof event !== "object") continue;
+      const e = event as Record<string, unknown>;
+      if (e.type === "run_end") terminal = true;
+      if (e.type === "run_start") { latestRun = e.runId; break; }
+    }
+    if (!checkpoint || checkpoint.id !== identity.task_id || checkpoint.goalId !== g.id || !a?.final || !terminal || latestRun !== a.run_id || a.run_id !== identity.run_id || a.llm_calls !== n) throw badRound("完整调用结算记录尚未保存，请检查本地存储后继续");
+    if (receipts.length >= ACCOUNTING_CALL_LIMIT) throw badRound("调用结算记录达到上限");
+    const rounds = g.rounds.map((round, i) => i === index ? { ...round, llm_settlements: [...receipts, { run_id: identity.run_id, llm_calls: n }] } : round);
+    return { ...g, rounds, used_llm_calls: g.quota ? g.used_llm_calls : g.used_llm_calls + n, updated_at: now };
+  }
+  if (g.quota) throw badRound("新目标的额度只由持久许可账本计量，主模型结算必须带原任务和运行身份");
   if (!Number.isInteger(n) || n < 1 || n > MAX_LLM_CALLS_LIMIT) throw badRound("调用次数无效");
   if (g.status === "deleted") throw goalNotFound();
   return { ...g, used_llm_calls: g.used_llm_calls + n, updated_at: now };
@@ -334,6 +435,22 @@ export function resolveUncertain(g: Goal, choice: "done" | "continue", now: numb
   return failCause(next) ? transitionGoal(next, "failed", now) : next;
 }
 
+/** 将任务快照写入当前轮次；快照只能属于当前目标和当前任务，避免串目标恢复。 */
+export function checkpointRound(g: Goal, task: StoredTurn, now: number): Goal {
+  const r = lastRound(g);
+  if (!r || !task || task.goalId !== g.id || task.id !== r.task_id || !TASK_ID.test(task.id)) throw badRound("任务恢复记录与目标轮次不匹配");
+  if (g.status === "deleted" || (r.status !== "running" && r.status !== "interrupted")) throw badRound("当前轮次不能写入恢复记录");
+  return replaceLast(g, { ...r, task_checkpoint: task }, now);
+}
+
+/** 重启恢复时重新打开原轮次；不接受没有 checkpoint 的轮次。 */
+export function resumeRound(g: Goal, now: number): Goal {
+  needRunning(g);
+  const r = lastRound(g);
+  if (!r || r.status !== "interrupted" || !r.task_id || !r.task_checkpoint) throw badRound("这一轮缺少可验证的恢复记录");
+  return replaceLast(g, { ...r, status: "running", interruption_reason: undefined, finished_at: null }, now);
+}
+
 // ---------- 新建与编辑 ----------
 
 export interface NormalizedGoal {
@@ -366,6 +483,7 @@ export function newGoal(n: NormalizedGoal, now: number, id = newGoalId()): Goal 
 
 /** 编辑：只能改未结束的目标；没给的字段保持原值；不能换项目；调用上限不能低于已用次数 */
 export function editGoal(g: Goal, p: GoalInput, now: number): Goal {
+  if (g.quota && p.max_llm_calls !== undefined && p.max_llm_calls !== g.max_llm_calls) throw fail("quota_cap_fixed", "本目标调用额度创建时固定，当前版本不支持修改");
   if (g.status !== "idle" && g.status !== "running" && g.status !== "paused") throw fail("goal_locked", `目标${GOAL_STATUS_LABEL[g.status]}，不能再编辑`);
   const n = normalizeGoal({
     project_id: p.project_id === undefined ? g.project_id : p.project_id,
@@ -382,23 +500,35 @@ export function editGoal(g: Goal, p: GoalInput, now: number): Goal {
 // ---------- 存储共用 ----------
 
 /** updateGoal 的操作：桌面端和浏览器模式都在读出当前值后调用 applyGoalChange，再写回 */
-export type GoalChange =
+type GoalChangeOperation =
   | { op: "transition"; to: GoalStatus }
+  /** 应用启动时把没有完成终态的目标轮次转成可继续的暂停状态。 */
+  | { op: "recover_after_restart" }
   | { op: "start_round"; plan: RoundPlan }
+  | { op: "checkpoint_round"; task: StoredTurn }
+  | { op: "resume_round" }
   | { op: "update_item"; item_id: string; status: ItemStatus }
   | { op: "set_round_items"; items: readonly { text: string; status: ItemStatus }[] }
   | { op: "append_evidence"; evidence: Evidence }
-  | { op: "record_llm_calls"; count: number }
+  | { op: "record_llm_calls"; count: number; task_id?: string; run_id?: string }
   | { op: "finish_round"; result: EvidenceResult | RoundVerdict; evidence?: Evidence }
   | { op: "fail_round"; message: string; evidence?: Evidence }
   | { op: "resolve_uncertain"; choice: "done" | "continue" };
+
+export type GoalChange = GoalChangeOperation & { quota_publication?: GoalQuotaPublication };
 
 export function applyGoalChange(g: Goal, c: GoalChange, now: number): Goal {
   switch (c?.op) {
     case "transition":
       return transitionGoal(g, c.to, now);
+    case "recover_after_restart":
+      return recoverGoalAfterRestart(g, now);
     case "start_round":
       return startRound(g, c.plan ?? {}, now);
+    case "checkpoint_round":
+      return checkpointRound(g, c.task, now);
+    case "resume_round":
+      return resumeRound(g, now);
     case "update_item":
       return updateItem(g, c.item_id, c.status, now);
     case "set_round_items":
@@ -406,7 +536,8 @@ export function applyGoalChange(g: Goal, c: GoalChange, now: number): Goal {
     case "append_evidence":
       return appendEvidence(g, c.evidence, now);
     case "record_llm_calls":
-      return recordLlmCalls(g, c.count, now);
+      if ((c.task_id === undefined) !== (c.run_id === undefined)) throw badRound("调用结算身份不完整");
+      return recordLlmCalls(g, c.count, now, c.task_id === undefined ? undefined : { task_id: c.task_id, run_id: c.run_id! });
     case "finish_round":
       return finishRound(g, c.result, now, c.evidence);
     case "fail_round":
@@ -441,7 +572,7 @@ function reviveRound(v: unknown): GoalRound | null {
     verdict = { verdict: d.verdict as EvidenceVerdict, reason: d.reason, by: d.by as RoundVerdict["by"] };
     if (typeof d.confidence === "number") verdict.confidence = d.confidence;
   }
-  return {
+  const round: GoalRound = {
     index: index as number,
     title: typeof v.title === "string" ? v.title : `第 ${index} 轮`,
     items,
@@ -449,9 +580,28 @@ function reviveRound(v: unknown): GoalRound | null {
     evidence: sanitizeEvidence(v.evidence),
     verdict,
     task_id: typeof v.task_id === "string" && TASK_ID.test(v.task_id) ? v.task_id : null,
+    interruption_reason: typeof v.interruption_reason === "string" && v.interruption_reason.trim() ? v.interruption_reason : undefined,
     started_at,
     finished_at,
   };
+  if (round.interruption_reason === undefined) delete round.interruption_reason;
+  if (v.task_checkpoint && typeof v.task_checkpoint === "object") {
+    const checkpoint = normalizeTurn(v.task_checkpoint as Partial<StoredTurn>);
+    if (TASK_ID.test(checkpoint.id) && typeof checkpoint.goalId === "string" && GOAL_ID.test(checkpoint.goalId)) round.task_checkpoint = checkpoint;
+  }
+  if (v.llm_settlements !== undefined) {
+    if (!Array.isArray(v.llm_settlements) || v.llm_settlements.length > ACCOUNTING_CALL_LIMIT || !round.task_id) return null;
+    const seen = new Set<string>();
+    const receipts: LlmSettlement[] = [];
+    for (const receipt of v.llm_settlements) {
+      if (!isObj(receipt) || typeof receipt.run_id !== "string" || !ACCOUNTING_RUN_ID.test(receipt.run_id)
+        || !Number.isInteger(receipt.llm_calls) || (receipt.llm_calls as number) < 0 || (receipt.llm_calls as number) > ACCOUNTING_CALL_LIMIT || seen.has(receipt.run_id)) return null;
+      seen.add(receipt.run_id);
+      receipts.push({ run_id: receipt.run_id, llm_calls: receipt.llm_calls as number });
+    }
+    round.llm_settlements = receipts;
+  }
+  return round;
 }
 
 /** 读回 rounds 列；内容损坏时返回 null（调用方跳过这一行，和技能库的处理一致） */

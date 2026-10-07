@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-07T03:47:53.827Z",
+  "parentRevision": "4fca797429fd66f839a6e4ea83613d6834b108d0",
+  "passed": true,
+  "sourceInputs": 557,
+  "sourceAndMcpUnchanged": true,
+  "fullTestCounts": {
+    "files": 107,
+    "passed": 1061,
+    "failed": 0,
+    "skipped": 0
+  },
+  "privateSmokeCounts": {
+    "files": 3,
+    "passed": 55,
+    "failed": 0,
+    "skipped": 0
+  },
+  "fullManifestSha256": "d5f2446d8846e33fab127b14cd270c8fd055283845056b52405c8ae04ae7e88a",
+  "gatesManifestSha256": "c5e3e5d2af078a4f909043784cab951a71803ea3302763f5910491ee562c31ab",
+  "fullLogSha256": "3c6c81c6052d7f82c80f1b70f883de0007dd4b6fda0901740aed6a75a625281d",
+  "fullLogBytes": 46108,
+  "sourceScopesIncludeConfigAndTestReadBrandBenchDocs": true,
+  "actualTerminalSessions": {
+    "full": 69338,
+    "gates": 82114
+  },
+  "limits": [
+    "synthetic Providers",
+    "no new native App/real-provider run",
+    "pre-goal full1058 and first full1031/1failure retained independently",
+    "core UI partial body in GoalDetail pending"
+  ]
+}

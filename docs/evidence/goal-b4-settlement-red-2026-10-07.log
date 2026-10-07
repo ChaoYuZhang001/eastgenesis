@@ -1,0 +1,198 @@
+
+ RUN  v3.0.5 /private/tmp/eastgenesis-goal-settlement-b4-20261007/base
+
+ ❯ tests/goal-settlement-recovery.test.ts (7 tests | 3 failed | 4 skipped) 148ms
+   ↓ Goal 执行失败保留原轮的真实任务恢复 > 文件与 Chat 已完成、总结部分输出失败时暂停；重启继续仅总结，不重放或重复记费
+   ↓ Goal 执行失败保留原轮的真实任务恢复 > 失败已用尽目标预算时，继续入口不再调用模型或新建任务
+   ↓ Goal 执行失败保留原轮的真实任务恢复 > 真实 backend 写失败经 store 返回字符串时，停止并显示存储错误；显式恢复仍沿用同轮且不重放已写文件
+   ↓ Goal 执行失败保留原轮的真实任务恢复 > 真实 pause stopper 的后端 checkpoint 错误字符串必须可见，原任务停止且不会恢复或重放
+   × 完整 Goal：任务终态持久化与调用结算失败恢复 > 终态 checkpoint 成功但旧3次调用结算失败时，重启继续先补结算且不越过 max3 111ms
+     → expected [ 'plan', 'answer', 'summary', …(1) ] to deeply equal [ 'plan', 'answer', 'summary' ]
+     → expected { …(11) } to match object { status: 'failed', …(2) }
+(8 matching properties omitted from actual)
+     → expected 1 to be 3 // Object.is equality
+   × 完整 Goal：任务终态持久化与调用结算失败恢复 > completed checkpoint 已成功而调用结算失败时，重启继续仅补结算和Goal收尾，不再执行模型或文件 20ms
+     → expected { …(11) } to match object { status: 'completed', …(1) }
+(9 matching properties omitted from actual)
+     → expected "spy" to be called once, but got 0 times
+   × 完整 Goal：任务终态持久化与调用结算失败恢复 > Runtime完成但completed checkpoint拒写时，同进程继续仅补保存和Goal收尾，保留已接受Chat且无副作用重放 16ms
+     → expected { …(11) } to match object { status: 'completed', …(1) }
+(9 matching properties omitted from actual)
+     → expected "spy" to be called once, but got 0 times
+     → expected { index: 1, title: '第 1 轮', …(8) } to match object { …(3) }
+(27 matching properties omitted from actual)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/goal-settlement-recovery.test.ts > 完整 Goal：任务终态持久化与调用结算失败恢复 > 终态 checkpoint 成功但旧3次调用结算失败时，重启继续先补结算且不越过 max3
+AssertionError: expected [ 'plan', 'answer', 'summary', …(1) ] to deeply equal [ 'plan', 'answer', 'summary' ]
+
+- Expected
++ Received
+
+  [
+    "plan",
+    "answer",
+    "summary",
++   "summary",
+  ]
+
+ ❯ tests/goal-settlement-recovery.test.ts:307:65
+    305|       // The previous three requests are real runtime events, not seed…
+    306|       // Recovery has no budget for another summary, even though stora…
+    307|       expect.soft(f.requests.map((request) => request.purpose)).toEqua…
+       |                                                                 ^
+    308|       expect.soft(f.goal()).toMatchObject({ status: "failed", used_llm…
+    309|       expect.soft((await f.backend.listGoals()).find((goal) => goal.id…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/goal-settlement-recovery.test.ts > 完整 Goal：任务终态持久化与调用结算失败恢复 > 终态 checkpoint 成功但旧3次调用结算失败时，重启继续先补结算且不越过 max3
+AssertionError: expected { …(11) } to match object { status: 'failed', …(2) }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "max_llm_calls": 3,
+-   "status": "failed",
+-   "used_llm_calls": 3,
++   "status": "completed",
++   "used_llm_calls": 1,
+  }
+
+ ❯ tests/goal-settlement-recovery.test.ts:308:29
+    306|       // Recovery has no budget for another summary, even though stora…
+    307|       expect.soft(f.requests.map((request) => request.purpose)).toEqua…
+    308|       expect.soft(f.goal()).toMatchObject({ status: "failed", used_llm…
+       |                             ^
+    309|       expect.soft((await f.backend.listGoals()).find((goal) => goal.id…
+    310|       expect(f.goal().rounds).toHaveLength(1); expect(f.goal().rounds[…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/goal-settlement-recovery.test.ts > 完整 Goal：任务终态持久化与调用结算失败恢复 > 终态 checkpoint 成功但旧3次调用结算失败时，重启继续先补结算且不越过 max3
+AssertionError: expected 1 to be 3 // Object.is equality
+
+- Expected
++ Received
+
+- 3
++ 1
+
+ ❯ tests/goal-settlement-recovery.test.ts:309:99
+    307|       expect.soft(f.requests.map((request) => request.purpose)).toEqua…
+    308|       expect.soft(f.goal()).toMatchObject({ status: "failed", used_llm…
+    309|       expect.soft((await f.backend.listGoals()).find((goal) => goal.id…
+       |                                                                                                   ^
+    310|       expect(f.goal().rounds).toHaveLength(1); expect(f.goal().rounds[…
+    311|       expect(f.starts).toHaveBeenCalledOnce(); expect(f.read).toHaveBe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/goal-settlement-recovery.test.ts > 完整 Goal：任务终态持久化与调用结算失败恢复 > completed checkpoint 已成功而调用结算失败时，重启继续仅补结算和Goal收尾，不再执行模型或文件
+AssertionError: expected { …(11) } to match object { status: 'completed', …(1) }
+(9 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "status": "completed",
+-   "used_llm_calls": 3,
++   "status": "paused",
++   "used_llm_calls": 0,
+  }
+
+ ❯ tests/goal-settlement-recovery.test.ts:332:29
+    330|       expect(await useGoals.getState().start(f.id)).toBeNull();
+    331|       await f.runner.run(f.id);
+    332|       expect.soft(f.goal()).toMatchObject({ status: "completed", used_…
+       |                             ^
+    333|       expect.soft(f.checkDone).toHaveBeenCalledOnce();
+    334|       expect(f.requests.map((request) => request.purpose)).toEqual(["p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/goal-settlement-recovery.test.ts > 完整 Goal：任务终态持久化与调用结算失败恢复 > completed checkpoint 已成功而调用结算失败时，重启继续仅补结算和Goal收尾，不再执行模型或文件
+AssertionError: expected "spy" to be called once, but got 0 times
+ ❯ tests/goal-settlement-recovery.test.ts:333:32
+    331|       await f.runner.run(f.id);
+    332|       expect.soft(f.goal()).toMatchObject({ status: "completed", used_…
+    333|       expect.soft(f.checkDone).toHaveBeenCalledOnce();
+       |                                ^
+    334|       expect(f.requests.map((request) => request.purpose)).toEqual(["p…
+    335|       expect(f.starts).toHaveBeenCalledOnce(); expect(f.read).toHaveBe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/goal-settlement-recovery.test.ts > 完整 Goal：任务终态持久化与调用结算失败恢复 > Runtime完成但completed checkpoint拒写时，同进程继续仅补保存和Goal收尾，保留已接受Chat且无副作用重放
+AssertionError: expected { …(11) } to match object { status: 'completed', …(1) }
+(9 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "status": "completed",
++   "status": "paused",
+    "used_llm_calls": 3,
+  }
+
+ ❯ tests/goal-settlement-recovery.test.ts:357:29
+    355|       expect(await useGoals.getState().start(f.id)).toBeNull();
+    356|       await f.runner.run(f.id);
+    357|       expect.soft(f.goal()).toMatchObject({ status: "completed", used_…
+       |                             ^
+    358|       expect.soft(f.checkDone).toHaveBeenCalledOnce();
+    359|       expect.soft((await f.backend.listGoals()).find((goal) => goal.id…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/goal-settlement-recovery.test.ts > 完整 Goal：任务终态持久化与调用结算失败恢复 > Runtime完成但completed checkpoint拒写时，同进程继续仅补保存和Goal收尾，保留已接受Chat且无副作用重放
+AssertionError: expected "spy" to be called once, but got 0 times
+ ❯ tests/goal-settlement-recovery.test.ts:358:32
+    356|       await f.runner.run(f.id);
+    357|       expect.soft(f.goal()).toMatchObject({ status: "completed", used_…
+    358|       expect.soft(f.checkDone).toHaveBeenCalledOnce();
+       |                                ^
+    359|       expect.soft((await f.backend.listGoals()).find((goal) => goal.id…
+    360|       expect(f.requests.map((request) => request.purpose)).toEqual(["p…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/goal-settlement-recovery.test.ts > 完整 Goal：任务终态持久化与调用结算失败恢复 > Runtime完成但completed checkpoint拒写时，同进程继续仅补保存和Goal收尾，保留已接受Chat且无副作用重放
+AssertionError: expected { index: 1, title: '第 1 轮', …(8) } to match object { …(3) }
+(27 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "status": "done",
++   "status": "interrupted",
+    "task_checkpoint": {
+      "id": "task-e06d67e2-b24e-4dca-b540-7391fca24569",
+-     "status": "completed",
++     "status": "running",
+    },
+    "task_id": "task-e06d67e2-b24e-4dca-b540-7391fca24569",
+  }
+
+ ❯ tests/goal-settlement-recovery.test.ts:359:94
+    357|       expect.soft(f.goal()).toMatchObject({ status: "completed", used_…
+    358|       expect.soft(f.checkDone).toHaveBeenCalledOnce();
+    359|       expect.soft((await f.backend.listGoals()).find((goal) => goal.id…
+       |                                                                                              ^
+    360|       expect(f.requests.map((request) => request.purpose)).toEqual(["p…
+    361|       expect(f.starts).toHaveBeenCalledOnce(); expect(f.read).toHaveBe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 4 skipped (7)
+   Start at  14:58:08
+   Duration  1.72s (transform 567ms, setup 205ms, collect 728ms, tests 148ms, environment 0ms, prepare 411ms)
+

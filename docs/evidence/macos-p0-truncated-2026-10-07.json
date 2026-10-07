@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "kind": "macos-p0-transport-truncation-evidence",
+  "capturedOn": "2026-10-07",
+  "platform": {
+    "os": "macOS",
+    "arch": "x86_64",
+    "appVersion": "0.1.0",
+    "packageIdentifier": "com.eastgenesis.desktop",
+    "packageKind": "macos-qa-bundle",
+    "buildId": "qa-20261007-channel-terminal-fix"
+  },
+  "setup": {
+    "profile": "isolated temporary HOME",
+    "transport": "loopback deterministic incomplete-body fixture",
+    "automation": "macOS System Events Accessibility",
+    "realUserProfileTouched": false,
+    "externalServiceConfigurationRead": false
+  },
+  "commands": {
+    "build": "pnpm --silent tauri:build:mac:qa",
+    "fixture": "node tools/desktop-stream-fixture.mjs",
+    "smoke": "temporary Accessibility script with sqlite3 read-only status queries"
+  },
+  "checks": {
+    "partialOutputVisibleBeforeFailure": true,
+    "failedStatePersisted": true,
+    "partialOutputPersisted": true,
+    "resumeEntryVisible": true
+  },
+  "result": "passed",
+  "boundary": {
+    "proven": [
+      "a real macOS window rendered partial output from an incomplete response",
+      "the terminal failure reached the UI and was persisted in the isolated session checkpoint",
+      "the partial output remained available and the resume entry was visible"
+    ],
+    "excluded": [
+      "exact task ID, task text, and rendered output value",
+      "external service behavior or SLA",
+      "cross-platform installation behavior",
+      "signing and notarization"
+    ]
+  },
+  "redaction": {
+    "goalTextPresent": false,
+    "renderedOutputPresent": false,
+    "taskIdValuePresent": false,
+    "absolutePathsPresent": false,
+    "externalServiceNamesPresent": false,
+    "credentialsPresent": false,
+    "temporaryProfileRetained": false
+  }
+}

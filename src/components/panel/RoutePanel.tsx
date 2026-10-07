@@ -1,11 +1,33 @@
 import { TriangleAlert } from "lucide-react";
-import { CAP_LABEL, TYPE_LABEL, type ChainStage, type DecisionMeta, type ModelProfile, type RouteDecision, type Weights } from "@/decision";
+import { CAP_LABEL, TYPE_LABEL, WORK_SURFACE_HINT, WORK_SURFACE_LABEL, routeTraceText, type ChainStage, type DecisionMeta, type ModelProfile, type RouteDecision, type RouteReplayResult, type RouteTrace, type Weights } from "@/decision";
 import { Badge } from "@/components/ui/input";
 import { BACKEND_LABEL } from "@/lib/timeline";
 
 export const CHAIN_STAGE_LABEL: Record<ChainStage, string> = { primary: "首选", fallback: "备选", rule_fallback: "兜底" };
 const WEIGHT_LABEL: Record<keyof Weights, string> = { capability: "能力匹配", quality: "质量", cost: "成本", latency: "延迟" };
 const pct = (n: number) => `${Math.round(n * 100)}%`;
+
+/** 路由是否带有可脱敏回放的历史快照；摘要只展示计数和 FNV 摘要，不展示正文或文件内容。 */
+export function RouteEvidence({ trace, replay }: { trace?: RouteTrace; replay?: RouteReplayResult | null }) {
+  if (!trace?.snapshot) return <span>旧记录：没有历史快照，不能重算</span>;
+  const { snapshot } = trace;
+  return (
+    <div className="space-y-1">
+      <p>历史快照已记录（可用于脱敏回放）：{snapshot.profiles.length} 个模型、{snapshot.availability.length} 条可用性</p>
+      <details>
+        <summary className="cursor-pointer text-muted-foreground">查看快照摘要</summary>
+        <p className="mt-1 break-words text-muted-foreground">能力矩阵摘要：{snapshot.profileSetId} · 可用性摘要：{snapshot.availabilitySetId}</p>
+        {replay && (
+          <p className="mt-1 break-words text-muted-foreground">
+            历史链重算：{replay.sourceSnapshotConsistent === false ? "不一致" : "一致"} · 当前重放：{replay.changed ? "已变化" : "未变化"}
+            {replay.profileSnapshotChanged ? " · 能力矩阵已变化" : ""}
+            {replay.availabilitySnapshotChanged ? " · Provider 可用性已变化" : ""}
+          </p>
+        )}
+      </details>
+    </div>
+  );
+}
 
 // 路由面板：为什么选这个模型、备选链、权重、被排除的模型，以及做决策的是哪一级后端
 export function RoutePanel({ route, profiles }: { route: { decision: RouteDecision; meta: DecisionMeta } | null; profiles: readonly ModelProfile[] }) {
@@ -21,6 +43,10 @@ export function RoutePanel({ route, profiles }: { route: { decision: RouteDecisi
         <dd>
           {TYPE_LABEL[c.type] ?? c.type}（置信度 {c.confidence.toFixed(2)}）
         </dd>
+        <dt className="text-muted-foreground">工作能力</dt>
+        <dd>
+          {WORK_SURFACE_LABEL[c.surface ?? "chat"]}（{c.surfaceReason ?? WORK_SURFACE_HINT[c.surface ?? "chat"]}）
+        </dd>
         <dt className="text-muted-foreground">所需能力</dt>
         <dd>{c.capabilities.length ? c.capabilities.map((k) => CAP_LABEL[k] ?? k).join("、") : "无特殊要求"}</dd>
         <dt className="text-muted-foreground">估算输入</dt>
@@ -35,6 +61,16 @@ export function RoutePanel({ route, profiles }: { route: { decision: RouteDecisi
         <dd>
           {BACKEND_LABEL[meta.backend]}（第 {meta.level} 级，{meta.latencyMs} ms）
         </dd>
+        <dt className="text-muted-foreground">路由策略</dt>
+        <dd>{d.trace?.policyVersion ?? "历史记录（无策略版本）"}</dd>
+        {d.trace && (
+          <>
+            <dt className="text-muted-foreground">输入摘要</dt>
+            <dd>{routeTraceText(d.trace)}</dd>
+            <dt className="text-muted-foreground">路由证据</dt>
+            <dd><RouteEvidence trace={d.trace} /></dd>
+          </>
+        )}
       </dl>
 
       {meta.degraded && (

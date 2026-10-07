@@ -1,0 +1,529 @@
+{
+  "schemaVersion": 1,
+  "kind": "complete_frozen_capture_sha256_index",
+  "runId": 37575271906,
+  "headSha": "2b509b7a4bd048412d442ad31360c7c7316a10d7",
+  "runStatus": "completed",
+  "runConclusion": "failure",
+  "createdAt": "2026-10-07T05:38:56.670449+00:00",
+  "fileCount": 85,
+  "totalFileBytes": 2271864,
+  "excludedSelfAndArchive": [
+    "complete-sha256-index.json",
+    "eastgenesis-ci-2b509-complete-evidence.zip"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2396,
+      "sha256": "a5cd3ed0886f2f3c8045397b8676eebdb6700bba41fcd04af3618503c5f7b84a",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "actual-stdout-index.json",
+      "bytes": 12921,
+      "sha256": "6881c167905b7c366a0b07d8fe0625d5fe1d0f6658a547e2bc66107205864d45",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "artifacts-terminal.json",
+      "bytes": 2968,
+      "sha256": "292c636c0c5397bcba660fbeeed90cd1d7d7804493b0b0f6a47323ee6792513b",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "finalize_capture.py",
+      "bytes": 14055,
+      "sha256": "3b8693c1ec308635da0d2303e021b08447438427b4ce28706b4f8b8c0fdca7d2",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "immutable-source/.github/workflows/desktop.yml",
+      "bytes": 19040,
+      "sha256": "b2091329630d40cc5859fd18619347650314c20882ef3b3064c73824e546df2a",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tests/desktop-goal-upgrade-inputs.test.ts",
+      "bytes": 11018,
+      "sha256": "177eab078c7ac6dc7b1f7d32f850f1db8a40efa3e1b9c31f906db37d1b72471e",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tests/desktop-windows-install-smoke.test.ts",
+      "bytes": 35361,
+      "sha256": "720b2b513f348a99c6276b3201d9d78afad0024b677c31aeb49ebef064083329",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-native-cancel-smoke.mjs",
+      "bytes": 27112,
+      "sha256": "0621aa3a76b61a115f87b7d8240fd81f32d345374127e64ca53822e0286c6e8b",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-native-picker-smoke.mjs",
+      "bytes": 27057,
+      "sha256": "f59edc15f920cec8a89c6cea794ecf74ef1862a13c0474c5ca6eb5e50d857da5",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-process-cleanup.mjs",
+      "bytes": 4260,
+      "sha256": "96138f637b706f1c7707b6906dcb4abb8bbd0311d180441f767ca3f36e956c53",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-runner-evidence-validate.mjs",
+      "bytes": 12542,
+      "sha256": "7025bdfccf947d6e930a500684448e55cf5318595a0b39e68331044ac0d155f0",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-startup-trace.d.mts",
+      "bytes": 2333,
+      "sha256": "ef77f6cdddc963706fb1e5d077b1f98918724bd6e0ce18f470966e4623f7a239",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-startup-trace.mjs",
+      "bytes": 9550,
+      "sha256": "569b72ffa6fd6ef78bfa64db53f26ce77647fb19fd32d9f4f4e534d61dc5439f",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-windows-install-smoke.d.mts",
+      "bytes": 2702,
+      "sha256": "11275fede5d0e7b88dc9f5c6f807632fc0406207f4962d1da28962752aa328ae",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-windows-install-smoke.mjs",
+      "bytes": 23691,
+      "sha256": "6a724a5bbeeff7611e4771655efefeb022e5ea18aafea9e229738e1448059ac4",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/tools/desktop-windows-install-smoke.ps1",
+      "bytes": 43789,
+      "sha256": "b18a3fab792b541504e7c8425bdebd828700a3b292663df9571323de7f4b7402",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/vendor/tauri-plugin-sql/src/sqlite_path_tests.rs",
+      "bytes": 9339,
+      "sha256": "bd44ae98576e84a2acbaff93b10739267a546acd7541be471ff502a1792f2f7c",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source/vendor/tauri-plugin-sql/src/wrapper.rs",
+      "bytes": 14660,
+      "sha256": "e37fdc94bcd0da39e7f49b2c4319c7e3af82a1b1b683d2b6fe7e5d50bd3cc346",
+      "evidenceClass": "immutable_source_copy"
+    },
+    {
+      "path": "immutable-source-binding.json",
+      "bytes": 189563,
+      "sha256": "d479df0219e207936cb47c47f807283c972023363e95b5d19ab98662d04d39f8",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644025-windows-latest-raw.log",
+      "bytes": 206871,
+      "sha256": "a42092d7a7e11a38e10616fe778362961f148410728ac068c13260866466dca5",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644025-windows-latest-terminal.json",
+      "bytes": 10458,
+      "sha256": "88e1dc9b3a7952ad875ba990868a361f60510634f56dd128e9474f4272f87eef",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644217-macos-latest-actual-1-desktop-runner-evidence.json",
+      "bytes": 1206,
+      "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644217-macos-latest-raw.log",
+      "bytes": 272592,
+      "sha256": "d8937f19f8dfe5fb60ddfde468466b2e0c3dd1c218a788db396034f3c9b27cef",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644217-macos-latest-terminal.json",
+      "bytes": 10454,
+      "sha256": "e8fffbd2a2bd078ee5b7c9da41c4339152310c820155f5d3dbfe5cda549d1582",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644229-ubuntu-latest-actual-1-desktop-install-smoke.json",
+      "bytes": 1683,
+      "sha256": "92a0861499f37de8dafd13e8651318a422b76c980f3c0d033d4f3d670f1bed35",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644229-ubuntu-latest-actual-2-desktop-linux-upgrade-smoke.json",
+      "bytes": 2088,
+      "sha256": "aef10799d780dc58485ea3bbb5723ca8fca06ecab547f93b40443088ca3b4b56",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644229-ubuntu-latest-actual-3-desktop-runner-evidence.json",
+      "bytes": 1470,
+      "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644229-ubuntu-latest-raw.log",
+      "bytes": 439039,
+      "sha256": "3f0a524f2932b685e3054e6303d3c6e65efecfb6018ca397bbc3afd6f80fb87d",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "job-112642644229-ubuntu-latest-terminal.json",
+      "bytes": 10456,
+      "sha256": "a225a4c4ab5bd9d8b22b2ba7acac6fc34e78472d577fddc38fff47e2c639ffb8",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T051700.830010Z.json",
+      "bytes": 20393,
+      "sha256": "86758da0b30ff2b4a5a32a031e43a7999214482ba853d70cc4cb54d3ca2e7f69",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T051929.089437Z.json",
+      "bytes": 21750,
+      "sha256": "dbe79efafb26df9a0a2c315f4839f8da950ecf481c8469a5d0e052518dab7fe3",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T052037.406245Z.json",
+      "bytes": 21750,
+      "sha256": "dbe79efafb26df9a0a2c315f4839f8da950ecf481c8469a5d0e052518dab7fe3",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T052209.626513Z.json",
+      "bytes": 21750,
+      "sha256": "dbe79efafb26df9a0a2c315f4839f8da950ecf481c8469a5d0e052518dab7fe3",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T052411.637701Z.json",
+      "bytes": 22849,
+      "sha256": "2ddfcf6022d1cf3272c7213788fdd15e5e907403a51d9380e54d48d4112a9f34",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T052522.580393Z.json",
+      "bytes": 22849,
+      "sha256": "2ddfcf6022d1cf3272c7213788fdd15e5e907403a51d9380e54d48d4112a9f34",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T052655.734223Z.json",
+      "bytes": 23279,
+      "sha256": "d80fb7ba79c3237d39c2e0ca2359946bb4ef5134a48f0e49785a534a83a76132",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T052758.937160Z.json",
+      "bytes": 23279,
+      "sha256": "d80fb7ba79c3237d39c2e0ca2359946bb4ef5134a48f0e49785a534a83a76132",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T052930.722756Z.json",
+      "bytes": 23494,
+      "sha256": "33a90dd6d028e063a3f8f52b3b7a793d84e261f2dbe81aeb37f6e8c337ba5640",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T053032.963034Z.json",
+      "bytes": 23948,
+      "sha256": "17e57466397afe0a05219acbd1a79d71dcef77106d50e37bf04f8f042c4dadf2",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T053149.038306Z.json",
+      "bytes": 23948,
+      "sha256": "17e57466397afe0a05219acbd1a79d71dcef77106d50e37bf04f8f042c4dadf2",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-20261007T053152.246517Z.json",
+      "bytes": 23948,
+      "sha256": "17e57466397afe0a05219acbd1a79d71dcef77106d50e37bf04f8f042c4dadf2",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "jobs-terminal.json",
+      "bytes": 35682,
+      "sha256": "078d70d1a2dbba84f4a44fa04ed2db48601447301d22a49e83734f9957f35d14",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-diagnostic-capture.json",
+      "bytes": 3543,
+      "sha256": "d11c58f6042bf4d05078492b4b19732b73d1262f9d454b289f26ceaa4d61ec35",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostic-artifact.zip",
+      "bytes": 6808,
+      "sha256": "bc133af6ac03046b5ccb5933a639221656c1e570ff849da20776c538b2e35827",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/native-webdriver-probe.log",
+      "bytes": 18,
+      "sha256": "eea7da5b4e05f48508be11134786a2705db981f4bc6e155df8266848f4d8b56c",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/native-webdriver-status.json",
+      "bytes": 48,
+      "sha256": "bed52ecb0b6420312e601344e85ae47c33f90dd47dc6b08bbc688c488ee05dbd",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-environment.txt",
+      "bytes": 247,
+      "sha256": "2935aac9a6e7d682ae253e378134d0c4e154b8c35fe1678fe3f3215cb1c1c5bc",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality-idle-cancel.json",
+      "bytes": 1837,
+      "sha256": "4646a97e3b9ded22b10824fa741a62296d7a3f0336b22a4a4fc9faf7d953dbb2",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality-idle-cancel.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality-slow-first-token.json",
+      "bytes": 2123,
+      "sha256": "34f23076c5aa1b0ef75c077a799ebe14b9bdf9fc0b22aced087d9916cb6a0cd3",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality-slow-first-token.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality-staged.json",
+      "bytes": 2111,
+      "sha256": "fa0713b5662b98571920d953d208a5b7caee87281ee72ee82b95f6cad101904c",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality-staged.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality-truncated.json",
+      "bytes": 2128,
+      "sha256": "266c74f938b0b213068692fb886da6c092dfbcc25beb89b50ad3a159dcd3d789",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality-truncated.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "linux-webdriver-diagnostics/webdriver-quality.json",
+      "bytes": 11407,
+      "sha256": "d20ee232fc1ce22adfc11f1f626ef64d829275c9fe1fed5b25dc5260ada2c8a8",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "local-c16-tree-immutable.bin",
+      "bytes": 66484,
+      "sha256": "9084be83ccff5e088037ac5746d38db9cc882e3765630986d07b45e6b923aaff",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "local-review/native-v8-readonly-review.json",
+      "bytes": 12067,
+      "sha256": "c263606686422a76f8e147457a693f8d47364e01ad70742a7d4473d0afb789f7",
+      "evidenceClass": "local_source_review_not_ci"
+    },
+    {
+      "path": "parse_actual_stdout.py",
+      "bytes": 3832,
+      "sha256": "6e3022105e748f474203964889e13995154a5b3c89a926079f1501a5bfe7b145",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "public-commit-20261007T051700.830010Z.json",
+      "bytes": 1207,
+      "sha256": "3ac71e1cc9660b441f4f96b47c25d4cd85595a3ca302fe369ec67722d6a658e0",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "public-tree-20261007T051700.830010Z.json",
+      "bytes": 203217,
+      "sha256": "d2183bd6234b8043a95bdda8e2e1ca2621e7d612a641d04f5f15ee32efa73b03",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T051700.830010Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T051929.089437Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T052037.406245Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T052209.626513Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T052411.637701Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T052522.580393Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T052655.734223Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T052758.937160Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T052930.722756Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T053032.963034Z.json",
+      "bytes": 13471,
+      "sha256": "bdb4c9f931885feba577ef01ee1e883c98c462dee6348e360144e1bdfa60d801",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T053149.038306Z.json",
+      "bytes": 13474,
+      "sha256": "67ecdedba82daca8c0cc50a1b7d477c768f9646b2762bf3fa982b3dab52bef85",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-20261007T053152.246517Z.json",
+      "bytes": 13474,
+      "sha256": "67ecdedba82daca8c0cc50a1b7d477c768f9646b2762bf3fa982b3dab52bef85",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "run-terminal.json",
+      "bytes": 15020,
+      "sha256": "7aac4d2d7a3a8e7cb82ee9b0b46667131fb9aa0a93b41cf8e75d11b9e3cc3963",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "terminal-audit.json",
+      "bytes": 15467,
+      "sha256": "a4a1a225ba2ad6423abcffe0bff369514c7f6bfe16acb6ee51215b0bfe719c69",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "watch.py",
+      "bytes": 5796,
+      "sha256": "b5aeed2e6de28931f994693e2d018f96afe3a99ec712e263e72fb6b82c0d9b9c",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-first-failure.json",
+      "bytes": 3636,
+      "sha256": "29044889ee5014b780f5ec216b8c33781fe9dd865d94989d931077ffd5ed5847",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-small-diagnostic-artifact.zip",
+      "bytes": 5071,
+      "sha256": "274afb165b982d00aa0c443f5f21072a0850cbb11aca7ebe4165cab5cca0d4d5",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-small-diagnostic-capture.json",
+      "bytes": 4029,
+      "sha256": "126ce09d6f91122fafce7fd75a7b695383cbbdc6f32e72b12f67af4a0d1750bb",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-small-diagnostics/goal-recovery-quality.json",
+      "bytes": 542,
+      "sha256": "c30b155df68aa83819c075a5e9bbbf8f32e459f60b504d49bd71bc08a736fe7d",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-small-diagnostics/goal-recovery-validation.json",
+      "bytes": 320,
+      "sha256": "5ceb2a088da8a0cb011eb973904256579c426cca2dc666722a1f42bf8dda560f",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-small-diagnostics/golden-task-quality.json",
+      "bytes": 1614,
+      "sha256": "b682b4735ad766efd2f723e862e94d3cec9814709f22f59b0bd0a57b3ce741c7",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-small-diagnostics/provider-controlled-recovery.json",
+      "bytes": 2608,
+      "sha256": "ab8966627f69e545b7ea37c5c0ea028f128012f0e2ece0ff9f48079318cdce67",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-small-diagnostics/provider-recovery-matrix.json",
+      "bytes": 7833,
+      "sha256": "22a860ce65dbcca6f947ceb8a71c6fbb17175b84309a0a3057d545beab56c38f",
+      "evidenceClass": "ci_capture_or_capture_method"
+    },
+    {
+      "path": "windows-small-diagnostics/routing-quality.json",
+      "bytes": 1600,
+      "sha256": "796bae97ccaeddbde205a2df9ddaebff63aa19c810580115d0c1d1319315b271",
+      "evidenceClass": "ci_capture_or_capture_method"
+    }
+  ],
+  "bindingFile": "immutable-source-binding.json",
+  "ciEvidenceBoundary": "local-review is explicitly local non-CI; immutable-source binding is 733 original Git blobs, only14 selected contents copied."
+}

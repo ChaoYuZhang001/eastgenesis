@@ -1,0 +1,47 @@
+{
+  "verifiedAt": "2026-10-07T06:08:58.286757+00:00",
+  "passed": true,
+  "localParentRevision": "c16ae0274a9066709baf8047951675b299b76092",
+  "sourceInputsVerified": 558,
+  "allCurrentInputHashesMatch": true,
+  "mcpBinaryVerifiedUnchanged": true,
+  "gatesReportSha256": "1559db4a63dfbed65ee871d5534095514e8390210070334262a2f7417e73cd9c",
+  "frontend": {
+    "files": 108,
+    "passed": 1076,
+    "failed": 0,
+    "skipped": 0
+  },
+  "privateConfigSmoke": {
+    "includedInActualFullSuite": true,
+    "tests": 55,
+    "files": [
+      {
+        "file": "custom-providers.test.ts",
+        "tests": 10
+      },
+      {
+        "file": "llm.test.ts",
+        "tests": 34
+      },
+      {
+        "file": "ui-settings.test.tsx",
+        "tests": 11
+      }
+    ],
+    "realProviderRun": false
+  },
+  "sqlPlugin": {
+    "normal": {
+      "unitPassed": 12,
+      "docPassed": 1
+    },
+    "qa": {
+      "unitPassed": 18,
+      "docPassed": 1
+    },
+    "windowsLockTestsCompiledOrRun": false
+  },
+  "nativeFullGoalPassed": false,
+  "staleCheckpointFreshnessProved": false
+}

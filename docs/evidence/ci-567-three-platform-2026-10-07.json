@@ -1,0 +1,327 @@
+{
+  "kind": "ci-567-root-independent-verification",
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-07T03:09:43.021608+00:00",
+  "runId": 37563580233,
+  "headSha": "567fc9e1fc14c991a973440b06d8ccf589576733",
+  "localCommit": "4fca797429fd66f839a6e4ea83613d6834b108d0",
+  "sourceTree": "f47c97b25cf2e71d3a66b272bd53986d14d965bc",
+  "sourceArchiveBytes": 15431680,
+  "sourceOnly": true,
+  "runStatus": "completed",
+  "runConclusion": "failure",
+  "captureIndexSha256": "ec6b1f48ee0a6adc5572e96a8441027ab4397e8d9e9889ef20edfb4f70abfb98",
+  "capturedFilesIncludingIndex": 64,
+  "capturedBytesIncludingIndex": 1342216,
+  "allCapturedFileHashesVerified": true,
+  "freshGithubRunJobsTreeAndArtifactsVerified": true,
+  "jobs": [
+    {
+      "id": 112606129161,
+      "name": "ubuntu-latest",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T02:46:27Z",
+      "completedAt": "2026-10-07T03:03:07Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37563580233/job/112606129161"
+    },
+    {
+      "id": 112606129427,
+      "name": "windows-latest",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-10-07T02:46:27Z",
+      "completedAt": "2026-10-07T02:49:46Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37563580233/job/112606129427"
+    },
+    {
+      "id": 112606129513,
+      "name": "macos-latest",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T02:46:32Z",
+      "completedAt": "2026-10-07T02:56:12Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37563580233/job/112606129513"
+    }
+  ],
+  "rawReports": [
+    {
+      "path": "ubuntu-desktop-install-smoke-1.json",
+      "kind": "desktop-install-smoke",
+      "rawLogPath": "ubuntu-job-112606129161.log",
+      "lineStart": 4688,
+      "lineEnd": 4747,
+      "runId": 37563580233,
+      "headSha": "567fc9e1fc14c991a973440b06d8ccf589576733",
+      "jobId": 112606129161,
+      "sha256": "dffe1dc05131131d13c7bfaa28c728d0274703be178baae8488ddfc6ea0dbc25",
+      "matchesOriginalLogJson": true,
+      "rootReextractedEqual": true,
+      "rawLogSha256": "2617c39d2bf3798d8f06c04f6b057a6c201f87023b441402c0eb2c929f61d545",
+      "reportSha256": "dffe1dc05131131d13c7bfaa28c728d0274703be178baae8488ddfc6ea0dbc25"
+    },
+    {
+      "path": "ubuntu-desktop-linux-upgrade-smoke-2.json",
+      "kind": "desktop-linux-upgrade-smoke",
+      "rawLogPath": "ubuntu-job-112606129161.log",
+      "lineStart": 4794,
+      "lineEnd": 4873,
+      "runId": 37563580233,
+      "headSha": "567fc9e1fc14c991a973440b06d8ccf589576733",
+      "jobId": 112606129161,
+      "sha256": "94ac4b89f9d84de45cdb91bc3e92f0855d2ef9b21cb0b5b53fc42b176ee921f6",
+      "matchesOriginalLogJson": true,
+      "rootReextractedEqual": true,
+      "rawLogSha256": "2617c39d2bf3798d8f06c04f6b057a6c201f87023b441402c0eb2c929f61d545",
+      "reportSha256": "94ac4b89f9d84de45cdb91bc3e92f0855d2ef9b21cb0b5b53fc42b176ee921f6"
+    },
+    {
+      "path": "ubuntu-desktop-runner-evidence-3.json",
+      "kind": "desktop-runner-evidence",
+      "rawLogPath": "ubuntu-job-112606129161.log",
+      "lineStart": 4906,
+      "lineEnd": 4958,
+      "runId": 37563580233,
+      "headSha": "567fc9e1fc14c991a973440b06d8ccf589576733",
+      "jobId": 112606129161,
+      "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde",
+      "matchesOriginalLogJson": true,
+      "rootReextractedEqual": true,
+      "rawLogSha256": "2617c39d2bf3798d8f06c04f6b057a6c201f87023b441402c0eb2c929f61d545",
+      "reportSha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde"
+    },
+    {
+      "path": "macos-desktop-runner-evidence-1.json",
+      "kind": "desktop-runner-evidence",
+      "rawLogPath": "macos-job-112606129513.log",
+      "lineStart": 3139,
+      "lineEnd": 3182,
+      "runId": 37563580233,
+      "headSha": "567fc9e1fc14c991a973440b06d8ccf589576733",
+      "jobId": 112606129513,
+      "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e",
+      "matchesOriginalLogJson": true,
+      "rootReextractedEqual": true,
+      "rawLogSha256": "e60f0763aef8da44b719da46d14b4ce136285b27d1eac98d8f9085949d609c26",
+      "reportSha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e"
+    }
+  ],
+  "smallArtifactsDigestAndMembersVerified": true,
+  "desktopBundleArtifactsDownloaded": false,
+  "frontendCoverage": {
+    "macos": {
+      "passed": 1006,
+      "failed": 0,
+      "skipped": 11,
+      "postMcp": 15,
+      "postMcpOverlap": 4,
+      "uniquePassed": 1017,
+      "crossProcessRepeated": 3
+    },
+    "ubuntu": {
+      "passed": 1006,
+      "failed": 0,
+      "skipped": 11,
+      "postMcp": 15,
+      "postMcpOverlap": 4,
+      "uniquePassed": 1017,
+      "crossProcessRepeated": 3
+    },
+    "windows": {
+      "passed": 999,
+      "failed": 1,
+      "skipped": 17,
+      "uniquePassed": 999,
+      "postMcp": "not_run"
+    }
+  },
+  "windows": {
+    "failureStage": "Run frontend tests",
+    "failure": "legacy_short_path_vs_native_long_path_test_expectation",
+    "notRun": [
+      "Build frontend",
+      "Run cross-process goal recovery evidence",
+      "Rust workspace tests",
+      "Run native file MCP integration tests",
+      "Build unsigned QA desktop bundle",
+      "Build unsigned QA desktop bundle with WebView2 automation args",
+      "Build isolated Windows installation QA fixture",
+      "Smoke-test real Windows NSIS installation lifecycle",
+      "Restore standard Windows QA build for WebDriver",
+      "Install Tauri WebDriver",
+      "Install matching Edge WebDriver",
+      "Record native WebView environment",
+      "Record Windows WebView2 diagnostics",
+      "Probe native Linux WebDriver",
+      "Run native WebView DOM smoke",
+      "Record macOS WebDriver boundary",
+      "Check platform bundle artifacts",
+      "Smoke-test extracted Linux Debian package",
+      "Build Linux upgrade QA fixture and test real dpkg lifecycle",
+      "Smoke-test the packaged Mac binary",
+      "Validate runner evidence collection",
+      "Post Set up Node.js"
+    ]
+  },
+  "linux": {
+    "install": {
+      "schemaVersion": 1,
+      "kind": "desktop-install-smoke",
+      "passed": true,
+      "platform": "linux",
+      "format": "deb",
+      "checks": {
+        "packageMetadata": true,
+        "packagePayload": true,
+        "dependencies": true,
+        "binaryStart": true,
+        "sqliteSchema": true,
+        "controlledTermination": true
+      },
+      "package": {
+        "name": "east-genesis-desktop",
+        "version": "0.1.0",
+        "architecture": "amd64",
+        "bytes": 6695964
+      },
+      "install": {
+        "mode": "deb-extract",
+        "isolatedPrefix": true,
+        "systemPackageDatabaseChanged": false,
+        "database": {
+          "schemaVersion": 7,
+          "sessions": true,
+          "toolInvocations": true
+        },
+        "termination": {
+          "exitCode": null,
+          "signal": "SIGTERM",
+          "requestedSignal": "SIGTERM",
+          "leaderExited": true,
+          "processGroupGone": true,
+          "liveProcessGroupGone": true,
+          "zombieProcesses": 0,
+          "groupProbe": "ps-pgid-state",
+          "controlledCleanup": true,
+          "gracefulTermination": true
+        }
+      },
+      "evidenceBoundary": {
+        "proven": [
+          "a Debian package was inspected without mutating the host package database",
+          "the package payload was extracted under an isolated prefix",
+          "the extracted binary dependencies were resolved on the Linux runner",
+          "the extracted installed binary started and initialized its isolated SQLite database",
+          "the process was terminated in a controlled way"
+        ],
+        "excluded": [
+          "system dpkg installation or uninstall",
+          "AppImage/RPM installation",
+          "old-version to new-version upgrade",
+          "automatic update or rollback",
+          "real Provider availability",
+          "signing/notarization"
+        ]
+      }
+    },
+    "upgrade": {
+      "schemaVersion": 1,
+      "kind": "desktop-linux-upgrade-smoke",
+      "platform": "linux",
+      "format": "deb",
+      "passed": true,
+      "checks": {
+        "baselineInstalled": true,
+        "desktopEntry": true,
+        "dependencies": true,
+        "baselineLaunched": true,
+        "newerVersionInstalled": true,
+        "upgradeLaunched": true,
+        "sessionRetained": true,
+        "sqliteSchema": true,
+        "uninstalled": true,
+        "uninstallRetainsUserData": true
+      },
+      "packages": [
+        {
+          "role": "baseline",
+          "name": "east-genesis-desktop",
+          "version": "0.1.0",
+          "architecture": "amd64",
+          "bytes": 6695964
+        },
+        {
+          "role": "upgrade",
+          "name": "east-genesis-desktop",
+          "version": "0.1.1",
+          "architecture": "amd64",
+          "bytes": 6695970
+        }
+      ],
+      "install": {
+        "mode": "dpkg-system",
+        "disposableRunner": true,
+        "isolatedUserData": true,
+        "systemInstallAttempted": true,
+        "systemPackageDatabaseChanged": true,
+        "cleanupVerified": true,
+        "database": {
+          "schemaVersion": 7,
+          "toolInvocations": true,
+          "sessionSentinel": true
+        },
+        "launches": [
+          {
+            "version": "0.1.0",
+            "schemaVersion": 7,
+            "installedProcessIdentity": true,
+            "stableProcessWindowMs": 4000,
+            "controlledCleanup": true
+          },
+          {
+            "version": "0.1.1",
+            "schemaVersion": 7,
+            "installedProcessIdentity": true,
+            "stableProcessWindowMs": 4000,
+            "controlledCleanup": true
+          }
+        ]
+      },
+      "evidenceBoundary": {
+        "proven": [
+          "actual dpkg installation and upgrade between two QA bundle versions",
+          "both installed versions start with SQLite schema 7",
+          "synthetic session survives upgrade and purge",
+          "installed executable and desktop entry exist before uninstall"
+        ],
+        "excluded": [
+          "code or schema changes between releases",
+          "desktop menu click or WebView task execution",
+          "real Provider",
+          "automatic updater or rollback",
+          "other Linux distributions or package formats",
+          "production release signing"
+        ]
+      }
+    },
+    "webViewSuitePassed": true,
+    "scenarios": [
+      "staged",
+      "slow-first-token",
+      "truncated",
+      "idle-cancel"
+    ]
+  },
+  "evidenceBoundary": {
+    "source": "immutable 4fca commit, excluding later dirty worktree",
+    "excluded": [
+      "new completed Chat checkpoint or UI patch",
+      "real Provider availability or failover",
+      "Windows patched SQL and NSIS verification",
+      "historical released-code upgrade",
+      "macOS CI WebView",
+      "three-platform performance baseline",
+      "signing/notarization"
+    ]
+  }
+}

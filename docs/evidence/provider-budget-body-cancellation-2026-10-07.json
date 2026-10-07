@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "kind": "provider-budget-body-cancellation-qa",
+  "capturedAt": "2026-10-06T21:06:19.650508+00:00",
+  "runtime": {
+    "node": "22.23.1",
+    "scope": "owned synthetic loopback only"
+  },
+  "sourceHashes": [
+    {
+      "path": "tools/provider-matrix.ts",
+      "sha256": "4aac65c166a2cbc5f65added26207bcf3c164db7f5a236a46d919b5bd0046142"
+    },
+    {
+      "path": "tests/provider-matrix-budget.test.ts",
+      "sha256": "e5a8c93ac27cf81108d5078ae63e000eb190f10494d24a399bf9f5118749598a"
+    }
+  ],
+  "logs": [
+    {
+      "name": "eg-budget-before-gc-20261007.log",
+      "sha256": "bdaa1c2a27c173e1c176f6b511ca014c000dbaef1d4971b35d2cd24c48e0ea2c"
+    },
+    {
+      "name": "eg-budget-after-gc-20261007.log",
+      "sha256": "d091c9a25de8f4abc47710291104b631e5e3f9aa4f2c0ec135bd382f4f64c44d"
+    },
+    {
+      "name": "eg-budget-final-20261007.log",
+      "sha256": "9bb2cd8722dbdab3f1a3afc2286348f78939e628bd210db6abae198e7f3ba5b9"
+    },
+    {
+      "name": "eg-budget-body-wrapper-review-20261007.log",
+      "sha256": "5f87a7153769f2ee887bd44cff7368ce4dafd2ceb27b4a78465e0f8b1397afd3"
+    },
+    {
+      "name": "eg-budget-node-gc-20261007.log",
+      "sha256": "6f6ac5b6af866673c11ba2ab0bd9a97f781db24b2f7dbaf61d2eabdc65bd6fe9"
+    }
+  ],
+  "beforeFix": {
+    "sourceAbortObserved": true,
+    "requestHeadersReceived": true,
+    "parentDeadlineMs": 8000,
+    "responseClosedOnlyAtProcessTermination": true,
+    "responseBodyCloseElapsedMs": 7491,
+    "stdoutBytes": 0,
+    "gcPressure": true
+  },
+  "afterFix": {
+    "budgetTestsPassed": 14,
+    "timeoutCases": [
+      "diagnostics_disabled",
+      "diagnostics_enabled",
+      "diagnostics_disabled_with_forced_gc"
+    ],
+    "requestTimeoutMs": 250,
+    "parentDeadlineMs": 8000,
+    "requestBudget": 3,
+    "dispatchesObservedPerCase": 3,
+    "blockedDispatchesObservedPerCase": 1,
+    "requestedOutputTokensPerDispatch": 23,
+    "responseBodyClosed": true,
+    "bodyCloseAssertionLimitMs": 4000,
+    "finalCaseElapsedMs": [
+      866,
+      948,
+      859
+    ],
+    "bodyWrapperReviewCasesPassed": 9,
+    "nodeGcMechanismCasesPassed": 6
+  },
+  "frontendRegression": {
+    "filesPassed": 91,
+    "testsPassed": 844,
+    "startedAtLocal": "2026-10-07 05:01:52 Asia/Shanghai",
+    "durationSeconds": 63.08,
+    "logSha256": "2c1624e71e75cef4ae8bc2045382b9e041d8d92c09a16cf40a3af4dc2440b7eb"
+  },
+  "evidenceBoundary": {
+    "proven": [
+      "Node CLI budget source cancellation directly cancels the owned response body reader",
+      "unchanged request and parent-process deadlines and dispatch/token parameter limits",
+      "server body closes before parent process termination under the tested GC pressure",
+      "diagnostics are optional and disabled by default"
+    ],
+    "excluded": [
+      "real Provider availability or charges",
+      "Windows repair after this code change",
+      "Tauri Rust source transport cancellation",
+      "browser engine GC behavior",
+      "billing hard cap from requested token parameter"
+    ]
+  },
+  "privateConfigRead": false,
+  "realProviderCalls": false
+}

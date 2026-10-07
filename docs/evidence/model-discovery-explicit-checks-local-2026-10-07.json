@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "kind": "explicit-model-checks-local-validation",
+  "recordedAtUtc": "2026-10-06T23:41:15.640379+00:00",
+  "localParentRevision": "3b637a530da1a3403d0364533a2a83d487bf3276",
+  "validation": {
+    "frontendFull": {
+      "files": 99,
+      "passed": 932,
+      "failed": 0,
+      "startedAtLocal": "2026-10-07 07:27:51 Asia/Shanghai",
+      "durationSeconds": 69.21,
+      "workers": 2
+    },
+    "focused": {
+      "files": 5,
+      "passed": 52,
+      "failed": 0,
+      "startedAtLocal": "2026-10-07 07:26:46 Asia/Shanghai",
+      "durationSeconds": 5.13
+    },
+    "typecheck": "passed",
+    "qaBuild": {
+      "passed": true,
+      "sourceInputs": 286,
+      "sourceUnchanged": true,
+      "binarySha256": "a47f7f0499b0b5c5f0bccc8ed271ab9be36e9689ebb287e5b8524e8c4341d243",
+      "formalReleaseBinding": false,
+      "manifest": "macos-model-discovery-build-manifest-2026-10-07.json"
+    },
+    "privateConfigSmoke": {
+      "files": 3,
+      "passed": 55,
+      "failed": 0,
+      "syntheticCredentialsOnly": true
+    }
+  },
+  "logs": [
+    {
+      "name": "eastgenesis-model-discovery-final-full-tests.log",
+      "bytes": 45444,
+      "sha256": "ac128c6b0e26ae341fa6d557f44cf5e3a5b49ae06975ef0594708db0ea9ced63"
+    },
+    {
+      "name": "eastgenesis-model-discovery-final-narrow-tests.log",
+      "bytes": 629,
+      "sha256": "64ded0be0c247ec645685aa2f5e3677ad6947869cb7c7c39c5fc349d723d3d23"
+    },
+    {
+      "name": "eastgenesis-model-discovery-final-typecheck.log",
+      "bytes": 82,
+      "sha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba"
+    },
+    {
+      "name": "eastgenesis-model-discovery-native-build.log",
+      "bytes": 6207,
+      "sha256": "9bbee3724cb8e6e80123197c09bc962b1a01fdb2655ecdcc1587fe86fb71741d"
+    },
+    {
+      "name": "eastgenesis-model-discovery-final-private-config-smoke.log",
+      "bytes": 494,
+      "sha256": "31c8c13a51002637521e4d1166e47d48d65b275adbda60956487240803d70ef2"
+    }
+  ],
+  "earlierTestFixtureLimitations": {
+    "incorrectGroupAssertion": "fixed by selecting the actual custom provider group; final suites above pass",
+    "nativeResponseWithFakeTimers": "worker OOM in initial isolated budget fixture; real timers for native Response and cancellable controlled body promises for timer assertions; no heap increase; isolated diagnostic raw logs not saved, only tool output excerpt",
+    "initialBuild": "earlier same-turn build passed before the catalog race fixes; not used for final native validation"
+  },
+  "nativeGui": {
+    "passed": true,
+    "report": "macos-model-discovery-native-2026-10-07.json",
+    "reportSha256": "4d1576e56098453742dcc8b398abe119415867250c9841c9e6cd109db0db7537",
+    "stages": 5,
+    "assertions": 12,
+    "actions": 15,
+    "elapsedMs": 11298,
+    "startupInferencePosts": 0,
+    "nonProbeInferencePosts": 0,
+    "cleanupPassed": true,
+    "sourceInputsUnchanged": 286,
+    "formalReleaseBinding": false
+  },
+  "realProviders": false,
+  "windowsAndLinuxNewProductCodeNative": "not_run",
+  "threePlatformCi30d": "historical prior snapshot, not proof of these product changes",
+  "automaticRoutingBoundary": "registered models remain eligible without preflight; directory-only models are manual lock candidates; known missing directory entries only hide from manual picker",
+  "billingBoundary": "max_tokens=1 is output request parameter, not a total token or fee guarantee; checks are not recorded as task usage ledger",
+  "sourceAndTestFilesSha256": {
+    "src/lib/discover.ts": "dfd8e3908fcd26e52605f9b483d29de993b98285011aa9247b9b616743b111cc",
+    "src/stores/settings.ts": "9f26290efa6d54e880c5a99c65f4d74988944694a65da4f36b297c5455ed46cc",
+    "src/components/settings/CustomProviders.tsx": "d0e86cfba13640ff84544bedbdd87fc4fd591ee249b4262de3c047f393118d4f",
+    "src/components/settings/ApiKeys.tsx": "cf7150428a142f84be8119171986f84b3fd05d5e5959311c0830e4d5f70a5b22",
+    "tests/custom-providers.test.ts": "7351f35c79280bed2c45ebe635b60ab61422925b8633dbd2017d3464a34b328d",
+    "tests/stores.test.ts": "1a1398a81f2656b05f9011782267fea7b8f9cbc025cdcfed26eaf91c86f714c5",
+    "tests/ui-assistant-turn.test.tsx": "20b5f7a593dbb367d3c7a077b4dca0fa5a35146481ff0f4fb8fa1b9c50563b40",
+    "tests/ui-settings.test.tsx": "e17cf0ba69b7c247b081d90b469ff60eb066fea2152c551a28e3a6b1ccb98d20",
+    "tests/model-discovery-settings.test.ts": "2e00dc7a38be82c08b9749f8229af09f3b4ddb248fc21c6d31401799b1146717",
+    "tests/model-discovery-routing.test.ts": "53d8e62bee19ec380b74cce9992f707a4984abc274cf517705cb2ed3614621f3",
+    "tests/model-probe-budget.test.ts": "2efa16f4d419e7b73f158c94e54aa304254446f47e1240e5198af2a6a7a4db1e"
+  }
+}

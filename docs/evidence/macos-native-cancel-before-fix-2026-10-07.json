@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "kind": "macos-native-provider-cancel",
+  "createdAt": "2026-10-06T21:23:07.534Z",
+  "passed": false,
+  "runCompleted": true,
+  "platform": "macos",
+  "observationMs": 1500,
+  "evidenceBoundary": {
+    "proven": [
+      "real macOS owned-PID UI submits and stops an actual native Provider stream",
+      "readonly SQLite records aborted task and preserved partial output",
+      "source response and socket state observed before any cleanup",
+      "peer socket remains open through bounded cancellation window while app stays alive"
+    ],
+    "excluded": [
+      "real Provider",
+      "remote compute or billing after disconnect",
+      "Windows/Linux transport",
+      "worker/stream registry release without a dedicated native probe",
+      "headers-before-first-token cancellation",
+      "late-delta discard after cancel",
+      "signing/notarization"
+    ]
+  },
+  "isolation": {
+    "freshHome": true,
+    "freshAppData": true,
+    "qaIsolatedProfileRequested": true,
+    "keyEnvironmentInherited": false,
+    "privateConfigurationRead": false,
+    "ledgerSeeded": false,
+    "sqliteAccess": "readonly",
+    "provider": "owned synthetic loopback custom:qa",
+    "warmupCreatedThroughUi": true,
+    "warmupCompletedLlmCalls": 1
+  },
+  "scenarios": [
+    {
+      "scenario": "idle_after_visible_delta",
+      "status": "failed",
+      "assertions": {
+        "sourceHeadersAndDeltaPrecededStop": true,
+        "initialDeltaVisibleBeforeStop": true,
+        "appAliveBeforeCleanup": true,
+        "sqliteAborted": true,
+        "partialOutputMatchesInitialDelta": true,
+        "nonemptyRecordedLlmCallsOnlySyntheticQa": true,
+        "canceledTaskSelectedRouteOnlySyntheticQa": true,
+        "responseClosedWithinWindowWhileAppAlive": false,
+        "peerSocketClosedWithinWindowWhileAppAlive": false,
+        "providerConfigNotPersisted": true,
+        "stoppedUiVisible": true,
+        "partialOutputVisibleAfterStop": true,
+        "sqlitePartialOutputStableAfterStop": true
+      },
+      "ui": {
+        "ownedPidAccess": true,
+        "taskEnteredAndSubmittedThroughUi": true,
+        "initialDeltaVisible": true
+      },
+      "stopControlMs": 1755,
+      "stopActionFromOperationStartMs": 1733.02099609375,
+      "stopReturnedAfterActionMs": 21.97900390625,
+      "observationOrigin": "foundation_unix_milliseconds_immediately_before_owned_ax_click",
+      "observedMs": 1500.97900390625,
+      "sqliteAbortMs": 148.97900390625,
+      "sqliteAbortAfterStopReturnedMs": 127,
+      "sqlite": {
+        "status": "aborted",
+        "streamingTextEqualsInitialDelta": true,
+        "streamingInterrupted": true,
+        "completedLlmCalls": 0,
+        "selectedRoutes": 1,
+        "allSelectedRoutesSyntheticQa": true,
+        "runEndStatus": "aborted",
+        "historyCompletedLlmCalls": 1,
+        "allHistoryCompletedLlmCallsSyntheticQa": true
+      },
+      "liveAppBeforeCleanup": true,
+      "sourceBeforeAnyCleanup": {
+        "headersMs": -3661.02099609375,
+        "initialDeltaMs": -3661.02099609375,
+        "responseClosedMs": null,
+        "peerSocketEndedMs": null,
+        "peerSocketClosedMs": null,
+        "responseClosePhase": null,
+        "socketClosePhase": null,
+        "responseDestroyed": false,
+        "socketDestroyed": false,
+        "peerCloseFromStopOperationStartedMs": null,
+        "responseCloseFromStopOperationStartedMs": null
+      },
+      "failedAssertions": [
+        "responseClosedWithinWindowWhileAppAlive",
+        "peerSocketClosedWithinWindowWhileAppAlive"
+      ],
+      "sourceImmediatelyBeforeAppCleanup": {
+        "headersMs": -3661.02099609375,
+        "initialDeltaMs": -3661.02099609375,
+        "responseClosedMs": null,
+        "peerSocketEndedMs": null,
+        "peerSocketClosedMs": null,
+        "responseClosePhase": null,
+        "socketClosePhase": null,
+        "responseDestroyed": false,
+        "socketDestroyed": false
+      }
+    }
+  ],
+  "binding": {
+    "expectedBinarySha256": "b7ce68b84a935cfb902535346d390c98b1491431ae75a758dd474c17ff90b96d",
+    "binaryStartSha256": "b7ce68b84a935cfb902535346d390c98b1491431ae75a758dd474c17ff90b96d",
+    "harnessStartSha256": "0621aa3a76b61a115f87b7d8240fd81f32d345374127e64ca53822e0286c6e8b",
+    "cleanupHelperStartSha256": "96138f637b706f1c7707b6906dcb4abb8bbd0311d180441f767ca3f36e956c53",
+    "workingTreeStart": {
+      "files": {
+        "src-tauri/src/net.rs": "423c2053ec7abcceb31313d87ed6cad896cc9d1973a8e1f52c8ab671c4ba2d8b",
+        "src-tauri/src/lib.rs": "96795246773ea920b2f86901453cf48ee887c6c57b4f3d3895ce135e9167d60c",
+        "src-tauri/src/keychain.rs": "66d5441737fa4a132a4480f693afdc1fc02cba2ecef1cef2a71b2899265ccced",
+        "src-tauri/Cargo.toml": "0c08b9914244a5b968625c6a7352d787d445eb5949ed38ec4c3aad0127451f4c",
+        "Cargo.lock": "62eda30b53690c55df54caba21f266f9931074d7f9279380ef9520a41cf9da1c",
+        "src/platform/tauri-backend.ts": "9f5d4c3ead7e3c42bb2d0a7b3c837188dec40910de28fb65d7ce480721cff82d",
+        "src/platform/proxy-fetch.ts": "a9cc43d9707ba797658f761e293616034c2ed410fba2c0c064d9d7d540cea456",
+        "src/core/llm/http.ts": "1a1927485f7054bccada515a396bb296ed6cd69730c006bbe3431d122103aeff",
+        "src/stores/tasks.ts": "1608449c662b9aadd81ff283fa69851e7de4e2c65828844046a4d31d75acaac9",
+        "src/components/chat/AssistantTurn.tsx": "524bace911de6fac188daa6ae1866339f4242bdea48c3161a33af0e8b89a52c1"
+      },
+      "netProductionPrefixSha256": "d3e940bbef41e10b59183e3840c676c1f74a1a6adb450bcbe9c122f2ec153c28"
+    },
+    "reference": {
+      "revision": "aebe9c8acb4c1c583e0e90863f88c3f9f1e840e5",
+      "files": {
+        "src-tauri/src/net.rs": "46434cc6b2245482ed91f10d14c33016549368c350c38f8ac49d9b5933a6cb05",
+        "src-tauri/src/lib.rs": "cd9c2997a85d7e8a205f117ef6430897a5c27a82ea1c0b411f3c5b3bd79a4780",
+        "src-tauri/src/keychain.rs": "66d5441737fa4a132a4480f693afdc1fc02cba2ecef1cef2a71b2899265ccced",
+        "src-tauri/Cargo.toml": "d9a93f6b2c6afee46d919145c9006f9ee32104a257338dba95e8a5900f1c11e4",
+        "Cargo.lock": "7736bcd5eb2aa2849ae3488edd52c21731fe5cde227ae07cdc0e7987e90c6c96",
+        "src/platform/tauri-backend.ts": "9f5d4c3ead7e3c42bb2d0a7b3c837188dec40910de28fb65d7ce480721cff82d",
+        "src/platform/proxy-fetch.ts": "a9cc43d9707ba797658f761e293616034c2ed410fba2c0c064d9d7d540cea456",
+        "src/core/llm/http.ts": "1a1927485f7054bccada515a396bb296ed6cd69730c006bbe3431d122103aeff",
+        "src/stores/tasks.ts": "1608449c662b9aadd81ff283fa69851e7de4e2c65828844046a4d31d75acaac9",
+        "src/components/chat/AssistantTurn.tsx": "524bace911de6fac188daa6ae1866339f4242bdea48c3161a33af0e8b89a52c1"
+      },
+      "netProductionPrefixSha256": "90b3487a932c95d6bdfdf745f4f64d74a2b09231f2449a52efdb1242dae22791",
+      "evidenceType": "git_content_reference",
+      "binaryCompilationBinding": "unknown_without_build_manifest"
+    },
+    "compiledSourceBinding": "unknown_without_build_manifest",
+    "binaryEndSha256": "b7ce68b84a935cfb902535346d390c98b1491431ae75a758dd474c17ff90b96d",
+    "harnessEndSha256": "0621aa3a76b61a115f87b7d8240fd81f32d345374127e64ca53822e0286c6e8b",
+    "cleanupHelperEndSha256": "96138f637b706f1c7707b6906dcb4abb8bbd0311d180441f767ca3f36e956c53",
+    "workingTreeEnd": {
+      "files": {
+        "src-tauri/src/net.rs": "423c2053ec7abcceb31313d87ed6cad896cc9d1973a8e1f52c8ab671c4ba2d8b",
+        "src-tauri/src/lib.rs": "96795246773ea920b2f86901453cf48ee887c6c57b4f3d3895ce135e9167d60c",
+        "src-tauri/src/keychain.rs": "66d5441737fa4a132a4480f693afdc1fc02cba2ecef1cef2a71b2899265ccced",
+        "src-tauri/Cargo.toml": "0c08b9914244a5b968625c6a7352d787d445eb5949ed38ec4c3aad0127451f4c",
+        "Cargo.lock": "62eda30b53690c55df54caba21f266f9931074d7f9279380ef9520a41cf9da1c",
+        "src/platform/tauri-backend.ts": "9f5d4c3ead7e3c42bb2d0a7b3c837188dec40910de28fb65d7ce480721cff82d",
+        "src/platform/proxy-fetch.ts": "a9cc43d9707ba797658f761e293616034c2ed410fba2c0c064d9d7d540cea456",
+        "src/core/llm/http.ts": "1a1927485f7054bccada515a396bb296ed6cd69730c006bbe3431d122103aeff",
+        "src/stores/tasks.ts": "1608449c662b9aadd81ff283fa69851e7de4e2c65828844046a4d31d75acaac9",
+        "src/components/chat/AssistantTurn.tsx": "524bace911de6fac188daa6ae1866339f4242bdea48c3161a33af0e8b89a52c1"
+      },
+      "netProductionPrefixSha256": "d3e940bbef41e10b59183e3840c676c1f74a1a6adb450bcbe9c122f2ec153c28"
+    },
+    "binaryUnchanged": true,
+    "harnessUnchanged": true,
+    "workingTreeUnchanged": true,
+    "currentFilesMatchingReference": {
+      "src-tauri/src/net.rs": false,
+      "src-tauri/src/lib.rs": false,
+      "src-tauri/src/keychain.rs": true,
+      "src-tauri/Cargo.toml": false,
+      "Cargo.lock": false,
+      "src/platform/tauri-backend.ts": true,
+      "src/platform/proxy-fetch.ts": true,
+      "src/core/llm/http.ts": true,
+      "src/stores/tasks.ts": true,
+      "src/components/chat/AssistantTurn.tsx": true
+    }
+  },
+  "osVersion": "26.7.1",
+  "architecture": "x64",
+  "controlledAppCleanup": true,
+  "teardown": {
+    "fixtureNotClosedUntilAfterAppCleanup": true,
+    "appCleanupStartedAfterObservation": true,
+    "responseClosedByAppCleanup": true,
+    "peerClosedByAppCleanup": true,
+    "streams": [
+      {
+        "headersMs": -3661.02099609375,
+        "initialDeltaMs": -3661.02099609375,
+        "responseClosedMs": 4827.97900390625,
+        "peerSocketEndedMs": 4826.97900390625,
+        "peerSocketClosedMs": 4827.97900390625,
+        "responseClosePhase": "app_teardown_or_fixture_teardown",
+        "socketClosePhase": "app_teardown_or_fixture_teardown",
+        "responseDestroyed": true,
+        "socketDestroyed": true
+      }
+    ]
+  },
+  "fixtureRequestCounts": {
+    "models": 1,
+    "json": 1,
+    "stream": 2
+  },
+  "finishedAt": "2026-10-06T21:23:40.119Z"
+}

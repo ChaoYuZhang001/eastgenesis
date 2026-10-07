@@ -1,0 +1,23 @@
+{
+  "kind": "goal-settlement-root-applied",
+  "appliedAt": "2026-10-07T07:46:01.183803+00:00",
+  "passed": true,
+  "base": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "sourceFilesBefore": 754,
+  "sourceFilesAfter": 756,
+  "goalScopeFiles": {
+    "src/decision/goal.ts": "e24995dae5fb642d40de5492a3d242fd3e7d69b25e26381ccada71de7ecd064f",
+    "src/decision/session.ts": "ebae15e61c80ef530066833314eac9d97d376296b5ae2276c34bfb7740bc2101",
+    "src/lib/goal-run.ts": "072179ba5892e9f6f46faae7c86d0767e3d74345fc4ca5dff0406a358628d681",
+    "src/lib/goal-runner.ts": "34a3790eb93d47e5c75ed1742ff027c4f44d6dbe7f14b7ddcdd42abbb658ff0d",
+    "src/stores/history.ts": "94c10956ae979099d5dac915d9c351868a90c4731ece68a26af8d00afb5ca4c0",
+    "src/stores/tasks.ts": "c7018da90743d0637a02ac08356d030afbb4bbd2760c190200eb4b7362bd646c",
+    "tests/goal-settlement-recovery.test.ts": "1bbd36a8e0efdf2da299ea6dffc3ec9d1ba39c378d8538760aa8b4d6cabeac63",
+    "tests/goal-settlement-boundaries.test.ts": "e468bfd45609fda90948c18c5de7b2da1a4024b20a189149b7623a5bd6ccdcaf"
+  },
+  "allOtherPublishedFilesUnchangedExceptApprovedWindowsFour": true,
+  "projectMemoryUnchanged": true,
+  "gitCommitted": false,
+  "nativeVerified": false,
+  "realProviderVerified": false
+}

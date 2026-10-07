@@ -1,6 +1,6 @@
 // 桌面端和浏览器共用的引擎组装：把后端（Key 状态、代理请求）接到决策层与 Agent 运行时。
 // webview 里不出现真实 Key：适配器拿到占位 Key，请求经 proxiedFetch 交给 Rust 注入认证。
-import { AgentRuntime, Coordinator, ToolRegistry, routedLlm, type AgentDeps, type AgentEvent, type Budget, type ConfirmRequest, type LlmCall, type MemoryNote, type Plan, type SkillNote, type Tool } from "@/agent";
+import { AgentRuntime, Coordinator, ToolRegistry, routedLlm, type AgentDeps, type AgentEvent, type Budget, type ConfirmRequest, type LlmCall, type MemoryNote, type Plan, type RuntimeFaultPoint, type SkillNote, type Tool } from "@/agent";
 import {
   CloudJevBackend,
   DecisionLayer,
@@ -17,6 +17,9 @@ import {
 } from "@/decision";
 import { MAX_CUSTOM_MODELS, PROXY_PLACEHOLDER_KEY, customModels, isValidModelName, proxiedFetch, type Backend, type CustomProvider, type KeyStatus } from "@/platform";
 import { DEFAULT_PROVIDER_PREFS, providerFactory, statusAvailability, type ProviderPrefs } from "./providers";
+
+import { invokeGoalModel, resolveGoalMeter, type GoalModelExecution } from "@/core/goal-model-call";
+import type { GoalMeterScope } from "@/core/goal-quota";
 
 import { customProfiles } from "./custom-profiles";
 import { localJevBackend } from "./local-decision";
@@ -111,6 +114,9 @@ export function withLockedModel(custom: readonly CustomProvider[], lock: string 
 
 export interface EngineOptions {
   backend: Backend;
+  /** Explicit Goal execution requires a matching authority scope. Create inside caller try/finally. */
+  goalExecution?: GoalModelExecution;
+  goalMeter?: GoalMeterScope;
   /** 单次运行的预算（目标模式按目标剩余额度给每一轮设定模型调用上限）；不给用 DEFAULT_BUDGET */
   budget?: Partial<Budget>;
   statuses: readonly KeyStatus[];
@@ -141,44 +147,70 @@ export interface EngineOptions {
   /** 手动干预：每次模型调用前读取 */
   override?: () => ModelOverride | null;
   consumeNext?: () => void;
+  /** QA 构建的桌面故障夹具；普通任务不提供。 */
+  fault?: { point: RuntimeFaultPoint; trigger: (point: RuntimeFaultPoint) => Promise<void> };
+  beforeSideEffect?: () => Promise<void>;
+  /** 仅隔离 QA 构建缩短等待；普通构建仍使用运行时默认租约。 */
+  ledgerLeaseMs?: number;
 }
 
 export function createEngine(o: EngineOptions): { runtime: AgentRuntime; coordinator: Coordinator; decision: DecisionLayer; profiles: ModelProfile[] } {
+  const goalMeter = resolveGoalMeter(o.goalExecution, o.goalMeter);
   const custom = o.custom ?? [];
   const prefs = o.providerPrefs ?? DEFAULT_PROVIDER_PREFS;
   const profiles = effectiveProfiles(o.overrides, custom);
   const health = o.health ?? new HealthTracker();
   // 第 1 级 Jev：只有 Rust 侧确认已配置 Key 时启用；请求经代理，webview 只有占位 Key
-  // 同一个客户端也作为完成校验的裁判（目标模式 checkDoneWithEvidence 在规则拿不准时问它）
-  const jevClient = o.jev?.configured ? new JevClient({ apiKey: PROXY_PLACEHOLDER_KEY, fetch: proxiedFetch(o.backend, "jev"), browserProxy: true }) : null;
+  const jevOptions = { apiKey: PROXY_PLACEHOLDER_KEY, fetch: proxiedFetch(o.backend, "jev"), browserProxy: true, goalMeter, goalExecution: o.goalExecution };
+  const jevClient = o.jev?.configured ? new JevClient(jevOptions) : null;
+  // 独立完成校验用同一 authority，显式记录 verifier 角色。
+  const judge = o.jev?.configured ? new JevClient({ ...jevOptions, quotaKind: "goal_verifier" }) : null;
   const cloud = jevClient ? new CloudJevBackend(jevClient) : new CloudJevBackend(null, "没有配置 Jev Key（在设置页配置）");
   // 第 2 级本地决策模型与路由共用适配器缓存
   const providerFor = providerFactory(o.backend, custom, prefs.regions, o.timeoutMs);
-  const local = localJevBackend(prefs.localJev, profiles, custom, providerFor);
+  const local = localJevBackend(prefs.localJev, profiles, custom, providerFor, goalMeter);
   const chain = new FallbackChain([cloud, local, new RuleBasedBackend()]);
   const tools = new ToolRegistry(o.tools ?? []);
   const decision = new DecisionLayer({
     chain,
+    goalExecution: o.goalExecution,
     availability: statusAvailability(o.statuses, custom, health, prefs),
     tools: tools.defs(),
     profiles,
     health,
     permission: o.permission,
-    judge: jevClient,
+    judge,
   });
-  const make = (r: RouteDecision) => routedLlm(r, providerFor, health);
+  const make = (r: RouteDecision) => routedLlm(r, providerFor, health, { stopOnUnknownOutcome: goalMeter !== undefined });
   const deps: AgentDeps = {
     decision,
     tools,
+    goalMeter,
+    goalExecution: o.goalExecution && Object.freeze({ ...o.goalExecution }),
     memories: o.memories,
     instructions: o.instructions,
     ...(o.budget ? { budget: o.budget } : {}),
     skills: o.skills,
-    llm: (route) => withOverride(route, make, profiles, o.override ?? (() => null), o.consumeNext ?? (() => {})),
+    llm: (route) => {
+      const call = withOverride(route, make, profiles, o.override ?? (() => null), o.consumeNext ?? (() => {}));
+      return (req, signal) => invokeGoalModel(goalMeter, "main", req.purpose, () => call(req, signal));
+    },
     confirm: o.confirm,
     approvePlan: o.approvePlan,
     onEvent: o.onEvent,
+    ...(o.beforeSideEffect ? { beforeSideEffect: o.beforeSideEffect } : {}),
+    ...(o.ledgerLeaseMs ? { ledgerLeaseMs: o.ledgerLeaseMs } : {}),
     onboarding: o.onboarding,
+    ...(o.fault ? { faultHooks: { onPoint: async ({ point }: { point: RuntimeFaultPoint }) => { if (point === o.fault!.point) await o.fault!.trigger(point); } } } : {}),
+    ...(o.backend.getToolInvocation && o.backend.saveToolInvocation ? {
+      ledger: {
+        get: (key) => o.backend.getToolInvocation!(key),
+        put: (record) => o.backend.saveToolInvocation!(record),
+        ...(o.backend.claimToolInvocation ? { claim: (key, owner, now, ttlMs) => o.backend.claimToolInvocation!(key, owner, now, ttlMs) } : {}),
+        ...(o.backend.renewToolInvocation ? { renew: (key, owner, now, ttlMs) => o.backend.renewToolInvocation!(key, owner, now, ttlMs) } : {}),
+        ...(o.backend.releaseToolInvocation ? { release: (key, owner) => o.backend.releaseToolInvocation!(key, owner) } : {}),
+      },
+    } : {}),
   };
   // 单 Agent 和多 Agent 协同共用同一套决策层、工具、模型调用和确认渠道
   return { runtime: new AgentRuntime(deps), coordinator: new Coordinator(deps), decision, profiles };

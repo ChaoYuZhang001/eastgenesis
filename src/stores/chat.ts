@@ -1,7 +1,7 @@
 // 会话：内容栏「最近」「历史」里的每一项。一次会话由若干轮任务组成（见 stores/tasks.ts）。
 // 迁移 5 起会话持久化：每轮结束后写回数据库，启动时读回（stores/history.ts）。
 import { create } from "zustand";
-import type { PermissionMode, Preference } from "@/decision";
+import type { PermissionMode, Preference, WorkSurface } from "@/decision";
 import type { AttachedFile } from "@/lib/attachments";
 import { MAX_FILES } from "@/lib/attachments";
 import { newSessionId } from "@/decision/session";
@@ -43,6 +43,8 @@ interface ChatState {
   workdir: string | null;
   /** 这次任务能用哪些 MCP 服务器的工具；null 表示所有已连接的 */
   servers: string[] | null;
+  /** 可选的能力面提示；null 表示自动推断，不是一个需要切换的产品模式 */
+  surfaceHint: WorkSurface | null;
   /** 会话列表的搜索词 */
   query: string;
   newSession(): void;
@@ -57,6 +59,7 @@ interface ChatState {
   setMode(v: TaskMode): void;
   setWorkdir(v: string | null): void;
   setServers(v: string[] | null): void;
+  setSurfaceHint(v: WorkSurface | null): void;
   setQuery(v: string): void;
   /** 发出当前草稿：新建会话（如果还没有）并提交任务；返回任务 id */
   send(opts?: SendOptions): string | null;
@@ -71,6 +74,8 @@ export interface SendOptions {
   preference?: Preference | null;
   mode?: TaskMode;
   goalId?: string | null;
+  /** 可选的能力面提示；提交后仍由决策层记录并解释最终判断 */
+  surfaceHint?: WorkSurface | null;
 }
 
 export const title = (goal: string) => {
@@ -112,6 +117,7 @@ export const useChat = create<ChatState>((set, get) => ({
   mode: "quick",
   workdir: null,
   servers: null,
+  surfaceHint: null,
   query: "",
 
   // 回到空白首屏；锁定的模型和权限档位保留，它们是用户的偏好而不是会话数据
@@ -136,6 +142,7 @@ export const useChat = create<ChatState>((set, get) => ({
   setMode: (mode) => set({ mode }),
   setWorkdir: (workdir) => set({ workdir }),
   setServers: (servers) => set({ servers }),
+  setSurfaceHint: (surfaceHint) => set({ surfaceHint }),
   setPermission: (permission) => set({ permission }),
   setMulti: (multi) => set({ multi }),
   setQuery: (query) => set({ query }),
@@ -143,7 +150,7 @@ export const useChat = create<ChatState>((set, get) => ({
     set((s) => ({ sessions: s.sessions.filter((x) => !ids.includes(x.id)), activeId: s.activeId && ids.includes(s.activeId) ? null : s.activeId })),
 
   send(opts = {}) {
-    const { draft, files, lock, permission, multi, preference, workdir, servers } = get();
+    const { draft, files, lock, permission, multi, preference, workdir, servers, surfaceHint } = get();
     const goal = draft.trim();
     if (!goal) return null;
     const now = Date.now();
@@ -169,6 +176,7 @@ export const useChat = create<ChatState>((set, get) => ({
       ...((opts.mode ?? get().mode) !== "quick" && { mode: opts.mode ?? get().mode }),
       ...(workdir && { workdir }),
       ...(servers && { servers }),
+      ...((opts.surfaceHint ?? surfaceHint) && { surfaceHint: opts.surfaceHint ?? surfaceHint }),
       ...(opts.goalId && { goalId: opts.goalId }),
       ...(history && { history }),
       ...(files.length && { files: files.map((f) => ({ name: f.name, text: f.text })) }),

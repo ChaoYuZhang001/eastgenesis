@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "kind": "desktop-linux-upgrade-smoke",
+  "platform": "linux",
+  "format": "deb",
+  "passed": true,
+  "checks": {
+    "baselineInstalled": true,
+    "desktopEntry": true,
+    "dependencies": true,
+    "baselineLaunched": true,
+    "newerVersionInstalled": true,
+    "upgradeLaunched": true,
+    "sessionRetained": true,
+    "sqliteSchema": true,
+    "uninstalled": true,
+    "uninstallRetainsUserData": true
+  },
+  "packages": [
+    {
+      "role": "baseline",
+      "name": "east-genesis-desktop",
+      "version": "0.1.0",
+      "architecture": "amd64",
+      "bytes": 6696702
+    },
+    {
+      "role": "upgrade",
+      "name": "east-genesis-desktop",
+      "version": "0.1.1",
+      "architecture": "amd64",
+      "bytes": 6696688
+    }
+  ],
+  "install": {
+    "mode": "dpkg-system",
+    "disposableRunner": true,
+    "isolatedUserData": true,
+    "systemInstallAttempted": true,
+    "systemPackageDatabaseChanged": true,
+    "cleanupVerified": true,
+    "database": {
+      "schemaVersion": 7,
+      "toolInvocations": true,
+      "sessionSentinel": true
+    },
+    "launches": [
+      {
+        "version": "0.1.0",
+        "schemaVersion": 7,
+        "installedProcessIdentity": true,
+        "stableProcessWindowMs": 4000,
+        "controlledCleanup": true
+      },
+      {
+        "version": "0.1.1",
+        "schemaVersion": 7,
+        "installedProcessIdentity": true,
+        "stableProcessWindowMs": 4000,
+        "controlledCleanup": true
+      }
+    ]
+  },
+  "evidenceBoundary": {
+    "proven": [
+      "actual dpkg installation and upgrade between two QA bundle versions",
+      "both installed versions start with SQLite schema 7",
+      "synthetic session survives upgrade and purge",
+      "installed executable and desktop entry exist before uninstall"
+    ],
+    "excluded": [
+      "code or schema changes between releases",
+      "desktop menu click or WebView task execution",
+      "real Provider",
+      "automatic updater or rollback",
+      "other Linux distributions or package formats",
+      "production release signing"
+    ]
+  }
+}

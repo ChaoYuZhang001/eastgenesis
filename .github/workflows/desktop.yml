@@ -1,0 +1,468 @@
+name: EastGenesis Desktop
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-and-package:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Set up pinned Windows Python runtime
+        if: runner.os == 'Windows'
+        id: windows-python-runtime
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: '3.12.10'
+          architecture: x64
+
+      - name: Regress Python discovery in Windows PowerShell 5.1
+        if: runner.os == 'Windows'
+        shell: powershell
+        timeout-minutes: 5
+        run: |
+          & tools/desktop-windows-python-discovery-regression.ps1 -PythonExecutable "${{ steps.windows-python-runtime.outputs.python-path }}" -OutputFile windows-python-discovery-quality.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload Windows Python discovery diagnostics
+        if: always() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eastgenesis-windows-python-discovery-diagnostics
+          if-no-files-found: warn
+          path: windows-python-discovery-quality.json
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux WebView dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            build-essential \
+            file \
+            libayatana-appindicator3-dev \
+            libssl-dev \
+            libwebkit2gtk-4.1-dev \
+            webkit2gtk-driver \
+            libxdo-dev \
+            librsvg2-dev \
+            patchelf \
+            xvfb
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run deterministic fixture smoke
+        run: pnpm desktop:fixture:smoke
+
+      - name: Run Provider recovery matrix
+        run: pnpm --silent provider:matrix -- --json > provider-recovery-matrix.json
+
+      - name: Run controlled Provider recovery smoke
+        run: pnpm --silent provider:controlled-recovery -- --json --output provider-controlled-recovery.json
+
+      - name: Run deterministic routing quality gate
+        run: pnpm --silent routing:gate -- --json > routing-quality.json
+
+      - name: Run anonymous golden task routing gate
+        run: pnpm --silent golden:gate -- --json > golden-task-quality.json
+
+      - name: Typecheck frontend
+        run: pnpm typecheck
+
+      - name: Run frontend tests
+        run: pnpm test -- --maxWorkers=2 --minWorkers=1
+
+      - name: Build frontend
+        run: pnpm build
+
+      - name: Run cross-process goal recovery evidence
+        shell: bash
+        env:
+          EASTGENESIS_CRASH_EVIDENCE_PATH: goal-recovery-quality.json
+        run: |
+          pnpm --silent vitest run tests/invocation-crash-process.test.ts --reporter=dot
+          test -s goal-recovery-quality.json
+          pnpm --silent desktop:goal-recovery:validate goal-recovery-quality.json > goal-recovery-validation.json
+
+      - name: Rust workspace tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            # Cargo shares selected packages' native search paths with every
+            # workspace doctest. Keep the Tauri app's CRT override directory
+            # out of plugin doctests by compiling their package graphs apart.
+            # Both feature sets retain all workspace targets and all doctests.
+            cargo test --workspace --all-targets --locked
+            cargo test -p eg-core --doc --locked
+            cargo test -p eastgenesis-desktop --doc --locked
+            cargo test -p tauri-plugin-sql --features sqlite --doc --locked
+            cargo test --workspace --all-targets --features qa-faults --locked
+            cargo test -p eg-core --doc --locked
+            cargo test -p eastgenesis-desktop --features qa-faults --doc --locked
+            cargo test -p tauri-plugin-sql --features sqlite,qa-load-observer --doc --locked
+          else
+            cargo test --workspace --locked
+            cargo test --workspace --features qa-faults --locked
+          fi
+
+      - name: Run native file MCP integration tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build -p eg-core --bin eg-mcp-files --locked
+          node -e "const fs = require('node:fs'); const p = 'target/debug/eg-mcp-files' + (process.platform === 'win32' ? '.exe' : ''); if (!fs.lstatSync(p).isFile() || fs.statSync(p).size === 0) throw new Error('native_mcp_binary_missing');"
+          pnpm --silent vitest run tests/mcp-files.test.ts tests/killer-scenario.test.ts tests/memory-skill-e2e.test.ts --maxWorkers=2 --minWorkers=1
+
+      - name: Build unsigned QA desktop bundle
+        if: runner.os != 'Windows'
+        run: pnpm tauri:build:qa
+
+      - name: Build unsigned QA desktop bundle with WebView2 automation args
+        if: runner.os == 'Windows'
+        run: pnpm tauri build --features qa-faults --config src-tauri/tauri.windows.qa.conf.json
+
+      - name: Build isolated Windows installation QA fixture
+        if: runner.os == 'Windows'
+        run: pnpm tauri build --features qa-faults --bundles nsis --config src-tauri/tauri.windows.qa.conf.json --config src-tauri/tauri.windows.install.qa.conf.json
+
+      - name: Smoke-test real Windows NSIS installation lifecycle
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $qaTokens = $null
+          $qaErrors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'tools/desktop-windows-install-smoke.ps1'),
+            [ref]$qaTokens, [ref]$qaErrors)
+          if ($qaErrors.Count -ne 0) { throw 'Windows installation helper syntax validation failed' }
+          pnpm --silent desktop:windows:install:smoke -- --json --output windows-install-quality.json
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Restore standard Windows QA build for WebDriver
+        if: runner.os == 'Windows'
+        run: pnpm tauri build --features qa-faults --config src-tauri/tauri.windows.qa.conf.json
+
+      - name: Install Tauri WebDriver
+        if: runner.os != 'macOS'
+        run: cargo install tauri-driver --version 2.1.0 --locked
+
+      - name: Install matching Edge WebDriver
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cargo install --git https://github.com/chippers/msedgedriver-tool --locked
+          & "$HOME/.cargo/bin/msedgedriver-tool.exe"
+          $PWD.Path | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Record native WebView environment
+        if: runner.os != 'macOS'
+        shell: bash
+        run: |
+          probe() {
+            if command -v "$1" >/dev/null 2>&1; then
+              "$@" 2>&1 | head -1
+            else
+              echo unavailable
+            fi
+          }
+          {
+            echo "runner_os=${{ runner.os }}"
+            echo "runner_arch=${{ runner.arch }}"
+            echo "display=${DISPLAY:-unset}"
+            echo "tauri_driver=$(probe tauri-driver --version)"
+            echo "webkit_webdriver=$(probe WebKitWebDriver --version)"
+            echo "msedge_driver=$(probe msedgedriver --version)"
+          } > webdriver-environment.txt
+
+      - name: Record Windows WebView2 diagnostics
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          function PolicyValue([string] $Path, [string] $Name) {
+            try {
+              $value = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction Stop).$Name
+              if ($value -is [bool]) { return [int]$value }
+              return [string]$value
+            } catch {
+              return "unset"
+            }
+          }
+          function HasPolicyValue([string] $Path, [string] $Name) {
+            try {
+              $null = (Get-ItemProperty -Path $Path -Name $Name -ErrorAction Stop).$Name
+              return 1
+            } catch {
+              return 0
+            }
+          }
+          $elevated = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+          $webviewRoots = @(
+            "${env:ProgramFiles(x86)}\Microsoft\EdgeWebView\Application",
+            "${env:ProgramFiles}\Microsoft\EdgeWebView\Application"
+          )
+          $webviewVersion = "unavailable"
+          foreach ($root in $webviewRoots) {
+            if (-not (Test-Path $root)) { continue }
+            $candidate = Get-ChildItem -Path $root -Directory -ErrorAction SilentlyContinue |
+              Where-Object { $_.Name -match '^\d+\.' } |
+              Sort-Object Name -Descending |
+              Select-Object -First 1
+            if ($candidate) {
+              $binary = Join-Path $candidate.FullName "msedgewebview2.exe"
+              if (Test-Path $binary) {
+                $webviewVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($binary).ProductVersion
+                break
+              }
+            }
+          }
+          $webviewPolicy = "HKLM:\SOFTWARE\Policies\Microsoft\Edge\WebView2"
+          @(
+            "windows_process_elevated=$([int]$elevated)"
+            "webview2_runtime_version=$webviewVersion"
+            "policy_hklm_remote_debugging_allowed=$(PolicyValue 'HKLM:\SOFTWARE\Policies\Microsoft\Edge' 'RemoteDebuggingAllowed')"
+            "policy_hkcu_remote_debugging_allowed=$(PolicyValue 'HKCU:\SOFTWARE\Policies\Microsoft\Edge' 'RemoteDebuggingAllowed')"
+            "policy_hklm_webview2_additional_arguments_present=$(HasPolicyValue $webviewPolicy 'AdditionalBrowserArguments')"
+          ) | Add-Content webdriver-environment.txt
+
+      - name: Probe native Linux WebDriver
+        if: runner.os == 'Linux'
+        shell: bash
+        continue-on-error: true
+        run: |
+          set +e
+          : > native-webdriver-probe.log
+          rm -f native-webdriver-status.json
+          probe=(WebKitWebDriver --port=4446 --host=127.0.0.1)
+          if command -v xvfb-run >/dev/null 2>&1; then
+            WEBKIT_DISABLE_COMPOSITING_MODE=1 xvfb-run --auto-servernum --server-args="-screen 0 1440x900x24" "${probe[@]}" > native-webdriver-probe.log 2>&1 &
+          else
+            "${probe[@]}" > native-webdriver-probe.log 2>&1 &
+          fi
+          native_pid=$!
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --silent --show-error --fail http://127.0.0.1:4446/status > native-webdriver-status.json; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          kill "$native_pid" 2>/dev/null || true
+          wait "$native_pid" 2>/dev/null || true
+          {
+            echo "ready=$ready"
+            echo "pid=$native_pid"
+          } >> native-webdriver-probe.log
+          cat native-webdriver-probe.log
+          if [ "$ready" -ne 1 ]; then
+            rm -f native-webdriver-status.json
+          fi
+
+      - name: Run native WebView DOM smoke
+        if: runner.os != 'macOS'
+        shell: bash
+        run: |
+          set +e
+          overall=0
+          cleanup_webkit() {
+            if [ "${{ runner.os }}" = "Linux" ] && command -v pkill >/dev/null 2>&1; then
+              pkill -TERM -x WebKitWebDriver >/dev/null 2>&1 || true
+              sleep 1
+              pkill -KILL -x WebKitWebDriver >/dev/null 2>&1 || true
+            fi
+          }
+          cleanup_webkit
+          trap cleanup_webkit EXIT
+          for scenario in staged slow-first-token truncated idle-cancel; do
+            cleanup_webkit
+            command=(pnpm --silent desktop:webdriver:smoke -- \
+              --app "${{ runner.os == 'Windows' && 'target/release/eastgenesis-desktop.exe' || 'target/release/eastgenesis-desktop' }}" \
+              --stream --scenario "$scenario")
+            if [ "${{ runner.os }}" = "Windows" ]; then
+              command+=(--native-driver "msedgedriver.exe")
+            fi
+            if [ "${{ runner.os }}" = "Linux" ]; then
+              WEBKIT_DISABLE_COMPOSITING_MODE=1 xvfb-run --auto-servernum --server-args="-screen 0 1440x900x24" "${command[@]}" \
+                > "webdriver-quality-${scenario}.json" 2> "webdriver-quality-${scenario}.log"
+            else
+              "${command[@]}" \
+                > "webdriver-quality-${scenario}.json" 2> "webdriver-quality-${scenario}.log"
+            fi
+            status=$?
+            if [ ! -s "webdriver-quality-${scenario}.json" ]; then
+              cat > "webdriver-quality-${scenario}.json" <<JSON
+          {"schemaVersion":1,"kind":"desktop-webdriver-smoke","scenario":"$scenario","passed":false,"status":"failed","checks":{"fixtureScenario":"$scenario"},"evidenceBoundary":{"proven":[],"excluded":["real native WebView DOM interaction"]}}
+          JSON
+            fi
+            if [ "$status" -ne 0 ]; then overall=1; fi
+          done
+          pnpm --silent desktop:webdriver:summary -- --output webdriver-quality.json webdriver-quality-staged.json webdriver-quality-slow-first-token.json webdriver-quality-truncated.json webdriver-quality-idle-cancel.json
+          summary_status=$?
+          if [ "$summary_status" -ne 0 ]; then overall=1; fi
+          exit "$overall"
+
+      - name: Upload WebDriver diagnostics
+        if: always() && runner.os != 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eastgenesis-webdriver-diagnostics-${{ runner.os }}
+          if-no-files-found: warn
+          path: |
+            webdriver-quality.json
+            webdriver-quality-*.json
+            webdriver-quality-*.log
+            webdriver-environment.txt
+            native-webdriver-probe.log
+            native-webdriver-status.json
+
+      - name: Record macOS WebDriver boundary
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cat > webdriver-quality.json <<'JSON'
+          {
+            "schemaVersion": 1,
+            "kind": "desktop-webdriver-suite",
+            "passed": false,
+            "status": "not_run",
+            "reason": "tauri-driver 2.1.0 does not support macOS",
+            "evidenceBoundary": {
+              "proven": [],
+              "excluded": ["real macOS WebView DOM interaction"]
+            }
+          }
+          JSON
+
+      - name: Check platform bundle artifacts
+        run: pnpm desktop:bundle:smoke
+
+      - name: Smoke-test extracted Linux Debian package
+        if: runner.os == 'Linux'
+        shell: bash
+        run: pnpm --silent desktop:install:smoke -- --format deb --json --output install-quality.json
+
+      - name: Build Linux upgrade QA fixture and test real dpkg lifecycle
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import { readFileSync, writeFileSync, readdirSync, renameSync } from 'node:fs';
+          import { spawnSync } from 'node:child_process';
+          import { resolve } from 'node:path';
+          const baselineVersion = JSON.parse(readFileSync('src-tauri/tauri.conf.json', 'utf8')).version;
+          if (!/^\d+\.\d+\.\d+$/.test(baselineVersion)) throw new Error('QA upgrade fixture requires a stable numeric version');
+          const parts = baselineVersion.split('.').map(Number);
+          parts[2] += 1;
+          const upgradeVersion = parts.join('.');
+          const config = JSON.stringify({ version: upgradeVersion, build: { beforeBuildCommand: null } });
+          const build = spawnSync(process.execPath, [resolve('node_modules/@tauri-apps/cli/tauri.js'), 'build', '--features', 'qa-faults', '--bundles', 'deb', '--config', config], { stdio: 'inherit' });
+          if (build.status !== 0) process.exit(build.status ?? 1);
+          const directory = resolve('target/release/bundle/deb');
+          const upgradePackages = readdirSync(directory).filter(name => name.endsWith('.deb')).filter(name => {
+            const metadata = spawnSync('dpkg-deb', ['--show', '--showformat=${Version}', resolve(directory, name)], { encoding: 'utf8' });
+            return metadata.status === 0 && metadata.stdout.trim() === upgradeVersion;
+          });
+          if (upgradePackages.length !== 1) throw new Error('QA upgrade fixture package is ambiguous');
+          // Keep the version-only fixture out of the ordinary bundle artifact.
+          renameSync(resolve(directory, upgradePackages[0]), resolve('qa-upgrade-fixture.deb'));
+          writeFileSync('qa-upgrade-versions.json', JSON.stringify({ baselineVersion, upgradeVersion }));
+          JS
+          qa_baseline_version=$(node -p "require('./qa-upgrade-versions.json').baselineVersion")
+          qa_upgrade_version=$(node -p "require('./qa-upgrade-versions.json').upgradeVersion")
+          pnpm --silent desktop:linux:upgrade:smoke -- \
+            --baseline-version "$qa_baseline_version" --upgrade-version "$qa_upgrade_version" \
+            --upgrade-package qa-upgrade-fixture.deb \
+            --json --output upgrade-quality.json
+
+      - name: Smoke-test the packaged Mac binary
+        if: runner.os == 'macOS'
+        run: pnpm --silent desktop:package:smoke -- --json > package-quality.json
+
+      - name: Validate runner evidence collection
+        shell: bash
+        run: |
+          common=(
+            --provider provider-recovery-matrix.json
+            --controlled provider-controlled-recovery.json
+            --routing routing-quality.json
+            --golden golden-task-quality.json
+            --goal goal-recovery-quality.json
+            --goal-validation goal-recovery-validation.json
+            --json
+            --output runner-evidence.json
+          )
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            pnpm --silent desktop:runner:evidence -- --platform macos "${common[@]}" --package package-quality.json
+          elif [ "${{ runner.os }}" = "Linux" ]; then
+            pnpm --silent desktop:runner:evidence -- --platform linux "${common[@]}" \
+              --webdriver webdriver-quality.json \
+              --environment webdriver-environment.txt \
+              --install install-quality.json \
+              --upgrade upgrade-quality.json
+          else
+            pnpm --silent desktop:runner:evidence -- --platform "${{ runner.os }}" "${common[@]}" \
+              --webdriver webdriver-quality.json \
+              --environment webdriver-environment.txt \
+              --windows-install windows-install-quality.json
+          fi
+
+      - name: Upload desktop bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eastgenesis-desktop-${{ runner.os }}
+          if-no-files-found: warn
+          path: |
+            target/release/bundle/**
+            !target/release/bundle/**/bundle_dmg.sh
+            provider-recovery-matrix.json
+            provider-controlled-recovery.json
+            routing-quality.json
+            golden-task-quality.json
+            goal-recovery-quality.json
+            goal-recovery-validation.json
+            runner-evidence.json
+            install-quality.json
+            upgrade-quality.json
+            windows-install-quality.json
+            package-quality.json
+            webdriver-quality.json
+            webdriver-quality-*.json
+            webdriver-quality-*.log
+            webdriver-environment.txt
+            native-webdriver-probe.log
+            native-webdriver-status.json

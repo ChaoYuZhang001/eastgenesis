@@ -1,0 +1,719 @@
+{
+  "schemaVersion": 1,
+  "kind": "immutable-ci-capture-summary",
+  "runId": 37539711370,
+  "headSha": "537e93c362ab74ffd3b54dea78301755b42fb957",
+  "runConclusion": "failure",
+  "checkedAtUtc": "2026-10-06T22:41:09.568031+00:00",
+  "evidenceFrozenAtUtc": "2026-10-06T22:43:13.377880+00:00",
+  "runUrl": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37539711370",
+  "platforms": {
+    "macOS": {
+      "jobId": 112529432879,
+      "jobConclusion": "success",
+      "jobCompletedAtUtc": "2026-10-06T22:26:47Z",
+      "ordinaryRust": {
+        "desktop": 31,
+        "backend": 90
+      },
+      "qaFaultsRust": {
+        "desktop": 30,
+        "backend": 90
+      },
+      "slowStreamFixturePassedBothModes": true,
+      "packagedBinarySmoke": "success",
+      "runnerChecks": {
+        "passed": 24,
+        "total": 24
+      },
+      "webDriver": {
+        "status": "not_run",
+        "reason": "tauri-driver 2.1.0 does not support macOS",
+        "realDomInteractionProven": false
+      },
+      "manifest": "macos-run-binding-manifest.json"
+    },
+    "Ubuntu": {
+      "jobId": 112529433137,
+      "jobConclusion": "success",
+      "jobCompletedAtUtc": "2026-10-06T22:34:39Z",
+      "ordinaryRust": {
+        "desktop": 31,
+        "backend": 90
+      },
+      "qaFaultsRust": {
+        "desktop": 30,
+        "backend": 90
+      },
+      "packageExtractChecks": {
+        "passed": 6,
+        "total": 6
+      },
+      "dpkgChecks": {
+        "passed": 10,
+        "total": 10
+      },
+      "runnerChecks": {
+        "passed": 33,
+        "total": 33
+      },
+      "webDriverScenarios": {
+        "passed": 4,
+        "total": 4
+      },
+      "dpkgCleanup": {
+        "uninstalled": true,
+        "uninstallRetainsUserData": true,
+        "cleanupVerified": true
+      },
+      "packageBytes": [
+        {
+          "role": "baseline",
+          "version": "0.1.0",
+          "bytes": 6676772
+        },
+        {
+          "role": "upgrade",
+          "version": "0.1.1",
+          "bytes": 6676778
+        }
+      ],
+      "timing": {
+        "metric": "webview-qa-fixture-descriptive-measurements",
+        "combinedScenarioPercentiles": false,
+        "byScenario": [
+          {
+            "scenario": "staged",
+            "firstBodyDelta": {
+              "samplesMs": [
+                114
+              ],
+              "sampleCount": 1,
+              "minMs": 114,
+              "maxMs": 114,
+              "p50Ms": null,
+              "p95Ms": null,
+              "percentileMethod": "not_applicable",
+              "interpretation": "descriptive_sample",
+              "performanceBaseline": false,
+              "excludedCount": 0
+            },
+            "terminalObserved": {
+              "samplesMs": [
+                768
+              ],
+              "sampleCount": 1,
+              "minMs": 768,
+              "maxMs": 768,
+              "p50Ms": null,
+              "p95Ms": null,
+              "percentileMethod": "not_applicable",
+              "interpretation": "descriptive_sample",
+              "performanceBaseline": false,
+              "excludedCount": 0
+            }
+          },
+          {
+            "scenario": "slow-first-token",
+            "firstBodyDelta": {
+              "samplesMs": [
+                365
+              ],
+              "sampleCount": 1,
+              "minMs": 365,
+              "maxMs": 365,
+              "p50Ms": null,
+              "p95Ms": null,
+              "percentileMethod": "not_applicable",
+              "interpretation": "descriptive_sample",
+              "performanceBaseline": false,
+              "excludedCount": 0
+            },
+            "terminalObserved": {
+              "samplesMs": [
+                1012
+              ],
+              "sampleCount": 1,
+              "minMs": 1012,
+              "maxMs": 1012,
+              "p50Ms": null,
+              "p95Ms": null,
+              "percentileMethod": "not_applicable",
+              "interpretation": "descriptive_sample",
+              "performanceBaseline": false,
+              "excludedCount": 0
+            }
+          },
+          {
+            "scenario": "truncated",
+            "firstBodyDelta": {
+              "samplesMs": [
+                73
+              ],
+              "sampleCount": 1,
+              "minMs": 73,
+              "maxMs": 73,
+              "p50Ms": null,
+              "p95Ms": null,
+              "percentileMethod": "not_applicable",
+              "interpretation": "descriptive_sample",
+              "performanceBaseline": false,
+              "excludedCount": 0
+            },
+            "terminalObserved": {
+              "samplesMs": [
+                195
+              ],
+              "sampleCount": 1,
+              "minMs": 195,
+              "maxMs": 195,
+              "p50Ms": null,
+              "p95Ms": null,
+              "percentileMethod": "not_applicable",
+              "interpretation": "descriptive_sample",
+              "performanceBaseline": false,
+              "excludedCount": 0
+            }
+          },
+          {
+            "scenario": "idle-cancel",
+            "firstBodyDelta": {
+              "samplesMs": [],
+              "sampleCount": 0,
+              "minMs": null,
+              "maxMs": null,
+              "p50Ms": null,
+              "p95Ms": null,
+              "percentileMethod": "not_applicable",
+              "interpretation": "no_verified_samples",
+              "performanceBaseline": false,
+              "excludedCount": 1
+            },
+            "terminalObserved": {
+              "samplesMs": [
+                424
+              ],
+              "sampleCount": 1,
+              "minMs": 424,
+              "maxMs": 424,
+              "p50Ms": null,
+              "p95Ms": null,
+              "percentileMethod": "not_applicable",
+              "interpretation": "descriptive_sample",
+              "performanceBaseline": false,
+              "excludedCount": 0
+            }
+          }
+        ],
+        "interpretation": "按合成 fixture 场景分别记录点击命令前到任务 store 首个正文增量及终态文本观测的描述样本；n=1 不计算分位数，不构成性能分布基线；不代表首帧、模型首 token、真实 Provider、冷暖启动或资源基线"
+      },
+      "manifest": "ubuntu-run-binding-manifest.json"
+    },
+    "Windows": {
+      "jobId": 112529433275,
+      "jobConclusion": "failure",
+      "jobCompletedAtUtc": "2026-10-06T22:39:40Z",
+      "ordinaryRust": {
+        "desktop": 31,
+        "backend": 80
+      },
+      "qaFaultsRust": {
+        "desktop": 30,
+        "backend": 80
+      },
+      "failedStep": {
+        "number": 21,
+        "name": "Smoke-test real Windows NSIS installation lifecycle"
+      },
+      "failureCategories": [
+        "database_timeout"
+      ],
+      "recordedChecks": {
+        "hostedRunner": true,
+        "noExistingInstallation": true,
+        "sourceBinaryIsolationProbe": true,
+        "webView2Present": true,
+        "nsisInstall": true,
+        "installedPayload": true,
+        "installedRegistry": true,
+        "nsisUninstall": true,
+        "installedBinaryRemoved": true,
+        "uninstallRegistryRemoved": true
+      },
+      "recordedChecksTrue": 10,
+      "lifecyclePassed": false,
+      "payloadBinding": {
+        "strategy": "tauri_cli_2_12_0_nsis_bundle_type_patch",
+        "cliVersion": "2.12.0",
+        "sourceSha256": "5b1f4f5c43b555b00bbb01e5e76f2b5168f85b9b3a78ad91fdcf2ab47cc378e0",
+        "expectedNsisSha256": "3240f2506c428c600a71754cb1eec4e31346accb03ca480b092cbdaaadf953fe",
+        "installedSha256": "3240f2506c428c600a71754cb1eec4e31346accb03ca480b092cbdaaadf953fe",
+        "repairedSha256": null
+      },
+      "installAttempts": {
+        "install": true,
+        "reinstall": false,
+        "uninstall": true
+      },
+      "sameVersionReinstall": false,
+      "launchCount": 0,
+      "cleanup": {
+        "nsisUninstall": true,
+        "installedBinaryRemoved": true,
+        "uninstallRegistryRemoved": true
+      },
+      "webDriverStep": "skipped",
+      "runnerEvidenceStep": "skipped",
+      "manifest": "windows-run-binding-manifest.json"
+    }
+  },
+  "evidenceBoundary": {
+    "excluded": [
+      "real Provider availability and real failover",
+      "Windows completed installation lifecycle",
+      "production cross-version/schema migration",
+      "three-platform performance baseline",
+      "macOS signing/notarization",
+      "Windows signing/SmartScreen"
+    ],
+    "notes": [
+      "Windows launches is a completed-cycle ledger, not a launch dispatch counter; an empty array does not prove no process was started.",
+      "macOS CI package smoke does not prove native WebView DOM interaction.",
+      "Ubuntu 0.1.0 to 0.1.1 packages use the same source with QA version changes; this is not production cross-schema migration.",
+      "Timing is a synthetic fixture descriptive sample by scenario, with no combined percentiles."
+    ]
+  },
+  "captureBindings": {
+    "macOS": {
+      "sourceLogBytes": 254960,
+      "sourceLogSha256": "9be9ac97b7466d53396f2c656a8b5faf617f0a6799fc8b5d721920dff448bbe2",
+      "extractedAtUtc": "2026-10-06T22:27:52.682020+00:00",
+      "files": [
+        {
+          "name": "macos-desktop-webdriver-suite.json",
+          "kind": "desktop-webdriver-suite",
+          "passed": false,
+          "sourceLineStart": 2927,
+          "sourceLineEnd": 2937,
+          "bytes": 275,
+          "sha256": "4896c211766bcf291e06d4313fc4abeac2fb10614d45c0d86cbac76a327c6c8e",
+          "checksTotal": 0,
+          "checksTrue": 0
+        },
+        {
+          "name": "macos-desktop-runner-evidence.json",
+          "kind": "desktop-runner-evidence",
+          "passed": true,
+          "sourceLineStart": 3003,
+          "sourceLineEnd": 3046,
+          "bytes": 1206,
+          "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e",
+          "checksTotal": 24,
+          "checksTrue": 24
+        }
+      ],
+      "rustSummaries": [
+        {
+          "line": 2183,
+          "text": "test net::tests::execute_stream_allows_valid_stream_longer_than_read_timeout ... ok"
+        },
+        {
+          "line": 2185,
+          "text": "test net::tests::execute_stream_cancels_idle_body_and_closes_socket ... ok"
+        },
+        {
+          "line": 2193,
+          "text": "test net::tests::execute_stream_maps_idle_read_timeout_without_losing_headers ... ok"
+        },
+        {
+          "line": 2207,
+          "text": "test net::tests::execute_stream_total_deadline_caps_headers_and_idle_body ... ok"
+        },
+        {
+          "line": 2209,
+          "text": "test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.28s"
+        },
+        {
+          "line": 2215,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2311,
+          "text": "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+        },
+        {
+          "line": 2317,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2326,
+          "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+        },
+        {
+          "line": 2334,
+          "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+        },
+        {
+          "line": 2340,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2346,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2358,
+          "text": "test net::tests::execute_stream_allows_valid_stream_longer_than_read_timeout ... ok"
+        },
+        {
+          "line": 2360,
+          "text": "test net::tests::execute_stream_cancels_idle_body_and_closes_socket ... ok"
+        },
+        {
+          "line": 2368,
+          "text": "test net::tests::execute_stream_maps_idle_read_timeout_without_losing_headers ... ok"
+        },
+        {
+          "line": 2382,
+          "text": "test net::tests::execute_stream_total_deadline_caps_headers_and_idle_body ... ok"
+        },
+        {
+          "line": 2384,
+          "text": "test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.03s"
+        },
+        {
+          "line": 2390,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2487,
+          "text": "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+        },
+        {
+          "line": 2492,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2501,
+          "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+        },
+        {
+          "line": 2509,
+          "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2515,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2521,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        }
+      ]
+    },
+    "Ubuntu": {
+      "sourceLogBytes": 415384,
+      "sourceLogSha256": "2280c55a1859f17fc97cec871e8d2f77915c60fa26091e48d30efb908f27c386",
+      "extractedAtUtc": "2026-10-06T22:35:59.832808+00:00",
+      "files": [
+        {
+          "name": "ubuntu-desktop-install-smoke.json",
+          "kind": "desktop-install-smoke",
+          "passed": true,
+          "sourceLineStart": 4550,
+          "sourceLineEnd": 4609,
+          "bytes": 1683,
+          "sha256": "8c1dbae619cf59e3a4a89b789e08c88c55e80055d16aaefad7d2af84b7f6ebae",
+          "checksTotal": 6,
+          "checksTrue": 6
+        },
+        {
+          "name": "ubuntu-desktop-linux-upgrade-smoke.json",
+          "kind": "desktop-linux-upgrade-smoke",
+          "passed": true,
+          "sourceLineStart": 4656,
+          "sourceLineEnd": 4735,
+          "bytes": 2088,
+          "sha256": "047bd37a6679a755c94aa0bf9e21eafe2a2b5d425ae4cf4f5cce92cd4b97290f",
+          "checksTotal": 10,
+          "checksTrue": 10
+        },
+        {
+          "name": "ubuntu-desktop-runner-evidence.json",
+          "kind": "desktop-runner-evidence",
+          "passed": true,
+          "sourceLineStart": 4768,
+          "sourceLineEnd": 4820,
+          "bytes": 1470,
+          "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde",
+          "checksTotal": 33,
+          "checksTrue": 33
+        },
+        {
+          "name": "ubuntu-webdriver-quality-idle-cancel.json",
+          "sourceArtifactId": 11449055188,
+          "sourceArtifactEntryBytes": 1217,
+          "bytes": 1217,
+          "sha256": "eaa3d58ce04e5771821da3b468da0ecb784741ed96f2a783a640e8b247a9b6a1",
+          "passed": true,
+          "kind": "desktop-webdriver-smoke",
+          "scenario": "idle-cancel"
+        },
+        {
+          "name": "ubuntu-webdriver-quality-slow-first-token.json",
+          "sourceArtifactId": 11449055188,
+          "sourceArtifactEntryBytes": 1502,
+          "bytes": 1502,
+          "sha256": "77a3bf38b871f76743978b53dc77dc15b6ff92a155705ae84aa1196e73c50dc7",
+          "passed": true,
+          "kind": "desktop-webdriver-smoke",
+          "scenario": "slow-first-token"
+        },
+        {
+          "name": "ubuntu-webdriver-quality-staged.json",
+          "sourceArtifactId": 11449055188,
+          "sourceArtifactEntryBytes": 1490,
+          "bytes": 1490,
+          "sha256": "e9d6e0d2d3e97502e7857db8170ae52b9c4f6ea36e84d164a4228e9f0727ecb8",
+          "passed": true,
+          "kind": "desktop-webdriver-smoke",
+          "scenario": "staged"
+        },
+        {
+          "name": "ubuntu-webdriver-quality-truncated.json",
+          "sourceArtifactId": 11449055188,
+          "sourceArtifactEntryBytes": 1509,
+          "bytes": 1509,
+          "sha256": "adf05c91f84f164817fee4511933039f906b7671cc5d70d54ba3a85d43ba7cf3",
+          "passed": true,
+          "kind": "desktop-webdriver-smoke",
+          "scenario": "truncated"
+        },
+        {
+          "name": "ubuntu-webdriver-quality.json",
+          "sourceArtifactId": 11449055188,
+          "sourceArtifactEntryBytes": 7181,
+          "bytes": 7181,
+          "sha256": "5616f81017077adaab1a881bd93ebb045ff2a01f1b9a92440dbaed0002382663",
+          "passed": true,
+          "kind": "desktop-webdriver-suite",
+          "scenario": null
+        }
+      ],
+      "rustSummaries": [
+        {
+          "line": 3458,
+          "text": "test net::tests::execute_stream_allows_valid_stream_longer_than_read_timeout ... ok"
+        },
+        {
+          "line": 3460,
+          "text": "test net::tests::execute_stream_cancels_idle_body_and_closes_socket ... ok"
+        },
+        {
+          "line": 3468,
+          "text": "test net::tests::execute_stream_maps_idle_read_timeout_without_losing_headers ... ok"
+        },
+        {
+          "line": 3482,
+          "text": "test net::tests::execute_stream_total_deadline_caps_headers_and_idle_body ... ok"
+        },
+        {
+          "line": 3484,
+          "text": "test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.60s"
+        },
+        {
+          "line": 3490,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 3586,
+          "text": "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+        },
+        {
+          "line": 3592,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 3601,
+          "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+        },
+        {
+          "line": 3609,
+          "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 3615,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+        },
+        {
+          "line": 3621,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 3633,
+          "text": "test net::tests::execute_stream_allows_valid_stream_longer_than_read_timeout ... ok"
+        },
+        {
+          "line": 3635,
+          "text": "test net::tests::execute_stream_cancels_idle_body_and_closes_socket ... ok"
+        },
+        {
+          "line": 3643,
+          "text": "test net::tests::execute_stream_maps_idle_read_timeout_without_losing_headers ... ok"
+        },
+        {
+          "line": 3657,
+          "text": "test net::tests::execute_stream_total_deadline_caps_headers_and_idle_body ... ok"
+        },
+        {
+          "line": 3659,
+          "text": "test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.61s"
+        },
+        {
+          "line": 3665,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 3761,
+          "text": "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+        },
+        {
+          "line": 3767,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 3776,
+          "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+        },
+        {
+          "line": 3784,
+          "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 3790,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 3796,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        }
+      ]
+    },
+    "Windows": {
+      "sourceLogBytes": 273418,
+      "sourceLogSha256": "a88bd99a623226bbc90ddb7ae107ba3d0c8211670c063080b0a72078c0a3a5c3",
+      "extractedAtUtc": "2026-10-06T22:41:30.611804+00:00",
+      "files": [
+        {
+          "name": "windows-desktop-windows-install-smoke.json",
+          "kind": "desktop-windows-install-smoke",
+          "passed": false,
+          "sourceLineStart": 3086,
+          "sourceLineEnd": 3156,
+          "bytes": 2081,
+          "sha256": "db307b699f3f0fb94050f97b8a4a9039c6f1e8816e4eb224f20422c0ae05e98b",
+          "checksTotal": 10,
+          "checksTrue": 10
+        }
+      ],
+      "rustSummaries": [
+        {
+          "line": 2226,
+          "text": "test net::tests::execute_stream_allows_valid_stream_longer_than_read_timeout ... ok"
+        },
+        {
+          "line": 2228,
+          "text": "test net::tests::execute_stream_cancels_idle_body_and_closes_socket ... ok"
+        },
+        {
+          "line": 2236,
+          "text": "test net::tests::execute_stream_maps_idle_read_timeout_without_losing_headers ... ok"
+        },
+        {
+          "line": 2250,
+          "text": "test net::tests::execute_stream_total_deadline_caps_headers_and_idle_body ... ok"
+        },
+        {
+          "line": 2252,
+          "text": "test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.63s"
+        },
+        {
+          "line": 2258,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2344,
+          "text": "test result: ok. 80 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+        },
+        {
+          "line": 2350,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2359,
+          "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+        },
+        {
+          "line": 2367,
+          "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+        },
+        {
+          "line": 2373,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2379,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2391,
+          "text": "test net::tests::execute_stream_allows_valid_stream_longer_than_read_timeout ... ok"
+        },
+        {
+          "line": 2393,
+          "text": "test net::tests::execute_stream_cancels_idle_body_and_closes_socket ... ok"
+        },
+        {
+          "line": 2401,
+          "text": "test net::tests::execute_stream_maps_idle_read_timeout_without_losing_headers ... ok"
+        },
+        {
+          "line": 2415,
+          "text": "test net::tests::execute_stream_total_deadline_caps_headers_and_idle_body ... ok"
+        },
+        {
+          "line": 2417,
+          "text": "test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.63s"
+        },
+        {
+          "line": 2423,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2509,
+          "text": "test result: ok. 80 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+        },
+        {
+          "line": 2515,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2524,
+          "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+        },
+        {
+          "line": 2532,
+          "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+        },
+        {
+          "line": 2538,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        },
+        {
+          "line": 2544,
+          "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "macos-p0-kill-restart-recovery-evidence",
+  "capturedOn": "2026-10-07",
+  "platform": {
+    "os": "macOS",
+    "arch": "x86_64",
+    "appVersion": "0.1.0",
+    "packageIdentifier": "com.eastgenesis.desktop",
+    "packageKind": "macos-qa-bundle",
+    "buildId": "qa-20261007-ax-recovery"
+  },
+  "setup": {
+    "profile": "isolated temporary HOME",
+    "transport": "loopback deterministic fixture",
+    "automation": "macOS System Events Accessibility",
+    "processTermination": "SIGKILL applied only to the test app process",
+    "realUserProfileTouched": false,
+    "externalServiceConfigurationRead": false
+  },
+  "commands": {
+    "build": "pnpm --silent tauri:build:mac:qa",
+    "fixture": "node tools/desktop-stream-fixture.mjs",
+    "smoke": "temporary Accessibility recovery script with sqlite3 read-only checkpoint queries"
+  },
+  "checks": {
+    "partialOutputVisibleBeforeKill": true,
+    "runningCheckpointPresentBeforeKill": true,
+    "runningCheckpointStreamingTextPresentBeforeKill": true,
+    "runningCheckpointTaskIdPresentBeforeKill": true,
+    "testProcessKilled": true,
+    "sameTaskIdAfterRestart": true,
+    "partialOutputRestoredAfterRestart": true,
+    "recoveredStatusVisibleAfterRestart": true,
+    "resumeEntryVisibleAfterRestart": true,
+    "resumeClicked": true,
+    "cancelClickedAfterResume": true
+  },
+  "result": "passed",
+  "boundary": {
+    "proven": [
+      "a real macOS Tauri window accepted a streaming task through Accessibility",
+      "SQLite contained a running checkpoint with non-empty partial output before termination",
+      "the same task record and partial output were visible after restarting the app with the same isolated profile",
+      "the resume entry was clicked and the resumed task was then cancelled for cleanup"
+    ],
+    "excluded": [
+      "task ID value and task text",
+      "external service names, addresses, or credentials",
+      "real external service availability or SLA",
+      "cross-platform installation behavior",
+      "signing and notarization"
+    ]
+  },
+  "redaction": {
+    "goalTextPresent": false,
+    "renderedOutputPresent": false,
+    "taskIdValuePresent": false,
+    "absolutePathsPresent": false,
+    "externalServiceNamesPresent": false,
+    "credentialsPresent": false,
+    "temporaryProfileRetained": false
+  }
+}

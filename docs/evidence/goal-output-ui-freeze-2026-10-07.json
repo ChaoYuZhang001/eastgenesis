@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "kind": "goal_output_ui_source_freeze",
+  "frozenAt": "2026-10-07T04:15:23.373Z",
+  "head": "662a70e092979f585ab793c9e78269d31ce4a9a4",
+  "frozenSources": {
+    "src/components/goal/GoalDetail.tsx": {
+      "sha256": "6a98f2af53001b86f494a3fe90ddd617205e6584a0f22d453d4a066e9fe6fb54",
+      "bytes": 16003
+    },
+    "tests/ui-goal-output.test.tsx": {
+      "sha256": "fc006101b1614897d87aa0f32c3eb0ffb8ee86d3bb7374574e397a93d181e5f9",
+      "bytes": 13870
+    }
+  },
+  "scope": "local_synthetic_ui_runtime_checkpoint_hydration",
+  "sourceInputs": 710,
+  "sourceInventoryStable": true,
+  "commands": [
+    [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "tests/ui-goal-output.test.tsx",
+      "tests/ui-goal-run.test.tsx",
+      "tests/goal-failed-recovery.test.ts",
+      "--minWorkers=2",
+      "--maxWorkers=2"
+    ],
+    [
+      "pnpm",
+      "typecheck"
+    ]
+  ],
+  "results": {
+    "files": 3,
+    "tests": 22,
+    "newUiTests": 7,
+    "skips": 0,
+    "typecheckExit": 0
+  },
+  "execSessions": {
+    "draftRed": 27553,
+    "missingRegionRed": 88029,
+    "initialGreen": 39984,
+    "draftEvidenceTypeError": 99864,
+    "finalGreen": 70688,
+    "finalTypecheck": 43557
+  },
+  "uiContract": {
+    "location": "RoundItem only; ActiveRound has no response body",
+    "streamingAria": "第 N 轮的正在生成",
+    "partialAria": "第 N 轮的部分输出",
+    "completedAria": "第 N 轮的总结",
+    "otherTerminalAria": "第 N 轮的结果",
+    "running": "nonempty streaming body only; stale summary hidden",
+    "stopped": "nonempty retained stream plus nonempty result",
+    "completed": "nonempty final summary only; stale streaming body hidden",
+    "whitespaceOnlyHidden": true,
+    "textOnlyReactEscaping": true,
+    "css": [
+      "whitespace-pre-wrap",
+      "[overflow-wrap:anywhere]"
+    ],
+    "resumeEntry": "existing page header 继续; no extra per-round resume button"
+  },
+  "invariantsVerified": [
+    "real AgentRuntime + task/Goal stores and GoalRunner",
+    "partial delta rendered exactly once within Goal round",
+    "failure pauses existing round",
+    "JSON parseRounds + hydrateGoalCheckpoints restores same task",
+    "header Continue resumes same task and round",
+    "summary-only resume with accepted Chat marker retained",
+    "read and write each once",
+    "result.ts inode + mtimeNs + SHA unchanged across resume",
+    "3+1 model events charged once to Goal",
+    "failed/aborted/needs_user result not labelled completed",
+    "HTML text not executed",
+    "no whitespace-only placeholder"
+  ],
+  "boundaries": {
+    "realProvidersUsed": false,
+    "nativeDesktopVerified": false,
+    "buildRun": false,
+    "publicCommitOrPushPerformed": false
+  },
+  "warnings": {
+    "existingAdjacentUiActWarnings": 45
+  },
+  "memoryPreexistingSha256": "bf48382bb339cd2468c31be5013fe8f92fa274d8cb3aeaedbbce0ae5064b85b2",
+  "evidenceFiles": [
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-20261007/red.json",
+      "sha256": "83d3c177986275e8de28c62fb24d57d1b0dd3302f3e3d32716df16c91f49c553",
+      "bytes": 159675
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-20261007/red.log",
+      "sha256": "a8984f5c075be024a75018ff6d7ae663deb8e393a83b7d04a18a071f2f62d2f5",
+      "bytes": 37400
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-20261007/red.json",
+      "sha256": "e3d3453da67fdfd0349a77600309903437a20f481e4c69cda1c547e43218e2c0",
+      "bytes": 159681
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-20261007/red.log",
+      "sha256": "3af7a23e7317346082cb5dcf530912ce571834df14c9756e46cb36dce8e7ff2f",
+      "bytes": 134774
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-20261007/green.json",
+      "sha256": "d1fe05b1d709b7ee21f24912e3599c1df3f8aa919fc5f6bf2656aff379c57031",
+      "bytes": 159761
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-20261007/green.log",
+      "sha256": "591f21c16ce2d6aa91e205eca4a3c51e1f5000c6a865d65857118d27e0526bee",
+      "bytes": 34430
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-20261007/typecheck.json",
+      "sha256": "6d6f66bc59938749121149984b6e0e223155403ccd9725a05b960d8dca4eb6da",
+      "bytes": 159592
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-20261007/typecheck.log",
+      "sha256": "e7f5281f82da98f9829e55dcf3398e869ef98abfb180cf8693a734212c00949d",
+      "bytes": 295
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-v2-20261007/green.json",
+      "sha256": "7397c6ed27fce0605166058101ba83a05912383b0beb84727d4c97cfffab8cc0",
+      "bytes": 159764
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-v2-20261007/green.log",
+      "sha256": "0cbca45f7b469d47411dd3f25d327eea2b9de97c708af551c5673c88686d1fa1",
+      "bytes": 34986
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-v2-20261007/typecheck.json",
+      "sha256": "2a3648473e110bcde3705d92c30f7b318d36516c7a1457a8d03ef26995206d43",
+      "bytes": 159595
+    },
+    {
+      "path": "/tmp/eastgenesis-goal-output-ui-final-v2-20261007/typecheck.log",
+      "sha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba",
+      "bytes": 82
+    }
+  ]
+}

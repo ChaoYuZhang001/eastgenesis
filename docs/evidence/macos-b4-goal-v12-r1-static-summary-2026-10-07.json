@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "kind": "v12_r1_minimal_restart_controller_frozen_static_binding",
+  "frozenAt": "2026-10-07T06:46:00.781573+00:00",
+  "passed": true,
+  "nativeExecutionAttempted": false,
+  "nativePassed": false,
+  "appStarted": false,
+  "axStarted": false,
+  "fixtureStarted": false,
+  "repoMutated": false,
+  "gitMutated": false,
+  "privateRead": false,
+  "baselineActualReport": {
+    "path": "/tmp/eastgenesis-unified-goal-native-pilot-b4cfd-v11.json",
+    "bytes": 908630,
+    "sha256": "fcf26ec4e8bfe8e9b5b28a7f70f5e6ed414a3b0c3ca44fa6adf16e073d2a909b"
+  },
+  "qaBuildManifest": {
+    "path": "/tmp/eastgenesis-unified-goal-v11-build-20261007-manifest.json",
+    "bytes": 388911,
+    "sha256": "d28a1ab3db438a46b8c0acd603e63f5559b94db0b8e4b5a96d47ca9717fc8ce5"
+  },
+  "sourceRevisionForNextInputCheck": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "sourceTree": "299d70a34eaaed6a92e312b8d6e0684848872548",
+  "hardcodedRevisionOrOldPidIntroduced": false,
+  "artifacts": {
+    "v11Harness": {
+      "path": "/tmp/eastgenesis-unified-goal-native-v11-frozen.mjs",
+      "bytes": 94071,
+      "sha256": "8525bb951442cda3943f9cbe9b69372c0745532e8c8eb650accd499be2b1afea"
+    },
+    "unchangedSwift": {
+      "path": "/tmp/eastgenesis-unified-goal-ax-v11-frozen.swift",
+      "bytes": 21262,
+      "sha256": "941bc0ededca619f530d4d6ddaba38b3cb65ea0700871d2ff39ed4026df5d916"
+    },
+    "v12Harness": {
+      "path": "/tmp/eastgenesis-unified-goal-native-v12-r1-frozen.mjs",
+      "bytes": 95753,
+      "sha256": "38b3302e2f9432ef0c2832ba79fd192bf70070941331a357b3064d159b2556c4"
+    },
+    "v12StaticScript": {
+      "path": "/tmp/eastgenesis-unified-goal-native-static-check-v12-r1-frozen.mjs",
+      "bytes": 42448,
+      "sha256": "1cc74c96ef565a6b295adf298ccfdb638bc1d6f3c4cae2aeaeaf9acbae8bbff4"
+    },
+    "v12StaticReport": {
+      "path": "/tmp/eastgenesis-unified-goal-native-static-check-v12-r1.json",
+      "bytes": 17424,
+      "sha256": "06e42a9f4d3ce440ee431c7a60ab03d1fe125c49b909d3f4294f445bd716719f"
+    },
+    "v12StaticRawLog": {
+      "path": "/tmp/eastgenesis-unified-goal-native-static-check-v12-r1.log",
+      "bytes": 431,
+      "sha256": "7a6105a774df1bd990d168e5720dd3dcddfce03583cea492ffbefd93f39bab18"
+    },
+    "v12SyntaxRawLog": {
+      "path": "/tmp/eastgenesis-unified-goal-native-syntax-check-v12-r1.log",
+      "bytes": 97,
+      "sha256": "edc4c4bd1f6b45b694aa036efd4b4e7d576f178a7fbacb358388e2b8f54819e3"
+    },
+    "v12Patch": {
+      "path": "/tmp/eastgenesis-unified-goal-native-v11-to-v12-r1-controller-frozen.patch",
+      "bytes": 3029,
+      "sha256": "36d90bb0dc7d4d702182243c2dc6bb306251d445495f9cd1c7e0fb1640810582"
+    },
+    "v11StoredActionMetadataReview": {
+      "path": "/tmp/eastgenesis-unified-goal-v11-stored-action-metadata-review-20261007.json",
+      "bytes": 13342,
+      "sha256": "f8d6812f37037db131016dcffb1731d213d98132aac813102d095cc9dcc5101f"
+    }
+  },
+  "actualReadOnlyReview": {
+    "path": "/tmp/eastgenesis-unified-goal-v11-actual-readonly-review-20261007.json",
+    "bytes": 15137,
+    "sha256": "03e831272861012fd9f898ceef10b83256b503355e51aa1ee480b16f173e6450"
+  },
+  "delta": {
+    "addedLines": 25,
+    "removedLines": 1,
+    "fullSourceExactAfterRevertingOnlyAddedFunctionAndRestartBranch": true,
+    "changedScope": "one exported pure decision function plus restart navigation branch",
+    "swiftChanged": false,
+    "swiftRecompiledOrTypecheckedForV12": false,
+    "v11SwiftHashUnchanged": true,
+    "businessScenarioStagesAndAssertionsChanged": false,
+    "providerFixtureOrProtocolChanged": false,
+    "sourceBindingOrQaValidationChanged": false,
+    "axFunctionOrIdentityValidatorChanged": false,
+    "candidateRawModeChanged": false,
+    "budget45045505000120000Changed": false,
+    "r1OnlyAddsNonemptyVisitedEqualsEnqueuedRequirement": true
+  },
+  "controller": {
+    "readName": "restart_existing_goal_fresh_read",
+    "readFields": {
+      "label": "same exact GOAL constant",
+      "fragment": true,
+      "roles": [
+        "AXButton"
+      ],
+      "scopes": [
+        "内容栏"
+      ]
+    },
+    "freshCurrentPidAndCFIdentityRequired": true,
+    "uniqueOneSuccessfulRead": "direct existing strict press, no home press",
+    "completeRawZeroUniqueZeroFailedRead": "home strict press then original existing Goal strict press",
+    "allOtherCases": "fixed failure before navigation or retry",
+    "readClaimsVisibility": false,
+    "pressReevaluatesFullNormalGate": true,
+    "nonemptyCompleteGraphRequired": true,
+    "visitedMustEqualEnqueued": true
+  },
+  "validation": {
+    "nodeSyntaxExit": 0,
+    "staticExit": 0,
+    "totalCases": 172,
+    "inheritedV11Cases": 146,
+    "newControllerCases": 26,
+    "sourceStartEndEqual": true,
+    "staticOnly": true,
+    "pureAppleScriptWrapperHasNoAppOrAppleEvent": true,
+    "noNativeEvidenceClaim": true
+  },
+  "limits": [
+    "Static positive events are fabricated structural contracts, not actual AX identity.",
+    "Unchanged Swift retains prior v11 static/typecheck evidence; no Swift compiler or helper main was run for v12.",
+    "Root must re-run fresh input binding against unchanged b4 source/QA binary and use a fresh exclusive native output.",
+    "v11 partial-failure stage passed, but its complete unified Goal recovery failed; v12-r1 has not run natively in this review. Root owns a separate prior-v12 native attempt, whose output is not audited here.",
+    "No current native session/output was polled or modified; prior v12 native result is Root-owned and outside this static r1 report."
+  ],
+  "preferredCandidate": "v12-r1",
+  "priorV12RetainedUnchanged": true,
+  "knownBaselineDiagnosticGapAndR1Closure": {
+    "swiftWindowsLookupFailureCanYieldEmptyQueue": "Existing value(app,kAXWindowsAttribute) ?? [] can produce complete zero-node graph; Swift unchanged.",
+    "r1DecisionRejectsEmptyGraph": true,
+    "r1DecisionRejectsUnvisitedQueueTail": true,
+    "prior170ChecksDoNotProveUnknownAbsenceGateComplete": true,
+    "budgetAndNormalPressGatesUnchanged": true
+  },
+  "supersedesOnlyPriorSummaryWording": {
+    "path": "/tmp/eastgenesis-unified-goal-v12-r1-frozen-static-summary.json",
+    "sha256": "dfc18feb34d21b1f7b2a14c40c1fbf49aae50bf0bb93f762263bb04d856142c7",
+    "reason": "Clarify r1 static scope while separately owned v12 native attempt runs; no source, scripts, tests or hashes changed."
+  }
+}

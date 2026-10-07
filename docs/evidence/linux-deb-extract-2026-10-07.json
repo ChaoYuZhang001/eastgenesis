@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "desktop-install-smoke",
+  "passed": true,
+  "platform": "linux",
+  "format": "deb",
+  "checks": {
+    "packageMetadata": true,
+    "packagePayload": true,
+    "dependencies": true,
+    "binaryStart": true,
+    "sqliteSchema": true,
+    "controlledTermination": true
+  },
+  "package": {
+    "name": "east-genesis-desktop",
+    "version": "0.1.0",
+    "architecture": "amd64",
+    "bytes": 6694342
+  },
+  "install": {
+    "mode": "deb-extract",
+    "isolatedPrefix": true,
+    "systemPackageDatabaseChanged": false,
+    "database": {
+      "schemaVersion": 7,
+      "sessions": true,
+      "toolInvocations": true
+    },
+    "termination": {
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "requestedSignal": "SIGTERM",
+      "processGroupAlive": false
+    }
+  },
+  "evidenceBoundary": {
+    "proven": [
+      "a Debian package was inspected without mutating the host package database",
+      "the package payload was extracted under an isolated prefix",
+      "the extracted binary dependencies were resolved on the Linux runner",
+      "the extracted installed binary started and initialized its isolated SQLite database",
+      "the process was terminated in a controlled way"
+    ],
+    "excluded": [
+      "system dpkg installation or uninstall",
+      "AppImage/RPM installation",
+      "old-version to new-version upgrade",
+      "automatic update or rollback",
+      "real Provider availability",
+      "signing/notarization"
+    ]
+  },
+  "ciEvidence": {
+    "runId": "37510223615",
+    "jobId": "112429133656",
+    "commit": "59c2c9d57c7a8105c077bda81a01266b5eb5392a",
+    "capturedOn": "2026-10-07",
+    "runner": "ubuntu-latest",
+    "source": "GitHub Actions job log"
+  }
+}

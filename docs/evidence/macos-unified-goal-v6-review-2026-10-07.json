@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "kind": "read_only_v6_actual_terminal_review",
+  "reviewedAt": "2026-10-07T04:56:48.632606+00:00",
+  "nativePassed": false,
+  "reviewerStartedNative": false,
+  "originalReport": {
+    "path": "/tmp/eastgenesis-unified-goal-native-pilot-31dcc-v6.json",
+    "sha256": "fa634fda3ed6054409af7d9c193885e6b88de3df69c0e28cb7b614a9dc0eeda2",
+    "bytes": 308001
+  },
+  "frozenCopy": {
+    "path": "/tmp/eastgenesis-unified-goal-native-pilot-31dcc-v6-frozen.json",
+    "sha256": "fa634fda3ed6054409af7d9c193885e6b88de3df69c0e28cb7b614a9dc0eeda2",
+    "mode": "0400",
+    "bytes": 308001
+  },
+  "terminal": {
+    "passed": false,
+    "nativePassed": false,
+    "nativeExecutionAttempted": true,
+    "status": "failed",
+    "failureStage": "actual_ax_action_failed",
+    "elapsedMs": 20178,
+    "startedAt": "2026-10-07T04:50:18.123Z",
+    "finishedAt": "2026-10-07T04:50:38.301Z"
+  },
+  "startup": {
+    "name": "initial_startup_ready",
+    "operation": "startup",
+    "success": true,
+    "ownedPid": 88010,
+    "ownedAppActive": true,
+    "elapsedMs": 1365,
+    "scanBudgetComplete": true,
+    "matchCount": 0,
+    "scrollActionIssued": false,
+    "readinessActivationIssued": true,
+    "requiredSeen": [],
+    "enabled": false,
+    "focused": false
+  },
+  "firstFailedAction": {
+    "name": "provider_qa-a_model_enabled",
+    "operation": "read",
+    "success": false,
+    "ownedPid": 88010,
+    "ownedAppActive": true,
+    "elapsedMs": 4590,
+    "scanBudgetComplete": false,
+    "matchCount": 0,
+    "scrollActionIssued": false,
+    "readinessActivationIssued": false,
+    "requiredSeen": [],
+    "enabled": false,
+    "focused": false
+  },
+  "failureSnapshotAction": {
+    "name": "failure_actual_ax",
+    "operation": "snapshot",
+    "success": false,
+    "ownedPid": 88010,
+    "ownedAppActive": true,
+    "elapsedMs": 4591,
+    "scanBudgetComplete": false,
+    "matchCount": 0,
+    "scrollActionIssued": false,
+    "readinessActivationIssued": false,
+    "requiredSeen": [],
+    "enabled": false,
+    "focused": false
+  },
+  "successfulProviderUiSaves": [
+    {
+      "name": "provider_a_save",
+      "operation": "press",
+      "success": true,
+      "ownedPid": 88010,
+      "ownedAppActive": true,
+      "elapsedMs": 206,
+      "scanBudgetComplete": true,
+      "matchCount": 1,
+      "scrollActionIssued": true,
+      "readinessActivationIssued": false,
+      "requiredSeen": [],
+      "enabled": true,
+      "focused": false,
+      "actionWallTimeMs": 1791348624717.057,
+      "actionTimestampWithinBounds": true
+    },
+    {
+      "name": "provider_b_save",
+      "operation": "press",
+      "success": true,
+      "ownedPid": 88010,
+      "ownedAppActive": true,
+      "elapsedMs": 240,
+      "scanBudgetComplete": true,
+      "matchCount": 1,
+      "scrollActionIssued": true,
+      "readinessActivationIssued": false,
+      "requiredSeen": [],
+      "enabled": true,
+      "focused": false,
+      "actionWallTimeMs": 1791348627427.675,
+      "actionTimestampWithinBounds": true
+    }
+  ],
+  "savedProviderProof": {
+    "sha256": "2732ddbe41aa7241f84ec06484f5d2b9a7567e67935b9049389ec899995b2fc7",
+    "exactTwoProviders": true,
+    "finalLoopbackUrlsMatch": true,
+    "protocolOpenai": true,
+    "singleRegisteredKnownModel": true,
+    "noExtraHeadersOrPlaintextKey": true
+  },
+  "fixture": {
+    "counts": {
+      "a": {
+        "post": 0,
+        "get": 1,
+        "authHeaders": 0,
+        "plan": 0,
+        "args": 0,
+        "answer": 0,
+        "summary": 0,
+        "other": 0
+      },
+      "b": {
+        "post": 0,
+        "get": 1,
+        "authHeaders": 0,
+        "plan": 0,
+        "args": 0,
+        "answer": 0,
+        "summary": 0,
+        "other": 0
+      }
+    },
+    "records": [],
+    "rejectedRequests": [],
+    "corruptionIssued": false,
+    "liveFixtureSockets": 0
+  },
+  "cleanup": {
+    "appSpawned": true,
+    "fixtureStarted": true,
+    "clipboardTouched": true,
+    "ownedRootCreated": true,
+    "processes": [
+      {
+        "role": "app",
+        "pid": 88010,
+        "exitCode": null,
+        "signal": "SIGTERM",
+        "requestedSignal": "SIGTERM",
+        "leaderExited": true,
+        "processGroupGone": true,
+        "liveProcessGroupGone": true,
+        "zombieProcesses": 0,
+        "groupProbe": "ps-pgid-state",
+        "controlledCleanup": true,
+        "gracefulTermination": true
+      },
+      {
+        "role": "ax_helper",
+        "pid": 88006,
+        "exitCode": null,
+        "signal": "SIGTERM",
+        "requestedSignal": "SIGTERM",
+        "leaderExited": true,
+        "processGroupGone": true,
+        "liveProcessGroupGone": true,
+        "zombieProcesses": 0,
+        "groupProbe": "ps-pgid-state",
+        "controlledCleanup": true,
+        "gracefulTermination": true
+      }
+    ],
+    "fixture": {
+      "closed": true,
+      "remainingOwnedSockets": 0
+    },
+    "clipboardCleared": true,
+    "ownedRootRemovedAfterProcessCleanup": true,
+    "safe": true
+  },
+  "ownedPidsAbsentIndependently": {
+    "exitCode": 1,
+    "stdoutEmpty": true
+  },
+  "endBindings": {
+    "sourceInputs": 721,
+    "sourceRevision": "31dcc35279f0e0e06d843d3d04a172bf987708b8",
+    "manifestSha256": "b75b7dc4a95df49ff8ca2fcac47b3b5085ccac2fb5bb5c2330cc9722fe020b2e",
+    "binarySha256": "d2446cb197b8a8d4c3307da60cf6108691ffb8420cdecef270f138da52cba3b9",
+    "sourceUnchangedReported": true,
+    "appUnchangedReported": true,
+    "harnessStartEndSame": true,
+    "swiftStartEndSame": true,
+    "helperBinaryStartEndSame": true,
+    "fullAppCopyStartEndEqual": true
+  },
+  "failureObservations": [
+    {
+      "name": "failure_actual_ax",
+      "complete": false,
+      "rows": 36
+    }
+  ],
+  "limitations": [
+    "Failed capability-matrix read has incomplete scan and does not establish model control is absent.",
+    "UI provider registration and actual synthetic GETs succeeded, but no Goal was submitted and no Provider POST occurred.",
+    "No same-goal task/recovery/nativePassed claim.",
+    "Binding equality is observed in captured report, not rerun on future modified source.",
+    "No further launch of31dcc authorized after source freeze ended."
+  ]
+}

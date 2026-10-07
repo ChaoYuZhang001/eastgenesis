@@ -9,7 +9,8 @@ import { STEP_LABEL, StepIcon } from "@/components/task/status";
 import { SubAgents } from "@/components/panel/SubAgents";
 import { doneText, progressOf } from "@/lib/progress";
 import { reasoningParts, type ReasoningPart } from "@/lib/reasoning";
-import { formatDuration, routeSummary } from "@/lib/route-summary";
+import { formatDuration, latestSurface, routeSummary, surfaceJourneyTextFromEvents } from "@/lib/route-summary";
+import { recoveryCheckpoint, safeRecoveryReason } from "@/lib/recovery";
 import { stepProgress } from "@/lib/steps";
 import { subAgentSteps, subAgentViews } from "@/lib/subagents";
 import { lastRoute } from "@/lib/timeline";
@@ -18,24 +19,38 @@ import { cn } from "@/lib/utils";
 import { useSettings } from "@/stores/settings";
 import { useTasks, type TaskCard } from "@/stores/tasks";
 import { useUi } from "@/stores/ui";
+import { WORK_SURFACE_LABEL } from "@/decision";
 import { RouteLine } from "./RouteLine";
 
 // 会话里的一轮：用户那句话 + 助手这一轮的执行与成果。
 // 运行中只显示当前那一步，结束后折叠成一行（docs/UI_LAYOUT_SPEC.md D 节）。
 export function AssistantTurn({ card }: { card: TaskCard }) {
-  const { cancel, respond, respondPlan } = useTasks();
+  const { cancel, resume, respond, respondPlan } = useTasks();
   const running = card.status === "running";
   const events = card.events;
   const agents = useMemo(() => subAgentViews(events), [events]);
   const steps = useMemo(() => (agents.length ? subAgentSteps(agents) : stepProgress(events)), [agents, events]);
   const progress = useMemo(() => progressOf(events), [events]);
+  const surface = useMemo(() => latestSurface(events), [events]);
+  const journey = useMemo(() => surfaceJourneyTextFromEvents(events), [events]);
   const summary = useMemo(() => routeSummary(lastRoute(events), events), [events]);
+  const recovery = useMemo(() => recoveryCheckpoint(events), [events]);
+  const recoveryReason = useMemo(() => (recovery ? safeRecoveryReason(recovery.reason) : null), [recovery]);
   const showReasoning = useSettings((s) => s.showReasoning);
   const thoughts = useMemo(() => (showReasoning ? reasoningParts(events) : []), [events, showReasoning]);
   const duration = (card.endedAt ?? Date.now()) - card.startedAt;
 
   return (
-    <article aria-label={`任务：${card.goal}`} className="space-y-4">
+    <article
+      aria-label={`任务：${card.goal}`}
+      className="space-y-4"
+      // Keep a stable marker after the transient streaming panel is replaced
+      // by the final result. WebKit can batch IPC callbacks in one frame.
+      data-stream-first-chunk={card.streamFirstChunkAt ? "true" : undefined}
+      data-stream-first-chunk-at={card.streamFirstChunkAt ? String(card.streamFirstChunkAt) : undefined}
+      data-stream-last-chunk-at={card.streamLastChunkAt ? String(card.streamLastChunkAt) : undefined}
+      data-stream-partial-output={card.streamingInterrupted ? "true" : undefined}
+    >
       <div className="flex justify-end">
         <div className="max-w-[80%] space-y-1">
           <p className="whitespace-pre-wrap rounded-lg bg-surface-2 px-4 py-3 text-sm">{card.goal}</p>
@@ -57,10 +72,21 @@ export function AssistantTurn({ card }: { card: TaskCard }) {
           <p role="status" aria-live="polite" className="flex items-center gap-2 text-sm text-muted-foreground">
             <Circle aria-hidden className="size-2 shrink-0 animate-eg-breathe fill-current text-china-gold" />
             <span className="min-w-0 truncate">{progress.text}</span>
+            {surface && <span className="shrink-0 text-xs">· {WORK_SURFACE_LABEL[surface]}</span>}
+            {journey && <span className="shrink-0 text-xs">· {journey}</span>}
           </p>
         ) : (
           <StepsDisclosure card={card} steps={steps} text={doneText(card.status, progress, formatDuration(duration))} />
         )}
+
+        {(running && card.streamingText) || (!running && card.streamingText && card.streamingInterrupted) ? (
+          <section aria-label={card.streamingInterrupted ? "部分输出" : "正在生成"} className="rounded-md bg-surface p-4">
+            <p aria-hidden className={cn("mb-1 text-xs", card.streamingInterrupted ? "text-east-red" : "text-muted-foreground")}>
+              {card.streamingInterrupted ? "生成中断，保留已收到的部分输出" : "正在生成"}
+            </p>
+            <p className="whitespace-pre-wrap text-sm">{card.streamingText}</p>
+          </section>
+        ) : null}
 
         {card.pendingPlan && <PlanPrompt plan={card.pendingPlan} onRespond={(ok) => respondPlan(card.id, ok)} />}
         {card.pendingConfirm && <ConfirmPrompt req={card.pendingConfirm} onRespond={(ok) => respond(card.id, ok)} />}
@@ -81,11 +107,25 @@ export function AssistantTurn({ card }: { card: TaskCard }) {
 
         {summary && <RouteLine summary={summary} durationMs={card.endedAt ? duration : null} card={card} />}
 
+        {!running && recovery && (
+          <div className="space-y-2">
+            {recoveryReason && <p role="status" className="text-xs text-muted-foreground">恢复原因：{recoveryReason}</p>}
+            {recovery.uncertainSteps.length > 0 && (
+              <p role="status" className="text-xs text-east-red">
+                {recovery.uncertainSteps.length} 个步骤的副作用状态未知，继续时会重新确认并重新生成参数。
+              </p>
+            )}
+            <Button size="sm" variant="outline" onClick={() => resume(card.id)}>
+              从未完成步骤继续
+            </Button>
+          </div>
+        )}
+
         {card.proposal && <MemoryPrompt taskId={card.id} proposal={card.proposal} />}
         {card.status === "completed" && <SaveSkill card={card} />}
 
         {running && (
-          <Button size="sm" variant="outline" onClick={() => cancel(card.id)}>
+          <Button size="sm" variant="outline" aria-label="停止任务" onClick={() => cancel(card.id)}>
             <Square aria-hidden />
             停止任务
           </Button>

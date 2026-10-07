@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-07T05:15:23.249240+00:00",
+  "passed": true,
+  "sourceRevision": "c16ae0274a9066709baf8047951675b299b76092",
+  "sourceTree": "ba27d3872fe5a369844527c67399f058319a8299",
+  "sourceInputsVerified": 733,
+  "sourceBlobModeAndHashVerified": true,
+  "completeOriginalAndCopiedAppSnapshotVerified": true,
+  "manifestSha256": "d69ec0ecbebea8fb495ad0d402890227d42ac2adb71bc875f1193369f1a3b5a2",
+  "buildHelperSha256": "8db9e43da5be8ccb07e43c2b975da0321715774b5ad0275b00ef942e3fcde957",
+  "buildLogSha256": "a3b8f0e899fdd4cf64696cca68f0b5c7e985bae64dc44dfeda57288410b6bdb2",
+  "buildExecSession": 83978,
+  "buildTerminalExitCode": 0,
+  "copiedApp": "/var/folders/hx/mwmbxj2n04b0_ncsr9mzqdph0000gn/T/eastgenesis-unified-goal-v7-bound-app-lwwdF5/UnifiedGoalV7Bound.app",
+  "binarySha256": "d2446cb197b8a8d4c3307da60cf6108691ffb8420cdecef270f138da52cba3b9",
+  "binaryBytes": 12217352,
+  "formalReleaseBinding": false,
+  "nativePassed": false,
+  "realProviderRan": false
+}

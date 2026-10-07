@@ -1,8 +1,9 @@
-import { useId, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
+import { useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { ArrowUp, File, Folder, FolderOpen, HardDrive, Lightbulb, Paperclip, Plug, Plus, Settings2, Sparkles, Target, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu, MenuCheckbox, MenuItem, MenuLabel, MenuRadio, MenuSeparator, SubMenu } from "@/components/ui/menu";
-import { ACCEPT, MAX_FILES, readTextFile } from "@/lib/attachments";
+import { ACCEPT, MAX_FILES, readTextFile, toAttachments } from "@/lib/attachments";
+import { classifyTask, WORK_SURFACE_HINT, WORK_SURFACE_LABEL, WORK_SURFACES } from "@/decision";
 import { useChat } from "@/stores/chat";
 import { useDialogs } from "@/stores/dialogs";
 import { useGoals } from "@/stores/goals";
@@ -21,13 +22,18 @@ export function Composer({ autoFocus = false }: { autoFocus?: boolean }) {
   const [fileError, setFileError] = useState<string | null>(null);
   const loaded = useSettings((s) => s.loaded);
   const chat = useChat();
-  const { draft, files, lock, permission, multi, preference, mode, workdir, setDraft, addFiles, removeFile, setLock, setPermission, setMulti, setPreference, setMode, setWorkdir, send } = chat;
+  const { draft, files, lock, permission, multi, preference, mode, workdir, surfaceHint, setDraft, addFiles, removeFile, setLock, setPermission, setMulti, setPreference, setMode, setWorkdir, setSurfaceHint, send } = chat;
   const currentId = useUi((s) => s.currentProjectId);
   const setCurrent = useUi((s) => s.setCurrentProject);
   const open = useUi((s) => s.open);
   const project = useProjects((s) => (currentId ? s.items.find((p) => p.id === currentId) ?? null : null));
   const saveGoal = useGoals((s) => s.save);
   const ready = loaded && draft.trim().length > 0;
+  const preview = useMemo(
+    () => classifyTask({ text: `${draft}${workdir ? ` 工作目录 ${workdir}` : ""}`, attachments: toAttachments(files), surfaceHint: surfaceHint ?? undefined }),
+    [draft, files, surfaceHint, workdir],
+  );
+  const hasPreviewInput = draft.trim().length > 0 || files.length > 0 || Boolean(workdir) || Boolean(surfaceHint);
 
   const placeholder =
     mode === "goal" ? "描述要持续追求的目标..." : mode === "plan" ? "描述任务，先出计划再执行..." : project ? `在「${project.name}」里描述你的任务...` : "描述你的任务...";
@@ -79,6 +85,7 @@ export function Composer({ autoFocus = false }: { autoFocus?: boolean }) {
     mode === "goal" && { key: "goal", icon: Target, text: "目标", title: "提交后新建目标", remove: () => setMode("quick"), label: "移除目标模式" },
     mode === "plan" && { key: "plan", icon: Lightbulb, text: "计划模式", title: "先出计划，确认后再执行", remove: () => setMode("quick"), label: "移除计划模式" },
     multi && { key: "multi", icon: Users, text: "多 Agent", title: "拆成几个子任务并行执行，再合并成果", remove: () => setMulti(false), label: "移除多 Agent 协同" },
+    surfaceHint && { key: "surface", icon: Sparkles, text: WORK_SURFACE_LABEL[surfaceHint], title: `提交时提示使用${WORK_SURFACE_LABEL[surfaceHint]}`, remove: () => setSurfaceHint(null), label: `移除工作能力提示 ${WORK_SURFACE_LABEL[surfaceHint]}` },
   ].filter(Boolean) as { key: string; icon: typeof Folder; text: string; title: string; remove: () => void; label: string }[];
 
   return (
@@ -120,6 +127,16 @@ export function Composer({ autoFocus = false }: { autoFocus?: boolean }) {
           <AddMenu onPickFiles={() => fileRef.current?.click()} />
           <PermissionSelect value={permission} onChange={setPermission} />
           <span className="flex-1" />
+          {hasPreviewInput && (
+            <span
+              role="status"
+              aria-label="预计工作能力"
+              title={`本地预判：${preview.surfaceReason}。提交后由决策层复核`}
+              className="max-w-40 truncate text-xs text-muted-foreground"
+            >
+              预计 {WORK_SURFACE_LABEL[preview.surface ?? "chat"]}
+            </span>
+          )}
           <RoutingSelect lock={lock} preference={preference} onLock={setLock} onPreference={setPreference} />
           <Button type="submit" size="icon" disabled={!ready} aria-label="提交任务" title="发送（⌘↩ / Ctrl+Enter）" className="size-8 shrink-0">
             <ArrowUp aria-hidden />
@@ -140,9 +157,9 @@ export function Composer({ autoFocus = false }: { autoFocus?: boolean }) {
 }
 
 // 「+」菜单（V3 第 4 节）。工作目录只告诉模型文件放在哪；文件工具能访问的目录仍以内置文件服务器的允许列表为准。
-// 选择系统文件夹需要 tauri-plugin-dialog，还没有接入：先用项目的上下文文件夹，或在应用内对话框里填路径。
+// 桌面端的「选择其他文件夹」走原生目录选择器，浏览器模式保留手填路径。
 function AddMenu({ onPickFiles }: { onPickFiles: () => void }) {
-  const { mode, multi, workdir, servers, setMode, setMulti, setWorkdir, setServers } = useChat();
+  const { mode, multi, workdir, servers, surfaceHint, setMode, setMulti, setWorkdir, setServers, setSurfaceHint } = useChat();
   const currentId = useUi((s) => s.currentProjectId);
   const openSettings = useUi((s) => s.openSettings);
   const project = useProjects((s) => (currentId ? s.items.find((p) => p.id === currentId) ?? null : null));
@@ -191,6 +208,17 @@ function AddMenu({ onPickFiles }: { onPickFiles: () => void }) {
         {workdir && <MenuItem onSelect={() => setWorkdir(null)}>不指定</MenuItem>}
         <MenuItem onSelect={askFolder}>选择其他文件夹…</MenuItem>
       </SubMenu>
+      <SubMenu icon={<Sparkles aria-hidden />} label="工作能力" hint={surfaceHint ? WORK_SURFACE_LABEL[surfaceHint] : "自动判断"}>
+        <MenuLabel>能力面提示，不改变权限或模型锁定</MenuLabel>
+        <MenuRadio checked={!surfaceHint} onSelect={() => setSurfaceHint(null)} hint="根据任务内容自动判断">
+          自动判断
+        </MenuRadio>
+        {WORK_SURFACES.map((surface) => (
+          <MenuRadio key={surface} checked={surfaceHint === surface} onSelect={() => setSurfaceHint(surface)} hint={WORK_SURFACE_HINT[surface]}>
+            {WORK_SURFACE_LABEL[surface]}
+          </MenuRadio>
+        ))}
+      </SubMenu>
       <MenuCheckbox icon={<Target aria-hidden />} checked={mode === "goal"} onChange={(on) => setMode(on ? "goal" : "quick")} hint="设置持续追求的目标">
         目标
       </MenuCheckbox>
@@ -220,4 +248,3 @@ function AddMenu({ onPickFiles }: { onPickFiles: () => void }) {
     </Menu>
   );
 }
-

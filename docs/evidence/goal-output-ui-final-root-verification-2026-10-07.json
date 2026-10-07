@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-final-goal-output-ui-local-verification",
+  "verifiedAt": "2026-10-07T04:20:31.054Z",
+  "passed": true,
+  "parentRevision": "662a70e092979f585ab793c9e78269d31ce4a9a4",
+  "sourceInputsVerified": 558,
+  "sourceStartEndAndCurrentSame": true,
+  "mcpBinaryUnchanged": true,
+  "mcpBinarySha256": "90fb4c64cfdfed89bf687e74a18735dccaf9e502f17cdd296ca3767c4a6b29b4",
+  "fullTests": {
+    "files": 108,
+    "passed": 1068,
+    "failed": 0,
+    "skipped": 0,
+    "execSession": 77567,
+    "exit": 0,
+    "manifestSha256": "dc73e4a5e1fe8e8c8175e09f23e586d9f3bbe9f8ebdfb8db8d08b9ca074aeaa1",
+    "logSha256": "f6492ff5cf5974c60a8a5f563c5dc73f53a127e37b436a783c9f5c65130b5333"
+  },
+  "gates": {
+    "execSession": 7999,
+    "exit": 0,
+    "manifestSha256": "943f20badcdb193cc2f8ba33cd30dfdae91801d7762c2e868a4d2574072ed12d",
+    "commands": [
+      {
+        "name": "typecheck",
+        "command": "pnpm run typecheck",
+        "startedAt": "2026-10-07T04:18:36.972Z",
+        "endedAt": "2026-10-07T04:18:52.381Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba",
+        "logBytes": 82
+      },
+      {
+        "name": "build",
+        "command": "pnpm run build",
+        "startedAt": "2026-10-07T04:18:52.382Z",
+        "endedAt": "2026-10-07T04:19:12.682Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "e79ade1e50535378cccd7099f5adc88a4d054c7a613ec4db09ef02805a00f2be",
+        "logBytes": 5173
+      },
+      {
+        "name": "private-smoke",
+        "command": "pnpm exec vitest run tests/custom-providers.test.ts tests/llm.test.ts tests/ui-settings.test.tsx --minWorkers=2 --maxWorkers=2",
+        "startedAt": "2026-10-07T04:19:12.682Z",
+        "endedAt": "2026-10-07T04:19:19.389Z",
+        "exitCode": 0,
+        "signal": null,
+        "logSha256": "478561b452c704aff45b2b24d529ee89e8ccc3795b032a1ec9292405165e37c1",
+        "logBytes": 494
+      }
+    ]
+  },
+  "privateSmoke": {
+    "files": 3,
+    "passed": 55
+  },
+  "uiIndependentVerificationSha256": "432771c73f4d38db7e3034eea18c31572da9c31bca0966b8e3671ac647e85def",
+  "boundary": {
+    "nativeApp": false,
+    "realProviders": false,
+    "newPublicCI": false,
+    "formalRelease": false
+  }
+}

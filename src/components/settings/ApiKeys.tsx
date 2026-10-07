@@ -10,8 +10,11 @@ import { useSettings, type TestResult } from "@/stores/settings";
 import { ResultNote, SettingsSection } from "./controls";
 import { LocalJevSettings } from "./LocalJevSettings";
 import { OllamaToggle, RegionSelect } from "./ProviderExtras";
+import { ProviderRecoveryNote } from "./ProviderRecoveryNote";
 
 const labelOf = (id: string) => (id === "jev" ? "Jev 决策层" : officialEndpoint(id)?.label ?? id);
+
+// 兼容旧设置外壳的命名；当前入口使用 SettingsView。
 
 function statusText(s: KeyStatus | null) {
   if (!s) return "读取中…";
@@ -38,10 +41,12 @@ function KeyRow({ id, status, onSave, onDelete, children }: RowProps) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<TestResult | null>(null);
   const label = labelOf(id);
+  const endpoint = officialEndpoint(id);
 
   const run = async (task: () => Promise<TestResult>) => {
     setBusy(true);
-    setNote(await task());
+    const result = await task();
+    if (!result.stale) setNote(result);
     setBusy(false);
   };
   const save = (e: FormEvent) => {
@@ -86,6 +91,7 @@ function KeyRow({ id, status, onSave, onDelete, children }: RowProps) {
         </form>
       )}
       {status?.source === "env" && <p className="text-xs text-muted-foreground">环境变量里的 Key 只能在系统里修改；在这里保存的 Key 会优先使用。</p>}
+      {endpoint && <ProviderRecoveryNote protocol={endpoint.dialect} />}
       {children}
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" size="sm" variant="secondary" disabled={busy} onClick={() => void run(() => testConnection(id))}>

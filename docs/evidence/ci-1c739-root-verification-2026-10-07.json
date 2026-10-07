@@ -1,0 +1,132 @@
+{
+  "kind": "ci-1c739-independent-root-terminal-verification",
+  "verifiedAt": "2026-10-07T07:11:54.328530+00:00",
+  "passed": true,
+  "runId": 37580929560,
+  "runConclusion": "failure",
+  "publicHead": "1c739f737e74b62d49d715b61fb6f04cb74ac122",
+  "localCommit": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "sourceFiles": 754,
+  "allFreshPublicLocalBlobAndModesEqual": true,
+  "mainUnchanged": true,
+  "captureIndexSha256": "2d0a5fc3f8bf0500bce3d8b97422b3921c22b2b4ad7a243a5d5941c89b0b151f",
+  "indexedFiles": 107,
+  "indexedBytes": 2617727,
+  "zipSha256": "edb2ba2b3d15e4dfdc6ef853d4d7d2e930d19b07b1098ed2d51136e5610174f7",
+  "zipMembers": 108,
+  "allFrozenMemberContentsVerified": true,
+  "terminalAuditSha256": "c86cf5eb6c20b5feb62534444bac27ce6356bd9e67665115340ed0c867e66e02",
+  "freshJobConclusions": {
+    "112660171376": "success",
+    "112660171518": "success",
+    "112660171525": "failure"
+  },
+  "rawLogAndActualStdoutChecks": [
+    {
+      "job": 112660171376,
+      "rawLogSha256": "c4ad2428666be39fd5244addba2acf35ebecd7cef1e1c8e91b5ddda2ff9693ea",
+      "coldPassed": 1065,
+      "coldSkipped": 11,
+      "nativeMcp15Passed": true,
+      "storedActualStdoutVerified": 3
+    },
+    {
+      "job": 112660171518,
+      "rawLogSha256": "4f752422df7ccf8ca1756b5f5fea558379a917498446c33e8cc2901c0d4d0394",
+      "coldPassed": 1065,
+      "coldSkipped": 11,
+      "nativeMcp15Passed": true,
+      "storedActualStdoutVerified": 1
+    },
+    {
+      "job": 112660171525,
+      "rawLogSha256": "6513a916df7755f865b669dfdcee84a6638adc81513c4455e02ea1c7f4c8ffa4",
+      "coldPassed": 1059,
+      "coldSkipped": 17,
+      "nativeMcp15Passed": true,
+      "storedActualStdoutVerified": 1
+    }
+  ],
+  "actualKindBearingStdoutVerified": [
+    {
+      "job": 112660171376,
+      "kind": "desktop-install-smoke",
+      "passed": true,
+      "sha256": "bb64cd9946605924ecd32abb656b055f1ceda09d2692f1c5923eee7fae12175c"
+    },
+    {
+      "job": 112660171376,
+      "kind": "desktop-linux-upgrade-smoke",
+      "passed": true,
+      "sha256": "a28193e240e383ba26f5e5158d20f1d4050ada672ed6a181b07cd3c0a83fd1dc"
+    },
+    {
+      "job": 112660171376,
+      "kind": "desktop-runner-evidence",
+      "passed": true,
+      "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde"
+    },
+    {
+      "job": 112660171518,
+      "kind": "desktop-runner-evidence",
+      "passed": true,
+      "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e"
+    },
+    {
+      "job": 112660171525,
+      "kind": "desktop-windows-install-smoke",
+      "passed": false,
+      "sha256": "f1cdf747428001f4c65d35c3f96706c5883ac49bfdd592352e613b800c47d84d"
+    }
+  ],
+  "frontendUniqueCatalog": 1076,
+  "frontendFinalUniqueMacAndLinux": 1076,
+  "frontendFinalUniqueWindows": 1070,
+  "frontendWindowsRemainingUnixSkips": 6,
+  "crossProcessAndMcpDuplicatesNotAdded": true,
+  "firstFailure": {
+    "platform": "windows",
+    "job": 112660171525,
+    "step": 22,
+    "stepName": "Smoke-test real Windows NSIS installation lifecycle",
+    "rawLog": "logs/job-112660171525.log",
+    "actualStdout": "stdout/job-112660171525-00-desktop-windows-install-smoke.json",
+    "actualStdoutLines": [
+      3296,
+      3648
+    ],
+    "cycle": 1,
+    "stage": "process_job",
+    "typedSubstage": "process_create",
+    "win32Error": 123,
+    "hresult": null,
+    "suspendCount": null,
+    "elapsedMs": 4468,
+    "stableWindowPassed": true,
+    "rootProcessAlive": true,
+    "rootWindowPresent": true,
+    "jobActiveProcessCountAtFailure": 8,
+    "databaseExists": true,
+    "externalProbeAttempts": 1,
+    "externalProbeFailures": 1,
+    "startupTraceComplete": true,
+    "startupTraceRecords": 36,
+    "lastStartupStage": "frontend_ready",
+    "applicationConnectMigrationAndFrontendReadyObserved": true,
+    "externalSchema7NotVerified": true,
+    "successfulLaunches": 0,
+    "samePackageRepairNotReached": true,
+    "cycle2NotReached": true,
+    "windowsDomNotReached": true,
+    "nsisInstallAndRegistryPassed": true,
+    "nsisUninstallBinaryAndRegistryCleanupPassed": true,
+    "actualWorkingDirectoryAndCommandNotRecorded": true,
+    "specificInvalidInputRootCauseNotEstablishedBy123Alone": true
+  },
+  "boundaries": [
+    "Windows external schema7, repair/cycle2 and DOM did not run successfully.",
+    "macOS CI unsigned binary smoke is separate from local full Goal AX evidence.",
+    "QA Linux same-source version fixture is not a production/schema migration proof.",
+    "Win32 123 does not identify the invalid argument without actual input facts."
+  ]
+}

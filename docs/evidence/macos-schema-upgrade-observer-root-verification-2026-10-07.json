@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-independent-native-sql-observer-verification",
+  "reportSha256": "8737828b4e457bc93972f9aa9ce8f4f4c5e411b33fb7ca608d24011713283d8b",
+  "sourceInputs": 322,
+  "manifestSha256": "52d5e27625eb4f7b5b9133a68facd9de6be97a588a94e0ce5e7a3243d1f27f94",
+  "binarySha256": "49a080f76ce3b3f322681705c8892d57435e8f5e7705c92e75bdbc49435fbade",
+  "harnessSha256": "33e488f2ed8938f22196993cf1039f47ea11c6b9fe40546ac4f2feb494fcc7df",
+  "expectedSqlNativeStages": [
+    "sql_plugin_ready",
+    "sql_load_entered",
+    "sql_connect_started",
+    "sql_connect_resolved",
+    "sql_migration_started",
+    "sql_migration_resolved",
+    "sql_load_resolved"
+  ],
+  "observations": [
+    {
+      "round": "actual_plugin_schema_6_to_7",
+      "traceRecordCount": 36,
+      "sqlNativeStages": [
+        "sql_plugin_ready",
+        "sql_load_entered",
+        "sql_connect_started",
+        "sql_connect_resolved",
+        "sql_migration_started",
+        "sql_migration_resolved",
+        "sql_load_resolved"
+      ],
+      "runtimeAssertions": 22
+    },
+    {
+      "round": "same_profile_restart_schema_7",
+      "traceRecordCount": 36,
+      "sqlNativeStages": [
+        "sql_plugin_ready",
+        "sql_load_entered",
+        "sql_connect_started",
+        "sql_connect_resolved",
+        "sql_migration_started",
+        "sql_migration_resolved",
+        "sql_load_resolved"
+      ],
+      "runtimeAssertions": 23
+    }
+  ],
+  "fixedReportAssertionsAndBindingVerified": true,
+  "cleanupVerified": true,
+  "historicalProductionUpgrade": false,
+  "windowsCauseVerified": false
+}

@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { SettingsContent } from "@/components/settings/SettingsView";
 import { CAP_LABEL } from "@/decision";
 import { effectiveProfiles } from "@/lib/engine";
-import type { Backend } from "@/platform";
+import { createMockBackend, type Backend } from "@/platform";
 import { useMemory } from "@/stores/memory";
 import { useSettings } from "@/stores/settings";
 import { useSkills } from "@/stores/skills";
@@ -68,7 +68,7 @@ describe("设置页 · 模型与路由", () => {
     expect(item).toHaveTextContent("custom:my-relay/gpt-4o-mini");
     expect(within(item).getByText("Key 已配置")).toBeInTheDocument();
     fireEvent.click(within(item).getByRole("button", { name: "测试连接" }));
-    expect(await within(item).findByText(/^连接正常（HTTP 200），可用模型 2 个/)).toBeInTheDocument();
+    expect(await within(item).findByText(/^模型目录连接正常（HTTP 200），列出 2 个模型；尚未检查推理调用/)).toBeInTheDocument();
     expect(within(item).getByText(/· 实测 \d+ ms/)).toBeInTheDocument();
     expect(within(item).getByText("模型列表（2）")).toBeInTheDocument();
     expect(within(item).getByText(/^服务端模型列表：2 个/)).toBeInTheDocument();
@@ -114,6 +114,8 @@ describe("设置页 · 模型与路由", () => {
 
     const item = await screen.findByRole("listitem", { name: "Claude Relay" });
     expect(within(item).getByText("Anthropic 兼容（Messages）")).toBeInTheDocument();
+    expect(within(item).getByText("自动路由：可恢复")).toBeInTheDocument();
+    expect(within(item).getByText(/协议：Anthropic Messages · 流结束：message_stop/)).toBeInTheDocument();
     const routes = within(item).getByRole("list", { name: "Claude Relay 参与路由的模型" });
     expect(within(routes).getAllByRole("listitem").map((li) => li.textContent)).toEqual([
       "custom:claude-relay/claude-x",
@@ -132,6 +134,30 @@ describe("设置页 · 模型与路由", () => {
     expect(within(edit).getByText("地址或协议改过，保存后再读取模型列表。")).toBeInTheDocument();
     expect(document.body.innerHTML).not.toContain(KEY);
   });
+
+  it("测试进行中编辑 Provider，旧请求迟返不覆盖新配置的已保存提示", async () => {
+    const b = createMockBackend();
+    let hold = false;
+    let respond!: (value: { status: number; body: string }) => void;
+    resetStores({ ...b, providerRequest: (req) => hold
+      ? new Promise((resolve) => { hold = false; respond = resolve; }) : b.providerRequest(req) });
+    const provider = { id: "custom:stale-note", label: "迟返测试", base_url: "http://127.0.0.1:8080/v1", default_model: "synthetic-model", headers: {} };
+    await act(async () => { await useSettings.getState().saveCustom(provider); });
+    render(<SettingsContent page="custom" />);
+    const item = screen.getByRole("listitem", { name: "迟返测试" });
+    hold = true;
+    fireEvent.click(within(item).getByRole("button", { name: "测试连接" }));
+    fireEvent.click(within(item).getByRole("button", { name: "编辑" }));
+    const form = screen.getByRole("form", { name: "编辑 迟返测试" });
+    fireEvent.change(within(form).getByLabelText("协议"), { target: { value: "anthropic" } });
+    fireEvent.click(within(form).getByRole("button", { name: "保存" }));
+    const saved = await screen.findByRole("listitem", { name: "迟返测试" });
+    expect(await within(saved).findByText("已保存")).toBeInTheDocument();
+    await act(async () => { respond({ status: 200, body: JSON.stringify({ data: [{ id: "old-model" }] }) }); });
+    expect(within(saved).getByText("已保存")).toBeInTheDocument();
+    expect(within(saved).queryByText(/模型目录连接正常/)).not.toBeInTheDocument();
+    expect(useSettings.getState().modelCache[provider.id]?.models).not.toContain("old-model");
+  });
 });
 
 describe("设置页 · Provider、决策层与 Agent", () => {
@@ -139,6 +165,9 @@ describe("设置页 · Provider、决策层与 Agent", () => {
     render(<SettingsContent page="providers" />);
     const google = row("Google Gemini");
     expect(within(google).queryByText(/适配器未实现/)).not.toBeInTheDocument();
+    expect(within(google).getByText("自动路由：可恢复")).toBeInTheDocument();
+    expect(within(google).getByText(/协议：OpenAI 兼容 · 流结束：SSE \[DONE\]/)).toBeInTheDocument();
+    expect(within(google).getByText(/端点连通性仍需“测试连接”/)).toBeInTheDocument();
     const input = within(google).getByLabelText("Google Gemini API Key");
     fireEvent.change(input, { target: { value: KEY } });
     fireEvent.click(within(google).getByRole("button", { name: "保存" }));
@@ -146,7 +175,7 @@ describe("设置页 · Provider、决策层与 Agent", () => {
     expect(await within(google).findByText("已配置（系统钥匙串）")).toBeInTheDocument();
     expect(within(google).getByText("已记录为已配置（浏览器模式不保存 Key）")).toBeInTheDocument();
     fireEvent.click(within(google).getByRole("button", { name: "测试连接" }));
-    expect(await within(google).findByText(/^连接正常（HTTP 200），可用模型 \d+ 个/)).toBeInTheDocument();
+    expect(await within(google).findByText(/^模型目录连接正常（HTTP 200），列出 \d+ 个模型；尚未检查推理调用/)).toBeInTheDocument();
 
     expect(screen.queryByText("Jev 决策层", { selector: "p" })).not.toBeInTheDocument();
     const providers = render(<SettingsContent page="routing" />);

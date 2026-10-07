@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-07T05:00:26.891450+00:00",
+  "passed": true,
+  "nativeReportSha256": "fa634fda3ed6054409af7d9c193885e6b88de3df69c0e28cb7b614a9dc0eeda2",
+  "qaManifestSha256": "b75b7dc4a95df49ff8ca2fcac47b3b5085ccac2fb5bb5c2330cc9722fe020b2e",
+  "immutableNativeRevision": "31dcc35279f0e0e06d843d3d04a172bf987708b8",
+  "immutableNativeGitBlobHashesVerified": 721,
+  "nativePassed": false,
+  "nativeInitialStartupPassed": true,
+  "nativeStartupElapsedMs": 1365,
+  "providerCounts": {
+    "a": {
+      "post": 0,
+      "get": 1,
+      "authHeaders": 0,
+      "plan": 0,
+      "args": 0,
+      "answer": 0,
+      "summary": 0,
+      "other": 0
+    },
+    "b": {
+      "post": 0,
+      "get": 1,
+      "authHeaders": 0,
+      "plan": 0,
+      "args": 0,
+      "answer": 0,
+      "summary": 0,
+      "other": 0
+    }
+  },
+  "nativeCleanupPassed": true,
+  "currentSourceChangedOnlyFourWindowsDiagnosticFiles": [
+    "tests/desktop-windows-install-smoke.test.ts",
+    "tools/desktop-windows-install-smoke.d.mts",
+    "tools/desktop-windows-install-smoke.mjs",
+    "tools/desktop-windows-install-smoke.ps1"
+  ],
+  "windowsLocalGatesSha256": "e273c28f8797491ca8f83d5284d0dc666599dc8a51fb25c908514b4cf0182735",
+  "windowsLocalTests": 85,
+  "windowsLocalTestFiles": 4,
+  "windowsLocalTypecheckPassed": true,
+  "gatesInputsVerified": 558,
+  "powerShellOrWindowsApiExecuted": false,
+  "realProviderUsed": false
+}

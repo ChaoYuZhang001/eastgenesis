@@ -1,0 +1,49 @@
+{
+  "kind": "settlement-windows-current-gates-root-verification",
+  "verifiedAt": "2026-10-07T07:58:28.926Z",
+  "passed": true,
+  "gatesSha256": "bfae491011089296f7eadf3f8b4842759acb06523570bceff73dc5008dc75b05",
+  "gates": [
+    {
+      "name": "typecheck",
+      "exitCode": 0,
+      "logSha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba"
+    },
+    {
+      "name": "full-frontend",
+      "exitCode": 0,
+      "logSha256": "325ba78e07a43347250989f4b512de4beb92fd370624648a4c30a8c959298999"
+    },
+    {
+      "name": "frontend-build",
+      "exitCode": 0,
+      "logSha256": "f55bbb68d56bd0fb95138c3859daa425858c7f36e54f47dec683af91b488ffea"
+    },
+    {
+      "name": "sql-plugin-normal",
+      "exitCode": 0,
+      "logSha256": "4d7ba0879c481e7c1698686c443f1229e8f47aa111c0956c165542637c5f08b5"
+    },
+    {
+      "name": "sql-plugin-qa",
+      "exitCode": 0,
+      "logSha256": "22658fa8f12cbcaaacf71d281542877ce65f007b030c48e5126cc344aa7aa4c0"
+    }
+  ],
+  "currentSourceInputs": 564,
+  "currentSourceFreshlyRecomputedAndUnchanged": true,
+  "compiledCoverage": 558,
+  "compilerDependencyGraphTraced": false,
+  "frontend": {
+    "files": 110,
+    "tests": 1132,
+    "failed": 0,
+    "skipped": 0
+  },
+  "syntheticPrivateSmokeIncluded": 55,
+  "mcpBinaryUnchanged": true,
+  "harnessUnchanged": true,
+  "bindingModuleUnchanged": true,
+  "nativeProof": false,
+  "realProviderProof": false
+}

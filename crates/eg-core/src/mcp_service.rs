@@ -8,6 +8,7 @@ use std::sync::{Mutex, MutexGuard};
 use serde::Serialize;
 
 use crate::error::{AppError, AppResult};
+use crate::file_roots::{FileRoot, FileRootsStore};
 use crate::mcp_guard::check_outgoing;
 use crate::mcp_host::{LineFn, McpHost};
 use crate::mcp_registry::{parse_registry, AllowTools, EntryError, McpEntry, Registry};
@@ -59,8 +60,12 @@ pub struct McpService<S: SecretStore> {
     secrets: McpSecrets<S>,
     /// 启动时从登记表取的白名单；运行期间改 mcp.json 要重启服务器才生效
     policies: Mutex<HashMap<String, AllowTools>>,
+    /// 串行化启动、发送、停止与内置目录变更，撤销不能与旧配置启动竞争。
+    lifecycle: Mutex<()>,
+    /// 当前进程的连接身份；旧 Transport 不能向替换后的进程发送或停止它。
+    connections: Mutex<HashMap<String, String>>,
     /// 内置服务器：由应用自己登记，优先于 mcp.json 里的同名条目
-    builtin: Vec<McpEntry>,
+    builtin: Mutex<Vec<McpEntry>>,
 }
 
 fn not_registered() -> AppError {
@@ -78,18 +83,79 @@ impl<S: SecretStore> McpService<S> {
             env,
             secrets: McpSecrets::new(store),
             policies: Mutex::new(HashMap::new()),
-            builtin: Vec::new(),
+            lifecycle: Mutex::new(()),
+            connections: Mutex::new(HashMap::new()),
+            builtin: Mutex::new(Vec::new()),
         }
     }
 
     /// 登记内置服务器（例如 mcp_files::builtin_entry）
     pub fn with_builtin(mut self, entries: Vec<McpEntry>) -> Self {
-        self.builtin = entries;
+        self.builtin = Mutex::new(entries);
         self
     }
 
     fn policies(&self) -> AppResult<MutexGuard<'_, HashMap<String, AllowTools>>> {
         self.policies.lock().map_err(|_| AppError::internal("lock poisoned"))
+    }
+
+    fn lifecycle(&self) -> AppResult<MutexGuard<'_, ()>> {
+        self.lifecycle.lock().map_err(|_| AppError::internal("lock poisoned"))
+    }
+
+    fn builtin(&self) -> AppResult<MutexGuard<'_, Vec<McpEntry>>> {
+        self.builtin.lock().map_err(|_| AppError::internal("lock poisoned"))
+    }
+
+    fn connections(&self) -> AppResult<MutexGuard<'_, HashMap<String, String>>> {
+        self.connections.lock().map_err(|_| AppError::internal("lock poisoned"))
+    }
+
+    fn check_connection(&self, id: &str, expected: Option<&str>) -> AppResult<()> {
+        if let Some(expected) = expected {
+            if self.connections()?.get(id).map(String::as_str) != Some(expected) {
+                return Err(AppError::new("mcp_stale_connection", "这个 MCP 连接已被替换，请重新连接"));
+            }
+        }
+        Ok(())
+    }
+
+    /// 只修改应用已登记的内置文件服务器。WebView 不能传入命令或参数；
+    /// 保存失败保持旧权限，保存成功先停止旧进程，再发布新启动配置。
+    fn change_file_roots<T>(
+        &self,
+        roots: &mut FileRootsStore,
+        change: impl FnOnce(&mut FileRootsStore) -> AppResult<T>,
+    ) -> AppResult<T> {
+        let _lifecycle = self.lifecycle()?;
+        let mut builtin = self.builtin()?;
+        let entry = builtin.iter_mut().find(|entry| entry.id == crate::mcp_files::SERVER_ID).ok_or_else(not_registered)?;
+        let mut policies = self.policies()?;
+        let mut connections = self.connections()?;
+        let result = change(roots)?;
+        let current_roots = roots.raw_roots();
+        let prefix: Vec<&str> = entry.args.iter().take_while(|arg| arg.raw != "--allow").map(|arg| arg.raw.as_str()).collect();
+        let next = crate::mcp_files::builtin_entry(&entry.command, &prefix, &current_roots);
+        // Stop admitting messages before stopping the old process. On a stop
+        // failure the command fails and this server remains inaccessible.
+        policies.remove(crate::mcp_files::SERVER_ID);
+        connections.remove(crate::mcp_files::SERVER_ID);
+        self.host.stop(crate::mcp_files::SERVER_ID)?;
+        *entry = next;
+        Ok(result)
+    }
+
+    pub fn add_file_root(&self, roots: &mut FileRootsStore, raw: &str) -> AppResult<Vec<FileRoot>> {
+        self.change_file_roots(roots, |roots| roots.add(raw))
+    }
+
+    pub fn remove_file_root(&self, roots: &mut FileRootsStore, raw: &str) -> AppResult<Vec<FileRoot>> {
+        self.change_file_roots(roots, |roots| {
+            if !roots.remove(raw)? {
+                return Err(AppError::new("root_not_found", "这个目录不在允许列表里"));
+            }
+            Ok(roots.list())
+        })
     }
 
     /// 每次都重新读文件：用户改完 mcp.json 点「刷新」即可，不用重启应用
@@ -101,13 +167,13 @@ impl<S: SecretStore> McpService<S> {
         }
     }
 
-    fn is_builtin(&self, id: &str) -> bool {
-        self.builtin.iter().any(|b| b.id == id)
+    fn is_builtin(&self, id: &str) -> AppResult<bool> {
+        Ok(self.builtin()?.iter().any(|b| b.id == id))
     }
 
     /// 按 ID 找登记项：先内置，再 mcp.json
     fn entry(&self, id: &str) -> AppResult<McpEntry> {
-        if let Some(e) = self.builtin.iter().find(|e| e.id == id) {
+        if let Some(e) = self.builtin()?.iter().find(|e| e.id == id) {
             return Ok(e.clone());
         }
         self.user_registry()?.entries.remove(id).ok_or_else(not_registered)
@@ -115,12 +181,19 @@ impl<S: SecretStore> McpService<S> {
 
     /// 内置服务器总在最前；mcp.json 损坏时内置服务器照常列出
     pub fn list(&self) -> McpRegistryView {
-        let mut servers: Vec<McpServerView> = self.builtin.iter().map(|e| self.view(e, true)).collect();
+        let builtin = match self.builtin() {
+            Ok(entries) => entries.clone(),
+            Err(_) => return McpRegistryView {
+                path_hint: self.path_hint.clone(), servers: Vec::new(),
+                errors: vec![EntryError { id: "builtin".into(), message: "无法读取内置服务器配置".into() }],
+            },
+        };
+        let mut servers: Vec<McpServerView> = builtin.iter().map(|e| self.view(e, true)).collect();
         let mut errors = Vec::new();
         match self.user_registry() {
             Ok(r) => {
                 for e in r.entries.values() {
-                    if self.is_builtin(&e.id) {
+                    if builtin.iter().any(|entry| entry.id == e.id) {
                         errors.push(EntryError { id: e.id.clone(), message: "与内置 MCP 服务器同名，已忽略".into() });
                     } else {
                         servers.push(self.view(e, false));
@@ -171,27 +244,56 @@ impl<S: SecretStore> McpService<S> {
 
     /// 只能按 ID 启动登记过的服务器；返回启动时生效的配置（前端按它注册工具）
     pub fn start(&self, id: &str, on_line: LineFn, on_exit: LineFn) -> AppResult<McpServerView> {
+        self.start_for_connection(id, None, on_line, on_exit)
+    }
+
+    pub fn start_for_connection(&self, id: &str, connection: Option<&str>, on_line: LineFn, on_exit: LineFn) -> AppResult<McpServerView> {
+        let _lifecycle = self.lifecycle()?;
         let e = self.entry(id)?;
         let cfg = resolve(&e, &self.env, &self.secrets)?;
+        let mut policies = self.policies()?;
+        let mut connections = self.connections()?;
         self.host.start(&cfg, &self.env, on_line, on_exit)?;
-        self.policies()?.insert(e.id.clone(), e.allow_tools.clone());
-        Ok(self.view(&e, self.is_builtin(&e.id)))
+        policies.insert(e.id.clone(), e.allow_tools.clone());
+        if let Some(connection) = connection {
+            connections.insert(e.id.clone(), connection.into());
+        } else {
+            connections.remove(&e.id);
+        }
+        Ok(self.view(&e, self.is_builtin(&e.id)?))
     }
 
     pub fn send(&self, id: &str, line: &str) -> AppResult<()> {
+        self.send_for_connection(id, line, None)
+    }
+
+    pub fn send_for_connection(&self, id: &str, line: &str, connection: Option<&str>) -> AppResult<()> {
+        let _lifecycle = self.lifecycle()?;
+        self.check_connection(id, connection)?;
         let allow = self.policies()?.get(id).cloned();
         let allow = allow.ok_or_else(|| AppError::new("mcp_not_running", "这个 MCP 服务器没有运行"))?;
         self.host.send(id, &check_outgoing(line, &allow)?)
     }
 
     pub fn stop(&self, id: &str) -> AppResult<bool> {
+        self.stop_for_connection(id, None)
+    }
+
+    pub fn stop_for_connection(&self, id: &str, connection: Option<&str>) -> AppResult<bool> {
+        let _lifecycle = self.lifecycle()?;
+        self.check_connection(id, connection)?;
         self.policies()?.remove(id);
+        self.connections()?.remove(id);
         self.host.stop(id)
     }
 
     pub fn stop_all(&self) {
+        let Ok(_lifecycle) = self.lifecycle() else { return };
         if let Ok(mut p) = self.policies.lock() {
             p.clear();
+        }
+        if let Ok(mut connections) = self.connections.lock() {
+            connections.clear();
         }
         self.host.stop_all();
     }

@@ -1,0 +1,27 @@
+import type { Db } from "./db";
+import { GOAL_QUOTA_SQL } from "./db-goal-quota";
+import { GoalQuotaControlError } from "@/core/goal-quota";
+import type { Goal } from "@/decision/goal";
+import { encodeGoalEnvelope, type GoalQuotaEnvelope, type GoalQuotaPublication } from "./goal-quota-storage";
+const fields=["key","goal_id","enrollment_id","description","instructions","preference","status","rounds","updated_at","deleted_at","revision","old_status","owner","fence","task_id","execution_id","mode","authority_fence"];
+const cte=`WITH input AS (SELECT ${fields.map((f,i)=>`$${i+1} AS ${f}`).join(",")})`;
+const record=`(${GOAL_QUOTA_SQL.snapshot})`;
+const qfield=(f:string)=>`json_extract(q.value,'$.${f}')`;
+const live=`${qfield('lease_until')}>(SELECT updated_at FROM input) AND (SELECT updated_at FROM input)>=0 AND (SELECT updated_at FROM input)<=9007199254740991 AND (SELECT updated_at FROM input)=CAST((SELECT updated_at FROM input) AS INTEGER)`;
+const bound=`json_extract(goals.rounds,'$.execution.owner_id')=(SELECT owner FROM input) AND json_extract(goals.rounds,'$.execution.fence')=(SELECT fence FROM input) AND json_extract(goals.rounds,'$.execution.task_id')=(SELECT task_id FROM input) AND json_extract(goals.rounds,'$.execution.execution_id')=(SELECT execution_id FROM input)`;
+const authority=`EXISTS (SELECT 1 FROM ${record} q WHERE
+ ((SELECT mode FROM input)='owned' AND ${qfield('active')}=1 AND ${qfield('owner')}=(SELECT owner FROM input) AND ${qfield('fence')}=(SELECT fence FROM input) AND goals.status='running' AND (${live}) AND (${bound}))
+ OR ((SELECT mode FROM input)='stopped' AND ${qfield('active')}=0 AND ${qfield('owner')} IS NULL AND ${qfield('fence')}=(SELECT authority_fence FROM input) AND ${qfield('fence')}=(SELECT fence FROM input)+1 AND (${bound}))
+ OR ((SELECT mode FROM input)='inactive_user' AND ${qfield('active')}=0 AND ${qfield('fence')}=(SELECT authority_fence FROM input))
+ OR ((SELECT mode FROM input)='free_completed' AND ${qfield('active')}=0 AND ${qfield('fence')}=(SELECT authority_fence FROM input) AND (${bound}) AND json_extract(goals.rounds,'$.rounds[#-1].task_checkpoint.id')=(SELECT task_id FROM input) AND json_extract(goals.rounds,'$.rounds[#-1].task_checkpoint.goalId')=(SELECT goal_id FROM input) AND json_extract(goals.rounds,'$.rounds[#-1].task_checkpoint.status')='completed'))`;
+export const GOAL_PUBLICATION_SQL={
+ write:`${cte} UPDATE goals SET description=(SELECT description FROM input),instructions=(SELECT instructions FROM input),routing_preference=(SELECT preference FROM input),status=(SELECT status FROM input),rounds=(SELECT rounds FROM input),updated_at=CAST((SELECT updated_at FROM input) AS INTEGER),deleted_at=(SELECT deleted_at FROM input),used_llm_calls=(SELECT json_extract(q.value,'$.consumed') FROM ${record} q),max_llm_calls=(SELECT json_extract(q.value,'$.limit') FROM ${record} q)
+ WHERE id=(SELECT goal_id FROM input) AND deleted_at IS NULL AND status=(SELECT old_status FROM input) AND CASE WHEN json_valid(rounds)=1 THEN CASE WHEN json_type(rounds)='object' THEN json_extract(rounds,'$.protocol')='inclusive-goal-quota-v1' AND json_extract(rounds,'$.goal_id')=id AND json_extract(rounds,'$.enrollment_id')=(SELECT enrollment_id FROM input) AND json_type(rounds,'$.revision')='integer' AND json_extract(rounds,'$.revision')=(SELECT revision FROM input) AND (${authority}) ELSE 0 END ELSE 0 END=1`,
+ bind:`${cte} UPDATE goals SET rounds=(SELECT rounds FROM input),updated_at=CAST((SELECT updated_at FROM input) AS INTEGER)
+ WHERE id=(SELECT goal_id FROM input) AND deleted_at IS NULL AND status='running' AND CASE WHEN json_valid(rounds)=1 THEN CASE WHEN json_type(rounds)='object' THEN json_extract(rounds,'$.protocol')='inclusive-goal-quota-v1' AND json_extract(rounds,'$.goal_id')=id AND json_extract(rounds,'$.enrollment_id')=(SELECT enrollment_id FROM input) AND json_type(rounds,'$.revision')='integer' AND json_extract(rounds,'$.revision')=(SELECT revision FROM input) AND (json_type(rounds,'$.execution') IS NULL OR json_extract(rounds,'$.execution.fence')<(SELECT fence FROM input)) AND EXISTS (SELECT 1 FROM ${record} q WHERE ${qfield('active')}=1 AND ${qfield('owner')}=(SELECT owner FROM input) AND ${qfield('fence')}=(SELECT fence FROM input) AND (${live})) ELSE 0 END ELSE 0 END=1`,
+};
+export async function strictGoalExecute(db:Db,sql:string,args:unknown[]):Promise<void>{let result:unknown;try{result=await db.execute(sql,args);}catch{throw new GoalQuotaControlError("quota_storage_unknown");}if(typeof result!=="object"||result===null||Array.isArray(result))throw new GoalQuotaControlError("quota_storage_unknown");let n:unknown;try{n=(result as {rowsAffected?:unknown}).rowsAffected;}catch{throw new GoalQuotaControlError("quota_storage_unknown");}if(n===0)throw new GoalQuotaControlError("quota_denied");if(typeof n!=="number"||n!==1)throw new GoalQuotaControlError("quota_storage_unknown");}
+export function publicationArgs(cur:Goal,next:Goal,envelope:GoalQuotaEnvelope,proof:GoalQuotaPublication|null,mode:string,authorityFence:number):unknown[]{
+ if(!cur.quota)throw new GoalQuotaControlError("quota_protocol_invalid");
+ return[`goal-quota:v1:${cur.id}`,cur.id,cur.quota.enrollmentId,next.description,next.instructions,next.routing_preference,next.status,encodeGoalEnvelope(envelope),next.updated_at,next.status==="deleted"?next.updated_at:null,cur.quota.revision,cur.status,proof?.ownerId??null,proof?.fence??0,proof?.taskId??null,proof?.executionId??null,mode,authorityFence];
+}

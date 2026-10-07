@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // 从 docs/BRAND.md 中的 CSS 代码块提取 --eg-* 变量，生成：
 //   src/styles/brand-tokens.css —— 变量本身（品牌色 HEX 只允许出现在 BRAND.md 与这个文件里）
 //   src/styles/brand-theme.ts   —— Tailwind 主题（只引用 var(--eg-*)），由 tailwind.config.ts 使用
@@ -16,7 +15,7 @@ const OUT_TS = resolve(root, "src/styles/brand-theme.ts");
 export function extractTokens(markdown) {
   const tokens = [];
   const seen = new Set();
-  const blockRe = /```css\n([\s\S]*?)```/g;
+  const blockRe = /```css\r?\n([\s\S]*?)```/g;
   let m;
   while ((m = blockRe.exec(markdown))) {
     // 去掉注释后按分号切分，支持跨行的值（渐变、字体栈）

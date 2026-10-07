@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "kind": "isolated_checkpoint_store_string_error_fix_verification",
+  "createdAt": "2026-10-07T06:01:29.858616+00:00",
+  "immutableSourceRevision": "c16ae0274a9066709baf8047951675b299b76092",
+  "publicEquivalentHead": "2b509b7a4bd048412d442ad31360c7c7316a10d7",
+  "sourceCopyFiles": 733,
+  "privateConfigRead": false,
+  "excludedMemoryRead": false,
+  "repositoryOrGitEdited": false,
+  "nativeAppAxFixtureOrRealProviderRun": false,
+  "patch": {
+    "path": "/tmp/eastgenesis-goal-checkpoint-bsrvg_4n/frozen-evidence/checkpoint-store-error-propagation.patch",
+    "bytes": 15721,
+    "sha256": "1b17fa43521507485ba2a4b936b06dec3d7e583ff7b92f3e281f85346ca13741",
+    "files": [
+      {
+        "path": "src/lib/goal-run.ts",
+        "baseBytes": 6184,
+        "baseSha256": "95e672dbc753a4aa4128c0dc7af3f431cd7b82ec2263ebf7d65c9dead171b592",
+        "candidateBytes": 6257,
+        "candidateSha256": "dd0e3a2a75ee1a5b169200321c3457ff65546bf4943c1c3598e429890dad1a7c"
+      },
+      {
+        "path": "src/lib/goal-runner.ts",
+        "baseBytes": 11875,
+        "baseSha256": "e7c06cdd4c9d9229ea569271a2e82649f366341735620a82a252fc5c641e9378",
+        "candidateBytes": 12001,
+        "candidateSha256": "a21906de8ea3ec2754260fbf6257c0c0f00259e28cc006260a52dad63af7854a"
+      },
+      {
+        "path": "tests/goal-failed-recovery.test.ts",
+        "baseBytes": 10310,
+        "baseSha256": "ea3fa0e0a7d2c85bd219e422ce1a466470db0758e1c57219c1e864f0d368e793",
+        "candidateBytes": 16148,
+        "candidateSha256": "de14996489ddd81bcd9d56ba33641aab2f44c6defa17d28d8c57917ee9114c75"
+      },
+      {
+        "path": "tests/goal-runner.test.ts",
+        "baseBytes": 18655,
+        "baseSha256": "7bca9984d5cfa362ffe538fe34a530b48d5c1de63cb3c5437b99e685891ec774",
+        "candidateBytes": 19772,
+        "candidateSha256": "88cd1a508bf5c4eaa69b2f10fc6b4fa05788f6369a5887046e11ed8276960171"
+      }
+    ]
+  },
+  "diagnosis": {
+    "callChain": [
+      "backend.updateGoal throws storage error",
+      "useGoals.change catches AppError and does not replace Goal on failure",
+      "useGoals.apply returns error.message string",
+      "old production checkpointTask await ignored Goal|string",
+      "natural failed GoalRunner catch sees no rejection and prints recovery-success explanation"
+    ],
+    "exactGap": "Failure string swallowed by production Goal checkpoint adapter. Ordered stop must contain the resulting rejection and report an error without changing stop boolean.",
+    "riskBoundary": "This fails to acknowledge persistence errors. It does not immediately advance/new-task after failed status and does not prove inevitable side-effect replay. Existing task terminal checkpoint and before-side-effect checkpoint already validate string failures."
+  },
+  "changes": [
+    "goal-run.ts checks checkpoint result and throws on string, consistent with existing task-store checkpoint implementation.",
+    "GoalRunner.stopAndCheckpoint catches checkpoint rejection, emits fixed visible storage error and preserves existing stop-result boolean and stopped paused/interrupted state.",
+    "Existing synthetic recovery fixture now uses exported production goalRunner and real stores/backend/AgentRuntime; only model transport, local test tools, and completion verdict are synthetic.",
+    "New real backend throw→store string regressions cover natural failed direct checkpoint and actual pause stopper; ordered-stop unit boundary is also exercised."
+  ],
+  "red": {
+    "command": "pnpm exec vitest run --config vitest.checkpoint-isolated.config.ts tests/goal-failed-recovery.test.ts tests/goal-runner.test.ts --reporter=json --outputFile=/tmp/eastgenesis-goal-checkpoint-bsrvg_4n/red-vitest.json",
+    "actualExitCode": 1,
+    "files": 2,
+    "cases": 23,
+    "passed": 20,
+    "failed": 3,
+    "reportBytes": 10896,
+    "reportSha256": "6750fad41c07ec665633cb6e909a2eda6bddc3271e333b6f87d496362a6e162b",
+    "failures": [
+      {
+        "name": "Goal 执行失败保留原轮的真实任务恢复 真实 backend 写失败经 store 返回字符串时，停止并显示存储错误；显式恢复仍沿用同轮且不重放已写文件",
+        "message": [
+          "AssertionError: expected '这一轮执行出错，已暂停；继续时将恢复原任务' to be '无法保存任务恢复记录，请检查本地存储后继续' // Object.is equality\n    at /private/tmp/eastgenesis-goal-checkpoint-bsrvg_4n/source/tests/goal-failed-recovery.test.ts:194:41\n    at file:///Users/apple/Desktop/EastGenesis/node_modules/.pnpm/@vitest+runner@3.0.5/node_modules/@vitest/runner/dist/index.js:561:22"
+        ]
+      },
+      {
+        "name": "Goal 执行失败保留原轮的真实任务恢复 真实 pause stopper 的后端 checkpoint 错误字符串必须可见，原任务停止且不会恢复或重放",
+        "message": [
+          "AssertionError: expected '无法保存任务完成记录，请检查本地存储后继续' to be '无法保存任务恢复记录，请检查本地存储后继续' // Object.is equality\n    at /private/tmp/eastgenesis-goal-checkpoint-bsrvg_4n/source/tests/goal-failed-recovery.test.ts:245:41\n    at file:///Users/apple/Desktop/EastGenesis/node_modules/.pnpm/@vitest+runner@3.0.5/node_modules/@vitest/runner/dist/index.js:561:22"
+        ]
+      },
+      {
+        "name": "目标执行器：多轮循环 有序停止的 checkpoint 拒绝仍保留 stop boolean 和原轮，并报告可见固定存储错误",
+        "message": [
+          "Error: promise rejected \"Error: synthetic checkpoint exception mus…\" instead of resolving\n    at _Assertion.__VITEST_RESOLVES__ (file:///Users/apple/Desktop/EastGenesis/node_modules/.pnpm/@vitest+expect@3.0.5/node_modules/@vitest/expect/dist/index.js:1886:21)\n    at _Assertion.propertyGetter (file:///Users/apple/Desktop/EastGenesis/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1557:27)\n    at Reflect.get (<anonymous>)\n    at Object.proxyGetter [as get] (file:///Users/apple/Desktop/EastGenesis/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1645:22)\n    at /private/tmp/eastgenesis-goal-checkpoint-bsrvg_4n/source/tests/goal-runner.test.ts:104:48\n    at file:///Users/apple/Desktop/EastGenesis/node_modules/.pnpm/@vitest+runner@3.0.5/node_modules/@vitest/runner/dist/index.js:561:22"
+        ]
+      }
+    ]
+  },
+  "green": {
+    "command": "pnpm exec vitest run --config vitest.checkpoint-isolated.config.ts tests/goal-failed-recovery.test.ts tests/goal-runner.test.ts tests/goal-store.test.ts tests/ui-goal-run.test.tsx --reporter=json --outputFile=/tmp/eastgenesis-goal-checkpoint-bsrvg_4n/green-vitest.json",
+    "actualExitCode": 0,
+    "files": 4,
+    "cases": 45,
+    "passed": 45,
+    "failed": 0,
+    "perFile": [
+      {
+        "file": "tests/goal-failed-recovery.test.ts",
+        "passed": 4,
+        "failed": 0
+      },
+      {
+        "file": "tests/goal-runner.test.ts",
+        "passed": 19,
+        "failed": 0
+      },
+      {
+        "file": "tests/goal-store.test.ts",
+        "passed": 9,
+        "failed": 0
+      },
+      {
+        "file": "tests/ui-goal-run.test.tsx",
+        "passed": 13,
+        "failed": 0
+      }
+    ],
+    "sameRedFilePopulation23NowPassed": true,
+    "reportBytes": 17149,
+    "reportSha256": "63a3f06485bd8e2598f9d4e2311cff84d46c374d2b1c0897faa62a22f85b991f"
+  },
+  "typecheck": {
+    "command": "pnpm run typecheck",
+    "cwd": "/tmp/eastgenesis-goal-checkpoint-bsrvg_4n/source",
+    "actualExitCode": 0,
+    "execSession": 23569,
+    "initialToolChunk": "f9f2be",
+    "terminalToolChunk": "6d2c1f",
+    "actualStdout": "> eastgenesis-desktop@0.1.0 typecheck /private/tmp/eastgenesis-goal-checkpoint-bsrvg_4n/source\n> tsc -b\n",
+    "terminalStdout": "",
+    "executedInIsolatedCopy": true
+  },
+  "proven": [
+    "Real backend fault becomes a store string, not a fake throw-only checkpoint.",
+    "Natural failure storage error remains visible rather than being overwritten by a recovery-success explanation.",
+    "Actual pause stops and reports checkpoint storage error without rejecting its pause promise.",
+    "Same Goal ID/task ID/round retained; paused/interrupted state and runner exit remain honest; no automatic verifier, new round/task/resume occurs.",
+    "After natural failed direct write error, the previously valid persisted terminal checkpoint is loaded from backend and hydrated; explicit recovery runs only summary, logical calls3→4, one file read and one file write.",
+    "Owned output file inode/mtime/hash unchanged across explicit recovery; used model calls remain accounted.",
+    "Adjacent existing store and UI task-completion-write-failure regressions remain green."
+  ],
+  "notProven": [
+    "Freshness of every stale checkpoint or blocking every possible resume after an earlier durable snapshot exists.",
+    "Elimination of all replay risks under storage corruption, concurrent writers or process death.",
+    "Native desktop AX/installation/signing, actual SQLite disk faults, external model/provider availability or full same-Goal native recovery."
+  ],
+  "limits": [
+    "Synthetic backend is real production store contract with injected backend rejection; it is not the native SQLite driver.",
+    "Natural-failure fault injection is deliberately restricted to paused/interrupted checkpoint writes because task finally already persists the terminal snapshot while still running.",
+    "Pause fault may also reject task finally writes after interruption; both are stopped/error states and no user resume is attempted in that test.",
+    "No schemas, ledger rules, permission rules, state machine gates, task identity or recovery-freshness gate are changed.",
+    "The patch remains only under /tmp and has not been applied to repository or pushed."
+  ]
+}

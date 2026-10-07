@@ -1,0 +1,560 @@
+{
+  "schemaVersion": 1,
+  "kind": "immutable-three-platform-ci-terminal-audit",
+  "auditedAt": "2026-10-07T06:51:36.037389+00:00",
+  "run": {
+    "id": 37580929560,
+    "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37580929560",
+    "number": 45,
+    "attempt": 1,
+    "event": "pull_request",
+    "head": "1c739f737e74b62d49d715b61fb6f04cb74ac122",
+    "tree": "ce6c3a9f9a4427fecb40c6939a1501b1c48fa3ae",
+    "createdAt": "2026-10-07T06:20:04Z",
+    "updatedAt": "2026-10-07T06:43:15Z",
+    "status": "completed",
+    "conclusion": "failure",
+    "freshApi": "api/run-final-confirmation.json",
+    "observationTimeoutWasNotUsedAsResult": true,
+    "watchSession": 74498,
+    "watchTerminalExitCode": 0
+  },
+  "sourceBinding": {
+    "localCommit": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+    "publicCommit": "1c739f737e74b62d49d715b61fb6f04cb74ac122",
+    "files": 754,
+    "allPublicLocalBlobAndModesEqual": true,
+    "localTreeEntriesIncludingExcludedMemory": 755,
+    "memoryExcluded": true,
+    "archiveBytes": 20224000,
+    "archiveSha256": "1887df1f688fc1fefeae118acc24676a38722d05d8e1f5f42e6eaf4139f39a1f",
+    "publicSoleParent": "e8b5d61f107fba9a580a7a856613b6280b89c0ec",
+    "selectedSources": 24,
+    "selectedSourcesGitBlobContentVerified": true,
+    "currentWorktreeNotUsedAsImmutableSource": true,
+    "paths": [
+      "source-binding.json",
+      "publisher-binding.json",
+      "source-selected-index.json",
+      "api/public-git-commit.json"
+    ]
+  },
+  "jobs": [
+    {
+      "id": 112660171376,
+      "platform": "ubuntu-latest",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T06:20:07Z",
+      "completedAt": "2026-10-07T06:33:20Z",
+      "failedSteps": [],
+      "skippedSteps": [
+        {
+          "number": 20,
+          "name": "Build unsigned QA desktop bundle with WebView2 automation args"
+        },
+        {
+          "number": 21,
+          "name": "Build isolated Windows installation QA fixture"
+        },
+        {
+          "number": 22,
+          "name": "Smoke-test real Windows NSIS installation lifecycle"
+        },
+        {
+          "number": 23,
+          "name": "Restore standard Windows QA build for WebDriver"
+        },
+        {
+          "number": 25,
+          "name": "Install matching Edge WebDriver"
+        },
+        {
+          "number": 27,
+          "name": "Record Windows WebView2 diagnostics"
+        },
+        {
+          "number": 31,
+          "name": "Record macOS WebDriver boundary"
+        },
+        {
+          "number": 35,
+          "name": "Smoke-test the packaged Mac binary"
+        }
+      ]
+    },
+    {
+      "id": 112660171518,
+      "platform": "macos-latest",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T06:20:12Z",
+      "completedAt": "2026-10-07T06:32:23Z",
+      "failedSteps": [],
+      "skippedSteps": [
+        {
+          "number": 6,
+          "name": "Install Linux WebView dependencies"
+        },
+        {
+          "number": 20,
+          "name": "Build unsigned QA desktop bundle with WebView2 automation args"
+        },
+        {
+          "number": 21,
+          "name": "Build isolated Windows installation QA fixture"
+        },
+        {
+          "number": 22,
+          "name": "Smoke-test real Windows NSIS installation lifecycle"
+        },
+        {
+          "number": 23,
+          "name": "Restore standard Windows QA build for WebDriver"
+        },
+        {
+          "number": 24,
+          "name": "Install Tauri WebDriver"
+        },
+        {
+          "number": 25,
+          "name": "Install matching Edge WebDriver"
+        },
+        {
+          "number": 26,
+          "name": "Record native WebView environment"
+        },
+        {
+          "number": 27,
+          "name": "Record Windows WebView2 diagnostics"
+        },
+        {
+          "number": 28,
+          "name": "Probe native Linux WebDriver"
+        },
+        {
+          "number": 29,
+          "name": "Run native WebView DOM smoke"
+        },
+        {
+          "number": 30,
+          "name": "Upload WebDriver diagnostics"
+        },
+        {
+          "number": 33,
+          "name": "Smoke-test extracted Linux Debian package"
+        },
+        {
+          "number": 34,
+          "name": "Build Linux upgrade QA fixture and test real dpkg lifecycle"
+        }
+      ]
+    },
+    {
+      "id": 112660171525,
+      "platform": "windows-latest",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-10-07T06:20:06Z",
+      "completedAt": "2026-10-07T06:43:15Z",
+      "failedSteps": [
+        {
+          "number": 22,
+          "name": "Smoke-test real Windows NSIS installation lifecycle"
+        }
+      ],
+      "skippedSteps": [
+        {
+          "number": 6,
+          "name": "Install Linux WebView dependencies"
+        },
+        {
+          "number": 19,
+          "name": "Build unsigned QA desktop bundle"
+        },
+        {
+          "number": 23,
+          "name": "Restore standard Windows QA build for WebDriver"
+        },
+        {
+          "number": 24,
+          "name": "Install Tauri WebDriver"
+        },
+        {
+          "number": 25,
+          "name": "Install matching Edge WebDriver"
+        },
+        {
+          "number": 26,
+          "name": "Record native WebView environment"
+        },
+        {
+          "number": 27,
+          "name": "Record Windows WebView2 diagnostics"
+        },
+        {
+          "number": 28,
+          "name": "Probe native Linux WebDriver"
+        },
+        {
+          "number": 29,
+          "name": "Run native WebView DOM smoke"
+        },
+        {
+          "number": 31,
+          "name": "Record macOS WebDriver boundary"
+        },
+        {
+          "number": 32,
+          "name": "Check platform bundle artifacts"
+        },
+        {
+          "number": 33,
+          "name": "Smoke-test extracted Linux Debian package"
+        },
+        {
+          "number": 34,
+          "name": "Build Linux upgrade QA fixture and test real dpkg lifecycle"
+        },
+        {
+          "number": 35,
+          "name": "Smoke-test the packaged Mac binary"
+        },
+        {
+          "number": 36,
+          "name": "Validate runner evidence collection"
+        },
+        {
+          "number": 72,
+          "name": "Post Set up Node.js"
+        }
+      ]
+    }
+  ],
+  "frontend": {
+    "uniqueCaseCatalog": 1076,
+    "catalogFiles": 108,
+    "macos": {
+      "coldPassed": 1065,
+      "coldSkipped": 11,
+      "nativeMcpReexecutionPassed": 15,
+      "nativePreviouslySkippedCovered": 11,
+      "nativeAlreadyPassedDuplicates": 4,
+      "finalUniquePassed": 1076,
+      "finalUniqueSkipped": 0
+    },
+    "linux": {
+      "coldPassed": 1065,
+      "coldSkipped": 11,
+      "nativeMcpReexecutionPassed": 15,
+      "nativePreviouslySkippedCovered": 11,
+      "nativeAlreadyPassedDuplicates": 4,
+      "finalUniquePassed": 1076,
+      "finalUniqueSkipped": 0
+    },
+    "windows": {
+      "coldPassed": 1059,
+      "coldSkipped": 17,
+      "nativeMcpReexecutionPassed": 15,
+      "nativePreviouslySkippedCovered": 11,
+      "nativeAlreadyPassedDuplicates": 4,
+      "finalUniquePassed": 1070,
+      "finalUniqueSkipped": 6,
+      "remainingSkippedFile": "tests/desktop-process-cleanup.test.ts",
+      "remainingSkipsAreUnixProcessGroupCases": true
+    },
+    "crossProcessRerunCases": 3,
+    "crossProcessRerunAddedToUniqueTotal": false,
+    "nativeFilesAndColdSkips": {
+      "tests/mcp-files.test.ts": {
+        "nativeCases": 6,
+        "coldSkipped": 6
+      },
+      "tests/memory-skill-e2e.test.ts": {
+        "nativeCases": 4,
+        "coldSkipped": 1
+      },
+      "tests/killer-scenario.test.ts": {
+        "nativeCases": 5,
+        "coldSkipped": 4
+      }
+    },
+    "windowsInstallContractTests": 30,
+    "windowsInstallContractPassDoesNotProveRealNsisPassed": true
+  },
+  "rust": {
+    "macos": {
+      "defaultDesktopLibrary": 36,
+      "defaultCore": 90,
+      "defaultMcpIntegrationSummaries": [
+        3,
+        2
+      ],
+      "defaultSql": 12,
+      "defaultSqlDoc": 1,
+      "qaDesktopLibrary": 35,
+      "qaCore": 90,
+      "qaMcpIntegrationSummaries": [
+        3,
+        2
+      ],
+      "qaSql": 18,
+      "qaSqlDoc": 1
+    },
+    "linux": {
+      "defaultDesktopLibrary": 36,
+      "defaultCore": 90,
+      "defaultMcpIntegrationSummaries": [
+        3,
+        2
+      ],
+      "defaultSql": 12,
+      "defaultSqlDoc": 1,
+      "qaDesktopLibrary": 35,
+      "qaCore": 90,
+      "qaMcpIntegrationSummaries": [
+        3,
+        2
+      ],
+      "qaSql": 18,
+      "qaSqlDoc": 1
+    },
+    "windows": {
+      "defaultDesktopLibrary": 36,
+      "defaultCore": 80,
+      "defaultMcpIntegrationSummaries": [
+        3,
+        2
+      ],
+      "defaultSql": 13,
+      "defaultSqlDoc": 1,
+      "qaDesktopLibrary": 35,
+      "qaCore": 80,
+      "qaMcpIntegrationSummaries": [
+        3,
+        2
+      ],
+      "qaSql": 19,
+      "qaSqlDoc": 1
+    },
+    "distinctFeaturesAndRepeatedExecutionsNotAddedAsUniqueCases": true,
+    "windowsCleanupRegressionActualRows": {
+      "shortLockReleaseThenRealDeleteSucceeded": [
+        2421,
+        2691
+      ],
+      "persistentLockRemainedFatalAfterBudget": [
+        2425,
+        2697
+      ],
+      "unchangedDatabaseReopenRegression": [
+        2423,
+        2694
+      ]
+    },
+    "windowsOnlyLockTestsCompiledAndExecuted": true,
+    "windowsOnlyLockTestsNotCompiledOnMacOrLinux": true,
+    "macCargoBannersInterleaved": true,
+    "rustParserLastPriorBannerIsNotAnUnambiguousExecutableAttribution": true
+  },
+  "firstFailure": {
+    "platform": "windows",
+    "job": 112660171525,
+    "step": 22,
+    "stepName": "Smoke-test real Windows NSIS installation lifecycle",
+    "rawLog": "logs/job-112660171525.log",
+    "actualStdout": "stdout/job-112660171525-00-desktop-windows-install-smoke.json",
+    "actualStdoutLines": [
+      3296,
+      3648
+    ],
+    "cycle": 1,
+    "stage": "process_job",
+    "typedSubstage": "process_create",
+    "win32Error": 123,
+    "hresult": null,
+    "suspendCount": null,
+    "elapsedMs": 4468,
+    "stableWindowPassed": true,
+    "rootProcessAlive": true,
+    "rootWindowPresent": true,
+    "jobActiveProcessCountAtFailure": 8,
+    "databaseExists": true,
+    "externalProbeAttempts": 1,
+    "externalProbeFailures": 1,
+    "startupTraceComplete": true,
+    "startupTraceRecords": 36,
+    "lastStartupStage": "frontend_ready",
+    "applicationConnectMigrationAndFrontendReadyObserved": true,
+    "externalSchema7NotVerified": true,
+    "successfulLaunches": 0,
+    "samePackageRepairNotReached": true,
+    "cycle2NotReached": true,
+    "windowsDomNotReached": true,
+    "nsisInstallAndRegistryPassed": true,
+    "nsisUninstallBinaryAndRegistryCleanupPassed": true,
+    "actualWorkingDirectoryAndCommandNotRecorded": true,
+    "specificInvalidInputRootCauseNotEstablishedBy123Alone": true
+  },
+  "linux": {
+    "nativeWebviewDom": {
+      "passed": true,
+      "actualTauri": true,
+      "scenarios": [
+        {
+          "name": "staged",
+          "passed": true,
+          "checks": {
+            "streamingFirstChunk": true,
+            "completedResult": true
+          },
+          "firstBodyDeltaMs": 93,
+          "terminalObservedMs": 745
+        },
+        {
+          "name": "slow-first-token",
+          "passed": true,
+          "checks": {
+            "streamingFirstChunk": true,
+            "completedResult": true
+          },
+          "firstBodyDeltaMs": 349,
+          "terminalObservedMs": 985
+        },
+        {
+          "name": "truncated",
+          "passed": true,
+          "checks": {
+            "partialOutputPreserved": true,
+            "terminalFailureVisible": true
+          },
+          "firstBodyDeltaMs": 52,
+          "terminalObservedMs": 231
+        },
+        {
+          "name": "idle-cancel",
+          "passed": true,
+          "checks": {
+            "cancelControl": true,
+            "cancelledResult": true
+          },
+          "firstBodyDeltaMs": null,
+          "terminalObservedMs": 440
+        }
+      ],
+      "nPerScenario": 1,
+      "descriptiveOnly": true,
+      "firstPaintOrRealModelFirstTokenClaimed": false
+    },
+    "debExtract": {
+      "version": "0.1.0",
+      "bytes": 6696504,
+      "schemaVersion": 7,
+      "systemDpkgChanged": false,
+      "processGroupGone": true,
+      "zombieCount": 0
+    },
+    "dpkgQaUpgrade": {
+      "versions": [
+        "0.1.0",
+        "0.1.1"
+      ],
+      "bytes": [
+        6696504,
+        6696512
+      ],
+      "systemDpkgChanged": true,
+      "schemaVersionBoth": 7,
+      "installedProcessIdentityBoth": true,
+      "stableWindowMsBoth": 4000,
+      "sentinelRetained": true,
+      "purgeCleanupVerified": true,
+      "codeOrSchemaChangeBetweenReleasesProven": false,
+      "autoUpdaterOrRollbackProven": false
+    }
+  },
+  "macos": {
+    "unsignedQaAppLogSizeMiB": 11.37,
+    "unsignedDmgLogSizeMiB": 6.61,
+    "actualDmgBytes": 6929037,
+    "packageSmokePassed": true,
+    "actualWebviewDom": "not_run",
+    "webdriverUnsupportedBoundary": "tauri-driver macOS platform",
+    "macNotRunJsonAppearsOnlyInCommandEchoAndWasNotCountedAsActualStdout": true
+  },
+  "actualKindBearingStdout": [
+    {
+      "path": "stdout/job-112660171376-00-desktop-install-smoke.json",
+      "kind": "desktop-install-smoke",
+      "platform": "linux",
+      "passed": true,
+      "sha256": "bb64cd9946605924ecd32abb656b055f1ceda09d2692f1c5923eee7fae12175c"
+    },
+    {
+      "path": "stdout/job-112660171376-01-desktop-linux-upgrade-smoke.json",
+      "kind": "desktop-linux-upgrade-smoke",
+      "platform": "linux",
+      "passed": true,
+      "sha256": "a28193e240e383ba26f5e5158d20f1d4050ada672ed6a181b07cd3c0a83fd1dc"
+    },
+    {
+      "path": "stdout/job-112660171376-02-desktop-runner-evidence.json",
+      "kind": "desktop-runner-evidence",
+      "platform": "linux",
+      "passed": true,
+      "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde"
+    },
+    {
+      "path": "stdout/job-112660171518-00-desktop-runner-evidence.json",
+      "kind": "desktop-runner-evidence",
+      "platform": "macos",
+      "passed": true,
+      "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e"
+    },
+    {
+      "path": "stdout/job-112660171525-00-desktop-windows-install-smoke.json",
+      "kind": "desktop-windows-install-smoke",
+      "platform": "windows",
+      "passed": false,
+      "sha256": "f1cdf747428001f4c65d35c3f96706c5883ac49bfdd592352e613b800c47d84d"
+    }
+  ],
+  "actualStdoutCount": 5,
+  "commandEchoWasExcluded": true,
+  "artifacts": {
+    "smallDiagnosticsDownloaded": [
+      {
+        "id": 11464403865,
+        "name": "eastgenesis-webdriver-diagnostics-Linux",
+        "bytes": 6805,
+        "sha256": "f51e2448f3bc8dedcf8395dfb3c039f9f8615e8be508d4394a5a1e0e87c26bcf",
+        "githubDigestMatched": true
+      }
+    ],
+    "desktopBundlesNotDownloaded": [
+      {
+        "platform": "Windows",
+        "bytes": 12202246
+      },
+      {
+        "platform": "macOS",
+        "bytes": 13957192
+      },
+      {
+        "platform": "Linux",
+        "bytes": 228233518
+      }
+    ]
+  },
+  "boundaries": {
+    "repositoryOrGitMutation": false,
+    "privateConfigurationRead": false,
+    "appOrAXExecutedByCapture": false,
+    "cancelOrRerunRequested": false,
+    "realProviderAvailabilityProven": false,
+    "nativeFullGoalRecoveryOrUserSideEffectsProvenByThisCi": false,
+    "productionSigningOrSmartScreenOrNotarizationProven": false,
+    "testsWithApiStepSuccessButNoBundleJsonDownloadedAreNotGivenInventedScores": true,
+    "earlyOneLineOnlyMacParseIsIncompleteAndSuperseded": "analysis/job-112660171518-terminal-parse.json"
+  }
+}

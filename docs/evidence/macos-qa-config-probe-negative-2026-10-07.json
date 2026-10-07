@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "qa-compiled-config-probe-negative-native",
+  "platform": "macos-x86_64",
+  "createdAt": "2026-10-06T21:25:53.999082+00:00",
+  "binarySha256": "56405de93a809cb6cfaedb5e74430592c59890f96cac918142e4312a63c6000d",
+  "supportMarkerPresent": true,
+  "exitCode": 1,
+  "probe": {
+    "schemaVersion": 1,
+    "kind": "desktop-qa-install-isolation",
+    "passed": false,
+    "qaFaultsEnabled": true,
+    "isolatedAppDirectories": false,
+    "appDirectoriesOverride": null,
+    "errors": [
+      "qa_isolation_missing"
+    ]
+  },
+  "temporaryHomeUnchanged": true,
+  "guiLaunched": false,
+  "privateConfigRead": false,
+  "realProviderCalls": false,
+  "evidenceBoundary": {
+    "proven": [
+      "actual compiled QA executable rejects missing embedded isolation before normal app startup",
+      "explicit probe exits without creating files in owned HOME"
+    ],
+    "excluded": [
+      "Windows PE/PowerShell protocol or NSIS success",
+      "feature-off binary native execution",
+      "positive embedded-isolation native execution",
+      "formal release binding"
+    ]
+  }
+}

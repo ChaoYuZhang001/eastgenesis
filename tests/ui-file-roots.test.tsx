@@ -61,6 +61,24 @@ describe("允许目录：设置页", () => {
     await waitFor(() => expect(started).toEqual(["files"]), LONG);
   });
 
+  it("目录已保存但服务器重启失败时，保留目录并把重启错误显示出来", async () => {
+    const backend = resetStores();
+    backend.mcpStart = async () => {
+      throw new Error("fixture restart failed");
+    };
+    useMcp.setState({ registry: { path_hint: "~/mcp.json", servers: [BUILTIN], errors: [] } });
+
+    await act(async () => {
+      render(<McpServerCard server={BUILTIN} />);
+    });
+    fireEvent.change(await screen.findByLabelText("要加入允许列表的文件夹", {}, LONG), { target: { value: "~/Documents/合同" } });
+    fireEvent.click(screen.getByRole("button", { name: "加入" }));
+
+    const list = await screen.findByRole("list", { name: "允许访问的目录" }, LONG);
+    await waitFor(() => expect(within(list).getByText("~/Documents/合同")).toBeInTheDocument(), LONG);
+    await waitFor(() => expect(screen.getAllByRole("alert").some((x) => x.textContent?.includes("fixture restart failed"))).toBe(true), LONG);
+  });
+
   it("不合法的路径显示错误，列表不变；移除用户加的目录后又重启一次", async () => {
     const backend = resetStores();
     const started: string[] = [];

@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "kind": "desktop-readiness-diagnostics-local-validation",
+  "recordedAtUtc": "2026-10-06T23:01:35.825779+00:00",
+  "workingTreeParentCommit": "d53d129168691e5e9979c5510d78614c4877d68b",
+  "basePublicSnapshot": "537e93c362ab74ffd3b54dea78301755b42fb957",
+  "frontend": {
+    "testFiles": 96,
+    "testsPassed": 900,
+    "workerCount": 2,
+    "startTimeLocal": "2026-10-07 06:59:27 Asia/Shanghai",
+    "durationSeconds": 66.25,
+    "typecheck": "passed",
+    "qaFrontendBuild": "passed",
+    "privateSyntheticConfigSmoke": {
+      "testsPassed": 54,
+      "privateConfigurationRead": false,
+      "realProviderCalls": false
+    },
+    "measurementToolNarrowTests": 44
+  },
+  "logBindings": {
+    "full-tests": {
+      "bytes": 44963,
+      "sha256": "68b985cef6a445ff7281b191e25444b3b66cff1e5d5fe683542a9fc9cb4942e6"
+    },
+    "publish-typecheck": {
+      "bytes": 82,
+      "sha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba"
+    },
+    "qa-build": {
+      "bytes": 5173,
+      "sha256": "95df01e1a64d3b8b3f3ef853e2b3ded05fccbb1bed3fa24124d9b4c06ad10cc7"
+    },
+    "private-config-smoke": {
+      "bytes": 494,
+      "sha256": "9d2abb5151a2fced0335ca212cd9df95137680916eece18da17933877052e279"
+    },
+    "tools-tests": {
+      "bytes": 594,
+      "sha256": "1583d936f870b669b3620f755c0b4d647199ddae1b32bc2d3245f46b40fa502c"
+    }
+  },
+  "ipcObserver": {
+    "source": "tauri_debug_callback_map_arrival",
+    "origin": "before_webdriver_click_command",
+    "testsPassed": 7,
+    "actualInstalledChannelApiTested": true,
+    "nativeWebDriverValidation": "not_run",
+    "performanceBaseline": false,
+    "payloadRetention": false,
+    "firstModelTokenProven": false,
+    "sourceHashes": {
+      "tools/desktop-ipc-timing.mjs": "db358bb599756875cc62f128215423e0e7ceb509f31cc515a186645d7b2ab8d6",
+      "tools/desktop-ipc-timing.d.mts": "ba0855483935222a98887fa49a1d3fa8487e2e71c63e9c0f6dfda17c35f18a9b",
+      "tools/desktop-webdriver-smoke.mjs": "ca4589cdf3a6610e2a401639d8d9905b57ced9f0f34cf9c00de4a7ad84fbaded",
+      "tools/desktop-webdriver-summary.mjs": "ef371486d34a61ed147388fc009f958a6cc796e17bae1ea6d46408f540560d67",
+      "tests/desktop-ipc-timing.test.ts": "550ab5e794700eb233a1ea872bd48071b72ea617231dcd032ae2aaa382edaadc",
+      "tests/desktop-webdriver-summary.test.ts": "099bcf1dc41ccae19f7881ecde4cd04d37eef59381e7bd53a77edf6c5b4b2e11"
+    }
+  },
+  "windowsDiagnostics": {
+    "schemaVersion": 1,
+    "kind": "windows-startup-diagnostics-patch-capture",
+    "baseCiRunId": 37539711370,
+    "baseCiHeadSha": "537e93c362ab74ffd3b54dea78301755b42fb957",
+    "workingTreeHead": "d53d129168691e5e9979c5510d78614c4877d68b",
+    "frozenAtUtc": "2026-10-06T22:58:42.486357+00:00",
+    "files": [
+      {
+        "repositoryPath": "EastGenesis/tools/desktop-windows-install-smoke.ps1",
+        "bytes": 37671,
+        "sha256": "c1f7349d4175331e237ac6ac49e205f2bba75496d31be842438506089deb3597"
+      },
+      {
+        "repositoryPath": "EastGenesis/tools/desktop-windows-install-smoke.mjs",
+        "bytes": 20593,
+        "sha256": "4970460fa22fa87bbd183e77917f39fbf1ef5c0fad2995a07fb0c0162c3835eb"
+      },
+      {
+        "repositoryPath": "EastGenesis/tools/desktop-windows-install-smoke.d.mts",
+        "bytes": 2242,
+        "sha256": "8bf605cf57153766fcd39cf538162f8d0b5d383416d586bac7a51b56c20a4d2b"
+      },
+      {
+        "repositoryPath": "EastGenesis/tests/desktop-windows-install-smoke.test.ts",
+        "bytes": 26217,
+        "sha256": "ff74387e645334bdd87a9323d1167a5895a6ffd7f83580ae2b3f6735e8eaae95"
+      }
+    ],
+    "patch": {
+      "name": "windows-startup-diagnostics.patch",
+      "bytes": 33118,
+      "sha256": "202af673338b04b82a1713b8aa013eb97f80de81abda0b0c38104ff24e81ad48"
+    },
+    "validation": {
+      "vitestFile": "tests/desktop-windows-install-smoke.test.ts",
+      "testsPassed": 24,
+      "testsTotal": 24,
+      "testDurationSeconds": 1.83,
+      "actualEmbeddedPythonProbeExecuted": true,
+      "pythonSchemaSuccess": true,
+      "pythonMissingAppMetaFixedSchemaQueryFailure": true,
+      "pythonFailureStdoutEmpty": true,
+      "pythonFailureStderrEmpty": true,
+      "nodeSyntaxCheck": "passed",
+      "diffWhitespaceCheck": "passed",
+      "powershellExecution": "not_run",
+      "windowsNativeExecution": "not_run",
+      "fullFrontendTypecheck": "not_run_by_subagent",
+      "fullFrontendTests": "not_run_by_subagent"
+    },
+    "preservedGates": [
+      "full expected NSIS payload SHA256",
+      "embedded configuration isolation probe",
+      "four-second startup stability",
+      "two actual NSIS cycles",
+      "uninstall/registry/process cleanup"
+    ],
+    "failureCauseConclusion": "base CI database_timeout remains unexplained; path/source review does not justify a production startup fix"
+  },
+  "nativeStartup": {
+    "report": "docs/evidence/macos-startup-performance-2026-10-07.json",
+    "sha256": "292deac6c490ebdf1509eec7d902aaf3b421c66690cdb32f105653bf2757f94c",
+    "pairs": 20,
+    "samplesPassed": 40,
+    "inferenceRequests": 0,
+    "allPlatformsStartupBaseline": false
+  },
+  "nativeSamplerCalibration": {
+    "report": "docs/evidence/macos-process-sampler-frozen-validation-2026-10-07.json",
+    "sha256": "8101f529dcc2ac13f26988a661647c098e48d2742f32cb1f2a9e23fd00bea13c",
+    "platform": "darwin",
+    "independentWindows": 1,
+    "eastgenesisResourceBaseline": false
+  },
+  "prePublishScan": {
+    "passed": true,
+    "worktree": {
+      "files": 586,
+      "bytes": 11649845,
+      "forbiddenNames": 0,
+      "fixtureMatches": 31,
+      "unexpectedCount": 0
+    },
+    "history": {
+      "diffLines": 5450,
+      "fixtureMatches": 31,
+      "unexpectedCount": 0
+    },
+    "unexpected": []
+  },
+  "evidenceBoundary": {
+    "excluded": [
+      "Windows new PowerShell/native execution",
+      "real Provider and failover",
+      "production cross-version/schema migration",
+      "three-platform startup/token/resource performance baseline",
+      "signing/notarization",
+      "formal release binding"
+    ],
+    "newRustSourceChanges": false,
+    "rustEvidence": "Production Rust source is unchanged; base snapshot 537 ordinary/QA workspace CI results remain separately bound."
+  }
+}

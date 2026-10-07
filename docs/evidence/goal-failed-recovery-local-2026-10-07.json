@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-07T03:45:10.662750+00:00",
+  "passed": true,
+  "scope": "synthetic Runtime/task-store/goal-runner recovery; not native GUI or real-provider proof",
+  "changedFiles": [
+    "src/lib/goal-runner.ts",
+    "src/stores/tasks.ts",
+    "tests/goal-runner.test.ts",
+    "tests/goal-failed-recovery.test.ts"
+  ],
+  "unchangedAccountingProjection": "src/lib/run-evidence.ts",
+  "finalValidationSourceHashes": {
+    "src/lib/goal-runner.ts": "e7c06cdd4c9d9229ea569271a2e82649f366341735620a82a252fc5c641e9378",
+    "src/stores/tasks.ts": "b3d77614d0d8fc8d18fa1472f38d16c73f5825cebd8fcfb22933954f6c05fb9e",
+    "src/lib/run-evidence.ts": "ea45d2362faa723617342a9b151df6c03ec9f479d08cbe1d325a5b59f0b39c85",
+    "tests/goal-runner.test.ts": "7bca9984d5cfa362ffe538fe34a530b48d5c1de63cb3c5437b99e685891ec774",
+    "tests/goal-failed-recovery.test.ts": "ea3fa0e0a7d2c85bd219e422ce1a466470db0758e1c57219c1e864f0d368e793"
+  },
+  "finalValidationSourceEndHashes": {
+    "src/lib/goal-runner.ts": "e7c06cdd4c9d9229ea569271a2e82649f366341735620a82a252fc5c641e9378",
+    "src/stores/tasks.ts": "b3d77614d0d8fc8d18fa1472f38d16c73f5825cebd8fcfb22933954f6c05fb9e",
+    "src/lib/run-evidence.ts": "ea45d2362faa723617342a9b151df6c03ec9f479d08cbe1d325a5b59f0b39c85",
+    "tests/goal-runner.test.ts": "7bca9984d5cfa362ffe538fe34a530b48d5c1de63cb3c5437b99e685891ec774",
+    "tests/goal-failed-recovery.test.ts": "ea3fa0e0a7d2c85bd219e422ce1a466470db0758e1c57219c1e864f0d368e793"
+  },
+  "sourceUnchanged": true,
+  "preImplementationProductionHashes": {
+    "src/lib/goal-runner.ts": "a2a4d44cfffdaac8000ab4fd0b91b93171145726467f37df07f83f00a830a93f",
+    "src/stores/tasks.ts": "1608449c662b9aadd81ff283fa69851e7de4e2c65828844046a4d31d75acaac9",
+    "src/lib/run-evidence.ts": "ea45d2362faa723617342a9b151df6c03ec9f479d08cbe1d325a5b59f0b39c85"
+  },
+  "logs": [
+    {
+      "stage": "initial_red",
+      "path": "/tmp/eastgenesis-goal-failed-recovery-red.log",
+      "exitCode": 1,
+      "counts": {
+        "files": 1,
+        "failed": 2,
+        "passed": 0
+      },
+      "sha256": "40398c53ef1e49493fcf5e4c707aa784cb5bcd67cfb92c64c8cbc22e3ec7eac1",
+      "bytes": 2437,
+      "interpretation": "Initial real Runtime/store scenario proves goal failed instead of paused; synthetic direct ProviderError does not emit llm_failed."
+    },
+    {
+      "stage": "replay_red",
+      "path": "/tmp/eastgenesis-goal-failed-recovery-replay-red.log",
+      "exitCode": 1,
+      "counts": {
+        "files": 1,
+        "failed": 2,
+        "passed": 0
+      },
+      "sha256": "8c321028de4b7e0520e3723eb6605691232944908422e08084ae9eba3f84503c",
+      "bytes": 5960,
+      "interpretation": "Old runner starts/reads/writes three times; preserves raw log. Failed synthetic transport call had not yet been wrapped by executeWithFallback, so this is replay proof, not accounting proof."
+    },
+    {
+      "stage": "fixture_diagnostic",
+      "path": "/tmp/eastgenesis-goal-failed-recovery-accounting-red.log",
+      "exitCode": 1,
+      "counts": {
+        "files": 1,
+        "failed": 2,
+        "passed": 0
+      },
+      "sha256": "4922c4cca2a2faded4ec9dfd67e2bef3ed2c04df0bac59060f94eab725424acd",
+      "bytes": 2493,
+      "interpretation": "Intermediate synthetic transport omitted RouteExhaustedError; failed call not emitted. Not a product accounting regression."
+    },
+    {
+      "stage": "delta_red",
+      "path": "/tmp/eastgenesis-goal-failed-recovery-delta-red.log",
+      "exitCode": 1,
+      "counts": {
+        "files": 1,
+        "failed": 1,
+        "passed": 1
+      },
+      "sha256": "88438c531dc5b3baf458cba9e615da3b0d37332da27f10a4516578ca0d028d55",
+      "bytes": 1515,
+      "interpretation": "After pause fix and actual executeWithFallback wrapper: same-task summary-only resume uses 7 instead of 4 calls; actual per-run budgets are 5 then 2."
+    },
+    {
+      "stage": "intermediate_green",
+      "path": "/tmp/eastgenesis-goal-failed-recovery-green.log",
+      "exitCode": 0,
+      "counts": {
+        "files": 7,
+        "failed": 0,
+        "passed": 64
+      },
+      "sha256": "2c2ae6d68ae8b3edd38d0feeca4d671f5b430708bb07f2730569b70b4ad684b6",
+      "bytes": 33122,
+      "interpretation": "Before the fixed checkpoint-error regression; superseded by final run."
+    },
+    {
+      "stage": "final_green",
+      "path": "/tmp/eastgenesis-goal-failed-recovery-final-green.log",
+      "exitCode": 0,
+      "counts": {
+        "files": 7,
+        "failed": 0,
+        "passed": 65
+      },
+      "sha256": "414b084fed1643fdb51fc15144d2f3673aec422fb16c5fbd3d83382ce36b71aa",
+      "bytes": 33122,
+      "interpretation": "Final frozen sources/tests, zero skipped; existing React act warnings retained in original log."
+    },
+    {
+      "stage": "typecheck",
+      "path": "/tmp/eastgenesis-goal-failed-recovery-typecheck.log",
+      "exitCode": 0,
+      "counts": null,
+      "sha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba",
+      "bytes": 82,
+      "interpretation": "pnpm typecheck -> tsc -b; actual terminal exit0."
+    }
+  ],
+  "commands": {
+    "narrow": "pnpm exec vitest run tests/goal-failed-recovery.test.ts tests/goal-runner.test.ts tests/goal-evidence-run.test.ts tests/completed-step-recovery.test.ts tests/recovery.test.ts tests/session-recovery.test.ts tests/ui-goal-run.test.tsx",
+    "typecheck": "pnpm typecheck"
+  },
+  "actualTerminals": {
+    "redReplaySession": 49161,
+    "redDeltaSession": 60914,
+    "finalGreenSession": 60806,
+    "typecheckSession": 76211
+  },
+  "proofs": [
+    "failed status pauses/interupts the original round and invokes exact task checkpoint hook",
+    "Serialized production rounds parsed and hydrated into same task; recovery only requests summary",
+    "Prior accepted Chat marker reaches actual summary request context",
+    "File read/write each once and result inode/mtime/content SHA unchanged across hydration/resume",
+    "Billing: settled plan+answer+failed summary =3, one resumed summary =1, total4; budgets5 then2",
+    "Exhausted budget3 remains3: next continue makes no request/resume/new task",
+    "Checkpoint callback failure pauses exact original round and exposes fixed storage message only",
+    "Existing aborted/needs_user and completed-not_done multi-round semantics pass existing tests"
+  ],
+  "boundaries": [
+    "No native App restart/GUI/build/Provider performed; completion-verdict dependency is synthetic, while runtime/tasks/checkpoint state transitions are production",
+    "Local event tally only counts llm/llm_failed including the same single subagent level as existing outcomeOf; no new 500-event/subagent stress case run",
+    "No durable billing watermark or schema change; old process-crash events with no settled RoundResult are not retrospectively billed by a resumed run",
+    "Existing completed Chat snapshots remain bounded by session MAX_FIELD; this does not prove lossless long-output recovery",
+    "Historical a035/b691 native evidence does not cover these new sources",
+    "Exact test/source start-end binding captured for final green/typecheck; historical red raw logs are retained but not advertised as a complete source-export snapshot"
+  ],
+  "forbiddenActionsPerformed": {
+    "gui": false,
+    "build": false,
+    "cargo": false,
+    "realProvider": false,
+    "privateConfig": false,
+    "gitMutation": false
+  }
+}

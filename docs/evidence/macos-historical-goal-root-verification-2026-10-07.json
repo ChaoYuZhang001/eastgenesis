@@ -1,0 +1,53 @@
+{
+  "kind": "historical-goal-root-independent-verification",
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-07T02:39:27.667905+00:00",
+  "writerRevision": "4a88d966aa327122695d62f8035cd1eb79c79b8c",
+  "readerRevision": "a035aa93659a6b834a85aa166677fd663913b9b5",
+  "writerBinarySha256": "552c8e86168491003348334d4714de1bcd2957ee12488b424e34f8e468f75e86",
+  "readerBinarySha256": "45c7986bd8ab5b201ebcdd4cfa049822dccaa723be0649293f8d5f9277aa5fce",
+  "nativeStartedAt": "2026-10-07T02:37:00.313Z",
+  "nativeEndedAt": "2026-10-07T02:38:15.971Z",
+  "nativeExitCode": 0,
+  "nativeReportSha256": "315bdc257346809fc6ce5c1cc45d15dee4f10c3353d74fe28293c61be335c4d3",
+  "nativeHarnessSha256": "90f02f5f5d02428e1a791f7f136af6b898553e3a50cb398199daa1d568073d8a",
+  "assertionsVerified": 32,
+  "actionsVerified": 7,
+  "writerBuildInputsVerified": 288,
+  "writerGitBlobModesVerified": 525,
+  "readerBuildInputsVerified": 675,
+  "readerGitBlobModesVerified": 676,
+  "allStartEndSourcesManifestsBinariesVerified": true,
+  "goalStatusObserved": "completed",
+  "taskStatusObserved": "completed",
+  "artifactIdentityPreserved": true,
+  "migrationMetadataPreserved": true,
+  "realQaLeaseWaitMs": 18233,
+  "cleanupVerified": true,
+  "evidenceBoundary": {
+    "proven": [
+      "exact historical Git export writer created a native checkpoint",
+      "two source-bound App binaries share one fresh HOME",
+      "real MCP move followed by process SIGABRT",
+      "new reader UI hydrates same task and single round",
+      "active QA lease blocks replay",
+      "actual QA expiry enables applied file probe",
+      "same durable invocation applied with zero recovery tool results",
+      "artifact inode mtime and hash preserved",
+      "owned live process groups cleaned"
+    ],
+    "excluded": [
+      "released-version upgrade",
+      "schema6 old application",
+      "schema6-to7 migration",
+      "natural plan-only crash from this barrier-protected writer",
+      "native SQLite read fault",
+      "real Provider",
+      "Windows or Linux",
+      "signed or notarized release",
+      "production ten-minute lease takeover",
+      "arbitrary duplicate tool attempts",
+      "full OS XPC process cleanup"
+    ]
+  }
+}

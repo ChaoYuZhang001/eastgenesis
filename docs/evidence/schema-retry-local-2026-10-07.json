@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "kind": "schema-bootstrap-and-migration-retry-local-validation",
+  "localParentRevision": "c22c51051693a92de7d691d075a21a96f817e1ad",
+  "schemaBeforeFix": {
+    "cases": 4,
+    "failed": 3,
+    "passed": 1,
+    "scope": "frontend bootstrap against synthetic current migration prefixes with actual Node SQLite"
+  },
+  "schemaAfterFix": {
+    "cases": 9,
+    "passed": 9,
+    "historicalReleasedDatabase": false,
+    "bootstrapWritesAttempted": false
+  },
+  "frontendFinal": {
+    "files": 102,
+    "passed": 991,
+    "skipped": 0,
+    "workers": 2,
+    "startedAtLocal": "2026-10-07 08:53:24 Asia/Shanghai",
+    "durationSeconds": 67.21
+  },
+  "frontendNarrow": {
+    "files": 4,
+    "passed": 83
+  },
+  "privateConfigSmoke": {
+    "files": 3,
+    "passed": 55,
+    "syntheticOnly": true,
+    "privateConfigurationRead": false
+  },
+  "typecheck": "passed",
+  "nativeMcpIntegration": {
+    "files": 3,
+    "passed": 15,
+    "binaryPrecondition": "explicit cargo build and regular nonempty platform binary"
+  },
+  "preObserverRustWorkspace": {
+    "normalDesktop": 36,
+    "qaDesktop": 35,
+    "corePerMode": 90,
+    "stdioPerMode": [
+      3,
+      2
+    ],
+    "sqlMigrationRetryPerMode": 4,
+    "sqlDocTestPerMode": 1,
+    "observerFeatureIncluded": false
+  },
+  "nativeMacBeforeObserver": {
+    "report": "macos-schema-upgrade-native-2026-10-07.json",
+    "sha256": "efe91ca05ef27298b810a5f9fe1788d26b4b93010bdc171a248c5432ddfb5976",
+    "actualApp": true,
+    "syntheticCurrentMigrationPrefix": true,
+    "rounds": 2,
+    "historicalProductionUpgrade": false
+  },
+  "logs": [
+    {
+      "name": "eastgenesis-schema-guard-before-fix.log",
+      "bytes": 5015,
+      "sha256": "820e3f5b9b2ccf58a915de0cc678dce6fa893d0730124118e2461d7376fe1dae",
+      "summaries": [
+        "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯",
+        "Test Files  1 failed (1)",
+        "Tests  3 failed | 1 passed (4)",
+        "Start at  08:20:52",
+        "Duration  2.02s (transform 239ms, setup 235ms, collect 44ms, tests 511ms, environment 659ms, prepare 302ms)"
+      ]
+    },
+    {
+      "name": "eastgenesis-schema-guard-after-fix.log",
+      "bytes": 947,
+      "sha256": "08ea226a8458f2701eb24c5e9212dd4aa8344b8c57e277cfa08391598e3de7b5",
+      "summaries": [
+        "Test Files  5 passed (5)",
+        "Tests  35 passed (35)",
+        "Start at  08:25:05",
+        "Duration  3.27s (transform 351ms, setup 586ms, collect 619ms, tests 965ms, environment 2.44s, prepare 584ms)"
+      ]
+    },
+    {
+      "name": "eastgenesis-schema-retry-final-full-tests.log",
+      "bytes": 46203,
+      "sha256": "74f255a0904067e4664c30991e21dedcb1e2d1cafdf1154f77f7c62620efb564",
+      "summaries": [
+        "Test Files  102 passed (102)",
+        "Tests  990 passed (990)",
+        "Start at  08:26:53",
+        "Duration  73.15s (transform 2.08s, setup 11.07s, collect 11.95s, tests 63.31s, environment 27.72s, prepare 8.92s)"
+      ]
+    },
+    {
+      "name": "eastgenesis-schema-retry-rust-normal.log",
+      "bytes": 11531,
+      "sha256": "3564d4fe55c2b9a7273ed642748d2e56cb3f3116afa114461f4a33873b99dc63",
+      "summaries": [
+        "test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.95s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ]
+    },
+    {
+      "name": "eastgenesis-schema-retry-rust-qa.log",
+      "bytes": 11365,
+      "sha256": "83d8b08e24a8a8117febcc26e500d8cf729b32f7743f378b69c57661846263a0",
+      "summaries": [
+        "test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.95s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s",
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ]
+    },
+    {
+      "name": "eastgenesis-native-mcp-integration-local.log",
+      "bytes": 839,
+      "sha256": "abcbd222ec629118edbf57714bcddd74a3c6cd29fce897902c25f914cee677e7",
+      "summaries": [
+        "Test Files  3 passed (3)",
+        "Tests  15 passed (15)",
+        "Start at  08:34:34",
+        "Duration  3.50s (transform 466ms, setup 442ms, collect 780ms, tests 2.11s, environment 1ms, prepare 477ms)"
+      ]
+    },
+    {
+      "name": "eastgenesis-sql-observer-frontend-narrow.log",
+      "bytes": 895,
+      "sha256": "f704536c0e326486d1e051e1de1ef1594fbd8e6186902b8d62569a3af032d13f",
+      "summaries": [
+        "Test Files  4 passed (4)",
+        "Tests  83 passed (83)",
+        "Start at  08:52:24",
+        "Duration  3.81s (transform 398ms, setup 638ms, collect 327ms, tests 3.39s, environment 1.21s, prepare 833ms)"
+      ]
+    },
+    {
+      "name": "eastgenesis-sql-observer-final-full-tests.log",
+      "bytes": 45481,
+      "sha256": "4f702dd0cde4fe715e0721a9388bed9ec2c87b388f91759d4e29fdb5b2ea8e88",
+      "summaries": [
+        "Test Files  102 passed (102)",
+        "Tests  991 passed (991)",
+        "Start at  08:53:24",
+        "Duration  67.21s (transform 1.94s, setup 10.05s, collect 10.81s, tests 59.79s, environment 23.91s, prepare 8.39s)"
+      ]
+    },
+    {
+      "name": "eastgenesis-sql-observer-typecheck.log",
+      "bytes": 82,
+      "sha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba",
+      "summaries": []
+    },
+    {
+      "name": "eastgenesis-schema-retry-private-config-smoke.log",
+      "bytes": 494,
+      "sha256": "1d51232570bc88598f58131181bdca537e903876b1b32e742ff4894296879a16",
+      "summaries": [
+        "Test Files  3 passed (3)",
+        "Tests  55 passed (55)",
+        "Start at  08:53:24",
+        "Duration  4.78s (transform 615ms, setup 451ms, collect 2.04s, tests 2.19s, environment 1.36s, prepare 673ms)"
+      ]
+    },
+    {
+      "name": "eastgenesis-sql-observer-rust-normal.log",
+      "bytes": 11530,
+      "sha256": "a3f94f8446391e9fc6d96c50c703b98271d08392317edb0d6beab0ad77bdd49a",
+      "summaries": [
+        "test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.84s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ]
+    },
+    {
+      "name": "eastgenesis-sql-observer-rust-qa.log",
+      "bytes": 12129,
+      "sha256": "9ff0acd9a291d494590ee3d39929125129ee88e84d266a8df76460f9ee350228",
+      "summaries": [
+        "test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.85s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ]
+    },
+    {
+      "name": "eastgenesis-plugin-sql-qa-load-observer-attempt1-compile-failed.log",
+      "bytes": 1498,
+      "sha256": "0e2eddf232e36038659270eafc38fa9bf4fd3a4a49d864d28111f49a7b1b6709",
+      "summaries": [
+        "error[E0373]: closure may outlive the current function, but it borrows `self.qa_load_observer`, which is owned by the current function"
+      ]
+    },
+    {
+      "name": "eastgenesis-plugin-sql-qa-load-observer-test.log",
+      "bytes": 1728,
+      "sha256": "afb382387b2c72a9f5dcc507b17e419380e32b81fa5742c86c075671c62ea4ba",
+      "summaries": [
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ]
+    },
+    {
+      "name": "eastgenesis-plugin-sql-no-observer-test.log",
+      "bytes": 1060,
+      "sha256": "f40e442583f13c04b41a642bced064b0a5d85302af838df8249c5aa1d88413d7",
+      "summaries": [
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+      ]
+    }
+  ],
+  "evidenceBoundary": {
+    "realProvider": false,
+    "windowsSpecificCause": "unobserved",
+    "windowsFullLifecycle": false,
+    "releaseSigning": false,
+    "historicalCheckpointHydration": false,
+    "recoveredTaskExecution": false,
+    "observerFinalNativeValidation": "passed: final frozen QA macOS package, two synthetic upgrade/restart rounds"
+  },
+  "postObserverRustWorkspace": {
+    "normalDesktop": 36,
+    "qaDesktop": 35,
+    "corePerMode": 90,
+    "stdioPerMode": [
+      3,
+      2
+    ],
+    "normalPluginUnits": 4,
+    "qaPluginUnits": 10,
+    "pluginDocPerMode": 1,
+    "failed": 0,
+    "ignored": 0,
+    "qaObserverIncluded": true,
+    "gateExitCode": 0
+  },
+  "vendorObserverFreeze": {
+    "report": "plugin-sql-observer-freeze-2026-10-07.json",
+    "sha256": "2aaa768edeeb988477a92c472e901e362ef906438337a53187c98581c4d4d9af",
+    "files": 32,
+    "originalCrateFilesVerified": 25,
+    "packageVersionsUnchanged": 605,
+    "callbackOrMissingStateCannotChangeLoadResult": true
+  },
+  "attemptHistory": {
+    "vendorObserverFirstCompilation": {
+      "exitCode": 101,
+      "testsRun": false,
+      "cause": "setup closure borrowed a Copy observer field without required static ownership",
+      "repair": "move setup closure; original log preserved"
+    },
+    "rootRustGateMetadata": {
+      "commandsPassed": true,
+      "formatRepair": "preserved original metadata and removed literal trailing backslash-n; did not rerun commands"
+    },
+    "nativeObserver": {
+      "exitCode": 0,
+      "passed": true,
+      "rounds": 2,
+      "attemptsEach": 1,
+      "report": "macos-schema-upgrade-observer-native-2026-10-07.json",
+      "sha256": "8737828b4e457bc93972f9aa9ce8f4f4c5e411b33fb7ca608d24011713283d8b",
+      "sourceInputs": 322,
+      "nativeSqlStagesPerRound": 7,
+      "traceRecordsPerRound": 36,
+      "formalReleaseBinding": false
+    }
+  },
+  "sourceAndTestHashes": {
+    "Cargo.toml": "ef9a3ef5c890a926380816b98855f6dced977df5831c0be72adf6d3caf933fab",
+    "Cargo.lock": "7af42848fa1f535161cf11bd3c32a859cf7842e459b7203d7a3a98b91ca126df",
+    "src-tauri/Cargo.toml": "3fdcea1ae54812918acc8081839f86aaada53006c7a0ce87e6fb865b12b5fa88",
+    "src-tauri/src/lib.rs": "1c6c21973ed740d8a6586cc11fff57c5b93f91fca5fab33b0e6fd676641aedfe",
+    "src-tauri/src/qa_startup_diagnostics.rs": "ddb966b848f1df4fbee2269af373106e7db70f091dd5261b52ff2ebee81c70cf",
+    "src/lib/db.ts": "f7b9a33df098c76f8a7dc73437b613c0305c4338fdd334e6c474888ac87f38e2",
+    "src/platform/tauri-backend.ts": "723c0a3fa87f513ae29ad98f081a34cd8aff3da0cae3b786749fedb70d51a553",
+    "tests/db-schema-bootstrap.test.ts": "4e2fe4026fc40bebbfaa0d6ca3f20f3632dd91ddc202d0f44a9037bbfb02d551",
+    "tests/desktop-startup-trace.test.ts": "a02a1a04ec28ec2a0d0de01fa0a91089e55a4ea29dc31fce4be1c88a66b8bd8b",
+    "tools/desktop-startup-trace.mjs": "569b72ffa6fd6ef78bfa64db53f26ce77647fb19fd32d9f4f4e534d61dc5439f",
+    "tools/desktop-startup-trace.d.mts": "ef77f6cdddc963706fb1e5d077b1f98918724bd6e0ce18f470966e4623f7a239",
+    "tools/desktop-macos-schema-upgrade-smoke.mjs": "33e488f2ed8938f22196993cf1039f47ea11c6b9fe40546ac4f2feb494fcc7df",
+    ".github/workflows/desktop.yml": "4c170fe8f3c82ff18a27773a65f0c3c15a033bc0d820bdcd511acec9034735d4"
+  }
+}

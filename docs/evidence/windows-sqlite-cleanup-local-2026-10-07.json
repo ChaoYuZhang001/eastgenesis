@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 1,
+  "kind": "windows_sqlite_fixture_cleanup_candidate",
+  "createdAt": "2026-10-07T05:48:48.192669+00:00",
+  "status": "patch_frozen_tmp_only_not_applied",
+  "expectedBase": {
+    "localCommit": "c16ae0274a9066709baf8047951675b299b76092",
+    "publishedSnapshot": "2b509b7a4bd048412d442ad31360c7c7316a10d7",
+    "publishedSourceTree": "9f1fe7c6a2366c1c8d56cd8106d2ee590a098247",
+    "sourcePath": "vendor/tauri-plugin-sql/src/sqlite_path_tests.rs",
+    "sourceSha256": "bd44ae98576e84a2acbaff93b10739267a546acd7541be471ff502a1792f2f7c",
+    "wrapperSha256": "e37fdc94bcd0da39e7f49b2c4319c7e3af82a1b1b683d2b6fe7e5d50bd3cc346",
+    "cargoLockSha256": "7af42848fa1f535161cf11bd3c32a859cf7842e459b7203d7a3a98b91ca126df",
+    "sourceFileCountExcludingMemory": 733
+  },
+  "observedWindowsFailure": {
+    "runId": "37575271906",
+    "jobId": "112642644025",
+    "step": 17,
+    "stepName": "Rust workspace tests",
+    "terminal": "failure",
+    "rawLog": "/tmp/eastgenesis-ci-2b509/job-112642644025-windows-latest-raw.log",
+    "rawLogSha256": "a42092d7a7e11a38e10616fe778362961f148410728ac068c13260866466dca5",
+    "lines": {
+      "suiteCount": 2387,
+      "testFailure": 2395,
+      "panicAtDirectoryDrop": 2402,
+      "rawOs32": 2403,
+      "eightPassedOneFailed": 2410,
+      "cargoExit101": 2413
+    },
+    "suitePassed": 8,
+    "suiteFailed": 1,
+    "exitCode": 101,
+    "panicSourceLine": 170,
+    "rawOsCode": 32,
+    "nsisReached": false,
+    "knownConclusion": "The Windows directory removal operation found an occupied file. The actual holder and timing are not identified."
+  },
+  "diagnosis": {
+    "knownFacts": [
+      "Directory originally dropped inside block_on before the current-thread runtime was destroyed.",
+      "Original test explicitly awaits pool.close and connection.close.",
+      "SQLx 0.8.6 create_database awaits connection.close.",
+      "SQLx 0.8.6 database_exists checks parsed filename.exists and opens no connection.",
+      "SQLx connection.close queues worker shutdown, drops self, then awaits shutdown confirmation; worker drops connection guard/shared before confirming."
+    ],
+    "unknowns": [
+      "Actual Windows holder of the file at remove_dir_all failure.",
+      "Whether runtime shutdown alone resolves the original Windows failure.",
+      "Whether any remaining OS sharing state is transient within the chosen budget."
+    ],
+    "notClaimed": [
+      "SQLx production connection bug located",
+      "SQLx migrate helper leaked an unawaited close",
+      "Windows failure reproduced on macOS",
+      "Windows cleanup fixed before Windows CI"
+    ]
+  },
+  "patch": {
+    "path": "/tmp/eastgenesis-sqlite-cleanup-20261007.patch",
+    "sha256": "b968fd36fe26b1b590f3a1581a8de8ad95954f48c15fd1e427b12473dda8c992",
+    "bytes": 7025,
+    "files": [
+      "vendor/tauri-plugin-sql/src/sqlite_path_tests.rs"
+    ],
+    "numstat": {
+      "added": 155,
+      "removed": 8
+    },
+    "candidateSourceSha256": "468fcfde814f6f77aa72f37acc637f8a15f02b79ac542b51d2bb44c3cfc9a13a",
+    "lineReferences": {
+      "const CLEANUP_LOCK_BUDGET": 147,
+      "fn remove_fixture_directory": 149,
+      "fn with_runtime": 184,
+      "impl Drop for Directory": 213,
+      "fn unchanged_database_creation": 227,
+      "fn runtime_tasks_drop": 295,
+      "fn directory_cleanup_preserves": 332,
+      "fn directory_cleanup_retries": 344,
+      "fn directory_cleanup_keeps": 377
+    },
+    "runtimeTeardownBeforeDirectoryCleanup": true,
+    "deleteOperation": "actual std::fs::remove_dir_all on every attempt",
+    "retryPlatform": "Windows only",
+    "retryRawOsCodes": [
+      32,
+      33
+    ],
+    "retryBudgetMs": 250,
+    "retrySleepMaximumMs": 10,
+    "noFixedSleepOnSuccess": true,
+    "nonSharingErrorBehavior": "immediate original error",
+    "persistentSharingBehavior": "original error after deadline, then Directory Drop unwrap remains fatal",
+    "deadlineCheck": "before every subsequent retry; first attempt always performs real deletion",
+    "originalDatabaseBodyPreservedIgnoringIndentation": true,
+    "productionPathMapperChanged": false,
+    "explicitDatabaseExistsCreateConnectAndCloseRetained": true,
+    "sentinelSchemaVersion7OneFileRetained": true,
+    "unixDeviceInodeIdentityRetained": true,
+    "applied": false
+  },
+  "validation": {
+    "host": "macOS",
+    "scope": "isolated Rust fixture containing exact production path_mapper and sqlite_path_tests; not full workspace/plugin suite",
+    "sqlxVersion": "0.8.6",
+    "tokioVersion": "1.53.1",
+    "offline": true,
+    "locked": true,
+    "downloadedNewDependencies": false,
+    "externalLockPackages": 168,
+    "lockPackagesIncludingFixture": 169,
+    "externalPackagesAllSubsetOfWorkspaceLock": true,
+    "isolatedTarget": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/target",
+    "workspaceTargetUsed": false,
+    "distinctPackageNamesForFinalRuns": true,
+    "tests": [
+      {
+        "variant": "base",
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--manifest-path",
+          "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/base/Cargo.toml",
+          "--target-dir",
+          "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/target",
+          "--jobs",
+          "1",
+          "--lib"
+        ],
+        "startedAt": "2026-10-07T05:38:59.104Z",
+        "endedAt": "2026-10-07T05:39:01.883Z",
+        "exitCode": 0,
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "rawLog": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/base-validation-v2.log",
+        "rawLogSha256": "3b658415c8b9a380b993ad3686448dcb5d650f84d23f208a63482fb0df1230f8",
+        "boundReport": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/base-validation-v2.json",
+        "boundReportSha256": "bbcdad66f7d43d2046d057501912545e1ca435dd4165caf6214bed3357fa1b1c",
+        "sourceStart": {
+          "src/lib.rs": "e88e07c90ed1652886f58466a452ac2f3bba914163368137e9921886970103df",
+          "src/sqlite_path_tests.rs": "bd44ae98576e84a2acbaff93b10739267a546acd7541be471ff502a1792f2f7c",
+          "Cargo.toml": "9cd551700b676865b97d7193caf141451a01284cdee3c7af0f80f714ee96d6c9",
+          "Cargo.lock": "3efd75aa2a30e840780f0f87afe9375bf3c75283a41051fa8c19302aa51977f7"
+        },
+        "sourceEnd": {
+          "src/lib.rs": "e88e07c90ed1652886f58466a452ac2f3bba914163368137e9921886970103df",
+          "src/sqlite_path_tests.rs": "bd44ae98576e84a2acbaff93b10739267a546acd7541be471ff502a1792f2f7c",
+          "Cargo.toml": "9cd551700b676865b97d7193caf141451a01284cdee3c7af0f80f714ee96d6c9",
+          "Cargo.lock": "3efd75aa2a30e840780f0f87afe9375bf3c75283a41051fa8c19302aa51977f7"
+        },
+        "sourceUnchanged": true,
+        "repositoryUnchanged": true,
+        "headStart": "c16ae0274a9066709baf8047951675b299b76092",
+        "headEnd": "c16ae0274a9066709baf8047951675b299b76092",
+        "sourceFileCountIncludingMemory": 734
+      },
+      {
+        "variant": "lifecycle-red",
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--manifest-path",
+          "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/lifecycle-red/Cargo.toml",
+          "--target-dir",
+          "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/target",
+          "--jobs",
+          "1",
+          "--lib"
+        ],
+        "startedAt": "2026-10-07T05:39:11.546Z",
+        "endedAt": "2026-10-07T05:39:14.550Z",
+        "exitCode": 101,
+        "passed": 7,
+        "failed": 1,
+        "ignored": 0,
+        "rawLog": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/lifecycle-red-validation-v2.log",
+        "rawLogSha256": "7b8ff9d8e2d01265f3bbc20d7f6516d5eb4ff2ec243904bf0a03cfc7ac492c0b",
+        "boundReport": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/lifecycle-red-validation-v2.json",
+        "boundReportSha256": "0c073c063712628b356026b9dba559762f1d7c6a02c43ca505c9581cf96c20b2",
+        "sourceStart": {
+          "src/lib.rs": "e88e07c90ed1652886f58466a452ac2f3bba914163368137e9921886970103df",
+          "src/sqlite_path_tests.rs": "bca4a42a6ec1649e4a34416aa194ec6fce956b42a61543e6722a0ee283e9e407",
+          "Cargo.toml": "e41ea9776f47ef0132b849fcce5340c7a93948a884ceb23593d418581b484af6",
+          "Cargo.lock": "b5459762770e0e8b166e5be453d9315a376a5b4f633ca2b2287de6c82ece35aa"
+        },
+        "sourceEnd": {
+          "src/lib.rs": "e88e07c90ed1652886f58466a452ac2f3bba914163368137e9921886970103df",
+          "src/sqlite_path_tests.rs": "bca4a42a6ec1649e4a34416aa194ec6fce956b42a61543e6722a0ee283e9e407",
+          "Cargo.toml": "e41ea9776f47ef0132b849fcce5340c7a93948a884ceb23593d418581b484af6",
+          "Cargo.lock": "b5459762770e0e8b166e5be453d9315a376a5b4f633ca2b2287de6c82ece35aa"
+        },
+        "sourceUnchanged": true,
+        "repositoryUnchanged": true,
+        "headStart": "c16ae0274a9066709baf8047951675b299b76092",
+        "headEnd": "c16ae0274a9066709baf8047951675b299b76092",
+        "sourceFileCountIncludingMemory": 734
+      },
+      {
+        "variant": "candidate",
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--manifest-path",
+          "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/candidate/Cargo.toml",
+          "--target-dir",
+          "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/target",
+          "--jobs",
+          "1",
+          "--lib"
+        ],
+        "startedAt": "2026-10-07T05:40:05.285Z",
+        "endedAt": "2026-10-07T05:40:09.742Z",
+        "exitCode": 0,
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "rawLog": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/candidate-validation-v2.log",
+        "rawLogSha256": "1588579b1f4ce0a3f5060f6316afff73b400b78702ae6cadc5695657d80ec1fe",
+        "boundReport": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/candidate-validation-v2.json",
+        "boundReportSha256": "f3dd6a9627956b6b3a7884a557874f3de09cd1d0def505a1a454279e3458c762",
+        "sourceStart": {
+          "src/lib.rs": "e88e07c90ed1652886f58466a452ac2f3bba914163368137e9921886970103df",
+          "src/sqlite_path_tests.rs": "468fcfde814f6f77aa72f37acc637f8a15f02b79ac542b51d2bb44c3cfc9a13a",
+          "Cargo.toml": "7073a149974eb3b0218a2aa7942923aa249e55e6f81a24d061ea16eea866bbdb",
+          "Cargo.lock": "d82d99752325cdd33999a4ba3730b7485a75862d51116ceaf711d57cd5bd1f94"
+        },
+        "sourceEnd": {
+          "src/lib.rs": "e88e07c90ed1652886f58466a452ac2f3bba914163368137e9921886970103df",
+          "src/sqlite_path_tests.rs": "468fcfde814f6f77aa72f37acc637f8a15f02b79ac542b51d2bb44c3cfc9a13a",
+          "Cargo.toml": "7073a149974eb3b0218a2aa7942923aa249e55e6f81a24d061ea16eea866bbdb",
+          "Cargo.lock": "d82d99752325cdd33999a4ba3730b7485a75862d51116ceaf711d57cd5bd1f94"
+        },
+        "sourceUnchanged": true,
+        "repositoryUnchanged": true,
+        "headStart": "c16ae0274a9066709baf8047951675b299b76092",
+        "headEnd": "c16ae0274a9066709baf8047951675b299b76092",
+        "sourceFileCountIncludingMemory": 734
+      }
+    ],
+    "lifecycleRedMeaning": "Intentional reverse cleanup order in candidate helper. Real pending Tokio task and filesystem prove destructor ordering; not an original-source Windows Os32 reproduction.",
+    "baseMeaning": "Original exact tests pass on Mac; this does not reproduce or exclude Windows sharing failure.",
+    "candidateMeaning": "Original six Mac tests plus two portable cleanup/lifecycle tests pass. The two cfg(windows) real lock tests are not compiled or run on this host.",
+    "applyCheck": {
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "/tmp/eastgenesis-sqlite-cleanup-20261007.patch"
+      ],
+      "cwd": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/patch-check-base",
+      "startedAt": "2026-10-07T05:44:41.673314+00:00",
+      "endedAt": "2026-10-07T05:44:41.699231+00:00",
+      "exitCode": 0,
+      "baseSha256": "bd44ae98576e84a2acbaff93b10739267a546acd7541be471ff502a1792f2f7c",
+      "baseUnchanged": true,
+      "patchSha256": "b968fd36fe26b1b590f3a1581a8de8ad95954f48c15fd1e427b12473dda8c992"
+    },
+    "applyCheckRawLog": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/patch-apply-check.log",
+    "applyCheckRawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rustfmtCheck": {
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2024",
+        "--check",
+        "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/candidate/src/sqlite_path_tests.rs"
+      ],
+      "startedAt": "2026-10-07T05:44:41.700044+00:00",
+      "endedAt": "2026-10-07T05:44:41.990188+00:00",
+      "exitCode": 0,
+      "sourceSha256": "468fcfde814f6f77aa72f37acc637f8a15f02b79ac542b51d2bb44c3cfc9a13a",
+      "sourceUnchanged": true
+    },
+    "rustfmtCheckRawLog": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/rustfmt-check.log",
+    "rustfmtCheckRawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "windowsRegressionPlan": {
+    "requires": "next real Windows CI on new immutable source snapshot after root native freeze ends",
+    "implementedCfgWindowsTests": [
+      {
+        "name": "directory_cleanup_retries_a_real_windows_sharing_lock_until_release",
+        "mechanism": "Actual share_mode(0) handle; cleanup sends first signal only after actual sharing/lock removal error; release handle; require real deletion success."
+      },
+      {
+        "name": "directory_cleanup_keeps_a_persistent_windows_sharing_lock_fatal",
+        "mechanism": "Keep actual share_mode(0) handle through budget; require raw32/33, retries observed, elapsed at least250ms, file still present, then release for final parent cleanup."
+      }
+    ],
+    "mustAlsoPass": [
+      "runtime_tasks_drop_while_the_directory_is_still_present",
+      "directory_cleanup_preserves_non_sharing_errors_without_retry",
+      "unchanged_database_creation_and_reopen_use_one_real_file with all existing sentinel/schema7/file assertions",
+      "existing complete Rust workspace suite",
+      "subsequent original NSIS/install smoke and external schema probe with no disabled process containment or enlarged timeout"
+    ],
+    "win32ApiCompiled": false,
+    "win32ApiExecuted": false,
+    "productionProviderUsed": false,
+    "nativeLaunchedByThisAgent": false,
+    "formalReleaseBinding": false
+  },
+  "sourceFreeze": {
+    "report": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/final-source-freeze.json",
+    "reportSha256": "3ff88628b2feba5bbf147539f8ab8bb0581c7377bd76bc0059aab9a6532bf3cc",
+    "head": "c16ae0274a9066709baf8047951675b299b76092",
+    "wholeSourceCountIncludingMemory": 734,
+    "sourceCountExcludingMemory": 733,
+    "allBytesUnchanged": true,
+    "memorySha256": "bf48382bb339cd2468c31be5013fe8f92fa274d8cb3aeaedbbce0ae5064b85b2",
+    "privateConfigurationRead": false,
+    "privateConfigurationModified": false,
+    "repoModified": false,
+    "gitMutated": false,
+    "patchApplied": false
+  },
+  "sqlxSourceVerification": {
+    "report": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/verified-sqlx-sources.json",
+    "reportSha256": "0c992c4dad6ed969ac3659f9e0f9bd82d31e136b250ceaf227089d709d8144c5",
+    "cachedCratesSha256MatchWorkspaceLock": true,
+    "localSourceBytesMatchLockedCachedCrates": true,
+    "primarySources": [
+      {
+        "title": "SQLx 0.8.6 SQLite migration helpers",
+        "url": "https://github.com/transact-rs/sqlx/blob/v0.8.6/sqlx-sqlite/src/migrate.rs",
+        "localLines": "19-50"
+      },
+      {
+        "title": "SQLx 0.8.6 SqliteConnection close",
+        "url": "https://github.com/transact-rs/sqlx/blob/v0.8.6/sqlx-sqlite/src/connection/mod.rs",
+        "localLines": "219-235"
+      },
+      {
+        "title": "SQLx 0.8.6 SQLite worker shutdown",
+        "url": "https://github.com/transact-rs/sqlx/blob/v0.8.6/sqlx-sqlite/src/connection/worker.rs",
+        "localLines": "323-329,481-494"
+      },
+      {
+        "title": "Rust Windows OpenOptionsExt share_mode",
+        "url": "https://doc.rust-lang.org/std/os/windows/fs/trait.OpenOptionsExt.html#tymethod.share_mode",
+        "meaning": "removing share flags prevents corresponding access until the handle closes"
+      }
+    ]
+  },
+  "vendorMaintenanceDraft": {
+    "path": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/vendor-PATCH-addendum.md",
+    "sha256": "61eb0ef943d4819685211c503053f93bf8610f7277d6abf2e4d0af48842aad1d",
+    "includedInPatch": false
+  },
+  "preservedSupersededOrFailedPreparation": [
+    {
+      "path": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/preparation-first-error.txt",
+      "sha256": "8fead1c49dfdb45d0b29513ebe4979a072fd5a651ed9ec48bfa45e7a0e239835",
+      "meaning": "Python temporary fixture preparation NameError, corrected without repository edit."
+    },
+    {
+      "command": "cargo generate-lockfile --offline in base fixture",
+      "exitCode": 101,
+      "meaning": "Mirror index reports locked yoke-derive0.8.3 yanked; corrected by preserving workspace lock and cached versions, then final --locked tests. No raw full log saved for this attempt."
+    },
+    {
+      "path": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/offline-preparation-check.log",
+      "sha256": "1095dbe5273532b871a22373cc152882af9af59225034570c7cf8337c68e8627",
+      "meaning": "Offline cached dependency preparation check; not Windows validation."
+    },
+    {
+      "path": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/base-validation.log",
+      "sha256": "0c09f6d29e68b7d7c498004e3ff9c258a161a595d6c08c2a38cee355c69e784e",
+      "meaning": "INVALID baseline evidence: same fixture package name/shared target reused candidate executable. Must not count this as base pass."
+    },
+    {
+      "path": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/cache-misidentification.txt",
+      "sha256": "8e432fa8521b80e7ce361e8c14423c94911ce1df68b8c148108be10cfc18d993",
+      "meaning": "Explains discarded cache result; final v2 runs use distinct package names, executable names and source-bound logs."
+    },
+    {
+      "path": "/tmp/eastgenesis-sqlite-cleanup-20261007-2b509/candidate-validation.log",
+      "sha256": "b2559ec2a8b918ca0ab4a2303691f7079999af7389a0f291b7fa6f118c9d972c",
+      "meaning": "Superseded candidate before tightened retry deadline guard. Final candidate-v2 evidence only."
+    },
+    {
+      "command": "git rev-parse HEAD while cwd was non-Git /tmp fixture",
+      "exitCode": 128,
+      "meaning": "Wrong cwd in an earlier combined read command; standalone rustfmt and correct repo HEAD checks subsequently pass."
+    },
+    {
+      "command": "read cached package .cargo-checksum.json",
+      "exitCode": 1,
+      "meaning": "Metadata file absent; verification instead compared whole .crate SHA to workspace lock and each source file to archive bytes."
+    }
+  ]
+}

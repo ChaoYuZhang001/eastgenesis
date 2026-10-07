@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-independent-goal-output-ui-verification",
+  "verifiedAt": "2026-10-07T04:17:34.239Z",
+  "passed": true,
+  "freezeSha256": "73139a902360fd7dc03baac26ba05974680990ecf4c92a87384614983acb46fe",
+  "frozenSources": {
+    "src/components/goal/GoalDetail.tsx": {
+      "sha256": "6a98f2af53001b86f494a3fe90ddd617205e6584a0f22d453d4a066e9fe6fb54",
+      "bytes": 16003
+    },
+    "tests/ui-goal-output.test.tsx": {
+      "sha256": "fc006101b1614897d87aa0f32c3eb0ffb8ee86d3bb7374574e397a93d181e5f9",
+      "bytes": 13870
+    }
+  },
+  "evidenceFilesVerified": 12,
+  "sourceInputsVerified": 710,
+  "narrowTestFiles": 3,
+  "narrowTests": 22,
+  "redTests": {
+    "failed": 6,
+    "passed": 1
+  },
+  "typecheckExit": 0,
+  "sourceStartEndAndBetweenCommands": true,
+  "realProviderProof": false,
+  "nativeDesktopProof": false
+}

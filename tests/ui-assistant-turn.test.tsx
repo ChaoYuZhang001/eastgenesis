@@ -54,7 +54,48 @@ const turn = (events: AgentEvent[]): TaskCard =>
     preferenceSource: "global",
   }) as TaskCard;
 
+const streamingTurn = (overrides: Partial<TaskCard> = {}): TaskCard => ({
+  ...turn([]),
+  status: "running",
+  summary: null,
+  endedAt: null,
+  streamingText: "已经收到的一部分答案",
+  streamingInterrupted: false,
+  ...overrides,
+});
+
 describe("回答区", () => {
+  it("运行中显示当前能力面和已经经过的统一能力链", () => {
+    const step = (id: string, surface: "work" | "codex" | "chat"): AgentEvent => ({
+      type: "step_start",
+      step: { id, goal: "执行下一步", tool: null },
+      attempt: 1,
+      surface,
+    });
+    render(<AssistantTurn card={streamingTurn({ events: [step("w", "work"), step("c", "codex"), step("a", "chat")] })} />);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("· Chat 对话");
+    expect(status).toHaveTextContent("· 能力链 Work → Codex → Chat");
+  });
+
+  it("运行中显示流式增量；中断后保留已收到的部分输出并明确标记", () => {
+    const { rerender } = render(<AssistantTurn card={streamingTurn()} />);
+    expect(screen.getByRole("region", { name: "正在生成" })).toHaveTextContent("已经收到的一部分答案");
+
+    rerender(<AssistantTurn card={streamingTurn({ status: "failed", streamingInterrupted: true })} />);
+    expect(screen.getByRole("region", { name: "部分输出" })).toHaveTextContent("生成中断，保留已收到的部分输出");
+    expect(screen.getByRole("region", { name: "部分输出" })).toHaveTextContent("已经收到的一部分答案");
+  });
+
+  it("流式正文完成后仍保留首个 chunk 的稳定 DOM 证据", () => {
+    render(<AssistantTurn card={{ ...turn([]), streamFirstChunkAt: 123, streamLastChunkAt: 456 }} />);
+    const article = screen.getByRole("article", { name: "任务：算一道题" });
+    expect(article).toHaveAttribute("data-stream-first-chunk", "true");
+    expect(article).toHaveAttribute("data-stream-first-chunk-at", "123");
+    expect(article).toHaveAttribute("data-stream-last-chunk-at", "456");
+    expect(screen.queryByRole("region", { name: "正在生成" })).not.toBeInTheDocument();
+  });
+
   it("默认不显示思考过程；设置里打开后折叠成「思考过程 · N 字」，展开只有摘要，不泄露系统提示", () => {
     const leaky = ["你是 EastGenesis 的智能体，按步骤完成用户目标。", "Output JSON only, then reflect on the plan.", "先拆成两步"].join("\n");
     const card = turn([route, { type: "llm", purpose: "answer", profileId: "custom:relay/deepseek-reasoner", latencyMs: 1, usage: null, reasoning: leaky }]);
@@ -119,6 +160,19 @@ describe("回答区", () => {
     const list = within(screen.getByRole("region", { name: "路由决策详情" })).getByRole("list", { name: "降级记录" });
     expect(list).toHaveTextContent("因超时降级到 relay/b（relay/a 请求超时（已重试 1 次））");
   });
+
+  it("恢复入口显示失败原因，并保留未知副作用的安全提示", () => {
+    const step = { id: "write", goal: "写入报告", tool: "write_file", args: { path: "report.md", content: "secret" } };
+    const card = turn([
+      { type: "plan", revision: 0, plan: { source: "fallback", steps: [step] } },
+      { type: "recover", step, strategy: "ask_user", error: "恢复时重新生成的参数与上一次调用不一致，无法证明副作用身份；已停止自动执行", backend: "rules" },
+      { type: "run_end", status: "needs_user", summary: "需要用户协助：参数身份无法证明" },
+    ]);
+    render(<AssistantTurn card={{ ...card, status: "needs_user", summary: null }} />);
+    expect(screen.getByText(/恢复原因：恢复时重新生成的参数/)).toBeInTheDocument();
+    expect(screen.getByText(/副作用状态未知/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "从未完成步骤继续" })).toBeInTheDocument();
+  });
 });
 
 describe("设置页", () => {
@@ -144,15 +198,19 @@ describe("设置页", () => {
     await waitFor(async () => expect(await b.loadSetting("show_reasoning")).toBe("true"));
   });
 
-  it("自定义 Provider：探测结果写明几个模型返回 404、已从下拉隐藏", async () => {
+  it("自定义 Provider：费用说明先展示，只有明确检查才发起推理并区分检查结果", async () => {
     resetStores(createMockBackend({ listModels: ["gpt-x", "ghost"], missingModels: ["ghost"] }));
     await act(async () => {
       await useSettings.getState().load();
       await useSettings.getState().saveCustom({ id: "custom:relay", label: "中转站", base_url: "http://127.0.0.1:8080/v1", default_model: "gpt-x", headers: {} });
     });
-    await waitFor(() => expect(useSettings.getState().modelCache["custom:relay"]?.probedAt).toBeDefined());
+    await waitFor(() => expect(useSettings.getState().modelCache["custom:relay"]?.models).toHaveLength(2));
     render(<SettingsContent page="custom" />);
-    expect(await screen.findByText("探测完成：1 个模型返回 404，已从输入框的模型下拉隐藏")).toBeInTheDocument();
+    expect(screen.getByText(/实际费用由服务决定/)).toBeInTheDocument();
+    expect(useSettings.getState().modelCache["custom:relay"]?.probedAt).toBeUndefined();
+    fireEvent.click(screen.getByRole("button", { name: "检查模型调用（可能计费）" }));
+    expect(await screen.findByText("上次检查：已发起 2/2，HTTP 成功 1，404/型号缺失 1，不确定 0，未发起 0")).toBeInTheDocument();
+    expect(screen.getByText(/已从手动模型下拉隐藏/)).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "不可用的模型（404）" })).toHaveTextContent("ghost");
   });
 });

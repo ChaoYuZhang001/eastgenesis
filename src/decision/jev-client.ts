@@ -18,6 +18,8 @@ import {
   type Questions,
   type SystemOneResult,
 } from "@typesafe-ai/sdk";
+import { isGoalQuotaControlError, type GoalMeterScope, type GoalQuotaKind } from "../core/goal-quota";
+import { invokeGoalModel, resolveGoalMeter, recordTerminalModelFailure, type GoalModelExecution } from "../core/goal-model-call";
 import { validateBaseUrl } from "../core/llm/registry";
 import { redact } from "../core/redact";
 
@@ -77,6 +79,9 @@ export class JevError extends Error {
 
 export interface JevClientOptions {
   apiKey: string;
+  goalExecution?: GoalModelExecution;
+  goalMeter?: GoalMeterScope;
+  quotaKind?: "cloud_decision" | "goal_verifier";
   baseURL?: string;
   model?: string;
   /** 单次尝试超时，默认 2500ms */
@@ -127,8 +132,13 @@ export class JevClient {
   readonly #client: TypeSafeClient;
   readonly #secret: string;
   readonly #deadlineMs: number;
+  readonly #goalMeter?: GoalMeterScope;
+  readonly #quotaKind: GoalQuotaKind;
+  readonly #terminalHeaders = new WeakSet<Headers>();
 
   constructor(o: JevClientOptions) {
+    this.#goalMeter = resolveGoalMeter(o.goalExecution, o.goalMeter);
+    this.#quotaKind = o.quotaKind ?? "cloud_decision";
     if (!o.apiKey?.trim()) throw new JevError("no_key");
     let baseURL = JEV_BASE_URL;
     if (o.baseURL) {
@@ -148,9 +158,20 @@ export class JevClient {
         defaultModel: this.model,
         logLevel: "off",
         timeout: o.timeoutMs ?? 2500,
-        retry: { maxRetries: o.maxRetries ?? 1, backoffInitialMs: o.backoffInitialMs ?? 300, backoffMaxMs: 2000, maxRetryAfterMs: 3000 },
+        retry: { maxRetries: this.#goalMeter ? 0 : (o.maxRetries ?? 1), backoffInitialMs: o.backoffInitialMs ?? 300, backoffMaxMs: 2000, maxRetryAfterMs: 3000 },
         dangerouslyAllowBrowser: o.browserProxy === true && o.fetch !== undefined,
-        fetch: o.fetch,
+        fetch: this.#goalMeter ? async (input, init) => {
+          const response = await (o.fetch ?? globalThis.fetch)(input, init);
+          // SDK parses an unsuccessful response with text(); only that actual
+          // completed body read grants provenance, never an APIError constructor.
+          const read = response.text.bind(response);
+          response.text = async () => {
+            const body = await read();
+            if (!response.ok) this.#terminalHeaders.add(response.headers);
+            return body;
+          };
+          return response;
+        } : o.fetch,
       });
     } catch (e) {
       throw new JevError("config", { detail: this.#scrub(String((e as Error).message ?? e)) });
@@ -174,6 +195,7 @@ export class JevClient {
   }
 
   #map(e: unknown, deadlineHit: boolean): JevError {
+    if (isGoalQuotaControlError(e)) throw e;
     if (e instanceof JevError) return e;
     if (e instanceof APIUserAbortError) {
       return deadlineHit ? new JevError("timeout", { detail: `超过总时限 ${this.#deadlineMs}ms` }) : new JevError("aborted");
@@ -184,7 +206,8 @@ export class JevClient {
       const s = e.status;
       const code: JevErrorCode = s === 401 || s === 403 ? "auth" : s === 429 ? "rate_limit" : s === 529 ? "overloaded" : s >= 500 ? "server" : "bad_request";
       // 不带响应体：服务端可能回显请求内容
-      return new JevError(code, { status: s, detail: `HTTP ${s}${e.requestId ? ` · request ${e.requestId}` : ""}` });
+      const error = new JevError(code, { status: s, detail: `HTTP ${s}${e.requestId ? ` · request ${e.requestId}` : ""}` });
+      return this.#terminalHeaders.has(e.headers) ? recordTerminalModelFailure(error) : error;
     }
     if (e instanceof TypeSafeError) return new JevError("bad_request", { detail: this.#scrub(e.message) });
     return new JevError("internal", { detail: this.#scrub(String(e)).slice(0, 200) });
@@ -192,6 +215,10 @@ export class JevClient {
 
   /** 一次请求里问多个问题（Jev 并行评估，比分开调用快且便宜） */
   async ask<const Q extends Questions>(state: EntryType, questions: Q, signal?: AbortSignal): Promise<SystemOneResult<Q>> {
+    return invokeGoalModel(this.#goalMeter, this.#quotaKind, this.#quotaKind === "goal_verifier" ? "check_done" : "decision", () => this.#ask(state, questions, signal));
+  }
+
+  async #ask<const Q extends Questions>(state: EntryType, questions: Q, signal?: AbortSignal): Promise<SystemOneResult<Q>> {
     const ctrl = new AbortController();
     let deadlineHit = false;
     const timer = setTimeout(() => {

@@ -24,6 +24,40 @@ pnpm install
 pnpm tauri dev
 ```
 
+### 3.1 已安装数据库迁移烟测
+
+这一步验证已存在的桌面数据库会真实执行 Rust/Tauri 迁移，而不是只在内存测试库里通过。先备份数据库，再启动打好的 `.app`；启动后用只读方式检查 schema 和调用账本：
+
+```bash
+DB="$HOME/Library/Application Support/com.eastgenesis.desktop/eastgenesis.db"
+cp "$DB" "/tmp/eastgenesis-db-before-smoke.db"
+open -na "/path/to/EastGenesis Desktop.app"
+
+node - <<'NODE'
+const { DatabaseSync } = require("node:sqlite");
+const p = process.env.HOME + "/Library/Application Support/com.eastgenesis.desktop/eastgenesis.db";
+const db = new DatabaseSync(p, { readOnly: true });
+console.log(db.prepare("SELECT value FROM app_meta WHERE key='schema_version'").all());
+console.log(db.prepare("PRAGMA table_info(tool_invocations)").all());
+db.close();
+NODE
+```
+
+预期：`schema_version` 为 `7`，`tool_invocations` 含 `lease_owner` 和 `lease_expires_at`，并存在 `tool_invocations_lease` 索引。2026-10-05 已在现有 schema 5 数据库上实测通过；未验证进程退出窗口前，不能把它当作完整崩溃恢复通过。
+
+### 3.2 QA 构建的桌面崩溃恢复
+
+这一步只使用临时测试目录和 QA 构建。普通发行构建没有故障终止入口：
+
+```bash
+pnpm tauri:build:mac:qa
+mkdir -p "$HOME/Downloads/eastgenesis-fault-test"
+EASTGENESIS_QA_FAULT_POINT=after_tool_before_ledger_commit \
+  "/path/to/EastGenesis Desktop QA.app/Contents/MacOS/eastgenesis-desktop"
+```
+
+在任务输入中要求只写入 `Downloads/eastgenesis-fault-test/marker.txt`。工具已返回成功后，QA 外壳会在 `applied` 账本提交前终止进程。再次启动同一个 QA 包，使用任务卡的恢复入口；检查文件内容、SQLite 记录和工具调用次数。预期是文件保留一份、账本为 `applied` 且租约为空、恢复实例不再次执行写入。第二个场景把环境变量改为 `after_ledger_started`，验证工具尚未执行时可以继续。完整字段记录见 `docs/LEDGER_FAULT_WINDOW_CHECKLIST.md`；没有完成这一步时，只能报告独立进程夹具已通过。
+
 ### 4. 配置凭据
 桌面应用只从系统钥匙串或进程环境变量读 Key，**不读 `.env.local`**。
 - 推荐：启动后在「设置 → API Key」里保存 Jev 和模型 Provider 的 Key（存进钥匙串，界面只显示「已配置」）。

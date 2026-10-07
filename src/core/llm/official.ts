@@ -71,6 +71,40 @@ export const OFFICIAL_ENDPOINTS: readonly OfficialEndpoint[] = [
 
 export const OFFICIAL_IDS: readonly OfficialId[] = OFFICIAL_ENDPOINTS.map((e) => e.id);
 
+/**
+ * 适配器进入自动路由前必须满足的恢复契约。
+ * 这不是对厂商 API 的能力宣称，而是 EastGenesis 自己能否安全降级的边界。
+ */
+export interface AdapterRecoveryContract {
+  abortSignal: true;
+  streamTerminal: "sse_done" | "message_stop";
+  partialOutput: true;
+  normalizedErrors: true;
+}
+
+export const OPENAI_RECOVERY_CONTRACT: AdapterRecoveryContract = {
+  abortSignal: true,
+  streamTerminal: "sse_done",
+  partialOutput: true,
+  normalizedErrors: true,
+};
+
+export const ANTHROPIC_RECOVERY_CONTRACT: AdapterRecoveryContract = {
+  abortSignal: true,
+  streamTerminal: "message_stop",
+  partialOutput: true,
+  normalizedErrors: true,
+};
+
+/** 只有声明了契约的适配器才允许被自动路由选中。 */
+export const ADAPTER_RECOVERY_CONTRACTS: Readonly<Record<OfficialId, AdapterRecoveryContract>> = Object.fromEntries(
+  OFFICIAL_ENDPOINTS.map((e) => [e.id, e.dialect === "anthropic" ? ANTHROPIC_RECOVERY_CONTRACT : OPENAI_RECOVERY_CONTRACT]),
+) as Record<OfficialId, AdapterRecoveryContract>;
+
+export function adapterRecoveryContract(provider: string): AdapterRecoveryContract | undefined {
+  return ADAPTER_RECOVERY_CONTRACTS[provider as OfficialId];
+}
+
 export function officialEndpoint(id: string): OfficialEndpoint | undefined {
   return OFFICIAL_ENDPOINTS.find((e) => e.id === id);
 }

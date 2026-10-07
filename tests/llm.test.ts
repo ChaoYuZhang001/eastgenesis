@@ -109,6 +109,81 @@ describe("OpenAIProvider", () => {
     expect(deltas).toEqual(["你", "好"]);
     expect(done).toMatchObject({ text: "你好", model: "m1", finishReason: "stop", usage: { inputTokens: 3, outputTokens: 2 } });
   });
+
+  it("stream：headers 到达后调用方取消仍能中断 body 读取", async () => {
+    const first = new TextEncoder().encode('data: {"choices":[{"delta":{"content":"半截"}}]}\n\n');
+    const fetch: FetchLike = async (_url, init) => {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(first);
+          init.signal?.addEventListener("abort", () => controller.error(new DOMException("aborted", "AbortError")), { once: true });
+        },
+      });
+      return new Response(stream, { status: 200, headers: { "content-type": "text/event-stream" } });
+    };
+    const p = new OpenAIProvider({ id: "openai", apiKey: KEY, fetch, timeoutMs: 500 });
+    const ctrl = new AbortController();
+    const iterator = p.stream({ model: "m", messages: [{ role: "user", content: "hi" }], signal: ctrl.signal })[Symbol.asyncIterator]();
+    await expect(iterator.next()).resolves.toMatchObject({ value: { type: "delta", text: "半截" }, done: false });
+    ctrl.abort();
+    await expect(iterator.next()).rejects.toMatchObject({ code: "aborted", providerId: "openai" });
+  });
+
+  it("stream：连接在 [DONE] 前关闭时视为截断，不把半截正文记为成功", async () => {
+    const body = 'data: {"choices":[{"delta":{"content":"半截"},"finish_reason":"stop"}]}\n\n';
+    const { fetch } = fakeFetch(() => sse(body, 9));
+    const p = new OpenAIProvider({ id: "openai", apiKey: KEY, fetch });
+    const iterator = p.stream({ model: "m", messages: [{ role: "user", content: "hi" }] })[Symbol.asyncIterator]();
+    await expect(iterator.next()).resolves.toMatchObject({ value: { type: "delta", text: "半截" }, done: false });
+    await expect(iterator.next()).rejects.toMatchObject({ code: "invalid_response", partialOutput: true });
+  });
+
+  it("stream：HTTP 200 后的错误事件仍按错误类型降级，并脱敏密钥", async () => {
+    const body =
+      'data: {"choices":[{"delta":{"content":"半截"}}]}\n\n' +
+      `data: {"error":{"type":"rate_limit_exceeded","message":"key ${KEY}"}}\n\n`;
+    const { fetch } = fakeFetch(() => sse(body, 13));
+    const p = new OpenAIProvider({ id: "openai", apiKey: KEY, fetch });
+    const iterator = p.stream({ model: "m", messages: [{ role: "user", content: "hi" }] })[Symbol.asyncIterator]();
+    await expect(iterator.next()).resolves.toMatchObject({ value: { type: "delta", text: "半截" }, done: false });
+    const error = await iterator.next().catch((e) => e);
+    expect(error).toMatchObject({ code: "rate_limit", partialOutput: true });
+    expect(error.detail).not.toContain(KEY);
+  });
+
+  it("stream：响应 headers 已到达后，body 超时映射为 timeout", async () => {
+    const first = new TextEncoder().encode('data: {"choices":[{"delta":{"content":"慢"}}]}\n\n');
+    const fetch: FetchLike = async (_url, init) => {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(first);
+          init.signal?.addEventListener("abort", () => controller.error(new DOMException("timeout", "AbortError")), { once: true });
+        },
+      });
+      return new Response(stream, { status: 200, headers: { "content-type": "text/event-stream" } });
+    };
+    const p = new OpenAIProvider({ id: "openai", apiKey: KEY, fetch, timeoutMs: 20 });
+    const iterator = p.stream({ model: "m", messages: [{ role: "user", content: "hi" }] })[Symbol.asyncIterator]();
+    await expect(iterator.next()).resolves.toMatchObject({ value: { type: "delta", text: "慢" }, done: false });
+    await expect(iterator.next()).rejects.toMatchObject({ code: "timeout", providerId: "openai" });
+  });
+
+  it("stream：body 网络中断时保留已产出的部分输出", async () => {
+    const first = new TextEncoder().encode('data: {"choices":[{"delta":{"content":"已收到"}}]}\n\n');
+    const fetch: FetchLike = async () => {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(first);
+          setTimeout(() => controller.error(new TypeError("socket closed")), 0);
+        },
+      });
+      return new Response(stream, { status: 200, headers: { "content-type": "text/event-stream" } });
+    };
+    const p = new OpenAIProvider({ id: "openai", apiKey: KEY, fetch });
+    const iterator = p.stream({ model: "m", messages: [{ role: "user", content: "hi" }] })[Symbol.asyncIterator]();
+    await expect(iterator.next()).resolves.toMatchObject({ value: { type: "delta", text: "已收到" }, done: false });
+    await expect(iterator.next()).rejects.toMatchObject({ code: "network", partialOutput: true, providerId: "openai" });
+  });
 });
 
 describe("AnthropicProvider", () => {
@@ -154,6 +229,51 @@ describe("AnthropicProvider", () => {
     expect(done).toMatchObject({ model: "claude-y", finishReason: "length", usage: { inputTokens: 4, outputTokens: 6 } });
   });
 
+  it("stream：连接在 message_stop 前关闭时视为截断", async () => {
+    const ev = (type: string, data: unknown) => `event: ${type}\ndata: ${JSON.stringify({ type, ...(data as object) })}\n\n`;
+    const body = ev("message_start", { message: { model: "claude-y" } }) + ev("content_block_delta", { delta: { type: "text_delta", text: "半截" } });
+    const { fetch } = fakeFetch(() => sse(body, 11));
+    const p = new AnthropicProvider({ apiKey: KEY, fetch });
+    const iterator = p.stream({ model: "c", messages: [{ role: "user", content: "hi" }] })[Symbol.asyncIterator]();
+    await expect(iterator.next()).resolves.toMatchObject({ value: { type: "delta", text: "半截" }, done: false });
+    await expect(iterator.next()).rejects.toMatchObject({ code: "invalid_response", partialOutput: true });
+  });
+
+  it("stream：Anthropic 中途错误按协议类型映射，并脱敏密钥", async () => {
+    const ev = (type: string, data: unknown) => `event: ${type}\ndata: ${JSON.stringify({ type, ...(data as object) })}\n\n`;
+    const body =
+      ev("message_start", { message: { model: "claude-y" } }) +
+      ev("content_block_delta", { delta: { type: "text_delta", text: "半截" } }) +
+      ev("error", { error: { type: "overloaded_error", message: `key ${KEY}` } });
+    const { fetch } = fakeFetch(() => sse(body, 11));
+    const p = new AnthropicProvider({ apiKey: KEY, fetch });
+    const iterator = p.stream({ model: "c", messages: [{ role: "user", content: "hi" }] })[Symbol.asyncIterator]();
+    await expect(iterator.next()).resolves.toMatchObject({ value: { type: "delta", text: "半截" }, done: false });
+    const error = await iterator.next().catch((e) => e);
+    expect(error).toMatchObject({ code: "server", partialOutput: true });
+    expect(error.detail).not.toContain(KEY);
+  });
+
+  it("stream：Anthropic body 网络中断时保留已产出的部分输出", async () => {
+    const first = new TextEncoder().encode(
+      'event: message_start\ndata: {"type":"message_start","message":{"model":"claude-y"}}\n\n' +
+      'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"type":"text_delta","text":"已收到"}}\n\n',
+    );
+    const fetch: FetchLike = async () => {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(first);
+          setTimeout(() => controller.error(new TypeError("socket closed")), 0);
+        },
+      });
+      return new Response(stream, { status: 200, headers: { "content-type": "text/event-stream" } });
+    };
+    const p = new AnthropicProvider({ apiKey: KEY, fetch });
+    const iterator = p.stream({ model: "c", messages: [{ role: "user", content: "hi" }] })[Symbol.asyncIterator]();
+    await expect(iterator.next()).resolves.toMatchObject({ value: { type: "delta", text: "已收到" }, done: false });
+    await expect(iterator.next()).rejects.toMatchObject({ code: "network", partialOutput: true, providerId: "anthropic" });
+  });
+
   it("没有 user 消息时报 bad_request，不发请求", async () => {
     const { fetch, calls } = fakeFetch(() => json({}));
     const p = new AnthropicProvider({ apiKey: KEY, fetch });
@@ -166,6 +286,7 @@ describe("错误映射与脱敏", () => {
   it.each([
     [401, "auth", false],
     [403, "auth", false],
+    [402, "billing", false],
     [404, "not_found", false],
     [429, "rate_limit", true],
     [500, "server", true],

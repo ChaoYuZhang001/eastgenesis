@@ -1,6 +1,6 @@
 // @vitest-environment node
 // 迁移：真实执行 eg-core 的迁移 SQL（node:sqlite 内存库），检查表结构、约束和从版本 3 升级。
-// 桌面端由 tauri-plugin-sql 执行同一份 SQL；Mac 上首次启动后「设置 › 关于 › 版本」应显示数据库结构版本 5。
+// 桌面端由 tauri-plugin-sql 执行同一份 SQL；Mac 上首次启动后「设置 › 关于 › 版本」应显示数据库结构版本 7。
 import { SCHEMA_VERSION } from "@/lib/db";
 import { loadSqlite, migratedDb, readMigrations, type RawDb } from "./sqlite-helper";
 
@@ -11,17 +11,17 @@ const version = (db: RawDb) => (db.prepare("SELECT value FROM app_meta WHERE key
 describe("迁移列表", () => {
   it("从 lib.rs 读出的版本连续，最后一条等于 SCHEMA_VERSION", () => {
     const ms = readMigrations();
-    expect(ms.map((m) => m.version)).toEqual([1, 2, 3, 4, 5]);
-    expect(ms.at(-1)).toMatchObject({ version: SCHEMA_VERSION, name: "create_sessions_usage" });
+    expect(ms.map((m) => m.version)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    expect(ms.at(-1)).toMatchObject({ version: SCHEMA_VERSION, name: "add_tool_invocation_leases" });
     // 续行符已去掉，SQL 里没有 Rust 转义残留
     for (const m of ms) expect(m.sql).not.toMatch(/\\$|\\\n/m);
   });
 });
 
 describe.skipIf(!sqlite)("迁移 SQL（node:sqlite）", () => {
-  it("新库执行全部迁移：结构版本 5，各表的列齐全", () => {
+  it("新库执行全部迁移：结构版本 7，各表的列齐全", () => {
     const db = migratedDb(sqlite!);
-    expect(version(db)).toBe("5");
+    expect(version(db)).toBe("7");
     expect(cols(db, "sessions")).toEqual(["id", "project_id", "title", "turns", "created_at", "updated_at", "deleted_at"]);
     expect(cols(db, "usage_calls")).toEqual(["id", "session_id", "task_id", "goal_id", "project_id", "profile_id", "input_tokens", "output_tokens", "baseline_profile_id", "created_at"]);
     expect(cols(db, "projects")).toEqual(["id", "name", "description", "instructions", "context_folders", "routing_preference", "archived", "created_at", "updated_at", "deleted_at"]);
@@ -29,6 +29,9 @@ describe.skipIf(!sqlite)("迁移 SQL（node:sqlite）", () => {
       "id", "project_id", "description", "instructions", "routing_preference", "status", "rounds", "max_llm_calls", "used_llm_calls", "created_at", "updated_at", "deleted_at",
     ]);
     expect(cols(db, "memories").slice(-2)).toEqual(["project_id", "deleted_at"]);
+    expect(cols(db, "tool_invocations")).toEqual([
+      "idempotency_key", "task_id", "step_id", "invocation_id", "tool", "args_digest", "attempt", "state", "artifacts", "detail", "created_at", "updated_at", "lease_owner", "lease_expires_at",
+    ]);
   });
 
   it("从版本 3 升级：已有记忆保留，project_id 和 deleted_at 为空", () => {
@@ -36,7 +39,9 @@ describe.skipIf(!sqlite)("迁移 SQL（node:sqlite）", () => {
     db.exec("INSERT INTO memories (id, kind, text, source, created_at, updated_at) VALUES ('mem-old', 'fact', '旧记忆', 'manual', 1, 1)");
     db.exec(readMigrations().find((m) => m.version === 4)!.sql);
     db.exec(readMigrations().find((m) => m.version === 5)!.sql);
-    expect(version(db)).toBe("5");
+    db.exec(readMigrations().find((m) => m.version === 6)!.sql);
+    db.exec(readMigrations().find((m) => m.version === 7)!.sql);
+    expect(version(db)).toBe("7");
     expect(db.prepare("SELECT id, text, project_id, deleted_at FROM memories").all({})).toEqual([{ id: "mem-old", text: "旧记忆", project_id: null, deleted_at: null }]);
   });
 
@@ -66,9 +71,20 @@ describe.skipIf(!sqlite)("迁移 SQL（node:sqlite）", () => {
     db.exec("INSERT INTO projects (id, name, created_at, updated_at) VALUES ('prj-a', 'A', 1, 1)");
     db.exec("INSERT INTO goals (id, project_id, description, created_at, updated_at) VALUES ('goal-a', 'prj-a', 'g', 1, 1)");
     db.exec(readMigrations().find((m) => m.version === 5)!.sql);
-    expect(version(db)).toBe("5");
+    db.exec(readMigrations().find((m) => m.version === 6)!.sql);
+    db.exec(readMigrations().find((m) => m.version === 7)!.sql);
+    expect(version(db)).toBe("7");
     expect(db.prepare("SELECT id FROM projects").all({})).toEqual([{ id: "prj-a" }]);
     expect(db.prepare("SELECT id FROM goals").all({})).toEqual([{ id: "goal-a" }]);
     expect(db.prepare("SELECT COUNT(*) AS n FROM sessions").get({})).toEqual({ n: 0 });
+    expect(db.prepare("SELECT COUNT(*) AS n FROM tool_invocations").get({})).toEqual({ n: 0 });
+  });
+
+  it("从版本 6 升级：账本记录保留，租约列为空", () => {
+    const db = migratedDb(sqlite!, 6);
+    db.exec("INSERT INTO tool_invocations (idempotency_key, task_id, step_id, invocation_id, tool, args_digest, attempt, state, artifacts, detail, created_at, updated_at) VALUES ('eg-old', 't', 's', 'i', 'write_file', 'x', 1, 'unknown', '[]', '', 1, 1)");
+    db.exec(readMigrations().find((m) => m.version === 7)!.sql);
+    expect(version(db)).toBe("7");
+    expect(db.prepare("SELECT state, lease_owner, lease_expires_at FROM tool_invocations WHERE idempotency_key = 'eg-old'").get({})).toEqual({ state: "unknown", lease_owner: null, lease_expires_at: null });
   });
 });

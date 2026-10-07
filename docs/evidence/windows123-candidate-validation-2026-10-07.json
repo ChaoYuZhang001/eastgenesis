@@ -1,0 +1,775 @@
+{
+  "schemaVersion": 1,
+  "kind": "windows123_process_start_input_facts_isolated_validation",
+  "createdAt": "2026-10-07T07:17:01.857389+00:00",
+  "baselineRevision": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "publicHead": "1c739f737e74b62d49d715b61fb6f04cb74ac122",
+  "ciRunId": "37580929560",
+  "finalIndex": {
+    "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-final-index-r1.json",
+    "bytes": 7652,
+    "sha256": "d28446a16aa94104682dcd17de7a25ec0dc14c996a6ca088eb995b2a32740492"
+  },
+  "finalPatch": {
+    "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/windows123-process-start-input-facts-final.patch",
+    "bytes": 29518,
+    "sha256": "373936bb760e4fe3a3d3624356434e7f09a6db48c7af4ce91b42ae62faeb7933",
+    "addedLines": 209,
+    "removedLines": 26,
+    "changedFileCount": 4
+  },
+  "sourceFiles": {
+    "tools/desktop-windows-install-smoke.ps1": {
+      "baseline": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline/tools/desktop-windows-install-smoke.ps1",
+        "bytes": 43789,
+        "sha256": "b18a3fab792b541504e7c8425bdebd828700a3b292663df9571323de7f4b7402"
+      },
+      "draft": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-draft/tools/desktop-windows-install-smoke.ps1",
+        "bytes": 48149,
+        "sha256": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397"
+      },
+      "final": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-final/tools/desktop-windows-install-smoke.ps1",
+        "bytes": 48149,
+        "sha256": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397"
+      },
+      "testedFinal": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tools/desktop-windows-install-smoke.ps1",
+        "bytes": 48149,
+        "sha256": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397"
+      },
+      "baselineGitBlobSha1": "e563c5928449c0d21dccd1325db1618588aaf367",
+      "sameRuntimeAsDraft": true
+    },
+    "tools/desktop-windows-install-smoke.mjs": {
+      "baseline": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline/tools/desktop-windows-install-smoke.mjs",
+        "bytes": 23691,
+        "sha256": "6a724a5bbeeff7611e4771655efefeb022e5ea18aafea9e229738e1448059ac4"
+      },
+      "draft": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-draft/tools/desktop-windows-install-smoke.mjs",
+        "bytes": 26237,
+        "sha256": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad"
+      },
+      "final": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-final/tools/desktop-windows-install-smoke.mjs",
+        "bytes": 26237,
+        "sha256": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad"
+      },
+      "testedFinal": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tools/desktop-windows-install-smoke.mjs",
+        "bytes": 26237,
+        "sha256": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad"
+      },
+      "baselineGitBlobSha1": "0f6c1b425b5843129ce155fcc59ea0d304a72da8",
+      "sameRuntimeAsDraft": true
+    },
+    "tools/desktop-windows-install-smoke.d.mts": {
+      "baseline": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline/tools/desktop-windows-install-smoke.d.mts",
+        "bytes": 2702,
+        "sha256": "11275fede5d0e7b88dc9f5c6f807632fc0406207f4962d1da28962752aa328ae"
+      },
+      "draft": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-draft/tools/desktop-windows-install-smoke.d.mts",
+        "bytes": 3699,
+        "sha256": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff"
+      },
+      "final": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-final/tools/desktop-windows-install-smoke.d.mts",
+        "bytes": 3699,
+        "sha256": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff"
+      },
+      "testedFinal": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tools/desktop-windows-install-smoke.d.mts",
+        "bytes": 3699,
+        "sha256": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff"
+      },
+      "baselineGitBlobSha1": "44c583d9f28d3de7964ad05d545ba66358968a96",
+      "sameRuntimeAsDraft": true
+    },
+    "tests/desktop-windows-install-smoke.test.ts": {
+      "baseline": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline/tests/desktop-windows-install-smoke.test.ts",
+        "bytes": 35361,
+        "sha256": "720b2b513f348a99c6276b3201d9d78afad0024b677c31aeb49ebef064083329"
+      },
+      "draft": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-draft/tests/desktop-windows-install-smoke.test.ts",
+        "bytes": 41782,
+        "sha256": "514d36464cd9979bd28c44f02b8b15c09b99a1e1133c9f9ff5c9bbaaf7894cc4"
+      },
+      "final": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-final/tests/desktop-windows-install-smoke.test.ts",
+        "bytes": 41779,
+        "sha256": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+      },
+      "testedFinal": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tests/desktop-windows-install-smoke.test.ts",
+        "bytes": 41779,
+        "sha256": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+      },
+      "baselineGitBlobSha1": "a712b437e10565c5d5326e01075e43639c097e51",
+      "sameRuntimeAsDraft": false
+    }
+  },
+  "outcome": {
+    "finalFocusedTestCount": 68,
+    "finalFocusedPassed": 68,
+    "finalFocusedFailed": 0,
+    "finalFocusedPending": 0,
+    "finalSyntaxExitCode": 0,
+    "finalTypecheckExitCode": 0,
+    "nativePassed": false,
+    "powershellCsharpWinApiExecuted": false,
+    "originalWin32123CauseProved": false,
+    "originalWin32123Fixed": false,
+    "repoApplied": false
+  },
+  "validation": {
+    "baseline-red": {
+      "command": [
+        "node",
+        "/Users/apple/Desktop/EastGenesis/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline-red/vitest.config.mjs",
+        "--maxWorkers=2",
+        "--minWorkers=1",
+        "--testNamePattern=process start input facts|projects only typed process-job failures",
+        "--reporter=json",
+        "--outputFile=/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline-red.vitest.json"
+      ],
+      "cwd": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline-red",
+      "exitCode": 1,
+      "rawLog": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline-red.raw.log",
+      "rawLogSha256": "daa5f62265e9e594e71cfdb7b7cf70ea55e67001795eaf30796548c32da49a82",
+      "counts": {
+        "numTotalTests": 68,
+        "numPassedTests": 36,
+        "numFailedTests": 3,
+        "numPendingTests": 29,
+        "success": false
+      },
+      "failures": [
+        "Windows NSIS install smoke safety and evidence boundary process start input facts projects fixed actual-input shapes without upgrading failed startup evidence",
+        "Windows NSIS install smoke safety and evidence boundary process start input facts retains legacy omitted facts and represents unavailable new facts as null",
+        "Windows NSIS install smoke safety and evidence boundary process start input facts accepts fixed unknown observations and the exact length recording boundaries"
+      ]
+    },
+    "candidate-green": {
+      "command": [
+        "node",
+        "/Users/apple/Desktop/EastGenesis/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green/vitest.config.mjs",
+        "--maxWorkers=2",
+        "--minWorkers=1",
+        "--testNamePattern=process start input facts|projects only typed process-job failures|retains suspended job containment|stops launch infrastructure failures",
+        "--reporter=json",
+        "--outputFile=/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green.vitest.json"
+      ],
+      "cwd": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green",
+      "exitCode": 0,
+      "rawLog": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green.raw.log",
+      "rawLogSha256": "df2606d1ce916df93ef4567dd5de25c091c4bcf093c2b1d4e11aaf1e7e1f1181",
+      "counts": {
+        "numTotalTests": 68,
+        "numPassedTests": 41,
+        "numFailedTests": 0,
+        "numPendingTests": 27,
+        "success": true
+      }
+    },
+    "candidate-syntax": {
+      "command": [
+        "node",
+        "--check",
+        "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green/tools/desktop-windows-install-smoke.mjs"
+      ],
+      "cwd": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green",
+      "exitCode": 0,
+      "rawLog": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-syntax.raw.log",
+      "rawLogSha256": "040f0f7ec43f5c311591afffc05be3fffae3a9f73e79ee112b430662d286a4c1"
+    },
+    "candidate-typecheck": {
+      "command": [
+        "node",
+        "/Users/apple/Desktop/EastGenesis/node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green/tsconfig.json"
+      ],
+      "cwd": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green",
+      "exitCode": 2,
+      "rawLog": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-typecheck.raw.log",
+      "rawLogSha256": "fc5e6c12f439b65d0b4ef95187753c055c8b244fe01ebb79b0468d4df74bce04"
+    },
+    "final-full": {
+      "command": [
+        "node",
+        "/Users/apple/Desktop/EastGenesis/node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/vitest.config.mjs",
+        "--maxWorkers=2",
+        "--minWorkers=1",
+        "--reporter=json",
+        "--outputFile=/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-full.vitest.json"
+      ],
+      "cwd": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green",
+      "exitCode": 0,
+      "rawLog": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-full.raw.log",
+      "rawLogSha256": "3ba1ecd05c1954004e3f135f0858c4ba93b633248218383b538a20d01c52867f",
+      "sourceStartHashes": {
+        "tools/desktop-windows-install-smoke.ps1": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397",
+        "tools/desktop-windows-install-smoke.mjs": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad",
+        "tools/desktop-windows-install-smoke.d.mts": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff",
+        "tests/desktop-windows-install-smoke.test.ts": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+      },
+      "sourceEndHashes": {
+        "tools/desktop-windows-install-smoke.ps1": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397",
+        "tools/desktop-windows-install-smoke.mjs": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad",
+        "tools/desktop-windows-install-smoke.d.mts": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff",
+        "tests/desktop-windows-install-smoke.test.ts": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+      },
+      "counts": {
+        "numTotalTests": 68,
+        "numPassedTests": 68,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "failures": []
+    },
+    "final-syntax": {
+      "command": [
+        "node",
+        "--check",
+        "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tools/desktop-windows-install-smoke.mjs"
+      ],
+      "cwd": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green",
+      "exitCode": 0,
+      "rawLog": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-syntax.raw.log",
+      "rawLogSha256": "ec92eed9e3625dd39c0f89d3032bd09f811991539e671104a333c6cf3b73b49a",
+      "sourceStartHashes": {
+        "tools/desktop-windows-install-smoke.ps1": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397",
+        "tools/desktop-windows-install-smoke.mjs": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad",
+        "tools/desktop-windows-install-smoke.d.mts": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff",
+        "tests/desktop-windows-install-smoke.test.ts": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+      },
+      "sourceEndHashes": {
+        "tools/desktop-windows-install-smoke.ps1": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397",
+        "tools/desktop-windows-install-smoke.mjs": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad",
+        "tools/desktop-windows-install-smoke.d.mts": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff",
+        "tests/desktop-windows-install-smoke.test.ts": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+      }
+    },
+    "final-typecheck": {
+      "command": [
+        "node",
+        "/Users/apple/Desktop/EastGenesis/node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tsconfig.json"
+      ],
+      "cwd": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green",
+      "exitCode": 0,
+      "rawLog": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-typecheck.raw.log",
+      "rawLogSha256": "89b1afedbd2c94415ac4648de4773b51a5ae2d707b1d0dde6f04f6fbde149041",
+      "sourceStartHashes": {
+        "tools/desktop-windows-install-smoke.ps1": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397",
+        "tools/desktop-windows-install-smoke.mjs": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad",
+        "tools/desktop-windows-install-smoke.d.mts": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff",
+        "tests/desktop-windows-install-smoke.test.ts": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+      },
+      "sourceEndHashes": {
+        "tools/desktop-windows-install-smoke.ps1": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397",
+        "tools/desktop-windows-install-smoke.mjs": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad",
+        "tools/desktop-windows-install-smoke.d.mts": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff",
+        "tests/desktop-windows-install-smoke.test.ts": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+      }
+    }
+  },
+  "vitestArtifacts": {
+    "baseline-red": {
+      "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/baseline-red.vitest.json",
+      "bytes": 28637,
+      "sha256": "11994e1845e1f0073e90a70efb3d94c07cb361a85c91e2cb550c94b74a53576e"
+    },
+    "candidate-green": {
+      "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-green.vitest.json",
+      "bytes": 25157,
+      "sha256": "abeecf3e42dde9ba6907f4893e98bb5454135bed8a2cd0f309f85b8e87f9ec63"
+    },
+    "final-full": {
+      "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-full.vitest.json",
+      "bytes": 25914,
+      "sha256": "36ce1d866893cac33a4cf2f08f6c34f4eebd428912d825503aab4682dd53a9b1"
+    }
+  },
+  "countsInterpretation": {
+    "baselineRedSelected": 39,
+    "baselineRedPassed": 36,
+    "baselineRedFailed": 3,
+    "baselineRedFilteredOut": 29,
+    "draftFilteredSelected": 41,
+    "draftFilteredPassed": 41,
+    "draftFilteredFailed": 0,
+    "draftFilteredOut": 27,
+    "finalFocusedTotal": 68,
+    "newFactsActualTestCases": 38,
+    "existingFocusedActualTestCases": 30,
+    "doNotAddRepeatedRuns": true,
+    "dataDrivenVectorsCountedOnlyAsReportedTestCases": true
+  },
+  "draftTypecheckFailure": {
+    "exitCode": 2,
+    "code": "TS2339",
+    "testLine": 491,
+    "message": "Property 'processStartInputFacts' does not exist on type 'Partial<unknown>'.",
+    "rawLog": {
+      "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/candidate-typecheck.raw.log",
+      "bytes": 558,
+      "sha256": "fc5e6c12f439b65d0b4ef95187753c055c8b244fe01ebb79b0468d4df74bce04"
+    },
+    "runtimeSourceChangeRequired": false,
+    "finalCorrection": "delete (diagnostic as Record<string, unknown>).processStartInputFacts;",
+    "draftPreserved": true
+  },
+  "changeSummary": [
+    "Optional sibling processStartInputFacts records only fixed launchRole and bounded shape observations of actual typed application/cwd plus actual constructed StringBuilder command before mutable CreateProcess.",
+    "Win32 factory still captures Marshal.GetLastWin32Error as its first statement, then attaches already collected facts without replacing original processJobFailure fields.",
+    "Node validates exact keys, nullable types, fixed enum values and length bounds; deep projects allowed facts. Legacy omitted facts remain readable; null means unavailable.",
+    "No raw path, command, environment, exception or derived hash strings are projected.",
+    "No launch retry, new probe, changed startup input, new startup gate or changed budget is introduced."
+  ],
+  "preservedBehavior": [
+    "original application/argument/cwd strings and command construction",
+    "CreateProcess flags 0x404",
+    "job flags 0x2000",
+    "assignment before ResumeThread and suspend-count-one assertion",
+    "termination and cleanup",
+    "external schema7 requirement",
+    "two lifecycle cycles",
+    "original processJobFailure four-field shape",
+    "all original budgets"
+  ],
+  "factsSemantics": {
+    "boundedLength": {
+      "maximumRecordedExactUtf16Length": 65535,
+      "overBound": "null",
+      "notAStartupGate": true,
+      "notWin32ValidCommandLimit": true
+    },
+    "applicationExists": "File.Exists best-effort boolean for the actual application input",
+    "cwdExists": "Directory.Exists best-effort boolean for the actual cwd input",
+    "fullPathComparison": "lexical Path.GetFullPath comparison only; does not normalize startup inputs or prove canonical filesystem identity",
+    "collectionFailure": "unknown/null only; no replacement of original launch outcome",
+    "presentNull": "unknown in failed process_job context; never success proof"
+  },
+  "lineReferences": {
+    "powershellStartControlled": {
+      "file": "tools/desktop-windows-install-smoke.ps1",
+      "line": 213
+    },
+    "powershellFactsCapture": {
+      "file": "tools/desktop-windows-install-smoke.ps1",
+      "line": 730
+    },
+    "powershellActualCreateProcess": {
+      "file": "tools/desktop-windows-install-smoke.ps1",
+      "line": 734
+    },
+    "powershellFailureSiblingProjection": {
+      "file": "tools/desktop-windows-install-smoke.ps1",
+      "line": 462
+    },
+    "nodeStrictFactsValidation": {
+      "file": "tools/desktop-windows-install-smoke.mjs",
+      "line": 77
+    },
+    "types": {
+      "file": "tools/desktop-windows-install-smoke.d.mts",
+      "line": 32
+    },
+    "factsTests": {
+      "file": "tests/desktop-windows-install-smoke.test.ts",
+      "line": 462
+    },
+    "testOnlyCastFix": {
+      "file": "tests/desktop-windows-install-smoke.test.ts",
+      "line": 491
+    }
+  },
+  "finalActualTestResults": [
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary remains importable through Vite after a Windows CRLF checkout",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary permits only explicit disposable hosted Windows runners",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary requires the dedicated QA app directory rather than relying on environment redirects",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary requires supported binary dispatch and embedded-config proof before any NSIS attempt",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary models only the pinned bundler patch and leaves source bytes unchanged",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary fails closed on missing or repeated markers and an unreviewed CLI version",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary still rejects changes to any installed byte outside the intentional marker patch",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary binds both install and repair proof to the whole expected payload digest",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary rejects malformed binding metadata instead of forwarding unknown fields",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary rejects unsupported, missing and duplicate CLI arguments",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary publishes only fixed checks and termination evidence from native helper results",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary distinguishes an absent database, an incomplete schema and a failed schema probe",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary preserves pre-cleanup root and job observations without inventing unknown values",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary rejects sensitive, unbounded and contradictory startup diagnostics",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary keeps legacy reports readable and accepts only consistent successful startup observations",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary captures each isolated startup trace before cleanup without extending the database wait",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary executes the actual embedded Python probe with fixed schema success and redacted query failure",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary refuses a claimed pass when real uninstall or repair checks are absent",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary records dispatch attempts without inventing a registry change on early failures",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary refuses unknown failure labels which could expose paths or provider configuration",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary does not describe forced termination as graceful or accept a remaining process tree",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary requires both repaired process startup stability and assignment before execution",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary preserves a redacted failure without claiming installation proof",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary projects only typed process-job failures and retains old failure reports",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary rejects leaked fields, unknown stages, unbounded numbers and impossible native tuples",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary allows null launch diagnostics only outside process_job, including normal lifecycle success",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts projects fixed actual-input shapes without upgrading failed startup evidence",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts retains legacy omitted facts and represents unavailable new facts as null",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts accepts fixed unknown observations and the exact length recording boundaries",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects raw top-level application text",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects raw application field",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects raw cwd field",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects raw command field",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects raw environment",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects raw exception",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects unknown role",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects unknown path form",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects unknown normalization",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects wrong flag type",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects wrong exists type",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects missing application",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects array application",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects null command",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects empty object",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects present undefined",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects application length -1",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects application length 65536",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects application length 1.5",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects application length NaN",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects application length Infinity",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects application length 31",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects cwd length -1",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects cwd length 65536",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects cwd length 1.5",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects cwd length NaN",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects cwd length Infinity",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects cwd length 31",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects command length -1",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects command length 65536",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects command length 1.5",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects command length NaN",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects command length Infinity",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects command length 31",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary process start input facts rejects facts attached to another failure or successful lifecycle",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary retains suspended job containment while capturing native errors before cleanup",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary stops launch infrastructure failures without weakening the external schema gate",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary CLI fails closed on ordinary hosts without exposing the supplied package path",
+      "status": "passed"
+    },
+    {
+      "name": "Windows NSIS install smoke safety and evidence boundary does not expose an unavailable output path in native exception text",
+      "status": "passed"
+    }
+  ],
+  "isolatedEnvironment": {
+    "root": "/tmp/eastgenesis-windows123-facts-_ewu2_vu",
+    "finalTestRoot": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green",
+    "maxWorkers": 2,
+    "minWorkers": 1,
+    "testInclude": [
+      "tests/desktop-windows-install-smoke.test.ts"
+    ],
+    "viteCacheDirectory": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/owned-vite-cache",
+    "temporaryDirectory": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/owned-tmp",
+    "nodeModulesDirectoryIsOwnRealDirectory": true,
+    "dependencyPackages": "readonly workspace dependency symlinks; cache namespaces excluded",
+    "configurationArtifacts": {
+      "vitest.config.mjs": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/vitest.config.mjs",
+        "bytes": 361,
+        "sha256": "188ab494a5bed5decca694b3d13b1c5aa5bc9db30eb7b9e57abaffc949cb9a33"
+      },
+      "tsconfig.json": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tsconfig.json",
+        "bytes": 649,
+        "sha256": "4e1e3b8ad1be123f8ed72ad36f97918c7288c031fba048110a137e5447b6acd3"
+      }
+    },
+    "immutableSupportReadDependencies": {
+      "tools/desktop-startup-trace.mjs": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tools/desktop-startup-trace.mjs",
+        "bytes": 9550,
+        "sha256": "569b72ffa6fd6ef78bfa64db53f26ce77647fb19fd32d9f4f4e534d61dc5439f"
+      },
+      "tools/desktop-startup-trace.d.mts": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/tools/desktop-startup-trace.d.mts",
+        "bytes": 2333,
+        "sha256": "ef77f6cdddc963706fb1e5d077b1f98918724bd6e0ce18f470966e4623f7a239"
+      },
+      "package.json": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/package.json",
+        "bytes": 2957,
+        "sha256": "b5396c29d929803ce613f2bcc396df6eab4f61cd2e66c900b496a8875e56056a"
+      },
+      "src-tauri/src/main.rs": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/src-tauri/src/main.rs",
+        "bytes": 702,
+        "sha256": "1e751d0f3372d74d5c5b5d1b7a5750a7da689bf906509b388a629a09727f933e"
+      },
+      "src-tauri/src/qa_install_probe.rs": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/src-tauri/src/qa_install_probe.rs",
+        "bytes": 6402,
+        "sha256": "8af3294f3fd44cf1af90032d0fb318e91830cd5981dc02300cb366a89d435ddf"
+      },
+      "src-tauri/src/lib.rs": {
+        "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-green/src-tauri/src/lib.rs",
+        "bytes": 24208,
+        "sha256": "1c6c21973ed740d8a6586cc11fff57c5b93f91fca5fab33b0e6fd676641aedfe"
+      }
+    },
+    "supportDependenciesAreNotPatchScope": true,
+    "repositoryOrCaptureRootWrites": false
+  },
+  "proofLimits": [
+    "Actual Node consumer tests prove synthetic facts projection, strict rejection and legacy compatibility. They do not prove C# field production, PowerShell IDictionary/Hashtable JSON serialization or Windows API behavior.",
+    "The full focused file additionally executes its existing embedded Python SQLite probe locally; this does not execute the Windows external probe launch chain.",
+    "Static source assertions inspect containment, error capture and schema gate source only; they are not native execution evidence.",
+    "No PowerShell/C# compiler, Cargo, native Windows process, App, AX, provider/private state or repository/Git mutation was run for this candidate.",
+    "The original Win32123 report lacks actual input facts, so no parameter-specific cause or repair is established."
+  ],
+  "parentVerifiedPrimaryDocumentationReferences": [
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw",
+      "verification": "supplied by parent; not independently fetched in this isolated validation",
+      "relevance": "application/command/cwd are separate inputs and command may be modified by API"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-",
+      "verification": "supplied by parent; not independently fetched in this isolated validation",
+      "relevance": "123 is invalid filename/directory/volume syntax class, not parameter-specific diagnosis"
+    }
+  ],
+  "reportMetadataCorrection": {
+    "kind": "report_metadata_only_correction",
+    "reason": "Unified diff has four --- a/ headers rather than diff --git headers; initial metadata counter incorrectly reported zero changed files. Source, patch and test evidence unchanged.",
+    "previousIndex": {
+      "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-final-index.json",
+      "bytes": 6931,
+      "sha256": "aeb46ad9564adead3441ba87b6d515fdbb20fa85e4b1f26f6e666970cc3035be"
+    },
+    "previousReport": {
+      "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/final-validation-report.json",
+      "bytes": 35496,
+      "sha256": "b7e36c3823874cfee49643e66572a8f8c7ed79531c2e8a1baa4dbaf0e529aa34"
+    }
+  }
+}

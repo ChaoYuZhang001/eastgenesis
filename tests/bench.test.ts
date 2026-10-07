@@ -64,7 +64,7 @@ describe("内部基准：智能路由对比固定模型", () => {
   });
 
   it("docs/BENCHMARK.md 的内部基准表与 formatBench 输出一致（改了路由或能力矩阵后用 pnpm eg bench 重新生成）", () => {
-    const doc = readFileSync(new URL("../docs/BENCHMARK.md", import.meta.url), "utf8");
+    const doc = readFileSync(new URL("../docs/BENCHMARK.md", import.meta.url), "utf8").replace(/\r\n/g, "\n");
     const start = doc.indexOf("<!-- bench:start -->");
     const end = doc.indexOf("<!-- bench:end -->");
     expect(start, "缺少 bench:start 标记").toBeGreaterThan(-1);

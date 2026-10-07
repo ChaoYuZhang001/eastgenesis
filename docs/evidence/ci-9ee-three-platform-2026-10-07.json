@@ -1,0 +1,1307 @@
+{
+  "schemaVersion": 1,
+  "kind": "ci-three-platform-source-bound-terminal-evidence",
+  "capturedAt": "2026-10-07T00:44:25.262539+00:00",
+  "sourceSnapshot": "9ee88388a584ab7fbadb4049aa5e93a4950d57a1",
+  "runId": 37550937897,
+  "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37550937897",
+  "conclusion": "failure",
+  "localPublishedCommit": "c22c51051693a92de7d691d075a21a96f817e1ad",
+  "sourceArchiveBytes": 12922880,
+  "jobs": [
+    {
+      "id": 112565981739,
+      "name": "macos-latest",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T00:14:51Z",
+      "completedAt": "2026-10-07T00:24:53Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37550937897/job/112565981739"
+    },
+    {
+      "id": 112565982044,
+      "name": "ubuntu-latest",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T00:14:47Z",
+      "completedAt": "2026-10-07T00:31:04Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37550937897/job/112565982044"
+    },
+    {
+      "id": 112565982111,
+      "name": "windows-latest",
+      "conclusion": "failure",
+      "startedAt": "2026-10-07T00:14:47Z",
+      "completedAt": "2026-10-07T00:37:19Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37550937897/job/112565982111"
+    }
+  ],
+  "observation": {
+    "schemaVersion": 1,
+    "kind": "ci-observed-summary",
+    "runId": 37550937897,
+    "headSha": "9ee88388a584ab7fbadb4049aa5e93a4950d57a1",
+    "conclusion": "failure",
+    "capturedAt": "2026-10-07T00:40:34.376551+00:00",
+    "jobs": [
+      {
+        "id": 112565981739,
+        "name": "macos-latest",
+        "conclusion": "success",
+        "startedAt": "2026-10-07T00:14:51Z",
+        "completedAt": "2026-10-07T00:24:53Z"
+      },
+      {
+        "id": 112565982044,
+        "name": "ubuntu-latest",
+        "conclusion": "success",
+        "startedAt": "2026-10-07T00:14:47Z",
+        "completedAt": "2026-10-07T00:31:04Z"
+      },
+      {
+        "id": 112565982111,
+        "name": "windows-latest",
+        "conclusion": "failure",
+        "startedAt": "2026-10-07T00:14:47Z",
+        "completedAt": "2026-10-07T00:37:19Z"
+      }
+    ],
+    "independentChecks": {
+      "rawLogReextractions": 5,
+      "terminalRunAndAllJobsHeadBinding": true,
+      "linuxZipDigestMatchesArtifactMetadata": true,
+      "windowsTraceStrictValidatorPassed": true
+    },
+    "windows": {
+      "report": "windows-desktop-windows-install-smoke-1.json",
+      "rawLog": "windows-job-112565982111.log",
+      "rawLogLines": [
+        3107,
+        3390
+      ],
+      "observedChecksPassed": 10,
+      "failure": "database_timeout",
+      "databaseExists": false,
+      "schemaProbeAttempts": 0,
+      "rootAliveAtDiagnosis": true,
+      "rootWindowAtDiagnosis": true,
+      "jobActiveProcessCount": 7,
+      "trace": {
+        "status": "observed",
+        "reason": "complete",
+        "runId": "4673426b-08d5-4b31-a994-01ae2caa2fd4",
+        "records": [
+          {
+            "seq": 1,
+            "source": "native",
+            "stage": "native_started",
+            "elapsedMs": 0,
+            "frontendSeq": null
+          },
+          {
+            "seq": 2,
+            "source": "native",
+            "stage": "builder_started",
+            "elapsedMs": 0,
+            "frontendSeq": null
+          },
+          {
+            "seq": 3,
+            "source": "native",
+            "stage": "plugin_setup_started",
+            "elapsedMs": 3,
+            "frontendSeq": null
+          },
+          {
+            "seq": 4,
+            "source": "native",
+            "stage": "plugin_setup_finished",
+            "elapsedMs": 3,
+            "frontendSeq": null
+          },
+          {
+            "seq": 5,
+            "source": "native",
+            "stage": "builder_finished",
+            "elapsedMs": 3,
+            "frontendSeq": null
+          },
+          {
+            "seq": 6,
+            "source": "native",
+            "stage": "setup_started",
+            "elapsedMs": 3963,
+            "frontendSeq": null
+          },
+          {
+            "seq": 7,
+            "source": "native",
+            "stage": "app_config_path_resolved",
+            "elapsedMs": 3963,
+            "frontendSeq": null
+          },
+          {
+            "seq": 8,
+            "source": "native",
+            "stage": "provider_store_loaded",
+            "elapsedMs": 3963,
+            "frontendSeq": null
+          },
+          {
+            "seq": 9,
+            "source": "native",
+            "stage": "native_state_ready",
+            "elapsedMs": 3964,
+            "frontendSeq": null
+          },
+          {
+            "seq": 10,
+            "source": "native",
+            "stage": "setup_finished",
+            "elapsedMs": 3964,
+            "frontendSeq": null
+          },
+          {
+            "seq": 11,
+            "source": "native",
+            "stage": "page_started",
+            "elapsedMs": 4095,
+            "frontendSeq": null
+          },
+          {
+            "seq": 12,
+            "source": "frontend",
+            "stage": "document_start",
+            "elapsedMs": 4110,
+            "frontendSeq": 1
+          },
+          {
+            "seq": 13,
+            "source": "frontend",
+            "stage": "frontend_entry",
+            "elapsedMs": 4150,
+            "frontendSeq": 2
+          },
+          {
+            "seq": 14,
+            "source": "frontend",
+            "stage": "react_render_called",
+            "elapsedMs": 4152,
+            "frontendSeq": 3
+          },
+          {
+            "seq": 15,
+            "source": "native",
+            "stage": "page_finished",
+            "elapsedMs": 4152,
+            "frontendSeq": null
+          },
+          {
+            "seq": 16,
+            "source": "frontend",
+            "stage": "bootstrap_started",
+            "elapsedMs": 4430,
+            "frontendSeq": 4
+          },
+          {
+            "seq": 17,
+            "source": "frontend",
+            "stage": "backend_tauri",
+            "elapsedMs": 4431,
+            "frontendSeq": 5
+          },
+          {
+            "seq": 18,
+            "source": "frontend",
+            "stage": "backend_init_started",
+            "elapsedMs": 4432,
+            "frontendSeq": 6
+          },
+          {
+            "seq": 19,
+            "source": "frontend",
+            "stage": "app_info_started",
+            "elapsedMs": 4432,
+            "frontendSeq": 7
+          },
+          {
+            "seq": 20,
+            "source": "frontend",
+            "stage": "sql_import_started",
+            "elapsedMs": 4432,
+            "frontendSeq": 8
+          },
+          {
+            "seq": 21,
+            "source": "frontend",
+            "stage": "sql_import_resolved",
+            "elapsedMs": 4446,
+            "frontendSeq": 9
+          },
+          {
+            "seq": 22,
+            "source": "native",
+            "stage": "get_app_info_received",
+            "elapsedMs": 4446,
+            "frontendSeq": null
+          },
+          {
+            "seq": 23,
+            "source": "frontend",
+            "stage": "db_load_called",
+            "elapsedMs": 4447,
+            "frontendSeq": 10
+          },
+          {
+            "seq": 24,
+            "source": "frontend",
+            "stage": "app_info_resolved",
+            "elapsedMs": 4452,
+            "frontendSeq": 11
+          },
+          {
+            "seq": 25,
+            "source": "frontend",
+            "stage": "db_load_failed",
+            "elapsedMs": 4458,
+            "frontendSeq": 12
+          },
+          {
+            "seq": 26,
+            "source": "frontend",
+            "stage": "backend_init_failed",
+            "elapsedMs": 4459,
+            "frontendSeq": 13
+          },
+          {
+            "seq": 27,
+            "source": "frontend",
+            "stage": "frontend_boot_failed",
+            "elapsedMs": 4460,
+            "frontendSeq": 14
+          }
+        ]
+      },
+      "nativeCompletedStartupRounds": 0,
+      "sameVersionReinstall": false,
+      "uninstallCleanupVerified": true,
+      "interpretation": "Observed Database.load Promise reject branch before schema query. Specific SQL plugin/path/permission/connection rejection cause remains unobserved. Complete means a valid captured snapshot, not app startup readiness; record times are functional diagnostic evidence, not a performance baseline."
+    },
+    "macos": {
+      "frontendPassed": 970,
+      "frontendSkipped": 11,
+      "frontendPopulation": 981,
+      "skipAudit": "macos-skipped-test-audit.json",
+      "node": "22.23.2",
+      "ordinaryDesktopRustPassed": 36,
+      "qaDesktopRustPassed": 35,
+      "coreRustPassedEach": 90,
+      "nativeWebDriver": "not_run",
+      "runnerChecks": 24
+    },
+    "linux": {
+      "nativeScenarios": [
+        "staged",
+        "slow-first-token",
+        "truncated",
+        "idle-cancel"
+      ],
+      "allNativeScenariosPassed": true,
+      "nativeIpcSingleSampleNotBaseline": true,
+      "debExtractChecks": 6,
+      "dpkgLifecycleChecks": 10,
+      "runnerChecks": 33,
+      "baselineVersion": "0.1.0",
+      "upgradeVersion": "0.1.1",
+      "packageBytesEach": 6687626,
+      "schema": 7,
+      "artifactBinding": "linux-artifact-binding.json"
+    },
+    "downloadBoundary": {
+      "smallArtifactDownloaded": "eastgenesis-webdriver-diagnostics-Linux",
+      "zipBytes": 6815,
+      "fullBundleDownloads": false,
+      "realProviderOrPrivateConfigurationAccess": false
+    },
+    "monitorCadence": {
+      "snapshotIntervalsSeconds": [
+        127,
+        91,
+        96,
+        99,
+        101,
+        84,
+        94,
+        57,
+        148,
+        139,
+        89
+      ],
+      "deviations": [
+        {
+          "previous": "jobs-20261007T003100Z.json",
+          "next": "jobs-20261007T003157Z.json",
+          "intervalSeconds": 57
+        }
+      ],
+      "terminalStatusPollingStopped": true
+    }
+  },
+  "collection": {
+    "sha256": "101f199490c742af424c2753ffc74f9d141c2fb98443af0b220305479e01f18d",
+    "totalBytes": 1586788,
+    "files": [
+      {
+        "path": "artifacts-live.json",
+        "bytes": 2238,
+        "sha256": "7578b22f02f00b44d23ba117bbd09f0825414fb1e599cd3a49f338910b9fe684"
+      },
+      {
+        "path": "artifacts-terminal.json",
+        "bytes": 2972,
+        "sha256": "cb2b00c5853ef74e1b0ab5cff5cafcdc894dbea04bd3f3c5eff50539d2f28e3e"
+      },
+      {
+        "path": "fetches.json",
+        "bytes": 1170,
+        "sha256": "97a0d8acfef1acbd46093267ad9c86c1f3250e4dac0b900695e087d30eb466bd"
+      },
+      {
+        "path": "jobs-20261007T001928Z.json",
+        "bytes": 20028,
+        "sha256": "0e004970c195006dee2de75862e584b4309134bae434ffba3eebdddd55a68678"
+      },
+      {
+        "path": "jobs-20261007T002135Z.json",
+        "bytes": 20071,
+        "sha256": "120783dcb9f7e1d8cdac2ad5dc2381ab77084d4341b77db6a5983d17b14e3aca"
+      },
+      {
+        "path": "jobs-20261007T002306Z.json",
+        "bytes": 20157,
+        "sha256": "ff92a2999415d578fe7026bdf0780985cd5f6f6248ec6e8cab2316e48d3d081c"
+      },
+      {
+        "path": "jobs-20261007T002442Z.json",
+        "bytes": 20974,
+        "sha256": "30fb36603a323068600eac5d8a554c57c43b0813677000b1fb4fd3836d5c5c81"
+      },
+      {
+        "path": "jobs-20261007T002621Z.json",
+        "bytes": 21686,
+        "sha256": "49bbea94d5a367a81acd5e715d7501d42875d38554a3065fae90ddc070bd1740"
+      },
+      {
+        "path": "jobs-20261007T002802Z.json",
+        "bytes": 21686,
+        "sha256": "49bbea94d5a367a81acd5e715d7501d42875d38554a3065fae90ddc070bd1740"
+      },
+      {
+        "path": "jobs-20261007T002926Z.json",
+        "bytes": 21901,
+        "sha256": "652effbdea2be66e64d9e85b8ac3d699a4a4238a11a6599d415a0f80047933f0"
+      },
+      {
+        "path": "jobs-20261007T003100Z.json",
+        "bytes": 22116,
+        "sha256": "260a4c3a8b1ae73c5b1d0e381042dee955d56f98b729d87df7522ff0c43239ff"
+      },
+      {
+        "path": "jobs-20261007T003157Z.json",
+        "bytes": 22398,
+        "sha256": "7ddf98c1e5145638d591ea910309f24be825a1a4d2e6f2b234fbd8ade549452c"
+      },
+      {
+        "path": "jobs-20261007T003425Z.json",
+        "bytes": 22398,
+        "sha256": "7ddf98c1e5145638d591ea910309f24be825a1a4d2e6f2b234fbd8ade549452c"
+      },
+      {
+        "path": "jobs-20261007T003644Z.json",
+        "bytes": 22441,
+        "sha256": "4c32b413f6f09800d25801d94de4c94a0f0f0d3bfa4798d77afd740f69a9c05e"
+      },
+      {
+        "path": "jobs-20261007T003813Z.json",
+        "bytes": 23411,
+        "sha256": "2b32b3151f67e8cc0a02ca1303b7506fe3d8cf1e7e125ef01036e2c7c50a76dc"
+      },
+      {
+        "path": "jobs-first.json",
+        "bytes": 19770,
+        "sha256": "6c456dc5a7ad6cc5be9506f9ec917668e7e55297bdc93e12d2a5f2c4e0ad40c1"
+      },
+      {
+        "path": "jobs-terminal.json",
+        "bytes": 23411,
+        "sha256": "2b32b3151f67e8cc0a02ca1303b7506fe3d8cf1e7e125ef01036e2c7c50a76dc"
+      },
+      {
+        "path": "linux-artifact-binding.json",
+        "bytes": 3186,
+        "sha256": "99b40ba14d3b84d17d66ac533f4b4a1d25d48fbe180c4ba8873b310a3d01602e"
+      },
+      {
+        "path": "linux-artifact-native-webdriver-probe.log",
+        "bytes": 18,
+        "sha256": "abf5743a7f82bcbfa4d865510369ded823e507fc5e44bb7ffa6ad2cd8c15a971"
+      },
+      {
+        "path": "linux-artifact-native-webdriver-status.json",
+        "bytes": 48,
+        "sha256": "bed52ecb0b6420312e601344e85ae47c33f90dd47dc6b08bbc688c488ee05dbd"
+      },
+      {
+        "path": "linux-artifact-webdriver-environment.txt",
+        "bytes": 247,
+        "sha256": "2935aac9a6e7d682ae253e378134d0c4e154b8c35fe1678fe3f3215cb1c1c5bc"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality-idle-cancel.json",
+        "bytes": 1837,
+        "sha256": "1eb3d326ca15e48c958d43aa2c900f4c19035d0fc630502045150b7cab390af9"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality-idle-cancel.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality-slow-first-token.json",
+        "bytes": 2121,
+        "sha256": "bb3687f1da5506952afb53a0b0c50d8e4495cd77c4baf55f37a20bb07c595ece"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality-slow-first-token.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality-staged.json",
+        "bytes": 2111,
+        "sha256": "561828a80fa804960953cda60fb9bb20be2875ff1995b044b2c59579e913d7c5"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality-staged.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality-truncated.json",
+        "bytes": 2128,
+        "sha256": "5835af6e82a90b938dac505b3077af5510f34fe9d251b37e309996f8a7790e8d"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality-truncated.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "linux-artifact-webdriver-quality.json",
+        "bytes": 11403,
+        "sha256": "7da0a8fbd24ae1f45421476da11643f75878b7867c38578cb1a2ed66017b875d"
+      },
+      {
+        "path": "linux-webdriver-diagnostics.zip",
+        "bytes": 6815,
+        "sha256": "3c69b31a6515233316b38ff2abe0f7e9a7bdd9f9591b9c98bc3354f0a61b2aa0"
+      },
+      {
+        "path": "macos-desktop-runner-evidence-1.json",
+        "bytes": 1206,
+        "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e"
+      },
+      {
+        "path": "macos-extraction.json",
+        "bytes": 306,
+        "sha256": "601584371722e8443d01313ffccff4216a5f93d95c13e4668fd337b4e6fc52f1"
+      },
+      {
+        "path": "macos-job-112565981739.log",
+        "bytes": 259955,
+        "sha256": "c9cd87b6e3a9c0ae49867ed782a783a2cd11fe79a191d3204b4444c8742e0af3"
+      },
+      {
+        "path": "macos-runner-report-pilot.json",
+        "bytes": 1206,
+        "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e"
+      },
+      {
+        "path": "macos-skipped-test-audit.json",
+        "bytes": 3686,
+        "sha256": "2210ebe764da09e929b009fa3d4c23830d4cf0dff7d117b7d28622ccecff1bc7"
+      },
+      {
+        "path": "monitor-start.json",
+        "bytes": 166,
+        "sha256": "6bf3d5d86446e033157beddbf2a39d7aab209722d4c0c54404d5d0466d0e2b7d"
+      },
+      {
+        "path": "observed-summary.json",
+        "bytes": 7976,
+        "sha256": "0da181f46e915d388bcb144109835d7ce7e9b88d167f466c8e2f8560a2d2d41d"
+      },
+      {
+        "path": "run-20261007T001928Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T002135Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T002306Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T002442Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T002621Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T002802Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T002926Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T003100Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T003157Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T003425Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T003644Z.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-20261007T003813Z.json",
+        "bytes": 13457,
+        "sha256": "0466e51f91cd55a505d8e86b5c45ecfc04f01013d59ba42c502d749cbd294b35"
+      },
+      {
+        "path": "run-first.json",
+        "bytes": 13454,
+        "sha256": "91aa051a65f9c8a2676a54fe16840d54e8893459e358429c3918854a4de2ecb1"
+      },
+      {
+        "path": "run-terminal.json",
+        "bytes": 13457,
+        "sha256": "0466e51f91cd55a505d8e86b5c45ecfc04f01013d59ba42c502d749cbd294b35"
+      },
+      {
+        "path": "skip-source-bindings.json",
+        "bytes": 1819,
+        "sha256": "8b5b230c55430ae7c50969a23670b6856a7b97a1335e7add9988d841adb4e363"
+      },
+      {
+        "path": "source-.github--workflows--desktop.yml",
+        "bytes": 17529,
+        "sha256": "35870617058dc761449e0c8c4bbe757ca1b151483c32b80c6277e7f5f97f06d3"
+      },
+      {
+        "path": "source-tests--killer-scenario-harness.ts",
+        "bytes": 8615,
+        "sha256": "5d1096bcd072406534d43bd04d7e87c4439c74b9be05804a4c7597ab4ae96454"
+      },
+      {
+        "path": "source-tests--killer-scenario.test.ts",
+        "bytes": 3748,
+        "sha256": "9b2a5375eb7ad28e52bd52b600a05a6358359c3d029979c1322764b3de4b7b33"
+      },
+      {
+        "path": "source-tests--mcp-files.test.ts",
+        "bytes": 9720,
+        "sha256": "d36d9805e0e94e47acf7181bf81678bfa6e5a42949ba8b182d9357182904ea6e"
+      },
+      {
+        "path": "source-tests--memory-skill-e2e.test.ts",
+        "bytes": 7242,
+        "sha256": "8dc5ff1191e610d36e0e83291f7344ff66001dce4abc26ed3cb9bc1f1100a925"
+      },
+      {
+        "path": "source-tests--sqlite-helper.ts",
+        "bytes": 4002,
+        "sha256": "3c1b198e71efab7eddc51282e792ab2c7c83c393d5e6f0432ad8064bbe96d34c"
+      },
+      {
+        "path": "ubuntu-desktop-install-smoke-1.json",
+        "bytes": 1683,
+        "sha256": "e93c91a1a5023b80456a212c1defabd734f13eeb7fdb9fa5bbad877cc7d04838"
+      },
+      {
+        "path": "ubuntu-desktop-install-smoke-pilot-1.json",
+        "bytes": 1683,
+        "sha256": "e93c91a1a5023b80456a212c1defabd734f13eeb7fdb9fa5bbad877cc7d04838"
+      },
+      {
+        "path": "ubuntu-desktop-linux-upgrade-smoke-2.json",
+        "bytes": 2088,
+        "sha256": "8c63046d8bb006d78bd222d5eb06e0614ba16730f41cee323472aa774692a6bc"
+      },
+      {
+        "path": "ubuntu-desktop-linux-upgrade-smoke-pilot-2.json",
+        "bytes": 2088,
+        "sha256": "8c63046d8bb006d78bd222d5eb06e0614ba16730f41cee323472aa774692a6bc"
+      },
+      {
+        "path": "ubuntu-desktop-runner-evidence-3.json",
+        "bytes": 1470,
+        "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde"
+      },
+      {
+        "path": "ubuntu-desktop-runner-evidence-pilot-3.json",
+        "bytes": 1470,
+        "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde"
+      },
+      {
+        "path": "ubuntu-extraction.json",
+        "bytes": 922,
+        "sha256": "38acb5e4a2c33d06bbf74d8efc11a0663dc57062d549663e933a5573a689b8e7"
+      },
+      {
+        "path": "ubuntu-job-112565982044.log",
+        "bytes": 424435,
+        "sha256": "f052348393a5b25f9c77fe1d7bb870f3ac720870142f00bb8072a6ec9eaf46b2"
+      },
+      {
+        "path": "windows-desktop-windows-install-smoke-1.json",
+        "bytes": 7683,
+        "sha256": "29f782b696bddfd079a1a273bf65ef0bc402d7c13af040ed7975988eeb02ede6"
+      },
+      {
+        "path": "windows-extraction.json",
+        "bytes": 322,
+        "sha256": "72ca21f8c5eac484c9775535ebf419f504cd2b93e8c908dfc0bed038a3e36896"
+      },
+      {
+        "path": "windows-job-112565982111.log",
+        "bytes": 288664,
+        "sha256": "3da425d19a7be39453c5223be27bcc76907dfa04beec7bde849232852512751e"
+      }
+    ]
+  },
+  "rawReports": [
+    {
+      "binding": {
+        "path": "windows-desktop-windows-install-smoke-1.json",
+        "kind": "desktop-windows-install-smoke",
+        "rawLogPath": "windows-job-112565982111.log",
+        "lineStart": 3107,
+        "lineEnd": 3390,
+        "runId": 37550937897,
+        "headSha": "9ee88388a584ab7fbadb4049aa5e93a4950d57a1",
+        "jobId": 112565982111
+      },
+      "rawReportSha256": "29f782b696bddfd079a1a273bf65ef0bc402d7c13af040ed7975988eeb02ede6",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-windows-install-smoke",
+        "platform": "windows",
+        "format": "nsis",
+        "passed": false,
+        "checks": {
+          "hostedRunner": true,
+          "noExistingInstallation": true,
+          "sourceBinaryIsolationProbe": true,
+          "webView2Present": true,
+          "nsisInstall": true,
+          "installedPayload": true,
+          "installedRegistry": true,
+          "nsisUninstall": true,
+          "installedBinaryRemoved": true,
+          "uninstallRegistryRemoved": true
+        },
+        "stages": [
+          "hostedRunner",
+          "noExistingInstallation",
+          "webView2Present",
+          "sourceBinaryIsolationProbe",
+          "nsisInstall",
+          "installedPayload",
+          "installedRegistry",
+          "nsisUninstall",
+          "installedBinaryRemoved",
+          "uninstallRegistryRemoved"
+        ],
+        "launches": [],
+        "payloadBinding": {
+          "strategy": "tauri_cli_2_12_0_nsis_bundle_type_patch",
+          "cliVersion": "2.12.0",
+          "sourceSha256": "bc29462cd4205878b914938ef40058f9ba514878d7ad8bc99e414fe78896c484",
+          "expectedNsisSha256": "8cbd79ba9736f3cb034cd360056202e1b5319e616f2286b1f2b6d4b4a72cfd4b",
+          "installedSha256": "8cbd79ba9736f3cb034cd360056202e1b5319e616f2286b1f2b6d4b4a72cfd4b",
+          "repairedSha256": null
+        },
+        "startupDiagnostics": [
+          {
+            "cycle": 1,
+            "outcome": "failed",
+            "failureStage": "database_timeout",
+            "elapsedMs": 34580,
+            "stableWindowPassed": true,
+            "databaseExists": false,
+            "schemaProbeAttempts": 0,
+            "schemaProbeFailures": 0,
+            "schemaProbeState": "not_attempted",
+            "lastProbeFailureStage": null,
+            "rootProcessAlive": true,
+            "rootWindowPresent": true,
+            "jobActiveProcessCount": 7,
+            "startupTrace": {
+              "status": "observed",
+              "reason": "complete",
+              "runId": "4673426b-08d5-4b31-a994-01ae2caa2fd4",
+              "records": [
+                {
+                  "seq": 1,
+                  "source": "native",
+                  "stage": "native_started",
+                  "elapsedMs": 0,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 2,
+                  "source": "native",
+                  "stage": "builder_started",
+                  "elapsedMs": 0,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 3,
+                  "source": "native",
+                  "stage": "plugin_setup_started",
+                  "elapsedMs": 3,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 4,
+                  "source": "native",
+                  "stage": "plugin_setup_finished",
+                  "elapsedMs": 3,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 5,
+                  "source": "native",
+                  "stage": "builder_finished",
+                  "elapsedMs": 3,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 6,
+                  "source": "native",
+                  "stage": "setup_started",
+                  "elapsedMs": 3963,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 7,
+                  "source": "native",
+                  "stage": "app_config_path_resolved",
+                  "elapsedMs": 3963,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 8,
+                  "source": "native",
+                  "stage": "provider_store_loaded",
+                  "elapsedMs": 3963,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 9,
+                  "source": "native",
+                  "stage": "native_state_ready",
+                  "elapsedMs": 3964,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 10,
+                  "source": "native",
+                  "stage": "setup_finished",
+                  "elapsedMs": 3964,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 11,
+                  "source": "native",
+                  "stage": "page_started",
+                  "elapsedMs": 4095,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 12,
+                  "source": "frontend",
+                  "stage": "document_start",
+                  "elapsedMs": 4110,
+                  "frontendSeq": 1
+                },
+                {
+                  "seq": 13,
+                  "source": "frontend",
+                  "stage": "frontend_entry",
+                  "elapsedMs": 4150,
+                  "frontendSeq": 2
+                },
+                {
+                  "seq": 14,
+                  "source": "frontend",
+                  "stage": "react_render_called",
+                  "elapsedMs": 4152,
+                  "frontendSeq": 3
+                },
+                {
+                  "seq": 15,
+                  "source": "native",
+                  "stage": "page_finished",
+                  "elapsedMs": 4152,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 16,
+                  "source": "frontend",
+                  "stage": "bootstrap_started",
+                  "elapsedMs": 4430,
+                  "frontendSeq": 4
+                },
+                {
+                  "seq": 17,
+                  "source": "frontend",
+                  "stage": "backend_tauri",
+                  "elapsedMs": 4431,
+                  "frontendSeq": 5
+                },
+                {
+                  "seq": 18,
+                  "source": "frontend",
+                  "stage": "backend_init_started",
+                  "elapsedMs": 4432,
+                  "frontendSeq": 6
+                },
+                {
+                  "seq": 19,
+                  "source": "frontend",
+                  "stage": "app_info_started",
+                  "elapsedMs": 4432,
+                  "frontendSeq": 7
+                },
+                {
+                  "seq": 20,
+                  "source": "frontend",
+                  "stage": "sql_import_started",
+                  "elapsedMs": 4432,
+                  "frontendSeq": 8
+                },
+                {
+                  "seq": 21,
+                  "source": "frontend",
+                  "stage": "sql_import_resolved",
+                  "elapsedMs": 4446,
+                  "frontendSeq": 9
+                },
+                {
+                  "seq": 22,
+                  "source": "native",
+                  "stage": "get_app_info_received",
+                  "elapsedMs": 4446,
+                  "frontendSeq": null
+                },
+                {
+                  "seq": 23,
+                  "source": "frontend",
+                  "stage": "db_load_called",
+                  "elapsedMs": 4447,
+                  "frontendSeq": 10
+                },
+                {
+                  "seq": 24,
+                  "source": "frontend",
+                  "stage": "app_info_resolved",
+                  "elapsedMs": 4452,
+                  "frontendSeq": 11
+                },
+                {
+                  "seq": 25,
+                  "source": "frontend",
+                  "stage": "db_load_failed",
+                  "elapsedMs": 4458,
+                  "frontendSeq": 12
+                },
+                {
+                  "seq": 26,
+                  "source": "frontend",
+                  "stage": "backend_init_failed",
+                  "elapsedMs": 4459,
+                  "frontendSeq": 13
+                },
+                {
+                  "seq": 27,
+                  "source": "frontend",
+                  "stage": "frontend_boot_failed",
+                  "elapsedMs": 4460,
+                  "frontendSeq": 14
+                }
+              ]
+            }
+          }
+        ],
+        "install": {
+          "mode": "nsis-install-reinstall-uninstall",
+          "isolatedPrefix": true,
+          "isolatedAppDirectories": true,
+          "systemPackageDatabaseChanged": true,
+          "attempts": {
+            "install": true,
+            "reinstall": false,
+            "uninstall": true
+          },
+          "sameVersionReinstall": false,
+          "crossVersionUpgrade": false,
+          "knownFoldersRegistryChanged": false
+        },
+        "errors": [
+          "database_timeout"
+        ],
+        "evidenceBoundary": {
+          "proven": [],
+          "excluded": [
+            "production default Known Folder storage or migration",
+            "old-version to new-version upgrade",
+            "automatic update or rollback",
+            "MSI or per-machine installation",
+            "normal user machine installation or UAC experience",
+            "UI hydration of the persisted session",
+            "real Provider availability",
+            "tool side-effect recovery",
+            "code signing or SmartScreen reputation"
+          ]
+        }
+      }
+    },
+    {
+      "binding": {
+        "path": "macos-desktop-runner-evidence-1.json",
+        "kind": "desktop-runner-evidence",
+        "rawLogPath": "macos-job-112565981739.log",
+        "lineStart": 3033,
+        "lineEnd": 3076,
+        "runId": 37550937897,
+        "headSha": "9ee88388a584ab7fbadb4049aa5e93a4950d57a1",
+        "jobId": 112565981739
+      },
+      "rawReportSha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-runner-evidence",
+        "platform": "macos",
+        "passed": true,
+        "checks": {
+          "providerShape": true,
+          "providerPassed": true,
+          "providerScenarios": true,
+          "providerRecovery": true,
+          "controlledShape": true,
+          "controlledPassed": true,
+          "controlledScenarios": true,
+          "controlledRecovery": true,
+          "routingShape": true,
+          "routingPassed": true,
+          "goldenShape": true,
+          "goldenPassed": true,
+          "goldenTasks": true,
+          "goalRecovery": true,
+          "goalValidation": true,
+          "webdriver": true,
+          "environment": true,
+          "packageShape": true,
+          "packagePassed": true,
+          "packageChecks": true,
+          "install": true,
+          "upgrade": true,
+          "windowsInstall": true,
+          "redaction": true
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "required CI evidence files exist and pass their fixed schemas",
+            "platform-specific WebDriver/package evidence is present when applicable",
+            "uploaded JSON passes the shared redaction boundary"
+          ],
+          "excluded": [
+            "real Provider availability or SLA",
+            "real macOS WebView interaction",
+            "installation/upgrade success beyond the recorded package smoke"
+          ]
+        }
+      }
+    },
+    {
+      "binding": {
+        "path": "ubuntu-desktop-install-smoke-1.json",
+        "kind": "desktop-install-smoke",
+        "rawLogPath": "ubuntu-job-112565982044.log",
+        "lineStart": 4641,
+        "lineEnd": 4700,
+        "runId": 37550937897,
+        "headSha": "9ee88388a584ab7fbadb4049aa5e93a4950d57a1",
+        "jobId": 112565982044
+      },
+      "rawReportSha256": "e93c91a1a5023b80456a212c1defabd734f13eeb7fdb9fa5bbad877cc7d04838",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-install-smoke",
+        "passed": true,
+        "platform": "linux",
+        "format": "deb",
+        "checks": {
+          "packageMetadata": true,
+          "packagePayload": true,
+          "dependencies": true,
+          "binaryStart": true,
+          "sqliteSchema": true,
+          "controlledTermination": true
+        },
+        "package": {
+          "name": "east-genesis-desktop",
+          "version": "0.1.0",
+          "architecture": "amd64",
+          "bytes": 6687626
+        },
+        "install": {
+          "mode": "deb-extract",
+          "isolatedPrefix": true,
+          "systemPackageDatabaseChanged": false,
+          "database": {
+            "schemaVersion": 7,
+            "sessions": true,
+            "toolInvocations": true
+          },
+          "termination": {
+            "exitCode": null,
+            "signal": "SIGTERM",
+            "requestedSignal": "SIGTERM",
+            "leaderExited": true,
+            "processGroupGone": true,
+            "liveProcessGroupGone": true,
+            "zombieProcesses": 0,
+            "groupProbe": "ps-pgid-state",
+            "controlledCleanup": true,
+            "gracefulTermination": true
+          }
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "a Debian package was inspected without mutating the host package database",
+            "the package payload was extracted under an isolated prefix",
+            "the extracted binary dependencies were resolved on the Linux runner",
+            "the extracted installed binary started and initialized its isolated SQLite database",
+            "the process was terminated in a controlled way"
+          ],
+          "excluded": [
+            "system dpkg installation or uninstall",
+            "AppImage/RPM installation",
+            "old-version to new-version upgrade",
+            "automatic update or rollback",
+            "real Provider availability",
+            "signing/notarization"
+          ]
+        }
+      }
+    },
+    {
+      "binding": {
+        "path": "ubuntu-desktop-linux-upgrade-smoke-2.json",
+        "kind": "desktop-linux-upgrade-smoke",
+        "rawLogPath": "ubuntu-job-112565982044.log",
+        "lineStart": 4747,
+        "lineEnd": 4826,
+        "runId": 37550937897,
+        "headSha": "9ee88388a584ab7fbadb4049aa5e93a4950d57a1",
+        "jobId": 112565982044
+      },
+      "rawReportSha256": "8c63046d8bb006d78bd222d5eb06e0614ba16730f41cee323472aa774692a6bc",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-linux-upgrade-smoke",
+        "platform": "linux",
+        "format": "deb",
+        "passed": true,
+        "checks": {
+          "baselineInstalled": true,
+          "desktopEntry": true,
+          "dependencies": true,
+          "baselineLaunched": true,
+          "newerVersionInstalled": true,
+          "upgradeLaunched": true,
+          "sessionRetained": true,
+          "sqliteSchema": true,
+          "uninstalled": true,
+          "uninstallRetainsUserData": true
+        },
+        "packages": [
+          {
+            "role": "baseline",
+            "name": "east-genesis-desktop",
+            "version": "0.1.0",
+            "architecture": "amd64",
+            "bytes": 6687626
+          },
+          {
+            "role": "upgrade",
+            "name": "east-genesis-desktop",
+            "version": "0.1.1",
+            "architecture": "amd64",
+            "bytes": 6687626
+          }
+        ],
+        "install": {
+          "mode": "dpkg-system",
+          "disposableRunner": true,
+          "isolatedUserData": true,
+          "systemInstallAttempted": true,
+          "systemPackageDatabaseChanged": true,
+          "cleanupVerified": true,
+          "database": {
+            "schemaVersion": 7,
+            "toolInvocations": true,
+            "sessionSentinel": true
+          },
+          "launches": [
+            {
+              "version": "0.1.0",
+              "schemaVersion": 7,
+              "installedProcessIdentity": true,
+              "stableProcessWindowMs": 4000,
+              "controlledCleanup": true
+            },
+            {
+              "version": "0.1.1",
+              "schemaVersion": 7,
+              "installedProcessIdentity": true,
+              "stableProcessWindowMs": 4000,
+              "controlledCleanup": true
+            }
+          ]
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "actual dpkg installation and upgrade between two QA bundle versions",
+            "both installed versions start with SQLite schema 7",
+            "synthetic session survives upgrade and purge",
+            "installed executable and desktop entry exist before uninstall"
+          ],
+          "excluded": [
+            "code or schema changes between releases",
+            "desktop menu click or WebView task execution",
+            "real Provider",
+            "automatic updater or rollback",
+            "other Linux distributions or package formats",
+            "production release signing"
+          ]
+        }
+      }
+    },
+    {
+      "binding": {
+        "path": "ubuntu-desktop-runner-evidence-3.json",
+        "kind": "desktop-runner-evidence",
+        "rawLogPath": "ubuntu-job-112565982044.log",
+        "lineStart": 4859,
+        "lineEnd": 4911,
+        "runId": 37550937897,
+        "headSha": "9ee88388a584ab7fbadb4049aa5e93a4950d57a1",
+        "jobId": 112565982044
+      },
+      "rawReportSha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-runner-evidence",
+        "platform": "linux",
+        "passed": true,
+        "checks": {
+          "providerShape": true,
+          "providerPassed": true,
+          "providerScenarios": true,
+          "providerRecovery": true,
+          "controlledShape": true,
+          "controlledPassed": true,
+          "controlledScenarios": true,
+          "controlledRecovery": true,
+          "routingShape": true,
+          "routingPassed": true,
+          "goldenShape": true,
+          "goldenPassed": true,
+          "goldenTasks": true,
+          "goalRecovery": true,
+          "goalValidation": true,
+          "webdriverShape": true,
+          "webdriverPassed": true,
+          "webdriverScenarios": true,
+          "package": true,
+          "installShape": true,
+          "installPassed": true,
+          "installFormat": true,
+          "installMode": true,
+          "installChecks": true,
+          "upgradeShape": true,
+          "upgradePassed": true,
+          "upgradeChecks": true,
+          "upgradeMode": true,
+          "upgradeVersions": true,
+          "upgradeDatabase": true,
+          "upgradeLaunches": true,
+          "windowsInstall": true,
+          "redaction": true
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "required CI evidence files exist and pass their fixed schemas",
+            "platform-specific WebDriver/package evidence is present when applicable",
+            "uploaded JSON passes the shared redaction boundary"
+          ],
+          "excluded": [
+            "real Provider availability or SLA",
+            "real macOS WebView interaction",
+            "installation/upgrade success beyond the recorded package smoke"
+          ]
+        }
+      }
+    }
+  ],
+  "rootIndependentVerification": {
+    "fileHashesVerified": 70,
+    "terminalRunHeadAndThreeJobsVerified": true,
+    "rawLogReportsReparsedAndEqual": 5
+  },
+  "evidenceBoundary": {
+    "nextCandidateSchemaGuardAndSqlRetryPatchIncluded": false,
+    "newNativeMcpPostRustStepIncluded": false,
+    "windowsSpecificLoadErrorCause": "unobserved",
+    "windowsCompleteLifecyclePassed": false,
+    "macosNativeWebDriver": "not_run",
+    "performanceBaseline": false,
+    "realProvider": false,
+    "signingNotarization": false
+  }
+}

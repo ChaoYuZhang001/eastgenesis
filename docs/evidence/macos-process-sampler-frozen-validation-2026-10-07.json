@@ -1,0 +1,439 @@
+{
+  "schemaVersion": 1,
+  "kind": "macos-owned-node-frozen-sampler-calibration",
+  "recordType": "native-run-original-numeric-record",
+  "startedAtUtc": "2026-10-06T22:53:56.054Z",
+  "passed": true,
+  "platformExecution": {
+    "darwin": "executed",
+    "linux": "not_run",
+    "win32": "not_run"
+  },
+  "runtime": {
+    "node": "v22.23.1",
+    "platform": "darwin",
+    "architecture": "x64"
+  },
+  "binding": {
+    "sourceHashesStart": {
+      "tools/desktop-process-measurement.mjs": "3265a95cc6c65186a048df67036a59da7168867800604579b488c5072fd75640",
+      "tools/desktop-process-measurement.d.mts": "714b57b3476c0da6c20a83bd7881200bba45515dc00c2c9bf619cb8602508ee9",
+      "tests/desktop-process-measurement.test.ts": "dab9b5acddcab021a52cc9c99ad334aec29f934769e025cc9b3959aefb800cb1",
+      "tools/desktop-process-sampler-calibration.mjs": "b8d373b09eee1e251518e9932d6e2eb5533cc687bad55730d36534cf652ce4a4"
+    },
+    "sourceHashesEnd": {
+      "tools/desktop-process-measurement.mjs": "3265a95cc6c65186a048df67036a59da7168867800604579b488c5072fd75640",
+      "tools/desktop-process-measurement.d.mts": "714b57b3476c0da6c20a83bd7881200bba45515dc00c2c9bf619cb8602508ee9",
+      "tests/desktop-process-measurement.test.ts": "dab9b5acddcab021a52cc9c99ad334aec29f934769e025cc9b3959aefb800cb1",
+      "tools/desktop-process-sampler-calibration.mjs": "b8d373b09eee1e251518e9932d6e2eb5533cc687bad55730d36534cf652ce4a4"
+    },
+    "sourceUnchanged": true
+  },
+  "settings": {
+    "intervalMs": 100,
+    "durationMs": 1200,
+    "busyRequestedWallMs": 800,
+    "maxTargetCpuDeltaMs": 1000,
+    "totalBudgetMs": 60000
+  },
+  "evidenceBoundary": {
+    "independentMeasurementWindows": 1,
+    "resourceProcesses": 1,
+    "appResourceBaseline": false,
+    "fullWebViewTreeMeasured": false,
+    "descendantRegistrationNativeValidation": false,
+    "realProvider": false,
+    "privateConfigurationRead": false,
+    "gui": false,
+    "excluded": [
+      "Linux/Windows native execution",
+      "owner and helper resources",
+      "unregistered descendants",
+      "WKWebView XPC without verified parent ancestry",
+      "EastGenesis resource or startup performance baseline"
+    ]
+  },
+  "targetHandshake": {
+    "event": "ready",
+    "committedBufferBytes": 33554432
+  },
+  "ownership": {
+    "ownerPid": 70808,
+    "targetPid": 70809,
+    "targetCreatedDirectly": true,
+    "helpers": [
+      {
+        "pid": 70815,
+        "capturedOwnedSpawn": true
+      }
+    ]
+  },
+  "scope": {
+    "source": "libproc_rusage_v0_mach_timebase",
+    "collection": "explicit_owned_pid_set",
+    "processTreeCoverage": "unverified",
+    "processTreeReason": "unregistered_descendants_not_discovered",
+    "cpu": "sum_own_user_and_system_time_excluding_child_counters",
+    "cpuCumulativeUnit": "milliseconds",
+    "cpuWindowUnit": "percent_of_one_logical_cpu",
+    "cpuWindowFormula": "100 * delta_cpu_ms / observed_wall_ms",
+    "rssUnit": "bytes",
+    "rssAggregation": "sum_at_each_sample_shared_pages_may_be_double_counted",
+    "samplingAtomicity": "non_atomic_collection_window_reported",
+    "excluded": [
+      "owner_and_sampler_resource_counters",
+      "unregistered_descendants",
+      "processes_outside_verified_ancestry",
+      "wkwebview_xpc_without_verified_parent_ancestry"
+    ]
+  },
+  "busyWork": {
+    "seq": 3,
+    "event": "busy_completed",
+    "requestedWallMs": 800,
+    "observedWallMs": 800.1104359999999,
+    "cpuDeltaUs": 799292,
+    "iterations": 13286857,
+    "sentAtMonotonicMs": 265.993929,
+    "receivedAtMonotonicMs": 1066.469871
+  },
+  "measurement": {
+    "schemaVersion": 1,
+    "kind": "desktop-process-measurement",
+    "status": "verified",
+    "scope": {
+      "source": "libproc_rusage_v0_mach_timebase",
+      "collection": "explicit_owned_pid_set",
+      "processTreeCoverage": "unverified",
+      "processTreeReason": "unregistered_descendants_not_discovered",
+      "cpu": "sum_own_user_and_system_time_excluding_child_counters",
+      "cpuCumulativeUnit": "milliseconds",
+      "cpuWindowUnit": "percent_of_one_logical_cpu",
+      "cpuWindowFormula": "100 * delta_cpu_ms / observed_wall_ms",
+      "rssUnit": "bytes",
+      "rssAggregation": "sum_at_each_sample_shared_pages_may_be_double_counted",
+      "samplingAtomicity": "non_atomic_collection_window_reported",
+      "excluded": [
+        "owner_and_sampler_resource_counters",
+        "unregistered_descendants",
+        "processes_outside_verified_ancestry",
+        "wkwebview_xpc_without_verified_parent_ancestry"
+      ]
+    },
+    "platformExecution": {
+      "darwin": "executed",
+      "linux": "not_run",
+      "win32": "not_run"
+    },
+    "settings": {
+      "intervalMs": 100,
+      "durationMs": 1200
+    },
+    "samples": [
+      {
+        "status": "verified",
+        "observedAtMs": 215.128058,
+        "collectionDurationMs": 1.0262099999999919,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "76529501",
+            "cpuSystemNs": "20352526",
+            "rssBytes": 70483968
+          }
+        ],
+        "rssBytes": 70483968,
+        "cpuCumulativeMs": 96.882027
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 318.49854500000004,
+        "collectionDurationMs": 1.0053359999999998,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "132579442",
+            "cpuSystemNs": "22019236",
+            "rssBytes": 75239424
+          }
+        ],
+        "rssBytes": 75239424,
+        "cpuCumulativeMs": 154.598678
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 419.931825,
+        "collectionDurationMs": 1.3799440000000232,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "232872744",
+            "cpuSystemNs": "22296557",
+            "rssBytes": 75268096
+          }
+        ],
+        "rssBytes": 75268096,
+        "cpuCumulativeMs": 255.169301
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 522.2390275,
+        "collectionDurationMs": 0.7294950000000426,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "333394713",
+            "cpuSystemNs": "22577312",
+            "rssBytes": 75272192
+          }
+        ],
+        "rssBytes": 75272192,
+        "cpuCumulativeMs": 355.972025
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 623.882477,
+        "collectionDurationMs": 1.2474420000000919,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "433249452",
+            "cpuSystemNs": "22914827",
+            "rssBytes": 75325440
+          }
+        ],
+        "rssBytes": 75325440,
+        "cpuCumulativeMs": 456.164279
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 727.2721965000001,
+        "collectionDurationMs": 1.2607150000000047,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "536533774",
+            "cpuSystemNs": "23172541",
+            "rssBytes": 75325440
+          }
+        ],
+        "rssBytes": 75325440,
+        "cpuCumulativeMs": 559.706315
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 828.8520599999999,
+        "collectionDurationMs": 0.6801759999999604,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "637138944",
+            "cpuSystemNs": "23534974",
+            "rssBytes": 75337728
+          }
+        ],
+        "rssBytes": 75337728,
+        "cpuCumulativeMs": 660.673918
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 930.8453575,
+        "collectionDurationMs": 0.6495669999999336,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "734918751",
+            "cpuSystemNs": "24011440",
+            "rssBytes": 75358208
+          }
+        ],
+        "rssBytes": 75358208,
+        "cpuCumulativeMs": 758.930191
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 1033.23039,
+        "collectionDurationMs": 0.5894920000000639,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "839370843",
+            "cpuSystemNs": "24350354",
+            "rssBytes": 75362304
+          }
+        ],
+        "rssBytes": 75362304,
+        "cpuCumulativeMs": 863.721197
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 1134.5714389999998,
+        "collectionDurationMs": 0.879071999999951,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "872770828",
+            "cpuSystemNs": "24632640",
+            "rssBytes": 75452416
+          }
+        ],
+        "rssBytes": 75452416,
+        "cpuCumulativeMs": 897.403468
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 1237.065098,
+        "collectionDurationMs": 0.7692379999998593,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "872770828",
+            "cpuSystemNs": "24632640",
+            "rssBytes": 75452416
+          }
+        ],
+        "rssBytes": 75452416,
+        "cpuCumulativeMs": 897.403468
+      },
+      {
+        "status": "verified",
+        "observedAtMs": 1338.8381835,
+        "collectionDurationMs": 1.2577769999998054,
+        "processes": [
+          {
+            "pid": 70809,
+            "parentPid": 70808,
+            "identity": "76059177584223",
+            "cpuUserNs": "872770828",
+            "cpuSystemNs": "24632640",
+            "rssBytes": 75452416
+          }
+        ],
+        "rssBytes": 75452416,
+        "cpuCumulativeMs": 897.403468
+      }
+    ],
+    "summary": {
+      "status": "verified",
+      "sampleCount": 12,
+      "wallMs": 1123.7101255,
+      "cpuCumulativeStartMs": 96.882027,
+      "cpuCumulativeEndMs": 897.403468,
+      "cpuDeltaMs": 800.521441,
+      "cpuPercentOneCore": 71.23914102347385,
+      "sampledPeakRssBytes": 75452416
+    }
+  },
+  "targetCpuBoundaries": {
+    "unit": "microseconds",
+    "startBefore": {
+      "seq": 1,
+      "event": "cpu",
+      "user": 76343,
+      "system": 20327,
+      "sentAtMonotonicMs": 212.668953,
+      "receivedAtMonotonicMs": 214.346347
+    },
+    "startAfter": {
+      "seq": 2,
+      "event": "cpu",
+      "user": 76615,
+      "system": 20390,
+      "sentAtMonotonicMs": 265.485506,
+      "receivedAtMonotonicMs": 265.971764
+    },
+    "endBefore": {
+      "seq": 4,
+      "event": "cpu",
+      "user": 872482,
+      "system": 24598,
+      "sentAtMonotonicMs": 1118.118816,
+      "receivedAtMonotonicMs": 1118.657092
+    },
+    "endAfter": {
+      "seq": 5,
+      "event": "cpu",
+      "user": 872874,
+      "system": 24650,
+      "sentAtMonotonicMs": 1340.1642,
+      "receivedAtMonotonicMs": 1340.516634
+    }
+  },
+  "crossCheck": {
+    "targetOwnCpuDeltaLowerMs": 800.075,
+    "targetOwnCpuDeltaUpperMs": 800.854,
+    "targetOwnCpuDeltaMidpointMs": 800.4645,
+    "nativeCpuDeltaMs": 800.521441,
+    "absoluteMidpointDifferenceMs": 0.05694099999993796,
+    "counterToleranceMs": 2,
+    "firstNativeCollectionBracketed": true,
+    "lastNativeCollectionBracketed": true,
+    "cpuAgreesWithinBracket": true,
+    "targetOwnCpuBelowBusyBudget": true,
+    "rssAtLeastCommittedBuffer": true,
+    "identityStable": true
+  },
+  "targetCleanup": {
+    "pid": 70809,
+    "exitObserved": true,
+    "exitCode": null,
+    "signal": "SIGTERM",
+    "forced": false
+  },
+  "afterExit": [
+    {
+      "status": "unverified",
+      "reason": "pid_exited",
+      "observedAtMs": 1349.278251,
+      "collectionDurationMs": 0.6210490000000846,
+      "processes": [],
+      "rssBytes": null,
+      "cpuCumulativeMs": null
+    },
+    {
+      "status": "unverified",
+      "reason": "pid_exited",
+      "observedAtMs": 1349.30831,
+      "collectionDurationMs": 0.017910999999912747,
+      "processes": [],
+      "rssBytes": null,
+      "cpuCumulativeMs": null
+    }
+  ],
+  "exitFailClosed": true,
+  "helperCleanup": [
+    {
+      "pid": 70815,
+      "exitObserved": true,
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "additionalSignalRequired": false
+    }
+  ],
+  "allOwnedChildrenExited": true,
+  "finishedAtUtc": "2026-10-06T22:53:57.361Z",
+  "elapsedMs": 1305.2687299999998,
+  "totalBudgetMet": true
+}

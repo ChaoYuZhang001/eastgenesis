@@ -1,5 +1,6 @@
 // Anthropic Messages API 适配器。system 消息单独放在顶层 system 字段；max_tokens 必填。
 import { ProviderError } from "./errors";
+import type { ProviderErrorCode } from "./errors";
 import { DEFAULT_LLM_TIMEOUT_MS, postJson, readJson, readSse, type HttpOptions } from "./http";
 import type { ChatRequest, ChatResponse, FetchLike, FinishReason, LLMProvider, StreamEvent, Usage } from "./types";
 
@@ -29,7 +30,16 @@ export class AnthropicProvider implements LLMProvider {
   readonly id: string;
   readonly kind = "anthropic" as const;
   readonly label: string;
-  readonly capabilities = { streaming: true, systemPrompt: true };
+  readonly capabilities = {
+    streaming: true,
+    systemPrompt: true,
+    recovery: {
+      abortSignal: true,
+      streamTerminal: "message_stop" as const,
+      partialOutput: true,
+      normalizedErrors: true,
+    },
+  };
   readonly #apiKey: string;
   readonly #baseUrl: string;
   readonly #headers: Record<string, string>;
@@ -92,46 +102,90 @@ export class AnthropicProvider implements LLMProvider {
     const usage: Usage = { inputTokens: 0, outputTokens: 0 };
     let sawUsage = false;
     let finish: FinishReason = "other";
-    for await (const ev of readSse(res, this.id)) {
-      let data: any;
-      try {
-        data = JSON.parse(ev.data);
-      } catch {
-        throw new ProviderError("invalid_response", this.id, { detail: "SSE 数据不是合法 JSON" });
-      }
-      switch (data.type) {
-        case "message_start":
-          if (data.message?.model) model = data.message.model;
-          if (data.message?.usage) {
-            usage.inputTokens = data.message.usage.input_tokens ?? 0;
-            usage.outputTokens = data.message.usage.output_tokens ?? 0;
-            sawUsage = true;
-          }
-          break;
-        case "content_block_delta":
-          if (data.delta?.type === "text_delta" && data.delta.text) {
-            text += data.delta.text;
-            yield { type: "delta", text: data.delta.text };
-          }
-          break;
-        case "message_delta":
-          if (data.delta?.stop_reason) finish = toFinish(data.delta.stop_reason);
-          if (data.usage?.output_tokens !== undefined) {
-            usage.outputTokens = data.usage.output_tokens;
-            sawUsage = true;
-          }
-          break;
-        case "error":
-          throw new ProviderError(data.error?.type === "overloaded_error" ? "server" : "invalid_response", this.id, {
-            detail: data.error?.message ?? "流中出现错误事件",
+    let sawMessageStop = false;
+    try {
+      for await (const ev of readSse(res, this.id)) {
+        let data: any;
+        try {
+          data = JSON.parse(ev.data);
+        } catch {
+          throw new ProviderError("invalid_response", this.id, {
+            detail: "SSE 数据不是合法 JSON",
+            partialOutput: text.length > 0,
+            secrets: [this.#apiKey],
           });
+        }
+        switch (data.type) {
+          case "message_start":
+            if (data.message?.model) model = data.message.model;
+            if (data.message?.usage) {
+              usage.inputTokens = data.message.usage.input_tokens ?? 0;
+              usage.outputTokens = data.message.usage.output_tokens ?? 0;
+              sawUsage = true;
+            }
+            break;
+          case "content_block_delta":
+            if (data.delta?.type === "text_delta" && data.delta.text) {
+              text += data.delta.text;
+              yield { type: "delta", text: data.delta.text };
+            }
+            break;
+          case "message_delta":
+            if (data.delta?.stop_reason) finish = toFinish(data.delta.stop_reason);
+            if (data.usage?.output_tokens !== undefined) {
+              usage.outputTokens = data.usage.output_tokens;
+              sawUsage = true;
+            }
+            break;
+          case "message_stop":
+            sawMessageStop = true;
+            break;
+          case "error":
+            throw new ProviderError(anthropicStreamErrorCode(data.error?.type), this.id, {
+              detail: data.error?.message ?? "流中出现错误事件",
+              partialOutput: text.length > 0,
+              secrets: [this.#apiKey],
+            });
+        }
+        // message_stop is the protocol terminal, even if the HTTP connection
+        // remains open. Leaving readSse releases the unread native body.
+        if (sawMessageStop) break;
       }
+    } catch (error) {
+      if (error instanceof ProviderError && text.length > 0 && !error.partialOutput) {
+        throw new ProviderError(error.code, this.id, {
+          ...(error.status === null ? {} : { status: error.status }),
+          ...(error.detail ? { detail: error.detail } : {}),
+          partialOutput: true,
+          secrets: [this.#apiKey],
+        });
+      }
+      throw error;
+    }
+    if (!sawMessageStop) {
+      throw new ProviderError("invalid_response", this.id, {
+        detail: "Anthropic 流式响应缺少 message_stop 结束事件",
+        partialOutput: text.length > 0,
+        secrets: [this.#apiKey],
+      });
     }
     yield {
       type: "done",
       response: { providerId: this.id, model, text, usage: sawUsage ? usage : null, finishReason: finish, latencyMs: this.#now() - t0 },
     };
   }
+}
+
+function anthropicStreamErrorCode(type: string | undefined): ProviderErrorCode {
+  const value = (type ?? "").toLowerCase();
+  if (value.includes("auth") || value.includes("permission")) return "auth";
+  if (value.includes("billing")) return "billing";
+  if (value.includes("rate_limit")) return "rate_limit";
+  if (value.includes("overloaded") || value.includes("api_error")) return "server";
+  if (value.includes("timeout")) return "timeout";
+  if (value.includes("not_found")) return "not_found";
+  if (value.includes("invalid_request") || value.includes("request_too_large") || value.includes("conflict")) return "bad_request";
+  return "invalid_response";
 }
 
 function toFinish(r: string | null | undefined): FinishReason {

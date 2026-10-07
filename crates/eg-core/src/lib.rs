@@ -130,6 +130,37 @@ pub const MIGRATIONS: &[(i64, &str, &str)] = &[
          CREATE INDEX IF NOT EXISTS usage_calls_created ON usage_calls (created_at);\n\
          INSERT OR REPLACE INTO app_meta (key, value) VALUES ('schema_version', '5');",
     ),
+    (
+        6,
+        "create_tool_invocations",
+        // 工具调用账本（src/lib/db-invocation.ts）：不保存正文，只保存幂等键、参数摘要、状态和产物引用，供跨重启恢复使用。
+        "CREATE TABLE IF NOT EXISTS tool_invocations (\n\
+           idempotency_key TEXT PRIMARY KEY NOT NULL,\n\
+           task_id TEXT NOT NULL,\n\
+           step_id TEXT NOT NULL,\n\
+           invocation_id TEXT NOT NULL,\n\
+           tool TEXT NOT NULL,\n\
+           args_digest TEXT NOT NULL,\n\
+           attempt INTEGER NOT NULL CHECK (attempt > 0),\n\
+           state TEXT NOT NULL CHECK (state IN ('planned', 'started', 'applied', 'not_applied', 'unknown', 'conflict')),\n\
+           artifacts TEXT NOT NULL DEFAULT '[]',\n\
+           detail TEXT NOT NULL DEFAULT '',\n\
+           created_at INTEGER NOT NULL,\n\
+           updated_at INTEGER NOT NULL\n\
+         );\n\
+         CREATE INDEX IF NOT EXISTS tool_invocations_task ON tool_invocations (task_id, step_id);\n\
+         CREATE INDEX IF NOT EXISTS tool_invocations_updated ON tool_invocations (updated_at);\n\
+         INSERT OR REPLACE INTO app_meta (key, value) VALUES ('schema_version', '6');",
+    ),
+    (
+        7,
+        "add_tool_invocation_leases",
+        // 跨进程恢复租约：同一个幂等键只能由一个运行实例占用；租约过期后才允许接管。
+        "ALTER TABLE tool_invocations ADD COLUMN lease_owner TEXT;\n\
+         ALTER TABLE tool_invocations ADD COLUMN lease_expires_at INTEGER;\n\
+         CREATE INDEX IF NOT EXISTS tool_invocations_lease ON tool_invocations (lease_expires_at);\n\
+         INSERT OR REPLACE INTO app_meta (key, value) VALUES ('schema_version', '7');",
+    ),
 ];
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq)]
@@ -196,6 +227,39 @@ mod tests {
         assert!(!sql.contains("cost") && !sql.contains("price"));
         for (v, _, old) in MIGRATIONS.iter().filter(|m| m.0 < 5) {
             assert!(!old.contains("sessions") && !old.contains("usage_calls"), "迁移 {v}");
+        }
+    }
+
+    #[test]
+    fn migration_6_adds_tool_invocation_ledger() {
+        let (_, name, sql) = MIGRATIONS.iter().find(|m| m.0 == 6).expect("迁移 6");
+        assert_eq!(*name, "create_tool_invocations");
+        for part in [
+            "CREATE TABLE IF NOT EXISTS tool_invocations",
+            "idempotency_key TEXT PRIMARY KEY NOT NULL",
+            "state TEXT NOT NULL CHECK",
+            "CREATE INDEX IF NOT EXISTS tool_invocations_task",
+        ] {
+            assert!(sql.contains(part), "缺少：{part}");
+        }
+        for (v, _, old) in MIGRATIONS.iter().filter(|m| m.0 < 6) {
+            assert!(!old.contains("tool_invocations"), "迁移 {v}");
+        }
+    }
+
+    #[test]
+    fn migration_7_adds_tool_invocation_leases() {
+        let (_, name, sql) = MIGRATIONS.iter().find(|m| m.0 == 7).expect("迁移 7");
+        assert_eq!(*name, "add_tool_invocation_leases");
+        for part in [
+            "ALTER TABLE tool_invocations ADD COLUMN lease_owner TEXT",
+            "ALTER TABLE tool_invocations ADD COLUMN lease_expires_at INTEGER",
+            "CREATE INDEX IF NOT EXISTS tool_invocations_lease",
+        ] {
+            assert!(sql.contains(part), "缺少：{part}");
+        }
+        for (v, _, old) in MIGRATIONS.iter().filter(|m| m.0 < 7) {
+            assert!(!old.contains("lease_owner") && !old.contains("lease_expires_at"), "迁移 {v}");
         }
     }
 

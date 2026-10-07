@@ -1,0 +1,1063 @@
+{
+  "schemaVersion": 1,
+  "kind": "ci-three-platform-source-bound-terminal-evidence",
+  "capturedAt": "2026-10-07T01:35:53.141162+00:00",
+  "sourceSnapshot": "e7d00dc29f3160b562042809520027989d732544",
+  "runId": 37555825538,
+  "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37555825538",
+  "conclusion": "failure",
+  "localPublishedCommit": "b781765b3ed346d6da1d91f193f5279aaeb4caff",
+  "sourceArchiveBytes": 13793280,
+  "jobs": [
+    {
+      "id": 112581697871,
+      "name": "ubuntu-latest",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T01:11:15Z",
+      "completedAt": "2026-10-07T01:28:27Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37555825538/job/112581697871"
+    },
+    {
+      "id": 112581698088,
+      "name": "macos-latest",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T01:11:25Z",
+      "completedAt": "2026-10-07T01:24:06Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37555825538/job/112581698088"
+    },
+    {
+      "id": 112581698276,
+      "name": "windows-latest",
+      "conclusion": "failure",
+      "startedAt": "2026-10-07T01:11:15Z",
+      "completedAt": "2026-10-07T01:18:16Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37555825538/job/112581698276"
+    }
+  ],
+  "observation": {
+    "schemaVersion": 1,
+    "kind": "ci-observed-summary",
+    "runId": 37555825538,
+    "headSha": "e7d00dc29f3160b562042809520027989d732544",
+    "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37555825538",
+    "conclusion": "failure",
+    "capturedAt": "2026-10-07T01:32:58.430435+00:00",
+    "jobs": [
+      {
+        "id": 112581697871,
+        "name": "ubuntu-latest",
+        "conclusion": "success",
+        "startedAt": "2026-10-07T01:11:15Z",
+        "completedAt": "2026-10-07T01:28:27Z"
+      },
+      {
+        "id": 112581698088,
+        "name": "macos-latest",
+        "conclusion": "success",
+        "startedAt": "2026-10-07T01:11:25Z",
+        "completedAt": "2026-10-07T01:24:06Z"
+      },
+      {
+        "id": 112581698276,
+        "name": "windows-latest",
+        "conclusion": "failure",
+        "startedAt": "2026-10-07T01:11:15Z",
+        "completedAt": "2026-10-07T01:18:16Z"
+      }
+    ],
+    "agentIndependentChecks": {
+      "rawLogReextractions": 4,
+      "terminalRunAndAllJobsHeadBinding": true,
+      "smallZipDigestsMatchArtifactMetadata": true
+    },
+    "windows": {
+      "failureReport": "windows-pre-native-failure.json",
+      "failedStep": 17,
+      "kind": "vendor_builder_doctest_link_failure",
+      "ordinaryDesktopRustPassed": 36,
+      "ordinaryCoreRustPassed": 80,
+      "ordinaryPluginRustPassed": 4,
+      "qaWorkspace": "not_run",
+      "nativeMcp": "not_run",
+      "nsisLifecycle": "not_run",
+      "typedSqlStartupTrace": "not_run",
+      "notRunReason": "prior_first_Rust_workspace_command_doctest_link_failure",
+      "old9eeLoadFailureResolved": "unproven"
+    },
+    "macos": {
+      "frontendColdPassed": 980,
+      "frontendColdSkipped": 11,
+      "frontendPopulation": 991,
+      "nativeMcpPassed": 15,
+      "nativeMcpRepeatedColdCases": 4,
+      "uniqueFrontendPopulationExecuted": 991,
+      "ordinaryDesktopRustPassed": 36,
+      "qaDesktopRustPassed": 35,
+      "coreRustPassedEach": 90,
+      "ordinaryPluginRustPassed": 4,
+      "qaPluginRustPassed": 10,
+      "nativeWebDriver": "not_run",
+      "runnerChecks": 24
+    },
+    "linux": {
+      "frontendColdPassed": 980,
+      "frontendColdSkipped": 11,
+      "frontendPopulation": 991,
+      "nativeMcpPassed": 15,
+      "nativeMcpRepeatedColdCases": 4,
+      "uniqueFrontendPopulationExecuted": 991,
+      "nativeIpcSingleSamples": [
+        {
+          "scenario": "staged",
+          "passed": true,
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "interpretation": "native IPC callback arrival at the WebView; body bytes can include SSE metadata; not model first token or first paint",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 77,
+              "firstBodyBytesLatencyMs": 114,
+              "transportTerminalLatencyMs": 729,
+              "transportTerminalKind": "done"
+            }
+          ]
+        },
+        {
+          "scenario": "slow-first-token",
+          "passed": true,
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "interpretation": "native IPC callback arrival at the WebView; body bytes can include SSE metadata; not model first token or first paint",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 71,
+              "firstBodyBytesLatencyMs": 369,
+              "transportTerminalLatencyMs": 983,
+              "transportTerminalKind": "done"
+            }
+          ]
+        },
+        {
+          "scenario": "truncated",
+          "passed": true,
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "interpretation": "native IPC callback arrival at the WebView; body bytes can include SSE metadata; not model first token or first paint",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 70,
+              "firstBodyBytesLatencyMs": 71,
+              "transportTerminalLatencyMs": 85,
+              "transportTerminalKind": "done"
+            }
+          ]
+        },
+        {
+          "scenario": "idle-cancel",
+          "passed": true,
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "interpretation": "native IPC callback arrival at the WebView; body bytes can include SSE metadata; not model first token or first paint",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 65,
+              "firstBodyBytesLatencyMs": 66,
+              "transportTerminalLatencyMs": 368,
+              "transportTerminalKind": "done"
+            }
+          ]
+        }
+      ],
+      "debExtractChecks": 6,
+      "dpkgLifecycleChecks": 10,
+      "runnerChecks": 33,
+      "upgradePackages": [
+        {
+          "role": "baseline",
+          "name": "east-genesis-desktop",
+          "version": "0.1.0",
+          "architecture": "amd64",
+          "bytes": 6694664
+        },
+        {
+          "role": "upgrade",
+          "name": "east-genesis-desktop",
+          "version": "0.1.1",
+          "architecture": "amd64",
+          "bytes": 6694660
+        }
+      ],
+      "upgradeDatabase": {
+        "schemaVersion": 7,
+        "toolInvocations": true,
+        "sessionSentinel": true
+      },
+      "upgradeLaunches": [
+        {
+          "version": "0.1.0",
+          "schemaVersion": 7,
+          "installedProcessIdentity": true,
+          "stableProcessWindowMs": 4000,
+          "controlledCleanup": true
+        },
+        {
+          "version": "0.1.1",
+          "schemaVersion": 7,
+          "installedProcessIdentity": true,
+          "stableProcessWindowMs": 4000,
+          "controlledCleanup": true
+        }
+      ],
+      "cleanupVerified": true
+    },
+    "coverageAudit": "frontend-coverage-audit.json",
+    "downloadBoundary": {
+      "smallArtifacts": [
+        "eastgenesis-webdriver-diagnostics-Linux (6811 bytes)",
+        "eastgenesis-desktop-Windows reports only (5077 bytes)"
+      ],
+      "desktopBundleDownloads": false,
+      "realProviderOrPrivateConfigurationAccess": false
+    },
+    "monitorCadence": {
+      "snapshotIntervalsSeconds": [
+        73,
+        112,
+        103,
+        144,
+        132,
+        122,
+        145,
+        134
+      ],
+      "deviations": [],
+      "terminalStatusPollingStopped": true
+    },
+    "evidenceBoundary": [
+      "This fixed-head Windows run did not execute installed app startup or typed SQL observer",
+      "Linux/native timings are one-sample functional evidence, not model first token/first paint/performance baseline",
+      "native MCP 15 executions include 4 repeated cold cases; do not add executions as unique population",
+      "macOS CI package smoke does not provide native WebDriver interaction",
+      "local 322-input macOS upgrade evidence is separate from these hosted CI binaries"
+    ]
+  },
+  "captureIndex": {
+    "files": 66,
+    "bytes": 1598398,
+    "sha256": "6ea1ec58df94b4ca390e8e90b4221d10df2703c7e4987e6c43a3a4d9e4cfe941"
+  },
+  "rawLogs": [
+    {
+      "path": "macos-job-112581698088.log",
+      "bytes": 268653,
+      "sha256": "cd6dea440102cff40ecef72af38d14021f0a92d6ff29704b6c093b04c8582a0a"
+    },
+    {
+      "path": "ubuntu-job-112581697871.log",
+      "bytes": 432638,
+      "sha256": "a7214b7e685a4f0a38eaf55eb18f303ed4dc6b65edab0574eda27820097d4398"
+    },
+    {
+      "path": "windows-job-112581698276.log",
+      "bytes": 387574,
+      "sha256": "a6e8c6b323cfba47231000c619119a1a83315af6d88d87e2ac36933945514983"
+    }
+  ],
+  "rawLogReports": [
+    {
+      "path": "ubuntu-desktop-install-smoke-1.json",
+      "kind": "desktop-install-smoke",
+      "rawLogPath": "ubuntu-job-112581697871.log",
+      "lineStart": 4726,
+      "lineEnd": 4785,
+      "runId": 37555825538,
+      "headSha": "e7d00dc29f3160b562042809520027989d732544",
+      "jobId": 112581697871,
+      "sha256": "777a625f33fb38711af2fe55a5fba4c2950cf0717f2ed58402d85f82ba87315a",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-install-smoke",
+        "passed": true,
+        "platform": "linux",
+        "format": "deb",
+        "checks": {
+          "packageMetadata": true,
+          "packagePayload": true,
+          "dependencies": true,
+          "binaryStart": true,
+          "sqliteSchema": true,
+          "controlledTermination": true
+        },
+        "package": {
+          "name": "east-genesis-desktop",
+          "version": "0.1.0",
+          "architecture": "amd64",
+          "bytes": 6694664
+        },
+        "install": {
+          "mode": "deb-extract",
+          "isolatedPrefix": true,
+          "systemPackageDatabaseChanged": false,
+          "database": {
+            "schemaVersion": 7,
+            "sessions": true,
+            "toolInvocations": true
+          },
+          "termination": {
+            "exitCode": null,
+            "signal": "SIGTERM",
+            "requestedSignal": "SIGTERM",
+            "leaderExited": true,
+            "processGroupGone": true,
+            "liveProcessGroupGone": true,
+            "zombieProcesses": 0,
+            "groupProbe": "ps-pgid-state",
+            "controlledCleanup": true,
+            "gracefulTermination": true
+          }
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "a Debian package was inspected without mutating the host package database",
+            "the package payload was extracted under an isolated prefix",
+            "the extracted binary dependencies were resolved on the Linux runner",
+            "the extracted installed binary started and initialized its isolated SQLite database",
+            "the process was terminated in a controlled way"
+          ],
+          "excluded": [
+            "system dpkg installation or uninstall",
+            "AppImage/RPM installation",
+            "old-version to new-version upgrade",
+            "automatic update or rollback",
+            "real Provider availability",
+            "signing/notarization"
+          ]
+        }
+      }
+    },
+    {
+      "path": "ubuntu-desktop-linux-upgrade-smoke-2.json",
+      "kind": "desktop-linux-upgrade-smoke",
+      "rawLogPath": "ubuntu-job-112581697871.log",
+      "lineStart": 4832,
+      "lineEnd": 4911,
+      "runId": 37555825538,
+      "headSha": "e7d00dc29f3160b562042809520027989d732544",
+      "jobId": 112581697871,
+      "sha256": "b3126a7612cb650a969e014ddee7a7d6f62f35b3358c005307818f8aaa947d87",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-linux-upgrade-smoke",
+        "platform": "linux",
+        "format": "deb",
+        "passed": true,
+        "checks": {
+          "baselineInstalled": true,
+          "desktopEntry": true,
+          "dependencies": true,
+          "baselineLaunched": true,
+          "newerVersionInstalled": true,
+          "upgradeLaunched": true,
+          "sessionRetained": true,
+          "sqliteSchema": true,
+          "uninstalled": true,
+          "uninstallRetainsUserData": true
+        },
+        "packages": [
+          {
+            "role": "baseline",
+            "name": "east-genesis-desktop",
+            "version": "0.1.0",
+            "architecture": "amd64",
+            "bytes": 6694664
+          },
+          {
+            "role": "upgrade",
+            "name": "east-genesis-desktop",
+            "version": "0.1.1",
+            "architecture": "amd64",
+            "bytes": 6694660
+          }
+        ],
+        "install": {
+          "mode": "dpkg-system",
+          "disposableRunner": true,
+          "isolatedUserData": true,
+          "systemInstallAttempted": true,
+          "systemPackageDatabaseChanged": true,
+          "cleanupVerified": true,
+          "database": {
+            "schemaVersion": 7,
+            "toolInvocations": true,
+            "sessionSentinel": true
+          },
+          "launches": [
+            {
+              "version": "0.1.0",
+              "schemaVersion": 7,
+              "installedProcessIdentity": true,
+              "stableProcessWindowMs": 4000,
+              "controlledCleanup": true
+            },
+            {
+              "version": "0.1.1",
+              "schemaVersion": 7,
+              "installedProcessIdentity": true,
+              "stableProcessWindowMs": 4000,
+              "controlledCleanup": true
+            }
+          ]
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "actual dpkg installation and upgrade between two QA bundle versions",
+            "both installed versions start with SQLite schema 7",
+            "synthetic session survives upgrade and purge",
+            "installed executable and desktop entry exist before uninstall"
+          ],
+          "excluded": [
+            "code or schema changes between releases",
+            "desktop menu click or WebView task execution",
+            "real Provider",
+            "automatic updater or rollback",
+            "other Linux distributions or package formats",
+            "production release signing"
+          ]
+        }
+      }
+    },
+    {
+      "path": "ubuntu-desktop-runner-evidence-3.json",
+      "kind": "desktop-runner-evidence",
+      "rawLogPath": "ubuntu-job-112581697871.log",
+      "lineStart": 4944,
+      "lineEnd": 4996,
+      "runId": 37555825538,
+      "headSha": "e7d00dc29f3160b562042809520027989d732544",
+      "jobId": 112581697871,
+      "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-runner-evidence",
+        "platform": "linux",
+        "passed": true,
+        "checks": {
+          "providerShape": true,
+          "providerPassed": true,
+          "providerScenarios": true,
+          "providerRecovery": true,
+          "controlledShape": true,
+          "controlledPassed": true,
+          "controlledScenarios": true,
+          "controlledRecovery": true,
+          "routingShape": true,
+          "routingPassed": true,
+          "goldenShape": true,
+          "goldenPassed": true,
+          "goldenTasks": true,
+          "goalRecovery": true,
+          "goalValidation": true,
+          "webdriverShape": true,
+          "webdriverPassed": true,
+          "webdriverScenarios": true,
+          "package": true,
+          "installShape": true,
+          "installPassed": true,
+          "installFormat": true,
+          "installMode": true,
+          "installChecks": true,
+          "upgradeShape": true,
+          "upgradePassed": true,
+          "upgradeChecks": true,
+          "upgradeMode": true,
+          "upgradeVersions": true,
+          "upgradeDatabase": true,
+          "upgradeLaunches": true,
+          "windowsInstall": true,
+          "redaction": true
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "required CI evidence files exist and pass their fixed schemas",
+            "platform-specific WebDriver/package evidence is present when applicable",
+            "uploaded JSON passes the shared redaction boundary"
+          ],
+          "excluded": [
+            "real Provider availability or SLA",
+            "real macOS WebView interaction",
+            "installation/upgrade success beyond the recorded package smoke"
+          ]
+        }
+      }
+    },
+    {
+      "path": "macos-desktop-runner-evidence-1.json",
+      "kind": "desktop-runner-evidence",
+      "rawLogPath": "macos-job-112581698088.log",
+      "lineStart": 3123,
+      "lineEnd": 3166,
+      "runId": 37555825538,
+      "headSha": "e7d00dc29f3160b562042809520027989d732544",
+      "jobId": 112581698088,
+      "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e",
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-runner-evidence",
+        "platform": "macos",
+        "passed": true,
+        "checks": {
+          "providerShape": true,
+          "providerPassed": true,
+          "providerScenarios": true,
+          "providerRecovery": true,
+          "controlledShape": true,
+          "controlledPassed": true,
+          "controlledScenarios": true,
+          "controlledRecovery": true,
+          "routingShape": true,
+          "routingPassed": true,
+          "goldenShape": true,
+          "goldenPassed": true,
+          "goldenTasks": true,
+          "goalRecovery": true,
+          "goalValidation": true,
+          "webdriver": true,
+          "environment": true,
+          "packageShape": true,
+          "packagePassed": true,
+          "packageChecks": true,
+          "install": true,
+          "upgrade": true,
+          "windowsInstall": true,
+          "redaction": true
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "required CI evidence files exist and pass their fixed schemas",
+            "platform-specific WebDriver/package evidence is present when applicable",
+            "uploaded JSON passes the shared redaction boundary"
+          ],
+          "excluded": [
+            "real Provider availability or SLA",
+            "real macOS WebView interaction",
+            "installation/upgrade success beyond the recorded package smoke"
+          ]
+        }
+      }
+    }
+  ],
+  "frontendCoverageAudit": {
+    "sha256": "385bd1f234ef9b3f9199c59c22a9f90a2ff52358a79b98559278a6ccd234107c",
+    "audit": {
+      "schemaVersion": 1,
+      "kind": "ci-frontend-coverage-audit",
+      "runId": 37555825538,
+      "headSha": "e7d00dc29f3160b562042809520027989d732544",
+      "platforms": {
+        "macos": {
+          "jobId": 112581698088,
+          "rawLog": {
+            "path": "macos-job-112581698088.log",
+            "bytes": 268653,
+            "sha256": "cd6dea440102cff40ecef72af38d14021f0a92d6ff29704b6c093b04c8582a0a"
+          },
+          "summaries": [
+            {
+              "line": 148,
+              "text": "node: v22.23.2"
+            },
+            {
+              "line": 503,
+              "text": "(node:7750) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 519,
+              "text": "(node:8649) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 527,
+              "text": "(node:8672) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 534,
+              "text": "(node:8684) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 541,
+              "text": "(node:8702) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 547,
+              "text": "(node:8844) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1378,
+              "text": "(node:9633) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1404,
+              "text": " Test Files  101 passed | 1 skipped (102)"
+            },
+            {
+              "line": 1405,
+              "text": "      Tests  980 passed | 11 skipped (991)"
+            },
+            {
+              "line": 1511,
+              "text": "(node:10093) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1516,
+              "text": " Test Files  1 passed (1)"
+            },
+            {
+              "line": 1517,
+              "text": "      Tests  1 passed (1)"
+            },
+            {
+              "line": 2241,
+              "text": "test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.68s"
+            },
+            {
+              "line": 2247,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2344,
+              "text": "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s"
+            },
+            {
+              "line": 2349,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2358,
+              "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+            },
+            {
+              "line": 2365,
+              "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+            },
+            {
+              "line": 2376,
+              "text": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s"
+            },
+            {
+              "line": 2381,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2387,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2394,
+              "text": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+            },
+            {
+              "line": 2439,
+              "text": "test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.78s"
+            },
+            {
+              "line": 2445,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2541,
+              "text": "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s"
+            },
+            {
+              "line": 2547,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2556,
+              "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+            },
+            {
+              "line": 2564,
+              "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+            },
+            {
+              "line": 2580,
+              "text": "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s"
+            },
+            {
+              "line": 2586,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2592,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2599,
+              "text": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+            },
+            {
+              "line": 2638,
+              "text": " Test Files  3 passed (3)"
+            },
+            {
+              "line": 2639,
+              "text": "      Tests  15 passed (15)"
+            }
+          ]
+        },
+        "windows": {
+          "jobId": 112581698276,
+          "rawLog": {
+            "path": "windows-job-112581698276.log",
+            "bytes": 387574,
+            "sha256": "a6e8c6b323cfba47231000c619119a1a83315af6d88d87e2ac36933945514983"
+          },
+          "summaries": [
+            {
+              "line": 151,
+              "text": "node: v22.23.3"
+            },
+            {
+              "line": 506,
+              "text": "(node:7736) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 518,
+              "text": "(node:9744) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 526,
+              "text": "(node:9320) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 533,
+              "text": "(node:9604) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 554,
+              "text": "(node:2232) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 561,
+              "text": "(node:2188) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1387,
+              "text": "(node:2584) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1414,
+              "text": " Test Files  101 passed | 1 skipped (102)"
+            },
+            {
+              "line": 1415,
+              "text": "      Tests  974 passed | 17 skipped (991)"
+            },
+            {
+              "line": 1521,
+              "text": "(node:8044) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1526,
+              "text": " Test Files  1 passed (1)"
+            },
+            {
+              "line": 1527,
+              "text": "      Tests  1 passed (1)"
+            },
+            {
+              "line": 2264,
+              "text": "test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.82s"
+            },
+            {
+              "line": 2270,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2356,
+              "text": "test result: ok. 80 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+            },
+            {
+              "line": 2362,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2371,
+              "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+            },
+            {
+              "line": 2379,
+              "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s"
+            },
+            {
+              "line": 2389,
+              "text": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s"
+            },
+            {
+              "line": 2395,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 2401,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3287,
+              "text": "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.92s"
+            }
+          ]
+        },
+        "ubuntu": {
+          "jobId": 112581697871,
+          "rawLog": {
+            "path": "ubuntu-job-112581697871.log",
+            "bytes": 432638,
+            "sha256": "a7214b7e685a4f0a38eaf55eb18f303ed4dc6b65edab0574eda27820097d4398"
+          },
+          "summaries": [
+            {
+              "line": 163,
+              "text": "node: v22.23.3"
+            },
+            {
+              "line": 1707,
+              "text": "(node:5889) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1720,
+              "text": "(node:6646) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1728,
+              "text": "(node:6810) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1735,
+              "text": "(node:6910) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1742,
+              "text": "(node:7076) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 1748,
+              "text": "(node:7156) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 2580,
+              "text": "(node:8229) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 2606,
+              "text": " Test Files  101 passed | 1 skipped (102)"
+            },
+            {
+              "line": 2607,
+              "text": "      Tests  980 passed | 11 skipped (991)"
+            },
+            {
+              "line": 2713,
+              "text": "(node:8795) ExperimentalWarning: SQLite is an experimental feature and might change at any time"
+            },
+            {
+              "line": 2718,
+              "text": " Test Files  1 passed (1)"
+            },
+            {
+              "line": 2719,
+              "text": "      Tests  1 passed (1)"
+            },
+            {
+              "line": 3570,
+              "text": "test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.44s"
+            },
+            {
+              "line": 3576,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3672,
+              "text": "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+            },
+            {
+              "line": 3678,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3687,
+              "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+            },
+            {
+              "line": 3695,
+              "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3705,
+              "text": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s"
+            },
+            {
+              "line": 3711,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3717,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3724,
+              "text": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3769,
+              "text": "test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.43s"
+            },
+            {
+              "line": 3775,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3871,
+              "text": "test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s"
+            },
+            {
+              "line": 3877,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3886,
+              "text": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+            },
+            {
+              "line": 3894,
+              "text": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3910,
+              "text": "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s"
+            },
+            {
+              "line": 3916,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3922,
+              "text": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3929,
+              "text": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+            },
+            {
+              "line": 3967,
+              "text": " Test Files  3 passed (3)"
+            },
+            {
+              "line": 3968,
+              "text": "      Tests  15 passed (15)"
+            }
+          ]
+        }
+      },
+      "coldMcpSkipGroups": [
+        {
+          "path": "tests/mcp-files.test.ts",
+          "guard": "!existsSync(target/debug/eg-mcp-files)",
+          "coldSkippedCount": 6,
+          "testNames": [
+            "注册 9 个工具：读不确认，写要确认，只有删除要二次确认",
+            "不在白名单的 MCP 服务器拒绝注册",
+            "只读工具直接执行；输出包成不可信数据再交给模型，伪造的结束标签被转义",
+            "删除要确认两次：第二次拒绝就停止，文件还在；两次都同意才删除",
+            "建目录、移动文件各确认一次，真的落到磁盘上",
+            "恢复前确认写入已经落地时不重复写文件，也不再弹确认"
+          ]
+        },
+        {
+          "path": "tests/killer-scenario.test.ts",
+          "guard": "!existsSync(target/debug/eg-mcp-files)",
+          "coldSkippedCount": 4,
+          "testNames": [
+            "列出 → 读取 → 判断主题 → 建文件夹 → 逐个确认后移动 → 报告；不反问、不碰范围外文件",
+            "续写轮数有上限：超过就停在 budget_exceeded，不会无限规划",
+            "每批步骤有上限时分多轮续写，结果一样",
+            "拒绝某次移动：任务停止，已移动的保留，没移动的留在原处"
+          ]
+        },
+        {
+          "path": "tests/memory-skill-e2e.test.ts",
+          "guard": "!existsSync(target/debug/eg-mcp-files)",
+          "coldSkippedCount": 1,
+          "testNames": [
+            "第一次跑完保存为技能；「再整理一次」直接按技能执行，用时 < 第一次的 50%"
+          ]
+        }
+      ],
+      "coverageInterpretation": {
+        "macos": {
+          "coldPassed": 980,
+          "coldSkipped": 11,
+          "population": 991,
+          "nativeMcpStepPassed": 15,
+          "nativeMcpStepSkipped": 0,
+          "repeatedColdCases": 4,
+          "uniquePopulationExecuted": 991,
+          "additionalCrashProcessCaseRepeated": 1
+        },
+        "windows": {
+          "coldPassed": 974,
+          "coldSkipped": 17,
+          "population": 991,
+          "additionalPosixSkips": 6,
+          "nativeMcpStep": "not_run_prior_Rust_doctest_failure",
+          "qaRustWorkspace": "not_run_prior_first_Rust_command_failure"
+        },
+        "sqlite": "node:sqlite warnings indicate support; skipped binary groups and Windows POSIX group are not SQLite unavailability",
+        "rawExecutionCountsAreNotUniqueCases": true,
+        "ubuntu": {
+          "coldPassed": 980,
+          "coldSkipped": 11,
+          "population": 991,
+          "nativeMcpStepPassed": 15,
+          "nativeMcpStepSkipped": 0,
+          "repeatedColdCases": 4,
+          "uniquePopulationExecuted": 991,
+          "additionalCrashProcessCaseRepeated": 1
+        }
+      }
+    }
+  },
+  "rootIndependentChecks": {
+    "allCaptureBytesAndHashes": true,
+    "rawLogReportsReextracted": 4,
+    "terminalRunAndAllJobHeads": true,
+    "smallZipDigestsMatchGithubMetadata": true,
+    "smallZipMembersMatchExtractedFiles": true
+  },
+  "evidenceBoundary": {
+    "excluded": [
+      "Windows native startup and NSIS lifecycle in this run",
+      "real Provider",
+      "performance baseline",
+      "new local plan-only-ledger fix",
+      "historical production upgrade",
+      "signing/notarization"
+    ],
+    "windowsFailureMeaning": "ordinary vendor doctest link failure after unit tests; QA/native MCP/bundle/NSIS/typed SQL stages not run",
+    "priorWindows9eeFailure": "Database.load failure remains historical, unresolved by this run"
+  }
+}

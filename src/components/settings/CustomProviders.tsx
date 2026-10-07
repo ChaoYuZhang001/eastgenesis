@@ -3,10 +3,12 @@ import { KeyRound, Pencil, PlugZap, Plus, RefreshCw, Trash2 } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/input";
 import { customProfileId, officialMatch } from "@/lib/engine";
+import { MAX_PROBED, PROBE_CONCURRENCY, PROBE_TIMEOUT_MS, PROBE_BATCH_TIMEOUT_MS } from "@/lib/discover";
 import { customModels, type CustomProvider, type SavedProvider } from "@/platform";
 import { useSettings, type TestResult } from "@/stores/settings";
 import { ResultNote, SettingsSection } from "./controls";
 import { CustomProviderForm } from "./CustomProviderForm";
+import { ProviderRecoveryNote } from "./ProviderRecoveryNote";
 
 /** 参与路由的模型及其路由 ID；沿用内置能力档位的标出参照来源（透明度优先） */
 function ModelRoutes({ c }: { c: CustomProvider }) {
@@ -36,35 +38,38 @@ function ModelCacheNote({ id }: { id: string }) {
   const entry = useSettings((s) => s.modelCache[id]);
   const probingNow = useSettings((s) => s.probingIds.includes(id));
   const refreshModels = useSettings((s) => s.refreshModels);
+  const probeModels = useSettings((s) => s.probeModels);
+  const cancelModelProbe = useSettings((s) => s.cancelModelProbe);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = async () => {
     setBusy(true);
-    const r = await refreshModels(id, true);
+    const r = await refreshModels(id);
     setError(r.ok ? null : r.message);
     setBusy(false);
   };
   const gone = entry?.unavailable ?? [];
+  const summary = entry?.probeSummary;
+  const stopped = summary?.stopReason === "cancelled" ? "已停止" : summary?.stopReason === "timeout" ? "单次请求超时，已停止后续检查" : summary?.stopReason === "budget" ? "达到本批等待上限，已停止后续检查" : null;
 
   return (
     <div className="space-y-1">
       <p className="text-xs text-muted-foreground">
         {entry ? `服务端模型列表：${entry.models.length} 个 · 上次读取 ${timeText(entry.fetchedAt)}` : "还没有读取过服务端模型列表（输入框的模型下拉会用已登记的模型）"}
       </p>
+      <p className="text-xs text-muted-foreground">读取目录和测试连接只请求模型列表，不发起推理。目录候选用于手动锁定；已登记的模型按能力档位参与自动路由，无需先做调用检查。</p>
       {entry && (
         <p role="status" className="text-xs text-muted-foreground">
           {probingNow
-            ? "正在逐个探测模型是否可用（每个只发 1 个 token 的请求）…"
-            : entry.probeSuspicious
-              ? "探测时所有模型都返回 404，可能是对话地址有误，这次没有隐藏任何模型"
-              : entry.probedAt !== undefined
-                ? gone.length
-                  ? `探测完成：${gone.length} 个模型返回 404，已从输入框的模型下拉隐藏`
-                  : "探测完成：没有返回 404 的模型"
-                : "还没有探测过模型是否可用"}
+            ? "正在检查模型调用，可能产生费用；可以停止后续检查…"
+            : summary
+              ? `上次检查：已发起 ${summary.probed}/${summary.total}，HTTP 成功 ${summary.ok}，404/型号缺失 ${summary.missing}，不确定 ${summary.unknown}，未发起 ${summary.notProbed}${stopped ? ` · ${stopped}` : ""}`
+              : entry.probedAt !== undefined ? "有历史调用检查记录，缺少成功与未知数量；不代表所有模型都可用" : "尚未检查推理调用；读取目录不代表模型一定可调用"}
         </p>
       )}
+      {entry?.probeSuspicious && <p className="text-xs text-muted-foreground">本批已检查的模型均返回 404/型号缺失，可能是对话地址有误，这次没有隐藏任何模型。</p>}
+      {gone.length > 0 && <p className="text-xs text-muted-foreground">{`${gone.length} 个模型返回 404/型号缺失，已从手动模型下拉隐藏；这份目录记录不改变已登记模型的自动路由。`}</p>}
       {gone.length > 0 && !probingNow && (
         <ul aria-label="不可用的模型（404）" className="flex flex-wrap gap-1">
           {gone.map((m) => (
@@ -74,10 +79,18 @@ function ModelCacheNote({ id }: { id: string }) {
           ))}
         </ul>
       )}
-      <Button size="sm" variant="secondary" disabled={busy} onClick={() => void refresh()}>
-        <RefreshCw aria-hidden />
-        {busy ? "读取中…" : "刷新模型列表"}
-      </Button>
+      <p className="text-xs text-muted-foreground">{`调用检查会向服务发送测试文本，每批最多 ${MAX_PROBED} 个模型、${PROBE_CONCURRENCY} 路并发，单次等待 ${PROBE_TIMEOUT_MS / 1000} 秒、整批等待 ${PROBE_BATCH_TIMEOUT_MS / 1000} 秒。请求限制输出 max_tokens=1，实际费用由服务决定；停止不能撤回已发送请求或保证退费。HTTP 成功不证明模型质量、工具能力或完整任务可用。`}</p>
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="secondary" disabled={busy || probingNow} onClick={() => void refresh()}>
+          <RefreshCw aria-hidden />
+          {busy ? "读取中…" : "刷新模型列表"}
+        </Button>
+        {probingNow ? (
+          <Button size="sm" variant="outline" onClick={() => cancelModelProbe(id)}>停止检查</Button>
+        ) : (
+          <Button size="sm" variant="outline" disabled={busy || !entry?.models.length} onClick={() => void probeModels(id)}>检查模型调用（可能计费）</Button>
+        )}
+      </div>
       {error && <ResultNote result={{ ok: false, message: error }} />}
     </div>
   );
@@ -114,7 +127,8 @@ export function CustomProviders() {
   };
   const test = async (id: string) => {
     setTesting(id);
-    note(id, await testConnection(id));
+    const result = await testConnection(id);
+    if (!result.stale) note(id, result);
     setTesting(null);
   };
   const del = async (id: string, label: string) => {
@@ -150,6 +164,7 @@ export function CustomProviders() {
                     <p className="font-medium">{c.label}</p>
                     <p className="break-all font-mono text-xs text-muted-foreground">{c.base_url}</p>
                     <p className="text-xs text-muted-foreground">{c.protocol === "anthropic" ? "Anthropic 兼容（Messages）" : "OpenAI 兼容（Chat Completions）"}</p>
+                    <ProviderRecoveryNote protocol={c.protocol ?? "openai"} />
                     <ModelRoutes c={c} />
                     <ModelCacheNote id={c.id} />
                     {Object.keys(c.headers).length > 0 && <p className="text-xs text-muted-foreground">附加请求头：{Object.keys(c.headers).join("、")}</p>}

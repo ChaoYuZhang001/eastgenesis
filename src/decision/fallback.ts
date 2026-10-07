@@ -1,3 +1,4 @@
+import { isGoalQuotaControlError } from "../core/goal-quota";
 // 三级降级的决策后端。
 //   第 1 级 CloudJevBackend：TypeSafe Jev（云端）。没有 TYPESAFE_API_KEY 时直接跳过。
 //   第 2 级 LocalJevBackend（local-jev.ts）：用户在设置页选的本机决策模型。没有选择时直接跳过。
@@ -271,6 +272,7 @@ export class FallbackChain {
         const meta: DecisionMeta = { backend: b.name, level: b.level, degraded: b.level > 1, confidence: d.confidence, skipped, latencyMs: this.#now() - t0 };
         return { value: d.value, meta };
       } catch (e) {
+        if (isGoalQuotaControlError(e)) throw e;
         if (last) throw e;
         const code = e instanceof JevError ? e.code : "internal";
         if (code === "aborted") throw e;

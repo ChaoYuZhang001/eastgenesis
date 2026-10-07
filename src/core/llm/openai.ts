@@ -3,6 +3,7 @@ import { ProviderError } from "./errors";
 import { DEFAULT_LLM_TIMEOUT_MS, postJson, readJson, readSse, type HttpOptions } from "./http";
 import type { RequestQuirks } from "./official";
 import { MAX_REASONING_CHARS } from "./types";
+import type { ProviderErrorCode } from "./errors";
 import type {
   ChatRequest,
   ChatResponse,
@@ -38,6 +39,7 @@ interface OpenAIBody {
   model?: string;
   choices?: OpenAIChoice[];
   usage?: { prompt_tokens?: number; completion_tokens?: number } | null;
+  error?: { type?: string; code?: string; message?: string };
 }
 
 export interface OpenAIProviderInit {
@@ -58,7 +60,16 @@ export class OpenAIProvider implements LLMProvider {
   readonly id: string;
   readonly kind: Extract<ProviderKind, "openai" | "openai-compatible">;
   readonly label: string;
-  readonly capabilities = { streaming: true, systemPrompt: true };
+  readonly capabilities = {
+    streaming: true,
+    systemPrompt: true,
+    recovery: {
+      abortSignal: true,
+      streamTerminal: "sse_done" as const,
+      partialOutput: true,
+      normalizedErrors: true,
+    },
+  };
   readonly #apiKey: string;
   readonly #baseUrl: string;
   readonly #headers: Record<string, string>;
@@ -125,30 +136,76 @@ export class OpenAIProvider implements LLMProvider {
     let model = req.model;
     let usage: Usage | null = null;
     let finish: FinishReason = "other";
-    for await (const ev of readSse(res, this.id)) {
-      if (ev.data === "[DONE]") break;
-      let chunk: OpenAIBody;
-      try {
-        chunk = JSON.parse(ev.data) as OpenAIBody;
-      } catch {
-        throw new ProviderError("invalid_response", this.id, { detail: "SSE 数据不是合法 JSON" });
+    let sawDone = false;
+    try {
+      for await (const ev of readSse(res, this.id)) {
+        if (ev.data === "[DONE]") {
+          sawDone = true;
+          break;
+        }
+        let chunk: OpenAIBody;
+        try {
+          chunk = JSON.parse(ev.data) as OpenAIBody;
+        } catch {
+          throw new ProviderError("invalid_response", this.id, {
+            detail: "SSE 数据不是合法 JSON",
+            partialOutput: text.length > 0,
+            secrets: [this.#apiKey],
+          });
+        }
+        if (chunk.error) {
+          throw new ProviderError(openAiStreamErrorCode(chunk.error.type ?? chunk.error.code), this.id, {
+            detail: chunk.error.message ?? "流中出现错误事件",
+            partialOutput: text.length > 0,
+            secrets: [this.#apiKey],
+          });
+        }
+        if (chunk.model) model = chunk.model;
+        if (chunk.usage) usage = toUsage(chunk.usage);
+        const c = chunk.choices?.[0];
+        if (c?.finish_reason) finish = toFinish(c.finish_reason);
+        if (reasoning.length <= MAX_REASONING_CHARS) reasoning += reasoningOf(c?.delta);
+        const delta = c?.delta?.content;
+        if (delta) {
+          text += delta;
+          yield { type: "delta", text: delta };
+        }
       }
-      if (chunk.model) model = chunk.model;
-      if (chunk.usage) usage = toUsage(chunk.usage);
-      const c = chunk.choices?.[0];
-      if (c?.finish_reason) finish = toFinish(c.finish_reason);
-      if (reasoning.length <= MAX_REASONING_CHARS) reasoning += reasoningOf(c?.delta);
-      const delta = c?.delta?.content;
-      if (delta) {
-        text += delta;
-        yield { type: "delta", text: delta };
+    } catch (error) {
+      if (error instanceof ProviderError && text.length > 0 && !error.partialOutput) {
+        throw new ProviderError(error.code, this.id, {
+          ...(error.status === null ? {} : { status: error.status }),
+          ...(error.detail ? { detail: error.detail } : {}),
+          partialOutput: true,
+          secrets: [this.#apiKey],
+        });
       }
+      throw error;
+    }
+    if (!sawDone) {
+      throw new ProviderError("invalid_response", this.id, {
+        detail: "流式响应缺少 [DONE] 结束标记",
+        partialOutput: text.length > 0,
+        secrets: [this.#apiKey],
+      });
     }
     yield {
       type: "done",
       response: { providerId: this.id, model, text, usage, finishReason: finish, latencyMs: this.#now() - t0, ...withReasoning(reasoning) },
     };
   }
+}
+
+function openAiStreamErrorCode(type: string | undefined): ProviderErrorCode {
+  const value = (type ?? "").toLowerCase();
+  if (value.includes("auth") || value.includes("api_key") || value.includes("permission")) return "auth";
+  if (value.includes("billing") || value.includes("quota") || value.includes("insufficient_quota")) return "billing";
+  if (value.includes("rate") || value.includes("limit")) return "rate_limit";
+  if (value.includes("not_found") || value.includes("model_not_found")) return "not_found";
+  if (value.includes("server") || value.includes("overload")) return "server";
+  if (value.includes("timeout")) return "timeout";
+  if (value.includes("request") || value.includes("parameter") || value.includes("context")) return "bad_request";
+  return "invalid_response";
 }
 
 function toUsage(u: OpenAIBody["usage"]): Usage | null {

@@ -169,7 +169,7 @@ export class Planner {
   }
 
   /** 规划没给参数时，按工具的参数说明生成 */
-  async fillArgs(step: PlanStep, tool: Tool, records: readonly StepRecord[], signal?: AbortSignal): Promise<Record<string, unknown>> {
+  async fillArgs(step: PlanStep, tool: Tool, records: readonly StepRecord[], signal?: AbortSignal, llm: LlmCall = this.o.llm): Promise<Record<string, unknown>> {
     const recent = records
       .filter((r) => r.status === "done")
       .slice(-3)
@@ -185,7 +185,7 @@ export class Planner {
     ]
       .filter(Boolean)
       .join("\n\n");
-    const r = await this.o.llm(
+    const r = await llm(
       { purpose: "args", messages: [{ role: "system", content: `你为工具生成调用参数。${UNTRUSTED_RULE}` }, { role: "user", content: user }] },
       signal,
     );

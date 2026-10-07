@@ -9,8 +9,8 @@ import { getBackend, type Goal, type GoalChange, type GoalInput } from "@/platfo
  * 停掉正在跑的循环。执行器（lib/goal-run.ts）在加载时注册进来：暂停、放弃、删除目标时，
  * 先在跑的那一轮要立刻停下，而不是等它自己跑完。没有注册时（单元测试里不带执行器）什么也不做。
  */
-let stopper: ((id: string) => void) | null = null;
-export const setGoalStopper = (f: ((id: string) => void) | null): void => {
+let stopper: ((id: string) => void | Promise<void>) | null = null;
+export const setGoalStopper = (f: ((id: string) => void | Promise<void>) | null): void => {
   stopper = f;
 };
 
@@ -20,6 +20,7 @@ interface GoalState {
   items: Goal[];
   error: string | null;
   load(): Promise<void>;
+  refresh(id:string):Promise<Goal|null>;
   /** 不带 id 是新建（状态 idle），带 id 是编辑；成功返回保存后的目标，失败返回错误说明 */
   save(g: GoalInput): Promise<Goal | string>;
   /** 未开始 → 进行中；已暂停 → 进行中（继续） */
@@ -45,7 +46,7 @@ export function goalsOfProject(items: readonly Goal[], projectId: string | null)
 // 与数据库 list 的排序一致：最近更新在前，同一时间按创建时间
 const order = (a: Goal, b: Goal) => b.updated_at - a.updated_at || b.created_at - a.created_at;
 
-export const useGoals = create<GoalState>((set) => {
+export const useGoals = create<GoalState>((set, get) => {
   // 写入成功后只替换这一条，不整表重读（运行时一轮里会有多次写入）；已删除的从列表移除
   const put = (g: Goal) =>
     set((s) => {
@@ -67,6 +68,18 @@ export const useGoals = create<GoalState>((set) => {
     }
   }
   const message = (r: Goal | AppError) => ("code" in r ? r.message : null);
+  const waitForRecoveryCheckpoint = async (id: string): Promise<boolean> => {
+    const deadline = Date.now() + 2_000;
+    while (Date.now() < deadline) {
+      const goal = get().items.find((item) => item.id === id);
+      const round = goal?.rounds.at(-1);
+      if (!goal || goal.status !== "paused" || round?.status !== "interrupted") return true;
+      if (round.task_checkpoint) return true;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    const goal = get().items.find((item) => item.id === id);
+    return Boolean(goal?.rounds.at(-1)?.task_checkpoint);
+  };
 
   return {
     loaded: false,
@@ -74,10 +87,27 @@ export const useGoals = create<GoalState>((set) => {
     error: null,
     async load() {
       try {
-        set({ items: await getBackend().listGoals(), loaded: true, error: null });
+        const listed = await getBackend().listGoals();
+        // 目标轮次会先落盘为 running，再启动任务卡。若页面进程在这一窗口退出，
+        // 下次启动不能留下一个永远“进行中”但没有任务卡的目标；先把它安全地暂停，
+        // 用户点击“继续”时再重新经过账本探测和权限闸门。等你确认的 uncertain 轮次不改。
+        const recovered = [];
+        for (const g of listed) {
+          const last = g.rounds.at(-1);
+          if (g.status === "running" && (!last || last.status === "running") && !(g.quota?.active && g.quota.leaseUntil>Date.now())) {
+            recovered.push(await getBackend().updateGoal(g.id, { op: "recover_after_restart" }));
+          } else {
+            recovered.push(g);
+          }
+        }
+        set({ items: recovered, loaded: true, error: null });
       } catch (e) {
         set({ loaded: true, error: toAppError(e).message });
       }
+    },
+    async refresh(id){
+      const g=(await getBackend().listGoals()).find(x=>x.id===id)??null;
+      if(g)put(g);else drop(id);return g;
     },
     async save(g) {
       try {
@@ -90,21 +120,29 @@ export const useGoals = create<GoalState>((set) => {
         return err.message;
       }
     },
-    start: async (id) => message(await change(id, { op: "transition", to: "running" })),
+    start: async (id) => {
+      const current = get().items.find((item) => item.id === id);
+      const last = current?.rounds.at(-1);
+      if (current?.status === "paused" && last?.status === "interrupted" && !last.task_checkpoint) {
+        const ready = await waitForRecoveryCheckpoint(id);
+        if (!ready) return "上一轮缺少可验证的任务恢复记录，已暂停以避免重复执行";
+      }
+      return message(await change(id, { op: "transition", to: "running" }));
+    },
     pause: async (id) => {
       const err = message(await change(id, { op: "transition", to: "paused" }));
-      stopper?.(id);
+      if (!err) await stopper?.(id);
       return err;
     },
     abandon: async (id) => {
       const err = message(await change(id, { op: "transition", to: "abandoned" }));
-      stopper?.(id);
+      if (!err) await stopper?.(id);
       return err;
     },
     async remove(id) {
       const r = await change(id, { op: "transition", to: "deleted" });
       const err = "code" in r && r.code !== "goal_not_found" ? r.message : null;
-      if (!err) stopper?.(id);
+      if (!err) await stopper?.(id);
       return err;
     },
     resolve: async (id, choice) => message(await change(id, { op: "resolve_uncertain", choice })),

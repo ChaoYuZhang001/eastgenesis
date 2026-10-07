@@ -1,6 +1,7 @@
 // 工具注册表（即工具白名单）与带超时的执行器。
 import { redact } from "../core/redact";
 import type { ToolDef } from "../decision/decision-layer";
+import { capabilityForTool, type ArtifactRef, type ToolCapability, type ToolInvocation } from "./tool-contract";
 import type { Tool } from "./types";
 
 export const TOOL_NAME = /^[a-z][a-z0-9_]{0,63}$/;
@@ -33,6 +34,11 @@ export class ToolRegistry {
     return [...this.#tools.values()];
   }
 
+  capability(name: string): ToolCapability | undefined {
+    const tool = this.#tools.get(name);
+    return tool ? capabilityForTool(tool) : undefined;
+  }
+
   /** 交给决策层做白名单和权限判断 */
   defs(): ToolDef[] {
     return this.list().map(({ name, description, sideEffect }) => ({ name, description, sideEffect }));
@@ -56,7 +62,8 @@ export async function executeTool(
   args: Record<string, unknown>,
   signal?: AbortSignal,
   now: () => number = Date.now,
-): Promise<{ ok: boolean; content: string; latencyMs: number; structured?: boolean }> {
+  invocation?: ToolInvocation,
+): Promise<{ ok: boolean; content: string; latencyMs: number; structured?: boolean; artifacts?: ArtifactRef[] }> {
   const t0 = now();
   const ctrl = new AbortController();
   const onAbort = () => ctrl.abort();
@@ -71,9 +78,15 @@ export async function executeTool(
   });
   try {
     if (signal?.aborted) throw Object.assign(new Error("已取消"), { name: "AbortError" });
-    const out = await Promise.race([tool.run(args, { signal: ctrl.signal }), timeout]);
+    const out = await Promise.race([tool.run(args, { signal: ctrl.signal, ...(invocation ? { invocation } : {}) }), timeout]);
     // structured：工具给了结构化结果（MCP structuredContent），成功与否以工具自己的标记为准
-    return { ok: out.ok === true, content: truncate(redact(String(out.content ?? ""))), latencyMs: now() - t0, ...(out.data !== undefined ? { structured: true } : {}) };
+    return {
+      ok: out.ok === true,
+      content: truncate(redact(String(out.content ?? ""))),
+      latencyMs: now() - t0,
+      ...(out.data !== undefined ? { structured: true } : {}),
+      ...(out.artifacts ? { artifacts: [...out.artifacts] } : {}),
+    };
   } catch (e) {
     if (signal?.aborted) throw e;
     return { ok: false, content: truncate(redact(e instanceof Error ? e.message : String(e))), latencyMs: now() - t0 };

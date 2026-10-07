@@ -7,8 +7,12 @@ import "@fontsource/montserrat/700.css";
 import "@fontsource/jetbrains-mono/400.css";
 import "./styles/globals.css";
 import App from "./App";
+import { recordQaStartup } from "./lib/qa-startup";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+recordQaStartup("frontend_entry");
+const root = ReactDOM.createRoot(document.getElementById("root")!);
+recordQaStartup("react_render_called");
+root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,

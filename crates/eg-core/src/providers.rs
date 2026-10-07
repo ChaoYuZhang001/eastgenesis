@@ -229,6 +229,15 @@ impl CustomProviderStore {
         self.items.get(id)
     }
 
+    /// Insert a validated provider without persisting it.  This is used by
+    /// desktop QA fixtures so a test endpoint never becomes part of a user's
+    /// provider configuration.
+    pub fn insert_ephemeral(&mut self, p: &CustomProvider) -> AppResult<()> {
+        let v = validate_custom(p)?;
+        self.items.insert(v.id.clone(), v);
+        Ok(())
+    }
+
     /// 返回（保存后的配置，base URL 是否相对已有配置发生了变化）
     fn upsert(&mut self, p: &CustomProvider) -> AppResult<(CustomProvider, bool)> {
         let v = validate_custom(p)?;
@@ -400,6 +409,33 @@ impl PlannedRequest {
             _ => text.to_string(),
         }
     }
+
+    /// Incrementally redact a response chunk. The pending suffix retains only
+    /// text that could still become the beginning of the secret on the next
+    /// network read; complete secrets are replaced before the bytes leave Rust.
+    pub fn scrub_stream(&self, pending: &mut String, incoming: &str, final_chunk: bool) -> String {
+        pending.push_str(incoming);
+        let Some(secret) = self.secret.as_deref().filter(|s| s.len() >= 8) else {
+            return std::mem::take(pending);
+        };
+        let mut safe = String::new();
+        while let Some(i) = pending.find(secret) {
+            safe.push_str(&pending[..i]);
+            safe.push_str("[REDACTED]");
+            pending.drain(..i + secret.len());
+        }
+        if final_chunk {
+            safe.push_str(&self.scrub(pending));
+            pending.clear();
+            return safe;
+        }
+        let keep = (1..secret.len()).rev().find(|n| pending.ends_with(&secret[..*n])).unwrap_or(0);
+        if keep < pending.len() {
+            safe.push_str(&pending[..pending.len() - keep]);
+            pending.drain(..pending.len() - keep);
+        }
+        safe
+    }
 }
 
 impl std::fmt::Debug for PlannedRequest {
@@ -429,8 +465,10 @@ pub fn plan_request<S: SecretStore>(req: &ProxyRequest, keys: &KeyService<S>, cu
     if req.body.as_ref().is_some_and(|b| b.len() > MAX_BODY) {
         return Err(AppError::new("proxy_body", "请求体过大"));
     }
-    // 本机服务不读钥匙串：没有条目也要查一次，而 macOS 读钥匙串可能弹授权框
-    let secret = if t.auth == Auth::None { None } else { keys.resolve(&req.target)? };
+    // 本机服务不读钥匙串。除了 Ollama，回环自定义 Provider 也不需要 Key；
+    // 跳过 resolve 不只是优化，Linux 没有 Secret Service 时不能让本地端点
+    // 因为无关的钥匙串后端不可用而无法执行。
+    let secret = if t.auth == Auth::None || !t.key_required { None } else { keys.resolve(&req.target)? };
     if t.key_required && secret.is_none() {
         return Err(AppError::new("provider_not_configured", "这个 Provider 还没有配置 API Key"));
     }
@@ -452,12 +490,26 @@ pub fn plan_request<S: SecretStore>(req: &ProxyRequest, keys: &KeyService<S>, cu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::secrets::MemoryStore;
+    use crate::secrets::{MemoryStore, SecretStore};
 
     const KEY: &str = "sk-real-0123456789abcdef";
 
     fn keys() -> KeyService<MemoryStore> {
         KeyService::new(MemoryStore::default(), Default::default())
+    }
+
+    struct FailingStore;
+
+    impl SecretStore for FailingStore {
+        fn get(&self, _account: &str) -> AppResult<Option<String>> {
+            Err(AppError::new("keychain_error", "unavailable"))
+        }
+        fn set(&self, _account: &str, _secret: &str) -> AppResult<()> {
+            Ok(())
+        }
+        fn delete(&self, _account: &str) -> AppResult<()> {
+            Ok(())
+        }
     }
     fn req(target: &str, method: &str, url: &str, body: Option<&str>) -> ProxyRequest {
         ProxyRequest { target: target.into(), method: method.into(), url: url.into(), body: body.map(Into::into) }
@@ -507,6 +559,23 @@ mod tests {
         assert_eq!(old.protocol, Protocol::Openai);
         assert_eq!(validate_custom(&old).unwrap().models, ["m"]);
         assert_eq!(serde_json::to_value(Protocol::Anthropic).unwrap(), "anthropic");
+    }
+
+    #[test]
+    fn streaming_scrub_holds_a_secret_prefix_across_chunks() {
+        let p = PlannedRequest {
+            method: "POST".into(),
+            url: "https://relay.example.com/v1/chat/completions".into(),
+            headers: vec![],
+            body: None,
+            secret: Some(KEY.into()),
+        };
+        let mut pending = String::new();
+        let mut out = p.scrub_stream(&mut pending, "prefix sk-real-0123", false);
+        out.push_str(&p.scrub_stream(&mut pending, "456789abcdef suffix", true));
+        assert!(!out.contains(KEY));
+        assert!(out.contains("[REDACTED]"));
+        assert_eq!(pending, "");
     }
 
     #[test]
@@ -645,6 +714,18 @@ mod tests {
     }
 
     #[test]
+    fn local_custom_provider_skips_keychain_lookup() {
+        let k = KeyService::new(FailingStore, Default::default());
+        let mut c = CustomProviderStore::in_memory();
+        let mut local = relay("http://localhost:11434/v1");
+        local.id = "custom:local".into();
+        c.insert_ephemeral(&local).unwrap();
+        let p = plan_request(&req("custom:local", "GET", "http://localhost:11434/v1/models", None), &k, &c).unwrap();
+        assert_eq!(header(&p, "authorization"), None);
+        assert!(p.secret.is_none());
+    }
+
+    #[test]
     fn store_roundtrip_on_disk_without_keys() {
         let dir = std::env::temp_dir().join(format!("eg-core-test-{}", std::process::id()));
         let path = dir.join("providers.json");
@@ -654,6 +735,20 @@ mod tests {
         let again = CustomProviderStore::load(&path).unwrap();
         assert_eq!(again.list(), c.list());
         assert!(!std::fs::read_to_string(&path).unwrap().contains(KEY));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn ephemeral_provider_is_not_persisted() {
+        let dir = std::env::temp_dir().join(format!("eg-core-ephemeral-{}", std::process::id()));
+        let path = dir.join("providers.json");
+        let _ = std::fs::remove_dir_all(&dir);
+        let mut c = CustomProviderStore::load(&path).unwrap();
+        let mut p = relay("http://127.0.0.1:17891/staged/v1");
+        p.id = "custom:qa".into();
+        c.insert_ephemeral(&p).unwrap();
+        assert!(c.get("custom:qa").is_some());
+        assert!(!path.exists());
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

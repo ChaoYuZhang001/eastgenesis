@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "kind": "macos-p0-accessibility-evidence",
+  "capturedOn": "2026-10-07",
+  "platform": {
+    "os": "macOS",
+    "arch": "x86_64",
+    "appVersion": "0.1.0",
+    "packageIdentifier": "com.eastgenesis.desktop",
+    "packageKind": "macos-qa-bundle",
+    "buildId": "qa-20261007-01"
+  },
+  "commands": {
+    "build": "pnpm tauri:build:mac:qa",
+    "packageSmoke": "pnpm --silent desktop:package:smoke -- --json",
+    "evidenceValidation": "pnpm --silent desktop:evidence:validate <temporary-evidence.json>",
+    "acceptanceRecord": "pnpm --silent desktop:acceptance:record -- --input <temporary-evidence.json> --scenario staged --platform macos --arch x86_64 --build qa-20261007-01 --output <temporary-record.json>"
+  },
+  "accessibility": {
+    "channel": "macOS System Events Accessibility",
+    "windowObserved": true,
+    "taskInputControlObserved": true,
+    "submitControlObserved": true,
+    "routeEvidenceCopyControlObserved": true,
+    "evidenceExportValidation": "passed",
+    "acceptanceRecordGeneration": "passed"
+  },
+  "scenarios": [
+    {
+      "id": "staged",
+      "status": "passed",
+      "checks": {
+        "inputAndSubmit": true,
+        "streamChunksVisible": true,
+        "completedStateVisible": true,
+        "routeEvidenceControlVisible": true,
+        "routeEvidenceCopyInvoked": true
+      },
+      "timing": {
+        "observedTaskDurationMs": 200,
+        "exactChunkTimestamps": "not_exposed_by_accessibility_tree"
+      },
+      "boundary": {
+        "proven": [
+          "real macOS application Accessibility interaction",
+          "loopback deterministic stream reached the rendered completion state",
+          "route evidence copy control was reachable"
+        ],
+        "excluded": [
+          "external service availability",
+          "exact network headers and first-token timestamps",
+          "task-ledger recovery after a killed UI",
+          "native directory picker and whitelist behavior"
+        ]
+      }
+    },
+    {
+      "id": "slow-first-token",
+      "status": "passed",
+      "checks": {
+        "inputAndSubmit": true,
+        "delayedFirstTokenPathCompleted": true,
+        "completedStateVisible": true
+      },
+      "timing": {
+        "observedTaskDurationMs": 400,
+        "exactChunkTimestamps": "not_exposed_by_accessibility_tree"
+      },
+      "boundary": {
+        "proven": [
+          "Accessibility submission remained usable while the deterministic stream delayed its first chunk",
+          "the task reached the rendered completion state"
+        ],
+        "excluded": [
+          "external service latency or SLA",
+          "exact first-token latency",
+          "task-ledger recovery",
+          "native directory picker behavior"
+        ]
+      }
+    },
+    {
+      "id": "partial-output",
+      "status": "passed",
+      "checks": {
+        "partialOutputPreserved": true,
+        "terminalFailureVisible": true,
+        "resumeEntryVisible": true
+      },
+      "boundary": {
+        "proven": [
+          "partial rendered output is retained when the deterministic stream emits an explicit failure",
+          "terminal failure and resume affordance are visible through Accessibility"
+        ],
+        "excluded": [
+          "transport Content-Length truncation",
+          "external service failure behavior",
+          "task-ledger recovery after a killed UI"
+        ]
+      }
+    },
+    {
+      "id": "idle-cancel",
+      "status": "passed",
+      "checks": {
+        "cancelControlVisible": true,
+        "cancelInvoked": true,
+        "stoppedStateVisible": true,
+        "resumeEntryVisible": true
+      },
+      "timing": {
+        "observedTaskDurationMs": 2200,
+        "workerExitTiming": "not_independently_observed"
+      },
+      "boundary": {
+        "proven": [
+          "Accessibility can invoke the visible cancellation control",
+          "the stopped state and resume affordance are rendered"
+        ],
+        "excluded": [
+          "worker process exit timing",
+          "external service cancellation semantics",
+          "task-ledger recovery after a killed UI"
+        ]
+      }
+    },
+    {
+      "id": "truncated",
+      "status": "not_proven",
+      "checks": {
+        "incompleteTransportAttempted": true,
+        "terminalFailureVisible": false
+      },
+      "observation": "partial rendering remained in progress during the local observation window; no terminal failure was observed",
+      "boundary": {
+        "proven": [],
+        "excluded": [
+          "transport truncation recovery",
+          "automatic timeout classification",
+          "resume behavior after transport truncation"
+        ]
+      }
+    },
+    {
+      "id": "ledger-recovery",
+      "status": "not_run",
+      "reason": "no killed-UI run with a post-restart task-side-effect probe was executed",
+      "boundary": {
+        "proven": [],
+        "excluded": [
+          "task event recovery",
+          "tool side-effect idempotency"
+        ]
+      }
+    },
+    {
+      "id": "directory-picker",
+      "status": "not_run",
+      "reason": "no native directory dialog and whitelist interaction was executed",
+      "boundary": {
+        "proven": [],
+        "excluded": [
+          "native directory picker",
+          "file-root permission enforcement"
+        ]
+      }
+    }
+  ],
+  "packageSmoke": {
+    "status": "passed",
+    "restartCycles": 2,
+    "processCycleMs": [4063, 4062],
+    "checks": {
+      "restartableProcess": true,
+      "controlledTermination": true,
+      "sqliteSchemaVersion": 7,
+      "sqliteSessionTable": true,
+      "sqliteToolInvocationTable": true,
+      "sqliteLeaseIndex": true,
+      "syntheticSessionRow": true
+    },
+    "boundary": {
+      "proven": [
+        "native process survives the startup window",
+        "a controlled exit can be followed by a second startup",
+        "SQLite schema and recovery tables persist across the isolated restart"
+      ],
+      "excluded": [
+        "WebView hydration",
+        "task event recovery after a killed UI",
+        "tool side-effect recovery",
+        "external service availability",
+        "signing and notarization"
+      ]
+    }
+  },
+  "redaction": {
+    "goalTextPresent": false,
+    "renderedOutputPresent": false,
+    "externalServiceNamesPresent": false,
+    "absolutePathsPresent": false,
+    "credentialsPresent": false,
+    "rawExportKeptOutsideRepository": true
+  },
+  "overall": "partial",
+  "overallReason": "four Accessibility scenarios reached their UI criteria; transport truncation, ledger recovery, and directory picker remain unproven"
+}

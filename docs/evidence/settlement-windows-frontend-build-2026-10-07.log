@@ -1,0 +1,78 @@
+
+> eastgenesis-desktop@0.1.0 build /Users/apple/Desktop/EastGenesis
+> pnpm brand:theme && tsc -b && vite build
+
+
+> eastgenesis-desktop@0.1.0 brand:theme /Users/apple/Desktop/EastGenesis
+> node scripts/brand/sync_theme.mjs
+
+已生成品牌变量与 Tailwind 主题（28 个变量）
+vite v6.0.7 building for production...
+transforming...
+✓ 1762 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                   0.50 kB │ gzip:   0.32 kB
+dist/assets/icon-32-DVeS9ut5.png                                  2.09 kB
+dist/assets/jetbrains-mono-greek-400-normal-C190GLew.woff2        4.23 kB
+dist/assets/inter-vietnamese-400-normal-DMkecbls.woff2            4.97 kB
+dist/assets/inter-vietnamese-600-normal-Cc8MFFhd.woff2            5.10 kB
+dist/assets/inter-greek-ext-400-normal-Bput3-QP.woff2             5.23 kB
+dist/assets/jetbrains-mono-cyrillic-400-normal-BEIGL1Tu.woff2     5.33 kB
+dist/assets/jetbrains-mono-vietnamese-400-normal-BeU3T8wf.woff    5.37 kB
+dist/assets/inter-greek-ext-600-normal-Cnui8OiR.woff2             5.43 kB
+dist/assets/jetbrains-mono-greek-400-normal-CNojz0t3.woff         5.67 kB
+dist/assets/inter-vietnamese-400-normal-BUNmGMP1.woff             6.68 kB
+dist/assets/inter-vietnamese-600-normal-Cm6aH8_k.woff             6.83 kB
+dist/assets/jetbrains-mono-cyrillic-400-normal-CIEtRijs.woff      6.98 kB
+dist/assets/inter-greek-ext-400-normal-DCpCPQOf.woff              7.14 kB
+dist/assets/inter-greek-ext-600-normal-C9WLioJ8.woff              7.30 kB
+dist/assets/jetbrains-mono-latin-ext-400-normal-Bc8Ftmh3.woff2    7.34 kB
+dist/assets/montserrat-vietnamese-700-normal-DUoPxeMJ.woff        7.53 kB
+dist/assets/inter-cyrillic-400-normal-BLGc9T1a.woff2              7.71 kB
+dist/assets/inter-greek-400-normal-DxZsaF_h.woff2                 7.84 kB
+dist/assets/montserrat-vietnamese-700-normal-D8RPk-a5.woff2       7.95 kB
+dist/assets/inter-greek-600-normal-Dhlb-90d.woff2                 7.96 kB
+dist/assets/inter-cyrillic-600-normal-BGBWG807.woff2              7.97 kB
+dist/assets/inter-greek-400-normal-BZzXV7-1.woff                  9.96 kB
+dist/assets/inter-greek-600-normal-CwicyhtI.woff                 10.08 kB
+dist/assets/jetbrains-mono-latin-ext-400-normal-DHMOLxAi.woff    10.12 kB
+dist/assets/inter-cyrillic-400-normal-ZzOtrSSW.woff              10.14 kB
+dist/assets/inter-cyrillic-ext-400-normal-Dc4VJyIJ.woff2         10.22 kB
+dist/assets/inter-cyrillic-600-normal-BuzJQFbW.woff              10.32 kB
+dist/assets/inter-cyrillic-ext-600-normal-CaqZN2hq.woff2         10.46 kB
+dist/assets/montserrat-cyrillic-700-normal-CF3jbqy3.woff         11.03 kB
+dist/assets/montserrat-cyrillic-700-normal-DO8I1zZZ.woff2        11.21 kB
+dist/assets/montserrat-cyrillic-ext-700-normal-D3s9QaN5.woff2    12.07 kB
+dist/assets/montserrat-cyrillic-ext-700-normal-B5jSujIz.woff     12.68 kB
+dist/assets/inter-cyrillic-ext-400-normal-BPnxn4xp.woff          14.19 kB
+dist/assets/inter-cyrillic-ext-600-normal-Bt9VVOA-.woff          14.35 kB
+dist/assets/montserrat-latin-700-normal-BYRy5CoC.woff2           18.84 kB
+dist/assets/montserrat-latin-700-normal-DHOpyQza.woff            20.60 kB
+dist/assets/jetbrains-mono-latin-400-normal-V6pRDFza.woff2       21.17 kB
+dist/assets/inter-latin-400-normal-BOOGhInR.woff2                23.69 kB
+dist/assets/inter-latin-600-normal-D273HNI0.woff2                24.30 kB
+dist/assets/jetbrains-mono-latin-400-normal-B11XCQ5g.woff        27.85 kB
+dist/assets/wordmark-light-BMTaXeou.png                          29.29 kB
+dist/assets/inter-latin-ext-400-normal-hnt3BR84.woff2            30.68 kB
+dist/assets/inter-latin-400-normal-gitzw0hO.woff                 31.20 kB
+dist/assets/inter-latin-600-normal-B5cFAncS.woff                 31.78 kB
+dist/assets/inter-latin-ext-600-normal-BnYJhD27.woff2            31.97 kB
+dist/assets/montserrat-latin-ext-700-normal-DTfQ8iG5.woff2       33.37 kB
+dist/assets/mark-for-dark-bg-BKDAU6A_.png                        35.19 kB
+dist/assets/montserrat-latin-ext-700-normal-DdSde0HZ.woff        41.63 kB
+dist/assets/inter-latin-ext-400-normal-C1t-h-pH.woff             42.88 kB
+dist/assets/inter-latin-ext-600-normal-CAF0vJDd.woff             43.98 kB
+dist/assets/logo-dark-transparent-C4Bg790G.png                   67.23 kB
+dist/assets/splash-bg-horizon-BvNExbqt.png                      122.44 kB
+dist/assets/index-CYayp2rY.css                                   40.36 kB │ gzip:  14.15 kB
+dist/assets/index-D5ugQ_ZH.js                                     0.49 kB │ gzip:   0.28 kB
+dist/assets/event-EUgx-vOr.js                                     1.12 kB │ gzip:   0.60 kB
+dist/assets/core-CQQ2fP86.js                                      1.48 kB │ gzip:   0.67 kB
+dist/assets/index-BuAgs6ky.js                                   640.90 kB │ gzip: 224.31 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.76s

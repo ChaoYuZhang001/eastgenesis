@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "github-runner-terminal-summary",
+  "capturedAt": "2026-10-06T22:06:01.958143+00:00",
+  "source": {
+    "runId": 37535219828,
+    "headSha": "c70ea1d67979f09c05227b5c078890dd8112d232",
+    "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37535219828",
+    "runConclusion": "failure"
+  },
+  "platforms": {
+    "linux": {
+      "jobId": 112514305624,
+      "conclusion": "success",
+      "dpkgLifecycleChecks": 10,
+      "runnerChecks": 33,
+      "webDriverScenarios": 4,
+      "report": "linux-dpkg-lifecycle-c70-2026-10-07.json"
+    },
+    "windows": {
+      "jobId": 112514305525,
+      "conclusion": "failure",
+      "failedStep": 21,
+      "failureCategory": "payload_mismatch",
+      "sourceIsolationProbePassed": true,
+      "installationAndCleanupExecuted": true,
+      "applicationLaunched": false,
+      "fullLifecyclePassed": false,
+      "report": "windows-nsis-payload-mismatch-c70-2026-10-07.json"
+    },
+    "macos": {
+      "jobId": 112514305264,
+      "conclusion": "failure",
+      "failedStep": 17,
+      "scope": "ordinary Rust workspace net tests",
+      "passed": 10,
+      "failed": 12,
+      "ignored": 0,
+      "sourceLogLines": [
+        2201,
+        2281
+      ],
+      "firstObservedFailure": "fixture_server_write_BrokenPipe_then_join_panic",
+      "subsequentPoisonedLockFailures": 11,
+      "clientFailureCategoryRecorded": false,
+      "timingRootCauseProven": false,
+      "qaAndPackageStepsExecuted": false
+    }
+  },
+  "evidenceBoundary": {
+    "excluded": [
+      "real Provider availability",
+      "cross schema release migration",
+      "three platform performance baseline",
+      "macOS signing or notarization",
+      "Windows lifecycle success beyond recorded stages"
+    ]
+  }
+}

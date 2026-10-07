@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "kind": "native-source-cancellation-readonly-audit",
+  "generatedAt": "2026-10-06T21:02:00.761312+00:00",
+  "scope": {
+    "productionEdits": false,
+    "repoWrites": false,
+    "guiRun": false,
+    "privateConfigRead": false,
+    "realProviderCalls": false,
+    "commitOrPush": false,
+    "temporaryArtifactsLocation": "temporary directory only",
+    "maximumExperimentWatchdogMs": 2500
+  },
+  "decision": {
+    "productSourceTransportCancellation": "failed",
+    "productP0Acceptance": "M23 not passed: source transport is not interrupted promptly during a Rust blocking idle read",
+    "frontendStopBehavior": "already immediate by code; earlier WebDriver evidence tests this surface",
+    "rustProductionCancellationFixed": false,
+    "nodeBrowserGcFailureEstablished": false,
+    "severityBoundary": "The experiment establishes a product transport-cancellation gap. It does not establish a UI hang, continued tool side effects, real-provider charges, or an indefinite connection leak."
+  },
+  "sourceHashes": [
+    {
+      "path": "src/core/llm/http.ts",
+      "sha256": "1a1927485f7054bccada515a396bb296ed6cd69730c006bbe3431d122103aeff",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "src-tauri/src/net.rs",
+      "sha256": "e8646fa1c4c477c1829396cef443c9f41d5877fefabb4d3400f9fb7e1db03ad9",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "src-tauri/src/lib.rs",
+      "sha256": "cd9c2997a85d7e8a205f117ef6430897a5c27a82ea1c0b411f3c5b3bd79a4780",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "src/platform/tauri-backend.ts",
+      "sha256": "9f5d4c3ead7e3c42bb2d0a7b3c837188dec40910de28fb65d7ce480721cff82d",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "src/platform/proxy-fetch.ts",
+      "sha256": "a9cc43d9707ba797658f761e293616034c2ed410fba2c0c064d9d7d540cea456",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "src/platform/index.ts",
+      "sha256": "c8ea8aa72f3bcdebf11c8c210660b9afa6e6fd6e6f275d6a15ffd6c2779371dc",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "src/lib/providers.ts",
+      "sha256": "38f06fe1516a0dbb6baec1d25877076275b9a355ea1d861c0994b9bb69ace9f7",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "tools/desktop-webdriver-smoke.mjs",
+      "sha256": "2d3ad03ab1cdd29eab1df706966c1f82841d2560798ce46b0942f6c36d98f53b",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "tools/desktop-stream-fixture.mjs",
+      "sha256": "8ec9c7997021d84df8b4cb06674ce858995e27b65643502924ea42e30104eb25",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "tools/desktop-stream-fixture-smoke.mjs",
+      "sha256": "944b95ed4db609c9d6ce15d80b73c2074b63adda4dfde4318a992a698b5ce3fe",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "tests/llm.test.ts",
+      "sha256": "9e50f24c3a1f1f8f6267fc6494ccc0d56a801c6f8f25f08e84369833978952c5",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "src-tauri/Cargo.toml",
+      "sha256": "d9a93f6b2c6afee46d919145c9006f9ee32104a257338dba95e8a5900f1c11e4",
+      "scope": "whole file at report creation; read-only audit"
+    },
+    {
+      "path": "src-tauri/src/net.rs",
+      "sha256": "90b3487a932c95d6bdfdf745f4f64d74a2b09231f2449a52efdb1242dae22791",
+      "scope": "production prefix only, ending before cfg(test); concurrent changes to tests excluded"
+    }
+  ],
+  "referenceQaBinary": {
+    "sha256": "b7ce68b84a935cfb902535346d390c98b1491431ae75a758dd474c17ff90b96d",
+    "provenance": "provided by the parent task; neither launched nor revalidated in this audit",
+    "doesNotProve": "prompt source transport cancellation"
+  },
+  "mechanism": [
+    {
+      "path": "src/core/llm/http.ts",
+      "lines": "47-59,63-68,86-95,123-149",
+      "finding": "Caller cancellation and timeout abort a local controller. ResponseControl retains the caller abort listener until body cleanup. readSse awaits reader.read and does not directly cancel/release the reader. Native fetch is relied on to error the response body."
+    },
+    {
+      "path": "src/platform/proxy-fetch.ts",
+      "lines": "61-70,72-81",
+      "finding": "Desktop POST stream:true goes to backend.providerStream using the caller signal. The non-stream proxy races frontend waiting against abort but does not cancel native provider_request."
+    },
+    {
+      "path": "src/platform/tauri-backend.ts",
+      "lines": "75-104,105-127",
+      "finding": "Cancellation immediately errors the frontend ReadableStream, sends provider_stream_cancel, clears queued chunks, and ignores late events. This can finish UI/agent waiting while the native request is still alive."
+    },
+    {
+      "path": "src-tauri/src/lib.rs",
+      "lines": "181-202,207-211",
+      "finding": "The cancel command only sets an AtomicBool. The blocking worker, HTTP response, and streams-map entry remain until execute_stream returns."
+    },
+    {
+      "path": "src-tauri/src/net.rs",
+      "lines": "17-18,83-91,109-141",
+      "finding": "Flag checks occur only after headers and before each blocking read. Setting the flag cannot wake a pending read. Production read budget is 60000ms; whole-loop deadline is 180000ms. The read error is converted into timeout before another cancellation check."
+    },
+    {
+      "path": "src-tauri/src/net.rs",
+      "lines": "127-141",
+      "finding": "The 180000ms explicit deadline is checked between reads only. A read started just before that deadline can wait an additional read-budget interval. A strict 180000ms wall-clock cap is not proven by this code; overshoot is source-derived and not a long-run measurement."
+    },
+    {
+      "path": "src/platform/index.ts",
+      "lines": "1-5",
+      "finding": "Browser dev and tests select the memory mock backend. The desktop product model transport is IPC plus Rust; it is not Node Undici."
+    }
+  ],
+  "rustExperiment": {
+    "artifactNames": [
+      "eg-native-idle-cancel-audit-20261007.rs",
+      "eg-native-idle-cancel-audit-20261007"
+    ],
+    "harnessSha256": "11b4f83085d0d17cf889dd2fbe923d8d2a89285fc8d582358fd140c52820bfc9",
+    "harnessTransformation": "Copied the production net module into an independent temporary harness; changed only visibility of execute_stream_with_budget so the harness could call it; used already compiled reqwest 0.12.28 and eg_core dependencies.",
+    "transport": "synthetic loopback HTTP GET, headers flushed, Content-Length 100, no response body bytes; server polls peer EOF/error until bounded cleanup",
+    "readTimeoutMs": 400,
+    "totalTimeoutMs": 800,
+    "cancelDelayAfterHeadersMs": 20,
+    "serverObservationLimitMs": 1200,
+    "processWatchdogMs": 2500,
+    "result": {
+      "headersMs": 4,
+      "cancelFlagSetMs": 25,
+      "executeStreamReturnedMs": 414,
+      "serverPeerClosedMs": 415,
+      "bodyChunks": 0,
+      "code": "timeout"
+    },
+    "exactOutput": "read_budget_ms=400 headers_ms=Some(4) cancel_ms=Some(25) finished_ms=414 server_peer_closed_ms=Some(415) chunks=0 result=timeout",
+    "proven": "A cancellation flag set during a pending idle read does not interrupt that read or promptly close the source connection; closure occurred after the shortened read timeout.",
+    "notProven": [
+      "A production 60000ms elapsed cancellation run",
+      "Real Provider behavior or cost",
+      "Native GUI end-to-end cancellation on the QA binary",
+      "Strict upper bound on remote compute after client disconnection"
+    ]
+  },
+  "nodeExperiments": {
+    "artifactName": "eg-source-cancel-audit-20261007.mjs",
+    "harnessSha256": "daf4ffcac764152d1a4f3cf517f37212aba3de86b21e830eafc4eebdaa7feeb4",
+    "moduleUnderTest": "actual src/core/llm/http.ts postJson and readSse",
+    "nodeVersion": "v22.23.1",
+    "undiciVersion": "6.27.0",
+    "transport": "synthetic loopback HTTP POST, headers flushed, idle response with no body data",
+    "providerTimeoutMs": 2000,
+    "postAbortObservationMs": 600,
+    "processWatchdogMs": 2500,
+    "cases": [
+      {
+        "forceGc": false,
+        "headersMs": 30,
+        "callerAbortMs": 31,
+        "sourceSignalAbortMs": 31,
+        "bodyReadErrorMs": 34,
+        "bodyReadErrorCode": "aborted",
+        "serverBodyClosedMs": 37,
+        "observedMs": 636
+      },
+      {
+        "forceGc": true,
+        "gcCycles": 8,
+        "headersMs": 29,
+        "callerAbortMs": 63,
+        "sourceSignalAbortMs": 63,
+        "bodyReadErrorMs": 67,
+        "bodyReadErrorCode": "aborted",
+        "serverBodyClosedMs": 70,
+        "observedMs": 669
+      }
+    ],
+    "result": "weak-reference cancellation failure not reproduced in these bounded cases",
+    "runtimeSourceObservation": "Installed Undici Request code has a WeakRef to its dependent controller and a FinalizationRegistry removing the source abort listener. That implementation detail alone does not establish a live failure.",
+    "limits": [
+      "No browser engine or WebView native Fetch test",
+      "Eight explicit GC cycles do not prove immunity across every Node lifetime or allocation pattern",
+      "Windows budget wrapper evidence belongs to tools/provider-matrix.ts and cannot be substituted for Rust product transport proof"
+    ]
+  },
+  "priorEvidenceBoundaries": [
+    {
+      "path": "tools/desktop-webdriver-smoke.mjs",
+      "lines": "418-433",
+      "assertions": [
+        "First streaming chunk visible",
+        "Stop control clicked",
+        "Stopped text visible"
+      ],
+      "notAsserted": [
+        "Server response close time",
+        "Peer socket closure after cancel",
+        "Native worker completion",
+        "Streams-map removal"
+      ],
+      "implication": "cancelledResult true proves frontend cancellation behavior, not prompt source transport cancellation."
+    },
+    {
+      "path": "tools/desktop-stream-fixture.mjs",
+      "lines": "77-87,148-155",
+      "finding": "OpenAI idle sends one initial delta and retains its response for 120000ms. close handlers only clear timers and do not emit connection-closure evidence."
+    },
+    {
+      "path": "tools/desktop-webdriver-smoke.mjs",
+      "lines": "508-522",
+      "finding": "Cleanup deletes the WebDriver session/stops the driver before stopping the fixture. App exit can close remaining native connections; fixture exit cannot prove cancellation closed them earlier."
+    },
+    {
+      "path": "tools/desktop-stream-fixture-smoke.mjs",
+      "lines": "27-47,145-151",
+      "finding": "Uses direct Node fetch and only asserts an AbortError; this is not Tauri native transport proof."
+    },
+    {
+      "path": "tests/llm.test.ts",
+      "lines": "113-130,154-168",
+      "finding": "Synthetic ReadableStream tests manually error the controller on signal abort. They test error normalization and listener retention; they do not exercise Undici or Rust socket cancellation."
+    }
+  ],
+  "recommendedFollowup": {
+    "implementation": "Use async reqwest and an explicit cancellation wake mechanism. Race cancellation against both request send and body chunk reads; drop the response on cancellation; retain incremental redaction and partial-output semantics.",
+    "cancelState": "A watch channel or cancellation token avoids lost wakeups. If Notify plus AtomicBool is used, register the waiter before checking the state and verify race handling.",
+    "timeouts": "Keep separate read-idle and total-deadline budgets; use async reqwest total timeout or a selected absolute deadline for a strict wall-clock budget.",
+    "avoid": "Do not shrink the read timeout to a polling interval and swallow/retry timeout errors: that can break valid slow responses and resumed-read semantics.",
+    "acceptance": [
+      "Server peer-close observed shortly after idle cancellation while the app remains running",
+      "Native worker and stream registry entry released",
+      "No late delta reaches the frontend after stop",
+      "Slow-first-token streams within the intended budget still pass",
+      "Partial output/redaction behavior stays intact"
+    ],
+    "currentBatchBoundary": "No Rust cancellation fix in this batch. Current source remains frozen; CLI wrapper fixes are separate evidence."
+  },
+  "redaction": {
+    "absolutePathsIncluded": false,
+    "userIdentifiersIncluded": false,
+    "urlsIncluded": false,
+    "credentialsOrPrivateConfigIncluded": false,
+    "sourceBodyIncluded": false
+  }
+}

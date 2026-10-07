@@ -1,10 +1,12 @@
+import { isGoalQuotaControlError } from "../core/goal-quota";
+import { isTerminalModelFailure, recordTerminalModelFailure } from "../core/goal-model-call";
 // 路由规则引擎：按能力矩阵做多因子评分，输出主模型、降级链和选择原因。
 // 降级链：主模型 → 备选 1 → 备选 2 → 规则兜底。
 import { PROVIDER_ERROR_TEXT, ProviderError, type ProviderErrorCode } from "../core/llm/errors";
 import { HealthTracker, type HealthStatus } from "./health";
 import { ADAPTER_READY, MODEL_PROFILES, providerReadiness } from "./profiles";
 import { classifyTask } from "./rules";
-import { CAP_LABEL, HARD_CAPS, SOFT_CAPS, TYPE_LABEL, type Classification, type ModelProfile, type TaskInput, type TaskType } from "./types";
+import { CAP_LABEL, HARD_CAPS, SOFT_CAPS, TYPE_LABEL, WORK_SURFACE_LABEL, type Capability, type Classification, type ModelProfile, type TaskInput, type TaskType } from "./types";
 
 export type Preference = "economy" | "balanced" | "best";
 export type LatencyPref = "fast" | "normal" | "patient";
@@ -47,6 +49,170 @@ export interface ChainEntry {
   reason: string;
 }
 
+/**
+ * 可持久化的路由解释摘要。这里保存计数、类型、策略版本和脱敏的模型/健康快照，
+ * 不保存任务正文、附件名称、路径或文件内容，避免“透明”变成额外的隐私泄漏面。
+ */
+export interface RouteTrace {
+  policyVersion: string;
+  input: {
+    textChars: number;
+    attachmentCount: number;
+    attachmentKinds: string[];
+    attachmentChars: number;
+    surfaceHint?: RouteRequest["surfaceHint"];
+    preference: Preference;
+    latency: LatencyPref;
+    maxCostTier?: number;
+    lock?: string;
+  };
+  /** 脱敏的能力矩阵和可用性快照，只保存模型档案、档位、健康状态和短原因。 */
+  snapshot?: RouteSnapshot;
+}
+
+export interface RouteProfileSnapshot {
+  id: string;
+  provider: string;
+  capabilities: Capability[];
+  costTier: number;
+  qualityTier: number;
+  latencyTier: number;
+  contextWindow: number;
+  enabled: boolean;
+  isCustom: boolean;
+}
+
+export interface RouteAvailabilitySnapshot {
+  profileId: string;
+  ok: boolean;
+  health?: number;
+  reason?: string;
+}
+
+export interface RouteSnapshot {
+  /** FNV 摘要只用于比较快照，不是防篡改签名。 */
+  profileSetId: string;
+  availabilitySetId: string;
+  profiles: RouteProfileSnapshot[];
+  availability: RouteAvailabilitySnapshot[];
+}
+
+/** 路由策略版本随策略或解释字段变化递增，便于比较不同版本的选择结果。 */
+export const ROUTER_POLICY_VERSION = "m22.4";
+
+function routeDigest(value: unknown): string {
+  const text = JSON.stringify(value) ?? "null";
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
+  return (h >>> 0).toString(16).padStart(8, "0");
+}
+
+export function makeRouteSnapshot(profiles: readonly ModelProfile[], availability: Availability): RouteSnapshot {
+  const profileRows = profiles
+    .map<RouteProfileSnapshot>((p) => ({
+      id: p.id,
+      provider: p.provider,
+      capabilities: [...p.capabilities].sort(),
+      costTier: p.cost_tier,
+      qualityTier: p.quality_tier,
+      latencyTier: p.latency_tier,
+      contextWindow: p.context_window,
+      enabled: p.enabled,
+      isCustom: p.is_custom,
+    }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+  const availabilityRows = profiles
+    .map<RouteAvailabilitySnapshot>((p) => {
+      const a = availability(p);
+      return a.ok ? { profileId: p.id, ok: true, health: a.health } : { profileId: p.id, ok: false, reason: a.reason };
+    })
+    .sort((a, b) => a.profileId.localeCompare(b.profileId));
+  return {
+    profileSetId: routeDigest(profileRows),
+    availabilitySetId: routeDigest(availabilityRows),
+    profiles: profileRows,
+    availability: availabilityRows,
+  };
+}
+
+export function makeRouteTrace(req: RouteRequest, preference: Preference, latency: LatencyPref, snapshot?: RouteSnapshot): RouteTrace {
+  const attachments = req.attachments ?? [];
+  const attachmentChars = attachments.reduce((sum, item) => {
+    const chars = typeof item.chars === "number" && Number.isFinite(item.chars) && item.chars >= 0 ? item.chars : 0;
+    return sum + chars;
+  }, 0);
+  return {
+    policyVersion: ROUTER_POLICY_VERSION,
+    input: {
+      textChars: Array.from(req.text).length,
+      attachmentCount: attachments.length,
+      attachmentKinds: [...new Set(attachments.map((item) => item.kind))].sort(),
+      attachmentChars,
+      ...(req.surfaceHint ? { surfaceHint: req.surfaceHint } : {}),
+      preference,
+      latency,
+      ...(req.maxCostTier !== undefined ? { maxCostTier: req.maxCostTier } : {}),
+      ...(req.lock ? { lock: req.lock } : {}),
+    },
+    ...(snapshot ? { snapshot } : {}),
+  };
+}
+
+export function routeTraceText(trace: RouteTrace): string {
+  const attachments = trace.input.attachmentCount === 0
+    ? "无附件"
+    : `${trace.input.attachmentCount} 个附件（${trace.input.attachmentKinds.join("、") || "未分类"}）`;
+  return `正文 ${trace.input.textChars} 字 · ${attachments} · 附件文本 ${trace.input.attachmentChars} 字`;
+}
+
+export interface RouteReplayResult {
+  sourcePolicyVersion: string;
+  currentPolicyVersion: string;
+  sourceTrace: RouteTrace;
+  sourcePrimary: string | null;
+  currentPrimary: string | null;
+  sourceChain: string[];
+  currentChain: string[];
+  changed: boolean;
+  sourceSnapshotAvailable: boolean;
+  sourceSnapshotConsistent: boolean | null;
+  historicalPrimary: string | null;
+  historicalChain: string[];
+  sourceProfileSetId: string | null;
+  currentProfileSetId: string | null;
+  sourceAvailabilitySetId: string | null;
+  currentAvailabilitySetId: string | null;
+  profileSnapshotChanged: boolean | null;
+  availabilitySnapshotChanged: boolean | null;
+}
+
+function profilesFromSnapshot(snapshot: RouteSnapshot): ModelProfile[] {
+  return snapshot.profiles.map((p) => ({
+    id: p.id,
+    provider: p.provider,
+    capabilities: [...p.capabilities],
+    cost_tier: p.costTier,
+    quality_tier: p.qualityTier,
+    latency_tier: p.latencyTier,
+    context_window: p.contextWindow,
+    enabled: p.enabled,
+    is_custom: p.isCustom,
+  }));
+}
+
+function availabilityFromSnapshot(snapshot: RouteSnapshot): Availability {
+  const byId = new Map(snapshot.availability.map((a) => [a.profileId, a]));
+  return (p) => {
+    const a = byId.get(p.id);
+    if (!a) return { ok: false, reason: "历史可用性快照缺少该模型" };
+    return a.ok ? { ok: true, health: a.health ?? 1 } : { ok: false, reason: a.reason ?? "历史快照标记为不可用" };
+  };
+}
+
+function sameIds(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((id, i) => id === b[i]);
+}
+
 export interface RouteDecision {
   classification: Classification;
   primary: ChainEntry | null;
@@ -54,6 +220,8 @@ export interface RouteDecision {
   weights: Weights;
   reasons: string[];
   excluded: { profileId: string; reason: string }[];
+  /** 新事件写入；旧事件没有此字段时仍可正常展示。 */
+  trace?: RouteTrace;
 }
 
 /** 各偏好的基础权重（能力匹配、质量、成本、延迟）；可用性作为乘数单独计算 */
@@ -92,6 +260,60 @@ export function weightsFor(pref: Preference, latency: LatencyPref, type: TaskTyp
     quality: raw.quality / sum,
     cost: raw.cost / sum,
     latency: raw.latency / sum,
+  };
+}
+
+/**
+ * 用已保存的分类和路由摘要在当前能力矩阵 / Provider 健康状态下重算一次。
+ * 原始任务正文不会被恢复；分类中的估算 token 和能力标签足以重算资格与评分。
+ * 旧事件没有 trace 时不能安全回放，调用方应把它当作历史记录处理。
+ */
+export function replayRouteDecision(
+  source: RouteDecision,
+  opts: { profiles?: readonly ModelProfile[]; availability: Availability },
+): RouteReplayResult {
+  if (!source.trace) throw new Error("这条路由记录没有脱敏 trace，无法回放");
+  const trace = source.trace;
+  const input: RouteRequest = {
+    text: "",
+    classification: source.classification,
+    ...(trace.input.surfaceHint ? { surfaceHint: trace.input.surfaceHint } : {}),
+    preference: trace.input.preference,
+    latency: trace.input.latency,
+    ...(trace.input.maxCostTier !== undefined ? { maxCostTier: trace.input.maxCostTier } : {}),
+    ...(trace.input.lock ? { lock: trace.input.lock } : {}),
+  };
+  const historical = trace.snapshot
+    ? route(input, { profiles: profilesFromSnapshot(trace.snapshot), availability: availabilityFromSnapshot(trace.snapshot) })
+    : null;
+  const current = route(input, opts);
+  const sourceChain = source.chain.map((entry) => entry.profileId);
+  const currentChain = current.chain.map((entry) => entry.profileId);
+  const sourcePrimary = source.primary?.profileId ?? null;
+  const currentPrimary = current.primary?.profileId ?? null;
+  const historicalChain = historical?.chain.map((entry) => entry.profileId) ?? [];
+  const historicalPrimary = historical?.primary?.profileId ?? null;
+  const currentSnapshot = current.trace?.snapshot;
+  const sourceSnapshot = trace.snapshot;
+  return {
+    sourcePolicyVersion: trace.policyVersion,
+    currentPolicyVersion: current.trace?.policyVersion ?? ROUTER_POLICY_VERSION,
+    sourceTrace: trace,
+    sourcePrimary,
+    currentPrimary,
+    sourceChain,
+    currentChain,
+    changed: sourcePrimary !== currentPrimary || sourceChain.join("\u0000") !== currentChain.join("\u0000"),
+    sourceSnapshotAvailable: Boolean(sourceSnapshot),
+    sourceSnapshotConsistent: historical ? historicalPrimary === sourcePrimary && sameIds(historicalChain, sourceChain) : null,
+    historicalPrimary,
+    historicalChain,
+    sourceProfileSetId: sourceSnapshot?.profileSetId ?? null,
+    currentProfileSetId: currentSnapshot?.profileSetId ?? null,
+    sourceAvailabilitySetId: sourceSnapshot?.availabilitySetId ?? null,
+    currentAvailabilitySetId: currentSnapshot?.availabilitySetId ?? null,
+    profileSnapshotChanged: sourceSnapshot && currentSnapshot ? sourceSnapshot.profileSetId !== currentSnapshot.profileSetId : null,
+    availabilitySnapshotChanged: sourceSnapshot && currentSnapshot ? sourceSnapshot.availabilitySetId !== currentSnapshot.availabilitySetId : null,
   };
 }
 
@@ -140,14 +362,15 @@ const describe = (b: ScoreBreakdown) =>
 const ZERO_BREAKDOWN: ScoreBreakdown = { capability: 0, quality: 0, cost: 0, latency: 0, availability: 0, total: 0 };
 
 /** 手动锁定：链上只有这一个模型。成本上限不适用（用户明确选了它），能力不匹配只提示不拦截 */
-function lockedRoute(req: RouteRequest & { lock: string }, profiles: readonly ModelProfile[], cls: Classification, w: Weights, avail: Availability): RouteDecision {
+function lockedRoute(req: RouteRequest & { lock: string }, profiles: readonly ModelProfile[], cls: Classification, w: Weights, avail: Availability, trace: RouteTrace): RouteDecision {
   const reasons = [
     `任务类型：${TYPE_LABEL[cls.type]}（${cls.signals.join("；") || "没有特殊信号"}）`,
+    `工作能力：${WORK_SURFACE_LABEL[cls.surface ?? "chat"]}（${cls.surfaceReason ?? "以对话和问答为主"}）`,
     `手动锁定：${req.lock}，跳过路由决策`,
   ];
   const fail = (why: string): RouteDecision => {
     reasons.push(why);
-    return { classification: cls, primary: null, chain: [], weights: w, reasons, excluded: [{ profileId: req.lock, reason: why }] };
+    return { classification: cls, primary: null, chain: [], weights: w, reasons, excluded: [{ profileId: req.lock, reason: why }], trace };
   };
   const p = profiles.find((x) => x.id === req.lock);
   if (!p) return fail(`锁定的模型不存在：${req.lock}（在输入框改回「自动路由」或换一个模型）`);
@@ -157,7 +380,7 @@ function lockedRoute(req: RouteRequest & { lock: string }, profiles: readonly Mo
   const missing = cls.capabilities.filter((c) => HARD_CAPS.includes(c) && !p.capabilities.includes(c));
   if (missing.length) reasons.push(`提示：能力矩阵里 ${p.id} 没有标注${missing.map((c) => CAP_LABEL[c]).join("、")}，按你的选择照常使用`);
   const entry: ChainEntry = { profileId: p.id, provider: p.provider, stage: "primary", score: 0, breakdown: { ...ZERO_BREAKDOWN, availability: a.health }, reason: "手动锁定" };
-  return { classification: cls, primary: entry, chain: [entry], weights: w, reasons, excluded: [] };
+  return { classification: cls, primary: entry, chain: [entry], weights: w, reasons, excluded: [], trace };
 }
 
 export function route(
@@ -169,17 +392,25 @@ export function route(
   const pref = req.preference ?? "balanced";
   const lat = req.latency ?? "normal";
   const w = weightsFor(pref, lat, cls.type);
-  if (req.lock) return lockedRoute({ ...req, lock: req.lock }, profiles, cls, w, opts.availability);
+  const snapshot = makeRouteSnapshot(profiles, opts.availability);
+  const availabilityById = new Map(snapshot.availability.map((a) => [a.profileId, a]));
+  const stableAvailability: Availability = (p) => {
+    const a = availabilityById.get(p.id);
+    if (!a) return { ok: false, reason: "可用性快照缺少该模型" };
+    return a.ok ? { ok: true, health: a.health ?? 1 } : { ok: false, reason: a.reason ?? "Provider 不可用" };
+  };
+  const trace = makeRouteTrace(req, pref, lat, snapshot);
+  if (req.lock) return lockedRoute({ ...req, lock: req.lock }, profiles, cls, w, stableAvailability, trace);
 
   const excluded: RouteDecision["excluded"] = [];
   const scored: { p: ModelProfile; b: ScoreBreakdown }[] = [];
   for (const p of profiles) {
-    const why = exclusion(p, cls, req, opts.availability);
+    const why = exclusion(p, cls, req, stableAvailability);
     if (why) {
       excluded.push({ profileId: p.id, reason: why });
       continue;
     }
-    const a = opts.availability(p);
+    const a = stableAvailability(p);
     scored.push({ p, b: score(p, cls, w, a.ok ? a.health : 0) });
   }
   scored.sort(
@@ -220,6 +451,7 @@ export function route(
   const hard = cls.capabilities.filter((c) => HARD_CAPS.includes(c));
   const reasons = [
     `任务类型：${TYPE_LABEL[cls.type]}（${cls.signals.join("；") || "没有特殊信号"}）`,
+    `工作能力：${WORK_SURFACE_LABEL[cls.surface ?? "chat"]}（${cls.surfaceReason ?? "以对话和问答为主"}）`,
     `硬性要求：${hard.map((c) => CAP_LABEL[c]).join("、") || "无"}；估算输入约 ${cls.estTokens} token`,
     `偏好：${PREF_LABEL[pref]}，延迟：${LAT_LABEL[lat]}${req.maxCostTier !== undefined ? `，成本上限 ${req.maxCostTier} 档` : ""}；权重 能力 ${f2(w.capability)} · 质量 ${f2(w.quality)} · 成本 ${f2(w.cost)} · 延迟 ${f2(w.latency)}`,
   ];
@@ -236,7 +468,7 @@ export function route(
   }
   if (!chain.length) reasons.push("没有可用模型：请配置 OPENAI_API_KEY 或 ANTHROPIC_API_KEY，或放宽成本上限");
 
-  return { classification: cls, primary: chain[0] ?? null, chain, weights: w, reasons, excluded };
+  return { classification: cls, primary: chain[0] ?? null, chain, weights: w, reasons, excluded, trace };
 }
 
 // ---------- 执行降级链 ----------
@@ -257,6 +489,46 @@ export interface Attempt {
   status?: number;
   /** 这个模型超时后已经重试过一次 */
   retried?: boolean;
+  /** 流式正文已经输出后才失败；不能把另一个模型的正文静默拼接进来。 */
+  partialOutput?: boolean;
+}
+
+/**
+ * Provider 失败后的处置契约。把「重试同一个模型 / 换模型 / 下线 Provider /
+ * 停止」集中成一张可测试的策略表，避免新增 Provider 时只改执行分支却忘记
+ * 更新用户看到的降级语义。
+ */
+export type FailureDisposition = "retry" | "skip_provider" | "next" | "stop";
+
+export interface FailurePolicy {
+  disposition: FailureDisposition;
+  /** 是否把这次失败计入模型健康度的连续失败计数。 */
+  recordsHealthFailure: boolean;
+  /** 是否属于用户主动取消；调用方应原样抛出，而不是包装成 route_exhausted。 */
+  userAborted: boolean;
+}
+
+/**
+ * 根据错误类型和当前尝试上下文决定恢复动作。
+ *
+ * 这函数不做健康度写入，也不生成 UI 文案；它是纯策略，供执行器、CLI
+ * 验证和后续桌面诊断共用。opts.badRequests 表示当前请求之前已经出现过的
+ * bad_request 次数；第二次出现意味着请求本身有问题，此时停止继续消耗其他模型。
+ */
+export function failurePolicy(code: string, opts: { retried?: boolean; badRequests?: number; partialOutput?: boolean } = {}): FailurePolicy {
+  const retried = opts.retried === true;
+  const badRequests = opts.badRequests ?? 0;
+  if (opts.partialOutput) return { disposition: "stop", recordsHealthFailure: false, userAborted: false };
+  if (code === "aborted") return { disposition: "stop", recordsHealthFailure: false, userAborted: true };
+  // Every model shares the client response limit. Switching models cannot
+  // remove that limit, and hitting it does not indicate Provider ill health.
+  if (code === "response_too_large") return { disposition: "stop", recordsHealthFailure: false, userAborted: false };
+  if (code === "timeout" && !retried) return { disposition: "retry", recordsHealthFailure: false, userAborted: false };
+  if (code === "auth" || code === "billing" || code === "config") return { disposition: "skip_provider", recordsHealthFailure: false, userAborted: false };
+  if (code === "bad_request") {
+    return { disposition: badRequests >= 1 ? "stop" : "next", recordsHealthFailure: badRequests < 1, userAborted: false };
+  }
+  return { disposition: "next", recordsHealthFailure: true, userAborted: false };
 }
 
 /** 超时后重试前的等待；同一个模型只重试一次，再失败才换下一个 */
@@ -293,14 +565,25 @@ export function abortableSleep(ms: number, signal?: AbortSignal): Promise<void> 
 
 export class RouteExhaustedError extends Error {
   readonly code = "route_exhausted";
+  readonly partialOutput: boolean;
   constructor(
     readonly attempts: Attempt[],
     readonly lastError: unknown,
   ) {
-    // 逐个写明试过哪个模型、为什么失败：卡片、时间线和 CLI 直接显示这段文字。超时重试的中间记录不单列，体现在「已重试 1 次」里
-    const final = attempts.filter((a) => a.action !== "retry");
-    super(`降级链上的 ${final.length} 个模型都没有成功：${final.map((a) => `${a.profileId}（${attemptText(a)}）`).join("、")}`);
+    // An early safe stop uses the same error contract as chain exhaustion.
+    // Retry records are consolidated, and skipped candidates were never called.
+    const called = attempts.filter((a) => a.action !== "retry" && a.action !== "skipped");
+    const skipped = attempts.filter((a) => a.action === "skipped");
+    const partialOutput = attempts.some((a) => a.partialOutput === true);
+    const heading = partialOutput ? "部分输出后已停止自动降级，已保留部分输出"
+      : called.length ? (called.some((a) => a.action === "stop") ? "已安全停止模型调用" : "降级链已耗尽")
+      : skipped.length ? "没有发起模型调用" : "没有发起模型调用，没有可尝试的候选模型";
+    const details = [heading];
+    if (called.length) details.push(`实际尝试的 ${new Set(called.map((a) => a.profileId)).size} 个模型均未成功：${called.map((a) => `${a.profileId}（${attemptText(a)}）`).join("、")}`);
+    if (skipped.length) details.push(`已跳过 ${skipped.length} 个候选（未调用）：${skipped.map((a) => `${a.profileId}（${attemptText(a)}）`).join("、")}`);
+    super(details.join("；"));
     this.name = "RouteExhaustedError";
+    this.partialOutput = partialOutput;
   }
   toAppError() {
     const summary = this.attempts.map((a) => `${a.profileId}:${a.errorCode ?? a.action}${a.action === "retry" ? "(retry)" : ""}`).join(", ");
@@ -309,6 +592,8 @@ export class RouteExhaustedError extends Error {
 }
 
 export interface FallbackOptions {
+  /** Goal logical call: an unknown first outcome must not be retried or moved to another Provider. */
+  stopOnUnknownOutcome?: boolean;
   health?: HealthTracker;
   now?: () => number;
   /** 用户取消时中断重试前的等待 */
@@ -320,10 +605,12 @@ export interface FallbackOptions {
 /**
  * 按降级链依次调用。触发规则：
  * - aborted：用户取消，立即停止并抛出
+ * - response_too_large：达到客户端统一读取上限，停止且不记模型健康失败
+ * - 已输出正文后失败：停止，保留部分输出，禁止拼接其他模型
  * - timeout：等 2 秒对同一个模型重试一次（中转站偶发的慢请求很常见），再失败才记一次失败、换下一个
  * - auth / config：整个 Provider 下线，跳过它在链上的其他模型
  * - bad_request：换下一个；连续两个模型都报请求错误，说明请求本身有问题，停止
- * - rate_limit / network / server / not_found / 其他：记一次失败（参与熔断），换下一个
+ * - rate_limit / network / server / not_found / invalid_response / 其他：未输出正文时记一次失败（参与熔断），换下一个并记录 attempts
  * - 调用前先看健康记录：同一任务前几次调用已让它熔断或停用，直接跳过，不再等它失败；链上最后一个照试
  */
 export async function executeWithFallback<T>(
@@ -359,34 +646,45 @@ export async function executeWithFallback<T>(
         attempts.push({ ...base, ok: true, latencyMs: now() - t0, action: "done", ...flag });
         return { result, entry: e, attempts };
       } catch (err) {
+        if (isGoalQuotaControlError(err)) throw err;
         last = err;
         const code = err instanceof ProviderError ? err.code : "unknown";
         const status = err instanceof ProviderError && err.status !== null ? { status: err.status } : {};
-        const rec = { ...base, ok: false, latencyMs: now() - t0, errorCode: code, ...status, ...flag };
-        if (code === "aborted") {
+        const partialOutput = err instanceof ProviderError && err.partialOutput === true;
+        const rec = { ...base, ok: false, latencyMs: now() - t0, errorCode: code, ...status, ...flag, ...(partialOutput ? { partialOutput: true } : {}) };
+        if (opts.stopOnUnknownOutcome && !isTerminalModelFailure(err)) {
+          attempts.push({ ...rec, action: "stop" });
+          throw new RouteExhaustedError(attempts, err);
+        }
+        // bad_request 的计数表示当前请求之前的次数，第二次才停止；其他错误不共享这个计数。
+        const policy = failurePolicy(code, { retried, badRequests, partialOutput });
+        if (policy.userAborted) {
           attempts.push({ ...rec, action: "stop" });
           throw err;
         }
-        if (code === "timeout" && !retried) {
+        if (policy.disposition === "retry") {
           attempts.push({ ...rec, action: "retry" });
           await sleep(TIMEOUT_RETRY_DELAY_MS, opts.signal);
           continue;
         }
-        if (code === "auth" || code === "config") {
-          opts.health?.markProviderDown(e.provider, code === "auth" ? "鉴权失败" : "配置有误");
+        if (policy.disposition === "skip_provider") {
+          opts.health?.markProviderDown(e.provider, code === "auth" ? "鉴权失败" : code === "billing" ? "额度或计费不可用" : "配置有误");
           downProviders.add(e.provider);
           attempts.push({ ...rec, action: "skip_provider" });
-        } else if (code === "bad_request") {
-          badRequests++;
-          attempts.push({ ...rec, action: badRequests >= 2 ? "stop" : "next" });
-          if (badRequests >= 2) throw new RouteExhaustedError(attempts, err);
+        } else if (policy.disposition === "stop") {
+          if (code === "bad_request") badRequests++;
+          attempts.push({ ...rec, action: "stop" });
+          const exhausted = new RouteExhaustedError(attempts, err);
+          throw opts.stopOnUnknownOutcome ? recordTerminalModelFailure(exhausted) : exhausted;
         } else {
-          opts.health?.recordFailure(e.profileId);
+          if (code === "bad_request") badRequests++;
+          if (policy.recordsHealthFailure) opts.health?.recordFailure(e.profileId);
           attempts.push({ ...rec, action: "next" });
         }
         break;
       }
     }
   }
-  throw new RouteExhaustedError(attempts, last);
+  const exhausted = new RouteExhaustedError(attempts, last);
+  throw opts.stopOnUnknownOutcome && isTerminalModelFailure(last) ? recordTerminalModelFailure(exhausted) : exhausted;
 }

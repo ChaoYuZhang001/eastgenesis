@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "kind": "macos-owned-process-sampler-validation-excerpt",
+  "recordedAtUtc": "2026-10-06T22:41:56Z",
+  "measurementDateLocal": "2026-10-07",
+  "measurementTimeLocalApproximate": "06:31 Asia/Shanghai",
+  "provenance": {
+    "recordType": "same-session-executed-measurement-excerpt",
+    "originalOutputAvailableAsFile": false,
+    "originalOutputSha256": null,
+    "source": "The earlier native validation returned JSON through the execution tool. No fixed raw stdout file was saved; the values below are copied from that tool result.",
+    "reexecutedForThisEvidenceSave": false,
+    "nativeExecutionModuleHashRetained": false,
+    "nativeExecutionModuleSha256": null,
+    "limitation": "This is an excerpt of an actual earlier run in this session, not a SHA-bound raw run record. Final source received subsequent reporting/deadline/close refinements. These numbers are not claimed as a new run against the final frozen source."
+  },
+  "finalSourceSnapshot": {
+    "binding": "frozen source snapshot at evidence save; not an exact native-run source binding",
+    "files": [
+      { "path": "tools/desktop-process-measurement.mjs", "sha256": "3265a95cc6c65186a048df67036a59da7168867800604579b488c5072fd75640" },
+      { "path": "tools/desktop-process-measurement.d.mts", "sha256": "714b57b3476c0da6c20a83bd7881200bba45515dc00c2c9bf619cb8602508ee9" },
+      { "path": "tests/desktop-process-measurement.test.ts", "sha256": "dab9b5acddcab021a52cc9c99ad334aec29f934769e025cc9b3959aefb800cb1" }
+    ],
+    "pureContractTests": { "passed": 9, "total": 9 },
+    "nodeSyntaxCheck": "passed",
+    "typecheck": "passed"
+  },
+  "platformExecution": { "darwin": "executed", "linux": "not_run", "win32": "not_run" },
+  "fixture": {
+    "gui": false,
+    "target": "one explicitly owned synthetic Node child process",
+    "parent": "the Node validation harness",
+    "committedBufferBytes": 33554432,
+    "busyLoop": "approximately 70 milliseconds of work per 100 millisecond timer period",
+    "realProvider": false,
+    "privateConfiguration": false,
+    "requestedIntervalMs": 100,
+    "requestedDurationMs": 1200,
+    "independentMeasurementWindows": 1,
+    "registeredResourceProcessCount": 1,
+    "registeredDescendantsInNativeRun": 0
+  },
+  "observedSummary": {
+    "status": "verified",
+    "sampleCount": 12,
+    "wallMs": 1121.8461439999999,
+    "cpuCumulativeStartMs": 90.592266,
+    "cpuCumulativeEndMs": 844.158419,
+    "cpuDeltaMs": 753.566153,
+    "cpuPercentOneCore": 67.17196979553019,
+    "sampledPeakRssBytes": 71753728,
+    "nodeProcessCpuUsageDeltaMs": 753.825,
+    "absoluteCpuDeltaDifferenceMs": 0.258847,
+    "identityStable": true
+  },
+  "exitValidation": {
+    "targetExitObserved": true,
+    "firstSampleAfterExit": { "status": "unverified", "reason": "pid_exited" },
+    "repeatedSampleAfterExit": { "status": "unverified", "reason": "pid_exited" },
+    "targetClosed": true,
+    "samplerClosed": true,
+    "backgroundBusyLoopRemaining": false
+  },
+  "measurementScope": {
+    "source": "libproc_rusage_v0_mach_timebase",
+    "collection": "explicit_owned_pid_set",
+    "processTreeCoverage": "unverified",
+    "cpu": "own user plus system counters; child CPU counters are not added",
+    "cpuCumulativeUnit": "milliseconds",
+    "cpuWindowUnit": "percent_of_one_logical_cpu",
+    "cpuWindowFormula": "100 * delta_cpu_ms / observed_wall_ms",
+    "rssUnit": "bytes",
+    "rssPeak": "maximum of the registered PID set RSS sum at each observed sample",
+    "sharedRssPagesMayBeDoubleCounted": true,
+    "collectionIsAtomic": false,
+    "fullAppOrWebViewTreeMeasured": false,
+    "excluded": [
+      "owner and sampler resource counters",
+      "unregistered descendants",
+      "processes outside verified parent ancestry",
+      "WKWebView XPC without verified parent ancestry"
+    ]
+  },
+  "evidenceBoundary": {
+    "proven": [
+      "the earlier Darwin run sampled RSS and cumulative CPU for its one owned synthetic Node target",
+      "the observed CPU delta agreed closely with the target's own process.cpuUsage counters",
+      "the target start identity remained stable across the observed samples",
+      "after target exit the sampler rejected both the first and repeated read"
+    ],
+    "excluded": [
+      "a SHA-bound reproducible raw execution record",
+      "a native rerun of every final frozen source byte",
+      "native Linux or Windows execution",
+      "native descendant-registration validation",
+      "an EastGenesis app or full WebView process-tree resource measurement",
+      "startup time or UI readiness measurement",
+      "a CPU/RSS performance distribution baseline",
+      "real Provider performance"
+    ]
+  }
+}

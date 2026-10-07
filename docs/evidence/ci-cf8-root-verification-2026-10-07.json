@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "root-independent-cf8-ci-verification",
+  "verifiedAt": "2026-10-07T04:22:49.007569+00:00",
+  "passed": true,
+  "runId": 37568809472,
+  "publicCommit": "cf8f54a6658417a39824effe21460b3f9893beca",
+  "localCommit": "662a70e092979f585ab793c9e78269d31ce4a9a4",
+  "sourceTree": "ec0a10c4c753430bf634235b6aa2175250ae1959",
+  "terminalConclusion": "failure",
+  "platformConclusions": {
+    "ubuntu-latest": "success",
+    "windows-latest": "failure",
+    "macos-latest": "success"
+  },
+  "indexedFilesVerified": 55,
+  "indexedBytesVerified": 2401325,
+  "zipMembersVerified": 56,
+  "immutableSourceBlobsVerified": 710,
+  "actualStdoutReportsReparsed": 5,
+  "indexSha256": "20fd2cb5ec0f071bcf22d8b4dc2e798972fdb1587f7ec25f8def185abbd3c878",
+  "zipSha256": "e861093653e829d704274eb72680202b2a6587b43f8dcaaa7ed465232a021c9a",
+  "windowsFailure": {
+    "stage": "database_timeout",
+    "schemaProbeFailures": 131,
+    "lastProbeFailureStage": "process_job",
+    "frontendReadyElapsedMs": 5485,
+    "specificWin32Error": "not_observed",
+    "schemaExternalValidation": false,
+    "fullInstallationLifecycle": false
+  },
+  "desktopBundlesDownloaded": false,
+  "newGoalOutputUiIncluded": false
+}

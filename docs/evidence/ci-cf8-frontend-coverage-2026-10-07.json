@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "kind": "ci-frontend-coverage-audit",
+  "runId": 37568809472,
+  "headSha": "cf8f54a6658417a39824effe21460b3f9893beca",
+  "localCommit": "662a70e092979f585ab793c9e78269d31ce4a9a4",
+  "sourceTree": "ec0a10c4c753430bf634235b6aa2175250ae1959",
+  "platforms": {
+    "ubuntu": {
+      "jobId": 112622574872,
+      "jobConclusion": "success",
+      "rawLog": {
+        "path": "ubuntu-job-112622574872.log",
+        "bytes": 430884,
+        "sha256": "8d801365919e4d110d4590f03b55b7cad69ee806b37b46e4f243962c56c8f5e7"
+      },
+      "cold": {
+        "passed": 1050,
+        "skipped": 11,
+        "failed": 0,
+        "population": 1061
+      },
+      "coldSummaryLine": 2543,
+      "coldFiles": 107,
+      "nativeMcp": {
+        "status": "completed",
+        "conclusion": "success",
+        "counts": {
+          "passed": 15,
+          "skipped": 0,
+          "failed": 0,
+          "population": 15
+        },
+        "rows": [
+          {
+            "line": 3924,
+            "path": "tests/mcp-files.test.ts",
+            "population": 6,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 6
+          },
+          {
+            "line": 3928,
+            "path": "tests/memory-skill-e2e.test.ts",
+            "population": 4,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 4
+          },
+          {
+            "line": 3930,
+            "path": "tests/killer-scenario.test.ts",
+            "population": 5,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 5
+          }
+        ],
+        "summaryLine": 3933
+      },
+      "filledColdSkips": 11,
+      "repeatedNativeCases": 4,
+      "crossProcess": {
+        "status": "completed",
+        "conclusion": "success",
+        "counts": {
+          "passed": 3,
+          "skipped": 0,
+          "failed": 0,
+          "population": 3
+        },
+        "summaryLine": 2657,
+        "repeatedColdCases": 3
+      },
+      "uniquePopulationPassed": 1061,
+      "remainingSkips": 0,
+      "remainingSkippedFiles": [],
+      "alias19": {
+        "line": 1640,
+        "path": "tests/desktop-goal-upgrade-inputs.test.ts",
+        "population": 19,
+        "skipped": 0,
+        "failed": 0,
+        "passed": 19
+      }
+    },
+    "windows": {
+      "jobId": 112622574970,
+      "jobConclusion": "failure",
+      "rawLog": {
+        "path": "windows-job-112622574970.log",
+        "bytes": 309416,
+        "sha256": "0af8d7a2469d21cdc3355286bdd66954ee2c3fb0173afa6309d5d152a1471a16"
+      },
+      "cold": {
+        "passed": 1044,
+        "skipped": 17,
+        "failed": 0,
+        "population": 1061
+      },
+      "coldSummaryLine": 1426,
+      "coldFiles": 107,
+      "nativeMcp": {
+        "status": "completed",
+        "conclusion": "success",
+        "counts": {
+          "passed": 15,
+          "skipped": 0,
+          "failed": 0,
+          "population": 15
+        },
+        "rows": [
+          {
+            "line": 2734,
+            "path": "tests/mcp-files.test.ts",
+            "population": 6,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 6
+          },
+          {
+            "line": 2738,
+            "path": "tests/memory-skill-e2e.test.ts",
+            "population": 4,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 4
+          },
+          {
+            "line": 2740,
+            "path": "tests/killer-scenario.test.ts",
+            "population": 5,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 5
+          }
+        ],
+        "summaryLine": 2743
+      },
+      "filledColdSkips": 11,
+      "repeatedNativeCases": 4,
+      "crossProcess": {
+        "status": "completed",
+        "conclusion": "success",
+        "counts": {
+          "passed": 3,
+          "skipped": 0,
+          "failed": 0,
+          "population": 3
+        },
+        "summaryLine": 1540,
+        "repeatedColdCases": 3
+      },
+      "uniquePopulationPassed": 1055,
+      "remainingSkips": 6,
+      "remainingSkippedFiles": [
+        {
+          "line": 521,
+          "path": "tests/desktop-process-cleanup.test.ts",
+          "population": 7,
+          "skipped": 6,
+          "failed": 0,
+          "passed": 1
+        }
+      ],
+      "alias19": {
+        "line": 513,
+        "path": "tests/desktop-goal-upgrade-inputs.test.ts",
+        "population": 19,
+        "skipped": 0,
+        "failed": 0,
+        "passed": 19
+      }
+    },
+    "macos": {
+      "jobId": 112622574996,
+      "jobConclusion": "success",
+      "rawLog": {
+        "path": "macos-job-112622574996.log",
+        "bytes": 273767,
+        "sha256": "1c87ff0aab4411898d9dc88b6955ad7e0932441bdb7a3dc3381a76ba0a56df64"
+      },
+      "cold": {
+        "passed": 1050,
+        "skipped": 11,
+        "failed": 0,
+        "population": 1061
+      },
+      "coldSummaryLine": 1413,
+      "coldFiles": 107,
+      "nativeMcp": {
+        "status": "completed",
+        "conclusion": "success",
+        "counts": {
+          "passed": 15,
+          "skipped": 0,
+          "failed": 0,
+          "population": 15
+        },
+        "rows": [
+          {
+            "line": 2667,
+            "path": "tests/mcp-files.test.ts",
+            "population": 6,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 6
+          },
+          {
+            "line": 2671,
+            "path": "tests/memory-skill-e2e.test.ts",
+            "population": 4,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 4
+          },
+          {
+            "line": 2673,
+            "path": "tests/killer-scenario.test.ts",
+            "population": 5,
+            "skipped": 0,
+            "failed": 0,
+            "passed": 5
+          }
+        ],
+        "summaryLine": 2676
+      },
+      "filledColdSkips": 11,
+      "repeatedNativeCases": 4,
+      "crossProcess": {
+        "status": "completed",
+        "conclusion": "success",
+        "counts": {
+          "passed": 3,
+          "skipped": 0,
+          "failed": 0,
+          "population": 3
+        },
+        "summaryLine": 1527,
+        "repeatedColdCases": 3
+      },
+      "uniquePopulationPassed": 1061,
+      "remainingSkips": 0,
+      "remainingSkippedFiles": [],
+      "alias19": {
+        "line": 507,
+        "path": "tests/desktop-goal-upgrade-inputs.test.ts",
+        "population": 19,
+        "skipped": 0,
+        "failed": 0,
+        "passed": 19
+      }
+    }
+  },
+  "rawExecutionCountsAreNotUniqueCases": true,
+  "unionUniquePassed": 1061,
+  "unionInterpretation": "At least one platform passes every case in the shared immutable 1061-case population; raw executions across platforms and post-native repeats are not added."
+}

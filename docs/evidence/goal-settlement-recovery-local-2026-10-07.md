@@ -1,0 +1,19 @@
+# 主运行调用结算和已完成成果收尾的本机修复
+
+当前工作区底座为本机 `b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe`，原公开快照为 `1c739f737e74b62d49d715b61fb6f04cb74ac122`。本页的候选属于后续源码；下方 b4 原生与 CI 证据不能作为后续二进制的通过证明。阶段仍为 Alpha / 内部 QA。
+
+原源码三条实际存储故障回归为 RED：上限3时结算失败后实际调用4次但只记1次；completed checkpoint已保存但结算失败后重启不能收尾；Runtime已completed但终态checkpoint拒写后同进程不能收尾。原测试字节 SHA256 为 `1bbd36a8e0efdf2da299ea6dffc3ec9d1ba39c378d8538760aa8b4d6cabeac63`，候选保持不变。既有四条短链兼容测试也保留。
+
+修复使用已有主Runtime `run_start.runId`，在StoredTurn增加可选 `recovery_accounting`，包含version=1、task_id、run_id、局部llm_calls、final。只有真实run_end才声明计数完整；运行中计数只是下界。GoalRound增加可选 `llm_settlements` 数组，每条是完整运行的run_id和llm_calls。带task/run身份的record_llm_calls要求当前持久终态及身份/次数相符；凭据和used_llm_calls经同一次Goal保存更新。重复同凭据不再加费，不一致的同run计数拒绝。新运行使用新身份；旧不带身份的调用保留原增量语义。
+
+恢复先补结算，再计算剩余预算。Runtime已completed时只补终态保存、结算和完成检查，不新建任务、不重做文件工具。恰好用完逻辑调用预算时，只用已有规则判定或等待明确用户验收，不创建Jev引擎。晚pause/cancel结果仍先保存和结算；旧运行结算完成前并发恢复不启动新Runtime。卡片500条、持久300条事件上限保持，保留最新主运行锚点；700条受控展示事件压力经真实Runtime回调链验证，属于合成窗口压力。
+
+这是既有JSON持久格式的可选字段扩展，不增加SQL schema版本或新SQL迁移。旧字段缺失仍能读取和hydrate；不能据旧Goal总计或截断事件倒推某run已结算数。未知且未完成时暂停自动模型预算，当前没有补录未知次数并解除暂停的UI入口；旧completed可以已有规则/人工验收收尾，不补造未知开销。该限制需要后续产品与恢复机制补齐。
+
+冻结候选包含六个源码文件和两个新测试文件。最终单次定向运行13文件137测试通过、0失败、0跳过，typecheck exit0；137是测试用例数量，部分原有恢复用例在新增测试文件中重叠，不代表137种独立业务能力。真实SQLite触发器拒绝UPDATE时，累计数和凭据一起保留旧值；真实文件read/write均一次，inode/mtime/SHA不变，短链接受的Chat标记保留。早先压力入口未进入新Runtime的失败、类型检查未使用import的失败及原RED日志均保留。
+
+Windows补丁只增加失败时的 `processStartInputFacts` 脱敏固定字段，保留实际application/cwd/command字符串、第一时间GetLastWin32Error、CREATE_SUSPENDED、先Job后resume、cleanup、外部schema7、repair与两cycle验收。Root当前工作区68项定向测试、0失败、0跳过，证明Node consumer和既有回归；宿主没有可用PowerShell/C#编译工具，producer编译与Hashtable序列化仍待Windows CI。此片不宣称修复原Win32 123根因。
+
+Root应用两组补丁后，当前完整前端110文件1132测试通过、0失败、0跳过；typecheck/build、普通SQL12+doc1和QASQL18+doc1均通过。564个动态源码/config/test/tool输入起止内容/模式/集合不变，MCP、验证harness和binding module起止不变；既有合成配置/脱敏55项包含在全量内。coverage是已声明源码目录的保守独立枚举，不是完整compiler依赖图追踪。见[完整本机验证](settlement-windows-current-gates-2026-10-07.json)。新源码QA App、原生完整Goal、三平台CI仍待分别形成新来源证明；真实双Provider故障矩阵、生产升级/schema迁移、三平台性能、签名/公证继续缺失。
+
+独立正余额Jev与raw fallback尝试的完整账单计量、usage旧task一次性标记、一般旧checkpoint新鲜度、任意长历史全部accepted-output保留不在本片修复结论内。逻辑模型调用计数不能代替全部上游HTTP尝试或实际账单。

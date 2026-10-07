@@ -128,9 +128,9 @@ describe("端到端：所有模型都不可用", () => {
     expect(within(c).getByText(/^失败 · /)).toBeInTheDocument();
     expect(within(c).queryByRole("region", { name: "成果" })).not.toBeInTheDocument();
 
-    // 折叠那行先说清楚没有一个模型成功，点开后逐个写明试过谁、为什么失败
+    // 折叠行描述本次实际尝试，点开后逐个写明试过谁、为什么失败。
     const line = within(c).getByRole("button", { name: /查看路由决策/ });
-    expect(line).toHaveTextContent(/\d+ 个模型都没有成功/);
+    expect(line).toHaveTextContent(/本次尝试的 \d+ 个模型均未成功/);
     const overlay = openRoute(c);
     const route = within(overlay).getByRole("region", { name: "路由决策详情" });
     const first = within(route).getByText("首选").nextElementSibling?.textContent ?? "";

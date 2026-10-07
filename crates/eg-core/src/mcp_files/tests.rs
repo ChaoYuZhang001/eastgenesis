@@ -81,9 +81,9 @@ fn sandbox_paths() {
     assert_eq!(code(e.sb.target("~/elsewhere.txt")), "path_not_allowed");
     assert!(e.sb.is_root(&e.sb.existing("~/Downloads").unwrap()));
     // 没有可用根目录：一律拒绝
-    let (none, _) = Sandbox::new(&["/definitely/not/here".to_string()], None);
+    let (none, _) = Sandbox::new(&[e.base.join("not-here").to_string_lossy().into_owned()], None);
     assert!(none.is_empty());
-    assert_eq!(code(none.existing("/tmp")), "path_not_allowed");
+    assert_eq!(code(none.existing(e.base.to_str().unwrap())), "path_not_allowed");
     assert_eq!(code(none.existing("~/x")), "invalid_path");
 }
 

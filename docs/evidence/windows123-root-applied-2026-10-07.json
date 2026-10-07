@@ -1,0 +1,19 @@
+{
+  "kind": "windows123-final-root-applied",
+  "appliedAt": "2026-10-07T07:28:42.686719+00:00",
+  "passed": true,
+  "base": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "sourceFilesVerified": 754,
+  "changedFiles": {
+    "tests/desktop-windows-install-smoke.test.ts": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3",
+    "tools/desktop-windows-install-smoke.d.mts": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff",
+    "tools/desktop-windows-install-smoke.mjs": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad",
+    "tools/desktop-windows-install-smoke.ps1": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397"
+  },
+  "allOtherPublishedSourceUnchanged": true,
+  "projectMemoryUnchanged": true,
+  "patchSha256": "373936bb760e4fe3a3d3624356434e7f09a6db48c7af4ce91b42ae62faeb7933",
+  "nativeProducerTested": false,
+  "originalWin32Error123Resolved": false,
+  "gitCommitted": false
+}

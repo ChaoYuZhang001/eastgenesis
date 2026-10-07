@@ -1,0 +1,12 @@
+import {act,cleanup,render,screen} from "@testing-library/react";
+import {GoalDetail} from "@/components/goal/GoalDetail";
+import {newGoal,normalizeGoal,type Goal} from "@/decision/goal";
+import {createMockBackend} from "@/platform";
+import {useGoals} from "@/stores/goals";
+import {useTasks} from "@/stores/tasks";
+import {resetStores} from "./ui-helpers";
+const id="goal-enrolled-ui";
+const goal=(unknown=0):Goal=>({...newGoal(normalizeGoal({description:"synthetic quota",max_llm_calls:4}),1,id),status:"paused",used_llm_calls:2,quota:{protocol:"inclusive-goal-quota-v1",enrollmentId:"enroll-ui",revision:2,limit:4,consumed:2,active:false,ownerId:null,fence:2,leaseUntil:0,pending:0,unknown,execution:null}});
+afterEach(cleanup);
+it("V1 occupied quota remains visible after durable reload and explicitly states fixed cap and logical scope",async()=>{const b=createMockBackend();b.listGoals=async()=>[goal()];resetStores(b);await useGoals.getState().load();render(<GoalDetail id={id}/>);expect(screen.getByText(/已占用调用额度 2 \/ 4/)).toBeVisible();expect(screen.getByText(/额度上限创建时固定.*主模型、决策与完成校验/)).toBeVisible();expect(screen.queryByText(/模型调用 2 \/ 4/)).not.toBeInTheDocument();});
+it("independent unknown quota is not disguised by known main receipts or offered automatic replay",async()=>{const b=createMockBackend();b.listGoals=async()=>[goal(1)];resetStores(b);await act(()=>useGoals.getState().load());useTasks.setState({tasks:[]});render(<GoalDetail id={id}/>);expect(screen.getByText(/调用结果尚未确认，不能自动重发/)).toBeVisible();expect(screen.getByText(/不代表实际 HTTP 请求数或费用/)).toBeVisible();expect(screen.queryByText(/历史调用次数未知/)).not.toBeInTheDocument();expect(screen.queryByRole("button",{name:/增加.*额度|恢复预算/})).not.toBeInTheDocument();});

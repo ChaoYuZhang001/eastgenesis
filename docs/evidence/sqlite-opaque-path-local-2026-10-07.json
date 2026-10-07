@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "kind": "sqlite-opaque-app-path-fix",
+  "recordedAt": "2026-10-07T02:42:08.992705+00:00",
+  "ciBeforeFix": {
+    "runId": 37559890652,
+    "headSha": "b6a4923b46656cd54cf858862f8fb27bdc19551d",
+    "terminalConclusion": "failure",
+    "captureIndexSHA256": "ba2475611a271c358a81f9896d8417810a7e7b7c366d9a078c4d3b749ebe2b47",
+    "typedFailure": "sql_connect_configuration_failed",
+    "rawWindowsLogSHA256": "20cfdf170996e8e2c0a3caf7b0fe52832bcc5110ae850fd259bac501d3b31d95"
+  },
+  "previousWrapperSHA256": "6dd4929973149e409ff967b0968e135c6e339eeeb20a4f896242317a143ccaa1",
+  "sources": [
+    {
+      "path": "vendor/tauri-plugin-sql/src/wrapper.rs",
+      "bytes": 14660,
+      "sha256": "e37fdc94bcd0da39e7f49b2c4319c7e3af82a1b1b683d2b6fe7e5d50bd3cc346"
+    },
+    {
+      "path": "vendor/tauri-plugin-sql/src/sqlite_path_tests.rs",
+      "bytes": 9339,
+      "sha256": "bd44ae98576e84a2acbaff93b10739267a546acd7541be471ff502a1792f2f7c"
+    },
+    {
+      "path": "vendor/tauri-plugin-sql/PATCH.md",
+      "bytes": 8458,
+      "sha256": "fa2ac2e7918e7ac1c3a3540f436cfbb1e74327da936a741b615403f2274254a9"
+    }
+  ],
+  "primarySourceBindings": [
+    {
+      "packageRelativePath": "sqlx-sqlite-0.8.6/src/options/parse.rs",
+      "bytes": 7736,
+      "sha256": "d94008fcdd7e03e2df1c6c0d788cc55cde42e772a83efb6e5f4839249154e156"
+    },
+    {
+      "packageRelativePath": "sqlx-sqlite-0.8.6/src/migrate.rs",
+      "bytes": 6853,
+      "sha256": "02a0b9b81a7b4a313927b295d3722b7947176d16024f76873733a9b950da073e"
+    },
+    {
+      "packageRelativePath": "tauri-2.12.0/src/path/mod.rs",
+      "bytes": 17183,
+      "sha256": "342c7b8fe55de2284cad6667c5d86296f143539aa3c8b4dba645a449b26dcf05"
+    },
+    {
+      "packageRelativePath": "tauri-2.12.0/src/path/desktop.rs",
+      "bytes": 20481,
+      "sha256": "9fab956b1c533eff123146fd481bee169c3d6efc48a43dbce6dc74e5469d9c24"
+    },
+    {
+      "packageRelativePath": "tauri-utils-2.10.0/src/platform/starting_binary.rs",
+      "bytes": 2598,
+      "sha256": "efdb6d24e3efce0bea10a22fb57c656ee090da153e0940b25028d522ae09f012"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/eastgenesis-b6-sqlx-path-probe.log",
+      "handle": null,
+      "exitCode": 0,
+      "phase": "actual_sqlx_parser_probe",
+      "bytes": 645,
+      "sha256": "413b9be7af6b99b167c4854bbcf800ef4cd1a4cc972df523f25f8dbb5caaf2be"
+    },
+    {
+      "path": "/tmp/eastgenesis-b6-sql-path-normal.log",
+      "handle": 41859,
+      "exitCode": 101,
+      "phase": "first_test_api_compile_failure",
+      "bytes": 1125,
+      "sha256": "1c6d598d017fb8966d656f83583c815e6fdc59c89cfbb97bae9658c9ff829e3c"
+    },
+    {
+      "path": "/tmp/eastgenesis-b6-sql-path-normal-after.log",
+      "handle": 15571,
+      "exitCode": 0,
+      "phase": "first_mapping_normal",
+      "bytes": 1541,
+      "sha256": "1a6073658ece62e331627cfd9ab47bfd876b948ac08936435da68545c6e3cfa9"
+    },
+    {
+      "path": "/tmp/eastgenesis-b6-sql-path-qa.log",
+      "handle": 43750,
+      "exitCode": 0,
+      "phase": "first_mapping_qa",
+      "bytes": 2209,
+      "sha256": "ec59c0109bff1cde50dd15711c2f3e96ee799095e85f13a01d9d18f336d10441"
+    },
+    {
+      "path": "/tmp/eastgenesis-b6-sql-path-final-normal.log",
+      "handle": 36542,
+      "exitCode": 0,
+      "phase": "final_normal",
+      "bytes": 1646,
+      "sha256": "568d549436ef55f2aa9976ac9794d0bbb7ba52e42d8bb3039e1269b6e870b4e9"
+    },
+    {
+      "path": "/tmp/eastgenesis-b6-sql-path-final-qa.log",
+      "handle": 67852,
+      "exitCode": 0,
+      "phase": "final_qa",
+      "bytes": 2312,
+      "sha256": "e56b6f6118fe88e2362258a94d6edad7a00f73df8a70831cb8f05ca257891599"
+    }
+  ],
+  "finalValidation": {
+    "platform": "macos",
+    "normalUnitPassed": 10,
+    "qaUnitPassed": 16,
+    "normalDocPassed": 1,
+    "qaDocPassed": 1,
+    "ignored": 0,
+    "newRegressionCases": 6,
+    "windowsCompiledUnitExpectation": {
+      "normal": 9,
+      "qa": 15,
+      "reason": "Unix non-UTF-8 path case is cfg(unix)"
+    },
+    "realCreateCloseReopen": true,
+    "sameDeviceInode": true,
+    "schemaVersionRetained": 7,
+    "sentinelRetained": true,
+    "callerParserBeforeAfterCases": 21,
+    "actualParserProbeCases": 9
+  },
+  "unchanged": {
+    "CargoLockSHA256": "7af42848fa1f535161cf11bd3c32a859cf7842e459b7203d7a3a98b91ca126df",
+    "databaseExistsCreateConnectSequence": true,
+    "migrationAndObserverImplementation": true,
+    "workflow": true,
+    "realProviderOrPrivateConfigurationAccessed": false
+  },
+  "evidenceBoundary": {
+    "proven": [
+      "real SQLx parses synthetic Windows namespace inputs into Configuration before this repair",
+      "opaque app-directory URL escaping retains original caller query and path join behavior in regressions",
+      "isolated real SQLite file survives close/reopen with same schema/sentinel/Unix device+inode"
+    ],
+    "inferred": [
+      "redacted Windows installed-app Configuration failure is caused by canonical namespace-prefix query parsing"
+    ],
+    "unproven": [
+      "patched Windows actual NSIS install/reinstall/startup",
+      "exact original CI path or configuration exception text",
+      "other platforms native recovery or performance from this package test"
+    ]
+  },
+  "setupCorrections": [
+    "Initial manual jobs query needed shell quoting; no API request occurred for that failed invocation.",
+    "Initial test code used unavailable Tokio test macro/get_read_only API; fixed only test code, retained first compile-failure log.",
+    "An initial src/backend/tauri.ts lookup was absent; located actual database code with rg --files/rg as src/lib/db.ts."
+  ]
+}
