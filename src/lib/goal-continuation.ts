@@ -3,11 +3,12 @@ import type { Goal } from "@/decision/goal";
 import { normalizeRecoveryAccounting, type StoredTurn } from "@/decision/session";
 import { withDb } from "./db";
 import { getGoalForQuota } from "./db-goal";
-import { GOAL_QUOTA_SQL } from "./db-goal-quota";
-import { decodeGoalEnvelope, quotaProjection } from "./goal-quota-storage";
+import { quotaProjection } from "./goal-quota-storage";
+import { readCanonicalGoalSnapshot } from "./goal-snapshot";
+import { rethrowGoalControl } from "./goal-quota-error";
 import { recoveryCheckpoint, type RecoveryCheckpoint } from "./recovery";
 
-/** A DB-derived capability for an unfinished run, never a final billing receipt.
+/** A DB-derived capability to resume the same interrupted Task, never a billing receipt.
  * Its private preimages are consumed by the conditional fresh claim and bind. */
 export interface GoalContinuation {
   readonly goalId: string;
@@ -49,25 +50,22 @@ function eligible(g: Goal, taskId: string, now: number): boolean {
     && (!q.active || q.leaseUntil <= now));
 }
 
-/** This final SELECT reads the Goal preimage and fully validated authority in
- * one SQLite statement. An enrollment changed after discovery yields no row. */
-const snapshotSql = `SELECT g.rounds, q.value AS record FROM goals g
-  JOIN (${GOAL_QUOTA_SQL.snapshot}) q
-  WHERE g.id=$2 AND g.deleted_at IS NULL AND g.status='running'
-  AND CASE WHEN json_valid(g.rounds)=1 THEN
-    json_extract(g.rounds,'$.enrollment_id')=$3 ELSE 0 END=1`;
-
 export async function prepareGoalContinuation(goalId: string, taskId: string, clock: () => number = Date.now): Promise<GoalContinuation | null> {
   return withDb(async db => {
     const discovered = await getGoalForQuota(db, goalId);
     if (!discovered.quota) return null;
-    const rows = await db.select<{ rounds: string; record: string }[]>(snapshotSql,
-      [`goal-quota:v1:${goalId}`, goalId, discovered.quota.enrollmentId]);
-    if (rows.length !== 1) return null;
-    const raw = rows[0], envelope = decodeGoalEnvelope(raw.rounds, goalId);
-    if (!envelope) return null;
-    const record = JSON.parse(raw.record);
-    const g: Goal = { ...discovered, status: "running", rounds: envelope.rounds,
+    // Capture the exact preimages from the strict reader's single coherent
+    // SELECT. Evidence alone never authorizes continuation: the later claim
+    // and bind must still compare both original JSON values atomically.
+    let raw: { rounds: string; authority: string } | undefined;
+    const snapshot = await readCanonicalGoalSnapshot({ select: async <T>(sql: string, args?: unknown[]): Promise<T> => {
+      const rows = await db.select<T>(sql, args);
+      if (Array.isArray(rows) && rows.length === 1) raw = rows[0];
+      return rows;
+    } }, goalId);
+    const envelope = snapshot.envelope, record = snapshot.authority;
+    if (!raw || envelope.enrollment_id !== discovered.quota.enrollmentId) return null;
+    const g: Goal = { ...discovered, status: snapshot.status, rounds: envelope.rounds,
       quota: quotaProjection(envelope, record), max_llm_calls: record.limit, used_llm_calls: record.consumed };
     const now = clock();
     if (!Number.isSafeInteger(now) || now < 0 || record.state !== "enrolled" || !eligible(g, taskId, now)) return null;
@@ -82,7 +80,7 @@ export async function prepareGoalContinuation(goalId: string, taskId: string, cl
     const r = g.rounds.at(-1)!, task = r.task_checkpoint!;
     if (!sameData(lastRaw, r)) return null;
     const a = normalizeRecoveryAccounting(task.recovery_accounting, taskId);
-    if (!a || a.final) return null;
+    if (!a) return null;
     const events = task.events as AgentEvent[];
     let latestStart = -1;
     for (let i = events.length - 1; i >= 0; i--) if (events[i]?.type === "run_start") { latestStart = i; break; }
@@ -90,6 +88,15 @@ export async function prepareGoalContinuation(goalId: string, taskId: string, cl
     let terminal: Extract<AgentEvent, { type: "run_end" }> | undefined;
     for (let i = events.length - 1; i > latestStart; i--) if (events[i]?.type === "run_end") { terminal = events[i] as typeof terminal; break; }
     if (terminal?.status === "completed") return null;
+    if (a.final) {
+      // Only a persisted, positively failed run can use its final receipt as
+      // old accounting evidence. A synthetic restart marker is never final.
+      if (task.status !== "failed" || terminal?.status !== "failed"
+        || snapshot.mainReceipt.state !== "final" || !snapshot.mainReceipt.terminalEvidence
+        || !sameData(snapshot.mainReceipt.accounting, a) || r.llm_settlements === undefined) return null;
+      const settled = r.llm_settlements.find(receipt => receipt.run_id === a.run_id);
+      if (settled && settled.llm_calls !== a.llm_calls) return null;
+    }
     if (!terminal && task.status !== "running") return null;
     // A temporary aborted view closes only recovery interpretation. Do not
     // persist it, settle the incomplete accounting, or infer a tool outcome.
@@ -102,9 +109,9 @@ export async function prepareGoalContinuation(goalId: string, taskId: string, cl
     const proof: GoalContinuation = Object.freeze({ goalId, enrollmentId: q.enrollmentId, taskId,
       round: r.index, revision: q.revision, authorityFence: q.fence, sourceExecutionId: e.executionId,
       sourceOwnerId: e.ownerId, sourceFence: e.fence, limit: q.limit, consumed: q.consumed });
-    sources.set(proof, { rounds: raw.rounds, record: raw.record, task: clone(task), checkpoint: clone(checkpoint) });
+    sources.set(proof, { rounds: raw.rounds, record: raw.authority, task: clone(task), checkpoint: clone(checkpoint) });
     return proof;
-  });
+  }).catch(rethrowGoalControl);
 }
 
 export function isGoalContinuation(proof: GoalContinuation | undefined, g: Goal, now = Date.now()): proof is GoalContinuation {

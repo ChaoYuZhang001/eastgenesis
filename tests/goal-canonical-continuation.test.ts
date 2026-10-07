@@ -2,8 +2,19 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import type { Db } from "@/lib/db";
 import { asDb, loadSqlite, migratedDb, type RawDb, type SqliteModule } from "./sqlite-helper";
-const state = vi.hoisted(() => ({ db: null as Db | null }));
-vi.mock("@/lib/db", () => ({ withDb: async (f: (db: Db) => Promise<unknown>) => f(state.db!) }));
+const state = vi.hoisted(() => ({ db: null as Db | null, serializeErrors: false, serializedErrors: [] as unknown[] }));
+vi.mock("@/lib/db", async () => {
+  const { toAppError } = await import("@/lib/ipc");
+  return { SCHEMA_VERSION: 7, withDb: async (f: (db: Db) => Promise<unknown>) => {
+    try { return await f(state.db!); }
+    catch (error) {
+      if (!state.serializeErrors) throw error;
+      const serialized = toAppError(error, "db_query_failed");
+      state.serializedErrors.push(serialized);
+      throw serialized;
+    }
+  } };
+});
 import { saveGoal, updateGoal, listGoals } from "@/lib/db-goal";
 import { createMockBackend, setBackend } from "@/platform";
 import { useGoals } from "@/stores/goals";
@@ -18,12 +29,15 @@ import { createGoalQuotaAuthority, GOAL_QUOTA_SQL } from "@/lib/db-goal-quota";
 import { GOAL_PUBLICATION_SQL } from "@/lib/db-goal-publication";
 import * as engine from "@/lib/engine";
 import type { GoalMeterScope } from "@/core/goal-quota";
+import { GoalQuotaControlError } from "@/core/goal-quota";
+import { CANONICAL_GOAL_SNAPSHOT_SQL } from "@/lib/goal-snapshot";
 
 let sqlite: SqliteModule;
 let raw: RawDb;
 beforeAll(async () => { sqlite = (await loadSqlite())!; expect(sqlite).not.toBeNull(); });
 beforeEach(() => {
   raw = migratedDb(sqlite); state.db = asDb(() => raw);
+  state.serializeErrors = false; state.serializedErrors = [];
   setBackend({ ...createMockBackend(), kind: "tauri", saveGoal, updateGoal, listGoals });
   useGoals.setState({ items: [], loaded: true, error: null });
   useTasks.setState({ tasks: [], activeId: null });
@@ -160,8 +174,7 @@ describe("canonical occupied calls distinguish an unfinished run from an unknown
     await expect(acquireGoalExecution(f.id, f.taskId)).rejects.toMatchObject({ code: "quota_denied" });
     useTasks.setState(s => ({ tasks: s.tasks.map(t => t.id !== f.taskId ? t : { ...t, recovery_accounting: { ...t.recovery_accounting!, final: true } }) }));
     const handle = useTasks.getState().resumeGoalRound("synthetic", { mode: "goal", goalId: f.id, taskId: f.taskId });
-    expect(handle).not.toBeNull();
-    await expect(handle!.prepare!()).rejects.toMatchObject({ code: "quota_denied" });
+    expect(handle).toBeNull();
     expect((await listGoals())[0].quota).toMatchObject({ active: false, consumed: 1 });
   });
 
@@ -244,6 +257,66 @@ describe("canonical occupied calls distinguish an unfinished run from an unknown
       expect(g.quota?.ownerId).toBe(foreign.current!.publication.ownerId);
       expect(sp).not.toHaveBeenCalled();
     } finally { await foreign.current?.release(); }
+  });
+
+  test("Runner refresh stops when another window publishes awaiting_user during recovery discovery", async () => {
+    const f = await interruptedKnownMain();
+    const before = (await listGoals())[0];
+    const original = useTasks.getState().prepareGoalRecovery;
+    const foreign = { current: null as Awaited<ReturnType<typeof acquireGoalExecution>> };
+    let published: Awaited<ReturnType<typeof listGoals>>[number] | undefined;
+    vi.spyOn(useTasks.getState(), "prepareGoalRecovery").mockImplementation(async (...args) => {
+      const pending = await original(...args);
+      expect(pending.continuation).toBeDefined();
+      foreign.current = await acquireGoalExecution(f.id, f.taskId, Date.now, pending.continuation);
+      expect(foreign.current).not.toBeNull();
+      const quota_publication = foreign.current!.publication;
+      expect(typeof await useGoals.getState().apply(f.id, { op: "resume_round", quota_publication })).not.toBe("string");
+      expect(typeof await useGoals.getState().apply(f.id, { op: "finish_round", result: {
+        verdict: "uncertain", by: "rules", reason: "synthetic existing result requires user confirmation",
+      }, quota_publication })).not.toBe("string");
+      await foreign.current!.release();
+      published = (await listGoals())[0];
+      return pending;
+    });
+    const sp = vi.spyOn(engine, "createEngine").mockImplementation(() => { throw Error("unexpected synthetic engine"); });
+    const resumed = vi.spyOn(useTasks.getState(), "resumeGoalRound");
+    const started = vi.spyOn(useTasks.getState(), "runGoalRound");
+    try {
+      await goalRunner.run(f.id);
+      expect(published).toBeDefined();
+      const g = (await listGoals())[0];
+      expect(g).toEqual(published);
+      expect(g.status).toBe("running"); expect(g.rounds).toHaveLength(1);
+      expect(g.rounds[0]).toMatchObject({ status: "uncertain", task_id: f.taskId });
+      expect(g.quota).toMatchObject({ active: false, ownerId: null, consumed: 1, pending: 0, unknown: 0, fence: before.quota!.fence + 2 });
+      expect(useGoals.getState().error).toBeNull();
+      expect(sp).not.toHaveBeenCalled(); expect(resumed).not.toHaveBeenCalled(); expect(started).not.toHaveBeenCalled();
+    } finally { await foreign.current?.release(); }
+  });
+
+  test("continuation restores fixed quota errors after the real toAppError database serialization", async () => {
+    const f = await interruptedKnownMain(), db = state.db!;
+    const before = (await listGoals())[0];
+    const execute = vi.fn(db.execute);
+    state.serializeErrors = true;
+    state.db = { execute, select: async <T>(sql: string, args?: unknown[]): Promise<T> => {
+      if (sql === CANONICAL_GOAL_SNAPSHOT_SQL) throw Error("synthetic private select detail must not escape");
+      return db.select<T>(sql, args);
+    } };
+    const sp = vi.spyOn(engine, "createEngine").mockImplementation(() => { throw Error("unexpected synthetic engine"); });
+    const error = await prepareGoalContinuation(f.id, f.taskId).catch(value => value);
+    expect(error).toBeInstanceOf(GoalQuotaControlError);
+    expect(error).toMatchObject({ code: "quota_storage_unknown", message: "quota_storage_unknown" });
+    await goalRunner.run(f.id);
+    expect(state.serializedErrors).toHaveLength(2);
+    for (const serialized of state.serializedErrors) {
+      expect(serialized).not.toBeInstanceOf(GoalQuotaControlError);
+      expect(serialized).toEqual({ code: "quota_storage_unknown", message: "quota_storage_unknown", detail: null });
+    }
+    expect(useGoals.getState().error).toBe("目标调用额度无法安全继续（quota_storage_unknown），请检查当前执行状态");
+    expect((await listGoals())[0]).toEqual(before);
+    expect(execute).not.toHaveBeenCalled(); expect(sp).not.toHaveBeenCalled();
   });
 
   test("automatic exhaustion from a stale refreshed Goal cannot fail or revoke a new owner", async () => {

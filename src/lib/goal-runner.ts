@@ -163,6 +163,7 @@ export class GoalRunner {
           if (aborted()) return;
           g = await this.#refresh(id);
           if (!g || g.status !== "running") return;
+          if (goalPhase(g) === "awaiting_user") return;
           const currentOwner = this.#sessions.get(id)?.publication;
           if (g.quota?.active && g.quota.leaseUntil > (this.deps.now?.() ?? Date.now())
             && (!currentOwner || currentOwner.ownerId !== g.quota.ownerId || currentOwner.fence !== g.quota.fence)) {
@@ -180,7 +181,7 @@ export class GoalRunner {
             if (verdict && !aborted() && this.deps.read(id)?.status === "running") await this.#apply(id, { op: "finish_round", result: verdict, evidence: pending.completed.evidence });
             return;
           }
-          if (!pending.accounting) {
+          if (g.quota || !pending.accounting) {
             if (isGoalContinuation(pending.continuation, g, this.deps.now?.() ?? Date.now())) continuation = pending.continuation;
             else {
               this.deps.onError?.(g.quota

@@ -157,6 +157,17 @@ function resolvePreference(opts: SubmitOptions): { preference: Preference; prefe
   return { preference: r.preference, preferenceSource: r.source };
 }
 const MAX_EVENTS = 500;
+
+/** Hydration may append one display-only aborted marker, but cannot redirect
+ * the persisted prompt, history or accounting used by a fresh claim. */
+function recoveryCardMatches(card: TaskCard, task: StoredTurn): boolean {
+  const extra = card.events.slice(task.events.length);
+  return card.goal === task.goal
+    && JSON.stringify(card.events.slice(0, task.events.length)) === JSON.stringify(task.events)
+    && JSON.stringify(card.recovery_accounting) === JSON.stringify(task.recovery_accounting)
+    && extra.length <= 1
+    && (extra.length === 0 || extra[0].type === "run_end" && extra[0].status === "aborted");
+}
 const controllers = new Map<string, AbortController>();
 const confirms = new Map<string, (ok: boolean) => void>();
 const plans = new Map<string, (ok: boolean) => void>();
@@ -507,6 +518,15 @@ export const useTasks = create<TasksState>((set, get) => {
       const round = useGoals.getState().items.find((g) => g.id === goalId)?.rounds.at(-1);
       const accounting = round?.task_id === taskId && round.llm_settlements !== undefined && a?.final && a.run_id === runId && terminal ? a : null;
       const completed = terminal?.status === "completed";
+      const goal = useGoals.getState().items.find((g) => g.id === goalId);
+      if (!completed && goal?.quota && getBackend().kind === "tauri") {
+        // Preclaim recovery is read-only. Re-saving a failed checkpoint here
+        // has no owned publication; validate its persisted seed instead.
+        const continuation = await prepareGoalContinuation(goalId, taskId);
+        const seed = continuation ? goalContinuationSeed(continuation, goal) : null;
+        if (!continuation || !seed || !recoveryCardMatches(card, seed.task)) return { accounting: null, completed: null };
+        return { accounting: seed.task.recovery_accounting?.final ? seed.task.recovery_accounting : null, completed: null, continuation };
+      }
       if (accounting || completed) {
         if (terminal) patch(card.id, () => ({ status: terminal.status, summary: terminal.summary }));
         await checkpointGoalTask(card.id, true);
@@ -525,14 +545,12 @@ export const useTasks = create<TasksState>((set, get) => {
       const seed = continuation && g ? goalContinuationSeed(continuation, g) : null;
       if (continuation && !seed) return null;
       if (g?.quota && !continuation && !card.recovery_accounting?.final) return null;
+      if (g?.quota && !continuation && ["running", "interrupted"].includes(g.rounds.at(-1)?.status ?? "")
+        && g.rounds.at(-1)?.task_checkpoint?.status !== "completed") return null;
       if (seed) {
         // The hydrated view may add one aborted marker; every persisted event,
         // the task prompt and accounting must otherwise match the DB source.
-        const persisted = seed.task.events;
-        const extra = card.events.slice(persisted.length);
-        if (card.goal !== seed.task.goal || JSON.stringify(card.events.slice(0, persisted.length)) !== JSON.stringify(persisted)
-          || JSON.stringify(card.recovery_accounting) !== JSON.stringify(seed.task.recovery_accounting)
-          || extra.length > 1 || (extra.length === 1 && (extra[0].type !== "run_end" || extra[0].status !== "aborted"))) return null;
+        if (!recoveryCardMatches(card, seed.task)) return null;
       }
       const checkpoint = seed?.checkpoint ?? recoveryCheckpoint(card.events);
       if (!checkpoint) return null;

@@ -2,23 +2,16 @@ import { withDb } from "./db";
 import { getGoalForQuota, envelopeForGoal } from "./db-goal";
 import { createGoalQuotaAuthority } from "./db-goal-quota";
 import { GOAL_PUBLICATION_SQL, publicationArgs, strictGoalExecute } from "./db-goal-publication";
-import { GoalQuotaControlError, type GoalMeterScope, type GoalQuotaErrorCode } from "@/core/goal-quota";
+import { GoalQuotaControlError, type GoalMeterScope } from "@/core/goal-quota";
 import type { Goal } from "@/decision/goal";
 import type { GoalQuotaPublication } from "./goal-quota-storage";
 import { goalContinuationGuard, type GoalContinuation } from "./goal-continuation";
+import { rethrowGoalControl } from "./goal-quota-error";
+export { rethrowGoalControl } from "./goal-quota-error";
 export interface GoalExecutionContext { readonly goalId:string;readonly enrollmentId:string;readonly taskId:string;readonly executionId:string }
 export interface GoalExecutionSession {
  readonly context:GoalExecutionContext;readonly publication:GoalQuotaPublication;readonly meter:GoalMeterScope;
  renew():Promise<void>;release():Promise<void>;
-}
-/** Production withDb preserves the fixed storage code but serializes Error identity. Restore only fixed quota control codes at this boundary. */
-export function rethrowGoalControl(error:unknown):never{
- if(error instanceof GoalQuotaControlError)throw error;
- if(error&&typeof error==="object"){
-  const code=(error as {code?:unknown}).code,message=(error as {message?:unknown}).message;
-  if(typeof code==="string"&&message===code&&["quota_invalid_request","quota_denied","quota_storage_unknown","quota_outcome_unknown","quota_protocol_invalid"].includes(code))throw new GoalQuotaControlError(code as GoalQuotaErrorCode);
- }
- throw error;
 }
 const sessions=new Map<string,GoalExecutionSession>();
 export const goalExecutionForTask=(taskId:string)=>sessions.get(taskId)??null;
@@ -33,6 +26,7 @@ export async function acquireGoalExecution(goalId:string,taskId:string,clock:()=
   if(g.status!=="running")throw new GoalQuotaControlError("quota_denied");
   const round=g.rounds.at(-1);if(round&&(round.status==="running"||round.status==="interrupted")&&round.task_id!==taskId)throw new GoalQuotaControlError("quota_denied");
   if(round&&(round.status==="running"||round.status==="interrupted")&&!round.task_checkpoint?.recovery_accounting?.final&&!continuation)throw new GoalQuotaControlError("quota_denied");
+  if(round&&(round.status==="running"||round.status==="interrupted")&&round.task_checkpoint?.status!=="completed"&&!continuation)throw new GoalQuotaControlError("quota_denied");
   if(round?.status==="interrupted"&&(!round.task_checkpoint||round.task_checkpoint.id!==taskId||round.task_checkpoint.goalId!==g.id))throw new GoalQuotaControlError("quota_protocol_invalid");
   const ownerId=`owner-${crypto.randomUUID()}`,executionId=`exec-${crypto.randomUUID()}`,q=g.quota;
   const authority=createGoalQuotaAuthority(db,clock);const requested={goalId:g.id,enrollmentId:q.enrollmentId,ownerId,fence:q.fence+1};let claim=requested;
