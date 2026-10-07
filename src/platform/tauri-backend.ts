@@ -152,6 +152,12 @@ export function createTauriBackend(): Backend {
           throw error;
         }
         assertSupportedSchemaVersion(schemaVersion);
+        // Vite removes this literal branch and its lazy QA chunk from ordinary builds.
+        if (import.meta.env.VITE_QA_GOAL_OBSERVER === "1") {
+          void import("@/lib/qa-goal-snapshot").then(({ installQaGoalObserver }) =>
+            installQaGoalObserver({ select: db.select.bind(db) }, (command, args) => call(command, args)),
+          ).catch(() => {});
+        }
         recordQaStartup("backend_init_resolved");
         return { info, storage: "sqlite", schemaVersion };
       } catch (error) {

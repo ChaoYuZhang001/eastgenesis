@@ -7,6 +7,8 @@ mod net;
 pub mod qa_install_probe;
 #[cfg(any(feature = "qa-faults", test))]
 mod qa_startup_diagnostics;
+#[cfg(any(feature = "qa-faults", test))]
+mod qa_goal_observer;
 
 use std::collections::HashMap;
 #[cfg(feature = "qa-faults")]
@@ -449,6 +451,8 @@ pub fn run() {
     #[cfg(feature = "qa-faults")]
     let diagnostics = qa_startup_diagnostics::initialize(context.config());
     #[cfg(feature = "qa-faults")]
+    qa_goal_observer::initialize();
+    #[cfg(feature = "qa-faults")]
     qa_startup_diagnostics::record(qa_startup_diagnostics::Stage::BuilderStarted);
     let sql_plugin = tauri_plugin_sql::Builder::default()
         .add_migrations("sqlite:eastgenesis.db", migrations());
@@ -571,7 +575,11 @@ pub fn run() {
             qa_ledger_lease_ms,
             qa_fault_exit,
             #[cfg(feature = "qa-faults")]
-            qa_startup_diagnostics::qa_startup_record
+            qa_startup_diagnostics::qa_startup_record,
+            #[cfg(feature = "qa-faults")]
+            qa_goal_observer::qa_goal_snapshot_capability,
+            #[cfg(feature = "qa-faults")]
+            qa_goal_observer::qa_goal_snapshot_request
         ])
         .build(context);
     #[cfg(feature = "qa-faults")]

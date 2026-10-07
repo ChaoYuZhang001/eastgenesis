@@ -143,10 +143,11 @@ struct Writer {
 
 pub(crate) struct Recorder {
     started: Instant,
+    run_id: String,
     writer: Mutex<Writer>,
 }
 
-fn valid_run_id(value: &str) -> bool {
+pub(crate) fn valid_run_id(value: &str) -> bool {
     value.len() == 36
         && value.bytes().enumerate().all(|(index, byte)| {
             if [8, 13, 18, 23].contains(&index) {
@@ -180,6 +181,7 @@ impl Recorder {
         file.flush()?;
         Ok(Self {
             started: Instant::now(),
+            run_id: run_id.to_owned(),
             writer: Mutex::new(Writer {
                 file,
                 seq: 0,
@@ -247,6 +249,13 @@ impl Recorder {
 
 #[cfg(feature = "qa-faults")]
 static RECORDER: OnceLock<Arc<Recorder>> = OnceLock::new();
+
+/// Available only after the guarded isolated startup journal was created.
+/// This identity is an observation capability, never an execution permission.
+#[cfg(feature = "qa-faults")]
+pub(crate) fn observation_run_id() -> Option<String> {
+    RECORDER.get().map(|recorder| recorder.run_id.clone())
+}
 
 #[cfg(feature = "qa-faults")]
 pub(crate) fn record(stage: Stage) {
@@ -403,6 +412,7 @@ mod tests {
     fn journal_is_bounded_fixed_fields_and_never_creates_appdata_or_overwrites() {
         let dir = owned_directory();
         let recorder = Recorder::create(&dir, RUN_ID).unwrap();
+        assert_eq!(recorder.run_id, RUN_ID);
         recorder.record(Stage::NativeStarted, None);
         recorder.record(Stage::FrontendEntry, Some(1));
         recorder.record(Stage::FrontendEntry, Some(1));
@@ -492,6 +502,7 @@ mod tests {
         std::fs::write(&path, b"fixed").unwrap();
         let recorder = Recorder {
             started: Instant::now(),
+            run_id: RUN_ID.to_owned(),
             writer: Mutex::new(Writer {
                 file: File::open(&path).unwrap(),
                 seq: 0,
