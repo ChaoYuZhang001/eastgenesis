@@ -113,7 +113,7 @@ namespace EastGenesisOwnedWindows {
       internal bool SameObject(FileIdentity b) { return Volume==b.Volume&&IdHigh==b.IdHigh&&IdLow==b.IdLow&&Creation==b.Creation&&Directory==b.Directory&&!b.Reparse; }
       internal string Label { get { return Volume.ToString("x8")+":"+IdHigh.ToString("x8")+IdLow.ToString("x8"); } }
     }
-    internal static FileIdentity Identity(SafeFileHandle handle) { FileInfo info;Check.Need(!handle.IsInvalid&&GetFileInformationByHandle(handle,out info),"file_handle_identity");return new FileIdentity(info); }
+    internal static FileIdentity Identity(SafeFileHandle handle) { Check.Need(!handle.IsInvalid,"file_handle_identity");FileInfo info;Check.Need(GetFileInformationByHandle(handle,out info),"file_handle_identity");return new FileIdentity(info); }
     internal static SafeFileHandle OpenFile(string path,uint access,bool directory,bool create,bool shareDelete=false) {
       // Input file readers deny concurrent writes/deletes for the retained read.
       SafeFileHandle h=CreateFile(path,access,shareDelete?7u:(directory?3u:1u),IntPtr.Zero,create?1u:3u,0x00200000u|(directory?0x02000000u:0u),IntPtr.Zero);
