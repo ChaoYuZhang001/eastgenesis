@@ -3,7 +3,7 @@
 import {spawn} from 'node:child_process';
 import {mkdtemp,mkdir,chmod,lstat,readdir,realpath,open} from 'node:fs/promises';
 import {constants} from 'node:fs';
-import {dirname,join,resolve} from 'node:path';
+import {basename,dirname,join,resolve} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {randomUUID} from 'node:crypto';
@@ -98,11 +98,29 @@ async function publishBuildOutputs(binding){
   if(process.env.GITHUB_ACTIONS!=='true')return;const path=process.env.GITHUB_OUTPUT,temp=process.env.RUNNER_TEMP;safePath(path);safePath(temp);need(dirname(path)===`${temp}/_runner_file_commands`&&/^set_output_[A-Za-z0-9-]+$/.test(path.slice(path.lastIndexOf('/')+1)),'ci_output_path_unbound');await noLinks(path);const fd=await open(path,constants.O_WRONLY|constants.O_APPEND|constants.O_NOFOLLOW);
   try{const a=await fd.stat({bigint:true});need(a.isFile()&&a.uid===BigInt(process.getuid())&&a.nlink===1n,'ci_output_file_not_owned');const values={'build-root':binding.buildRoot,'build-id':binding.buildId,'build-dev':binding.buildIdentity.dev,'build-ino':binding.buildIdentity.ino,'plan-sha256':binding.planSha256,'node-sha256':binding.tools.node.sha256,'python-sha256':binding.tools.python.sha256,'tauri-driver-sha256':binding.tools.tauriDriver.sha256,'native-driver-sha256':binding.tools.nativeDriver.sha256,'app-sha256':binding.appSha256,'source-manifest-sha256':binding.sourceManifestSha256,'build-proof-sha256':binding.buildProofSha256};for(const value of Object.values(values))need(typeof value==='string'&&/^[A-Za-z0-9/_.-]+$/.test(value),'ci_output_value_invalid');await fd.writeFile(Object.entries(values).map(([k,v])=>`${k}=${v}\n`).join(''));await fd.sync();const b=await fd.stat({bigint:true}),named=await lstat(path,{bigint:true});need(a.dev===b.dev&&a.ino===b.ino&&b.dev===named.dev&&b.ino===named.ino&&b.nlink===1n,'ci_output_file_changed');}finally{await fd.close();}
 }
+// Retain the exact four original format predicates. Publish only safe format
+// flags and allowlisted basenames, never header bytes, full paths or env.
+export function compileExecutableFormatDiagnostic({cargo,rustc,pnpm,cargoData,rustcData,pnpmData}){
+  [cargo,rustc,pnpm].forEach(p=>safePath(p));need([cargoData,rustcData,pnpmData].every(Buffer.isBuffer),'compile_format_diagnostic_input_invalid');
+  const toolBasename=path=>{const name=basename(path);return ['cargo','rustc','pnpm','pnpm.cjs'].includes(name)?name:'other';},elfMagic=data=>data.subarray(0,4).equals(Buffer.from([0x7f,0x45,0x4c,0x46]));
+  return {schemaVersion:1,kind:'linux-compile-tool-format-diagnostic-v1',tools:{cargo:{basename:toolBasename(cargo),elfMagic:elfMagic(cargoData)},rustc:{basename:toolBasename(rustc),elfMagic:elfMagic(rustcData)},pnpm:{basename:toolBasename(pnpm),entrypointPathExpected:pnpm.endsWith('/bin/pnpm.cjs'),nodeMarkerInFirst128:pnpmData.subarray(0,128).toString('utf8').includes('node'),shebangPresent:pnpmData.subarray(0,2).equals(Buffer.from('#!'))}},fullPathsIncluded:false,rawBytesIncluded:false,environmentIncluded:false,nativeExecutableExecuted:false};
+}
+export function validateCompileExecutableFormats(diagnostic){
+  need(diagnostic?.tools?.cargo?.elfMagic===true,'compile_cargo_elf_unbound');
+  need(diagnostic?.tools?.rustc?.elfMagic===true,'compile_rustc_elf_unbound');
+  need(diagnostic?.tools?.pnpm?.entrypointPathExpected===true,'compile_pnpm_entrypoint_path_unbound');
+  need(diagnostic?.tools?.pnpm?.nodeMarkerInFirst128===true,'compile_pnpm_node_header_unbound');return true;
+}
+export async function publishCompileExecutableFormatDiagnostic(outputDir,diagnostic,publish=jsonFile){
+  let formatError;try{validateCompileExecutableFormats(diagnostic);}catch(e){formatError=e;}
+  try{await publish(`${outputDir}/compile-tool-format-diagnostics.json`,diagnostic);}catch{if(formatError)throw formatError;throw fault('compile_tool_format_diagnostic_write_failed');}
+  if(formatError)throw formatError;return diagnostic;
+}
 export async function prepareBuild(options,outputDir){
   assertBootstrapHost();const sourceRoot=options['--source-root'];await ownedDirectory(sourceRoot);const source=await capturePublicSource({sourceRoot,expectedHead:options['--expected-head'],expectedTree:options['--expected-tree'],ci:ciProvenance(options)}),cargoConfiguration=await preflightCargoConfiguration(sourceRoot,source),versions=await sourceVersions(sourceRoot);
   const node=await canonicalExecutable(process.execPath),cargo=await canonicalExecutable(options['--cargo']),rustc=await canonicalExecutable(options['--rustc']);safePath(options['--pnpm']);const pnpm=await realpath(options['--pnpm']),python=await canonicalExecutable(options['--python']),tauriDriver=await canonicalExecutable(options['--tauri-driver']),nativeDriver=await canonicalExecutable(options['--native-driver']);
   need(cargo.endsWith('/cargo')&&rustc.endsWith('/rustc')&&dirname(cargo)===dirname(rustc),'rustup_proxy_or_toolchain_mismatch');
-  const cargoBytes=await readPinned(cargo,{executable:true}),rustcBytes=await readPinned(rustc,{executable:true}),pnpmBytes=await readInstalledDependency(pnpm,{executable:true,max:2097152});need(cargoBytes.data.subarray(0,4).equals(Buffer.from([0x7f,0x45,0x4c,0x46]))&&rustcBytes.data.subarray(0,4).equals(Buffer.from([0x7f,0x45,0x4c,0x46]))&&pnpm.endsWith('/bin/pnpm.cjs')&&pnpmBytes.data.subarray(0,128).toString('utf8').includes('node'),'compile_executable_format_unbound');
+  const cargoBytes=await readPinned(cargo,{executable:true}),rustcBytes=await readPinned(rustc,{executable:true}),pnpmBytes=await readInstalledDependency(pnpm,{executable:true,max:2097152});const toolFormatDiagnostic=compileExecutableFormatDiagnostic({cargo,rustc,pnpm,cargoData:cargoBytes.data,rustcData:rustcBytes.data,pnpmData:pnpmBytes.data});await publishCompileExecutableFormatDiagnostic(outputDir,toolFormatDiagnostic);
   const pnpmPackage=await readInstalledDependency(`${dirname(dirname(pnpm))}/package.json`,{max:2097152});need(JSON.parse(pnpmPackage.data).name==='pnpm'&&JSON.parse(pnpmPackage.data).version==='9.15.4','pnpm_version_unbound');
   const prepRoot=await freshRoot('eastgenesis-linux-full-goal-build-'),buildId=randomUUID(),buildIdentity=await ownedDirectory(prepRoot);await subdirs(prepRoot,['home','tmp','config','data','cache','runtime','cargo-home','target','probe','bin']);
   const shimBody=Buffer.from(`#!${node}\nconst {spawnSync}=require('node:child_process');\nconst result=spawnSync(${JSON.stringify(node)},[${JSON.stringify(pnpm)},...process.argv.slice(2)],{env:process.env,stdio:'inherit'});\nif(result.error)process.exitCode=127;else if(result.signal)process.exitCode=128;else process.exitCode=result.status===null?127:result.status;\n`),pnpmShim=await exclusive(`${prepRoot}/bin/pnpm`,shimBody,0o500);

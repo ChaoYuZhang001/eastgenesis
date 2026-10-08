@@ -156,8 +156,44 @@ export async function withOwnedChildControl({intentPath,spawnOriginal,perform,ac
       if(!outcome.cleanupVerified&&!primary)primary=Object.assign(new Error('helper_cleanup_unverified'),{fixedCode:'helper_cleanup_unverified'});
     }
   }
-  if(primary){Object.assign(primary,{cleanupEvidence:outcome});throw primary;}
+  if(primary){
+    // Captures are bounded by the existing combined 1 MiB input limit. Keep
+    // the original failure even if attaching diagnostic metadata fails.
+    try{Object.assign(primary,{cleanupEvidence:outcome,helperExit:exit,
+      boundedHelperOutput:{captureStarted:child!==null,stdout:Buffer.concat(stdout),stderr:Buffer.concat(stderr),outputLimitBytes:1048576,observedOutputBytes:outputBytes,truncated:outputExceeded}});}catch{}
+    throw primary;
+  }
   need(outcome.cleanupVerified,'helper_cleanup_unverified');return Object.freeze({value:result,...outcome});
+}
+
+export function windowsFailureMetadata(error){
+  const cleanup={};for(const key of ['originalObjectControlled','helperExitObserved','helperCloseObserved','pipesClosedObserved','cleanupVerified'])cleanup[key]=typeof error?.cleanupEvidence?.[key]==='boolean'?error.cleanupEvidence[key]:null;
+  cleanup.allDescendantWaitClaim=false;
+  const code=typeof error?.fixedCode==='string'&&/^[a-z][a-z0-9_]{0,79}$/.test(error.fixedCode)?error.fixedCode:'windows_native_failed';
+  const exit=error?.helperExit;const helperExit=exit&&typeof exit==='object'?{code:Number.isSafeInteger(exit.code)&&exit.code>=-0x80000000&&exit.code<=0xffffffff?exit.code:null,signal:typeof exit.signal==='string'&&/^SIG[A-Z]{1,12}$/.test(exit.signal)?exit.signal:null}:null;
+  return {schemaVersion:1,code,nativeSucceeded:false,fullGoal:false,appSession:false,providerRequests:0,cleanupEvidence:cleanup,helperExit};
+}
+
+export async function assertWindowsDiagnosticDirectory(inputPath){
+  need(typeof inputPath==='string'&&isAbsolute(inputPath)&&resolve(inputPath)===inputPath,'diagnostic_root_invalid');
+  // Reject forbidden components before any metadata lookup or content access.
+  need(!inputPath.split(/[\\/]/).some(part=>part.toLowerCase()==='memory.md'||/^\.env(?:\.|$)/i.test(part)),'diagnostic_root_forbidden');
+  let cursor=inputPath;
+  while(true){const info=await lstat(cursor);need(info.isDirectory()&&!info.isSymbolicLink(),'diagnostic_root_link');const parent=dirname(cursor);if(parent===cursor)break;cursor=parent;}
+  need(await realpath(inputPath)===inputPath,'diagnostic_root_link');
+}
+
+export async function persistWindowsFailureDiagnostics(controllerRoot,error){
+  await assertWindowsDiagnosticDirectory(controllerRoot);
+  const metadata=windowsFailureMetadata(error),captured=error?.boundedHelperOutput;
+  const valid=captured?.captureStarted===true&&Buffer.isBuffer(captured.stdout)&&Buffer.isBuffer(captured.stderr)&&captured.stdout.length+captured.stderr.length<=1048576&&captured.outputLimitBytes===1048576;
+  const writes={stdout:'not_captured',stderr:'not_captured'};
+  for(const [key,name] of [['stdout','native-helper.stdout'],['stderr','native-helper.stderr']])if(valid){
+    try{await writeFile(join(controllerRoot,name),captured[key],{flag:'wx',mode:0o600});writes[key]='saved';}catch{writes[key]='failed';}
+  }
+  const report={...metadata,helperOutputCaptured:valid,helperOutputLimitBytes:1048576,helperOutputCapturedBytes:valid?captured.stdout.length+captured.stderr.length:0,helperOutputTruncated:valid?captured.truncated===true:null,diagnosticWrites:{...writes}};
+  let outerFailure='failed';try{await writeFile(join(controllerRoot,'outer-failure.json'),JSON.stringify(report),{flag:'wx',mode:0o600});outerFailure='saved';}catch{}
+  return Object.freeze({...report,diagnosticWrites:{...writes,outerFailure}});
 }
 
 export async function runWindowsNativeSixCases(config){

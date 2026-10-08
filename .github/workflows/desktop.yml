@@ -149,7 +149,7 @@ jobs:
             if ($parseErrors.Count -ne 0) { throw 'owned_qa_powershell_parse_failed' }
           }
           Add-Type -Path tools/owned-lifecycle/windows-owned-kernel.cs
-          node tools/owned-lifecycle/windows-native-cases-cli.mjs --pwsh (Join-Path $PSHOME 'pwsh.exe')
+          node tools/owned-lifecycle/windows-native-cases-cli.mjs --pwsh (Join-Path $PSHOME 'pwsh.exe') --output-parent "${{ runner.temp }}"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           # Extra expected-RED candidate is a separate runner/report. It is not
           # invoked by this fragment and cannot change positive six == 12 handles.
@@ -163,6 +163,7 @@ jobs:
             ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/native-helper.stdout
             ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/native-helper.stderr
             ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/outer-failure.json
+            ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/outer-helper-cleanup-intent.jsonl
             ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/eg-win-owned-*/lifecycle.jsonl
           if-no-files-found: error
           retention-days: 14

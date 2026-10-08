@@ -7,7 +7,7 @@ import {createHash} from 'node:crypto';
 import {EventEmitter} from 'node:events';
 import {PassThrough} from 'node:stream';
 import {readFile,mkdir,realpath} from 'node:fs/promises';
-import {assertWindowsRuntimeHost,windowsOperationEnd,acceptWindowsAcknowledgement,quoteWindowsArgument,readPinnedRuntimeInput,verifyWindowsJournalRows,validateWindowsNativeReport,runWindowsNativeSixCases,withOwnedChildControl} from './windows-owned-runtime.mjs';
+import {assertWindowsRuntimeHost,windowsOperationEnd,acceptWindowsAcknowledgement,quoteWindowsArgument,readPinnedRuntimeInput,verifyWindowsJournalRows,validateWindowsNativeReport,runWindowsNativeSixCases,withOwnedChildControl,persistWindowsFailureDiagnostics,assertWindowsDiagnosticDirectory} from './windows-owned-runtime.mjs';
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 async function fresh(action){const root=await mkdtemp(join(await realpath(tmpdir()),'eg-win-primitive-fs-'));await chmod(root,0o700);try{await action(root);}finally{await rm(root,{recursive:true,force:true});}}
 const fixed=code=>error=>error?.fixedCode===code;
@@ -125,6 +125,42 @@ test('pure late operation deadline still controls mock original and retains RED'
 test('pure failed original termination never claims observed exit cleanup',async()=>fresh(async root=>{
   const child=new MockOriginalChild({killFails:true}),args=scopeArgs(root,child,async()=>{throw Object.assign(new Error('synthetic write failure'),{fixedCode:'synthetic_failure'});});args.cleanupCapMs=20;
   await assert.rejects(withOwnedChildControl(args),error=>{assert.equal(error.fixedCode,'synthetic_failure');assert.equal(error.cleanupEvidence.cleanupVerified,false);assert.equal(error.cleanupEvidence.helperExitObserved,false);assert.equal(error.cleanupEvidence.allDescendantWaitClaim,false);return true;});assert.equal(child.killCount,1);
+}));
+test('actual fresh-FS nonzero mock helper retains bounded stderr and original failure with cleanup evidence',async()=>fresh(async root=>{
+  const child=new MockOriginalChild();let failure;
+  const args=scopeArgs(root,child,async scope=>{
+    queueMicrotask(()=>{child.stderr.write('synthetic native fixture error\n');child.emit('exit',23,null);child.stdout.destroy();child.stderr.destroy();child.emit('close',23,null);});
+    return scope.waitForExitAndClose();
+  });let spawned=0;args.spawnOriginal=()=>{spawned++;return child;};
+  try{await withOwnedChildControl(args);}catch(error){failure=error;}
+  assert.equal(failure.fixedCode,'native_runner_failed');assert.equal(failure.helperExit.code,23);assert.equal(failure.cleanupEvidence.cleanupVerified,true);
+  assert.equal(failure.boundedHelperOutput.stderr.toString(),'synthetic native fixture error\n');
+  const diagnostics=await persistWindowsFailureDiagnostics(root,failure);
+  assert.equal(diagnostics.code,'native_runner_failed');assert.equal(diagnostics.cleanupEvidence.cleanupVerified,true);assert.equal(diagnostics.helperExit.code,23);
+  assert.deepEqual(diagnostics.diagnosticWrites,{stdout:'saved',stderr:'saved',outerFailure:'saved'});
+  assert.equal(await readFile(join(root,'native-helper.stderr'),'utf8'),'synthetic native fixture error\n');
+  const retained=JSON.parse(await readFile(join(root,'outer-failure.json'),'utf8'));assert.equal(retained.code,'native_runner_failed');assert.equal(retained.cleanupEvidence.allDescendantWaitClaim,false);
+  assert.equal(spawned,1);assert.equal(child.killCount,0);
+}));
+test('actual fresh-FS diagnostic write failures remain independent and preserve primary and cleanup',async()=>fresh(async root=>{
+  await mkdir(join(root,'native-helper.stdout'));await mkdir(join(root,'outer-failure.json'));
+  const primary=Object.assign(new Error('synthetic primary'),{fixedCode:'synthetic_failure',cleanupEvidence:{originalObjectControlled:true,helperExitObserved:true,helperCloseObserved:true,pipesClosedObserved:true,cleanupVerified:true,allDescendantWaitClaim:false},helperExit:{code:17,signal:null},boundedHelperOutput:{captureStarted:true,stdout:Buffer.from('synthetic stdout'),stderr:Buffer.from('synthetic stderr'),outputLimitBytes:1048576,truncated:false}});
+  const result=await persistWindowsFailureDiagnostics(root,primary);
+  assert.deepEqual(result.diagnosticWrites,{stdout:'failed',stderr:'saved',outerFailure:'failed'});assert.equal(result.code,'synthetic_failure');assert.equal(primary.fixedCode,'synthetic_failure');assert.equal(primary.cleanupEvidence.cleanupVerified,true);
+  assert.equal(result.cleanupEvidence.cleanupVerified,true);assert.equal(result.helperExit.code,17);assert.equal(await readFile(join(root,'native-helper.stderr'),'utf8'),'synthetic stderr');
+}));
+test('actual fresh-FS oversized diagnostic buffers are refused without exposing arbitrary error fields',async()=>fresh(async root=>{
+  const error=Object.assign(new Error('unpersisted arbitrary message'),{fixedCode:'synthetic_failure',secretField:'synthetic must not persist',boundedHelperOutput:{captureStarted:true,stdout:Buffer.alloc(1048577),stderr:Buffer.alloc(0),outputLimitBytes:1048576,truncated:false}});
+  const result=await persistWindowsFailureDiagnostics(root,error);assert.equal(result.helperOutputCaptured,false);assert.deepEqual(result.diagnosticWrites,{stdout:'not_captured',stderr:'not_captured',outerFailure:'saved'});
+  const raw=await readFile(join(root,'outer-failure.json'),'utf8');assert.equal(raw.includes('unpersisted arbitrary message'),false);assert.equal(raw.includes('secretField'),false);assert.equal(raw.includes('synthetic must not persist'),false);
+}));
+test('forbidden diagnostic Memory and env components reject before nonexistent path lookup',async()=>fresh(async root=>{
+  for(const name of ['MEMORY.md','.env','.env.local'])await assert.rejects(assertWindowsDiagnosticDirectory(join(root,name,'nonexistent')),fixed('diagnostic_root_forbidden'));
+}));
+test('actual fresh-FS diagnostic parent rejects leaf and ancestor directory links',async()=>fresh(async root=>{
+  const target=join(root,'owned-directory'),linked=join(root,'linked-directory');await mkdir(target);await mkdir(join(target,'owned-child'));await symlink(target,linked);
+  await assert.rejects(assertWindowsDiagnosticDirectory(linked),fixed('diagnostic_root_link'));
+  await assert.rejects(assertWindowsDiagnosticDirectory(join(linked,'owned-child')),fixed('diagnostic_root_link'));
 }));
 test('pure report parser refuses incomplete App boundary',()=>{
   assert.throws(()=>validateWindowsNativeReport({schemaVersion:1,platform:'win32',nativeRun:true,passed:true,cases:[]}),fixed('native_report_invalid'));
