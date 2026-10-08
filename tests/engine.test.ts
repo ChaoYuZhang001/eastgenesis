@@ -41,6 +41,15 @@ describe("引擎组装", () => {
     expect(of("deepseek", narrow)).toMatchObject({ ok: false, reason: "适配器未实现" });
   });
 
+  it("自定义 Provider 的未知协议 fail-closed，不进入自动路由也不静默当成 OpenAI", async () => {
+    const future = { ...relay, id: "custom:future", protocol: "future" as never };
+    const profile = effectiveProfiles({}, [future]).find((p) => p.provider === future.id)!;
+    const statuses: KeyStatus[] = [{ id: future.id, configured: true, source: "keychain", needs_key: true }];
+    const available = statusAvailability(statuses, [future], new HealthTracker());
+    expect(available(profile)).toEqual({ ok: false, reason: "自定义 Provider 协议未声明可恢复契约" });
+    await expect(providerFactory(createMockBackend(), [future])({ provider: future.id })).rejects.toMatchObject({ code: "config" });
+  });
+
   it("地域偏好：providerFactory 按地域拼 base URL，未知地域回到默认", async () => {
     const seen: string[] = [];
     const b = createMockBackend({ configured: ["qwen", "kimi"] });

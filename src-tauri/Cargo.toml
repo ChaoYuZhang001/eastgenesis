@@ -10,6 +10,10 @@ license.workspace = true
 name = "eastgenesis_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+[features]
+default = []
+qa-faults = ["tauri-plugin-sql/qa-load-observer"]
+
 # Tauri 的 crate 必须来自同一次发布。这里固定版本号只管得住顶层，内部 crate（tauri-utils 等）由 Cargo.lock 固定。
 # 升级时 tauri、tauri-build、tauri-plugin-sql 和 package.json 里的 @tauri-apps/* 一起改，并提交新的 Cargo.lock。
 [build-dependencies]
@@ -19,10 +23,13 @@ tauri-build = { version = "=2.7.0", features = [] }
 eg-core = { path = "../crates/eg-core" }
 tauri = { version = "=2.12.0", features = [] }
 tauri-plugin-sql = { version = "=2.5.0", features = ["sqlite"] }
+tauri-plugin-dialog = "=2.4.0"
 serde.workspace = true
 serde_json.workspace = true
 # 同步 HTTP 客户端（默认 rustls），用于代理模型请求；Key 只在 Rust 进程内
 ureq = "=2.12.1"
+reqwest = { version = "=0.12.28", default-features = false, features = ["rustls-tls"] }
+tokio = { version = "=1.53.1", features = ["rt", "sync", "time"] }
 keyring = "=3.6.3"
 
 # 钥匙串后端按平台启用

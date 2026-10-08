@@ -86,6 +86,37 @@ for (const kind of ["mock", "sqlite"] as const) {
       expect((await b.listUsage(15)).map((c) => c.id)).toEqual(["u2"]);
       expect(Object.keys((await b.listUsage(0))[0]!)).not.toContain("cost");
     });
+
+    it("运行中的回合可以作为脱敏 checkpoint 保存，供下次启动恢复", async () => {
+      const id = newSessionId();
+      await b.saveSession({
+        id,
+        title: "恢复",
+        project_id: null,
+        turns: [turn({ status: "running", summary: null, endedAt: null, events: [{ type: "plan", revision: 1 }] })],
+        created_at: 1,
+        updated_at: 2,
+      });
+      const saved = (await b.listSessions()).find((s) => s.id === id);
+      expect(saved?.turns[0]).toMatchObject({ status: "running", summary: null, endedAt: null });
+      expect(saved?.turns[0]?.events).toEqual([{ type: "plan", revision: 1 }]);
+    });
+
+    it("运行中的流式回合保存有限的部分输出，恢复时不泄漏凭据", async () => {
+      const id = newSessionId();
+      const partial = `已经收到一部分\nBearer ${SECRET}`;
+      await b.saveSession({
+        id,
+        title: "流式恢复",
+        project_id: null,
+        turns: [turn({ status: "running", summary: null, endedAt: null, streamingText: partial, streamingInterrupted: true })],
+        created_at: 1,
+        updated_at: 2,
+      });
+      const saved = (await b.listSessions()).find((s) => s.id === id);
+      expect(saved?.turns[0]).toMatchObject({ status: "running", streamingInterrupted: true, streamingText: "已经收到一部分\nBearer [REDACTED]" });
+      expect(JSON.stringify(saved)).not.toContain(SECRET);
+    });
   });
 }
 
@@ -101,5 +132,28 @@ describe("会话的规范化", () => {
     expect(kept[0]!.text).toHaveLength(MAX_FIELD);
     expect(parseTurns("{坏")).toEqual([]);
     expect(parseTurns(JSON.stringify([turn(), { goal: "没有 id" }, 3]))).toHaveLength(1);
+
+    const codex = normalizeSession({
+      id: newSessionId(),
+      title: "Codex 会话",
+      project_id: null,
+      turns: [turn({ surfaceHint: "codex" })],
+      created_at: 1,
+      updated_at: 1,
+    });
+    expect(codex.turns[0]!.surfaceHint).toBe("codex");
+    // 老记录没有能力面字段时，规范化结果仍保持可读且显式为空。
+    expect(parseTurns(JSON.stringify([turn()]))[0]!.surfaceHint).toBeNull();
+
+    const partial = normalizeSession({
+      id: newSessionId(),
+      title: "部分输出",
+      project_id: null,
+      turns: [turn({ streamingText: "x".repeat(200_010), streamingInterrupted: true })],
+      created_at: 1,
+      updated_at: 1,
+    });
+    expect(partial.turns[0]!.streamingText).toHaveLength(200_000);
+    expect(partial.turns[0]!.streamingInterrupted).toBe(true);
   });
 });

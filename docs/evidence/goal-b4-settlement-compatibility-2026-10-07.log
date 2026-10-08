@@ -1,0 +1,10 @@
+
+ RUN  v3.0.5 /private/tmp/eastgenesis-goal-settlement-b4-20261007/base
+
+ ✓ tests/goal-settlement-recovery.test.ts (7 tests | 3 skipped) 244ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed | 3 skipped (7)
+   Start at  14:58:54
+   Duration  1.51s (transform 569ms, setup 108ms, collect 767ms, tests 244ms, environment 0ms, prepare 161ms)
+

@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "historical-native-and-sql-path-final-local-gates",
+  "recordedAt": "2026-10-07T02:43:59.756Z",
+  "localParentRevision": "a035aa93659a6b834a85aa166677fd663913b9b5",
+  "fullFrontend": {
+    "command": "pnpm exec vitest run --minWorkers=2 --maxWorkers=2",
+    "handle": 82000,
+    "exitCode": 0,
+    "filesPassed": 103,
+    "testsPassed": 1017,
+    "skipped": 0,
+    "startedAt": "2026-10-07T02:42:50.536Z",
+    "endedAt": "2026-10-07T02:43:59.756Z",
+    "sourceInputs": 549,
+    "sourceStartEndUnchanged": true,
+    "mcpBinaryStartEndUnchanged": true,
+    "manifestSha256": "3d744932840bd16ad6f55e7b9999ef936e87fae4fd761ca7fb77bdcbaccc28f9",
+    "logSha256": "98c69853ded160217fa265cd92000932a407ded0eec2a2898d665b250cf98c28",
+    "rootIndependentlyRehashed": true
+  },
+  "typecheck": {
+    "command": "pnpm typecheck",
+    "handle": 62724,
+    "exitCode": 0,
+    "logSha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba"
+  },
+  "privateConfigSmoke": {
+    "command": "pnpm exec vitest run tests/custom-providers.test.ts tests/llm.test.ts tests/ui-settings.test.tsx --minWorkers=2 --maxWorkers=2",
+    "handle": 30368,
+    "exitCode": 0,
+    "filesPassed": 3,
+    "testsPassed": 55,
+    "skipped": 0,
+    "realProviderOptIn": false,
+    "logSha256": "f5ea68107bdbaa27a5dfc3214885de252295ff0126d49f8a49f814e5a9414c21"
+  },
+  "historicalNative": {
+    "reportSha256": "315bdc257346809fc6ce5c1cc45d15dee4f10c3353d74fe28293c61be335c4d3",
+    "harnessSha256": "90f02f5f5d02428e1a791f7f136af6b898553e3a50cb398199daa1d568073d8a",
+    "assertions": 32,
+    "actions": 7,
+    "exitCode": 0,
+    "readerRevision": "a035aa93659a6b834a85aa166677fd663913b9b5"
+  },
+  "inputGateAttempts": {
+    "initialFailedStage": "scoped_git_project_invalid",
+    "initialNativeExecutionAttempted": false,
+    "initialReportSha256": "35d044692437f726ce423a5afd115619f9b7cbed9ceb35a0d30c185df1b14c69",
+    "afterCanonicalFix": {
+      "kind": "historical-goal-root-input-gates",
+      "schemaVersion": 1,
+      "startedAt": "2026-10-07T02:36:22.932Z",
+      "harnessSha256": "90f02f5f5d02428e1a791f7f136af6b898553e3a50cb398199daa1d568073d8a",
+      "results": [
+        {
+          "name": "partial-rejected",
+          "exitCode": 1,
+          "expectedCode": 1,
+          "failedStage": "compiled_input_coverage_missing",
+          "passed": false,
+          "nativeExecutionAttempted": false,
+          "inputGatePassed": false,
+          "inputEndGatePassed": false,
+          "valid": true,
+          "reportSha256": "ddc90388ed07576b3e53ff413646fc52ff7d3342c2bb6e5a68c17273bbb27383"
+        },
+        {
+          "name": "full-accepted",
+          "exitCode": 0,
+          "expectedCode": 0,
+          "failedStage": null,
+          "passed": false,
+          "nativeExecutionAttempted": false,
+          "inputGatePassed": true,
+          "inputEndGatePassed": true,
+          "valid": true,
+          "reportSha256": "e504be3fc63f7b571133822bd6631d4de496d45f6c8c30bbe24cd57ed21aa655"
+        }
+      ],
+      "passed": true,
+      "nativeProof": false
+    }
+  },
+  "inputTests": {
+    "handle": 96532,
+    "filesPassed": 1,
+    "testsPassed": 19,
+    "exitCode": 0,
+    "logSha256": "646dd02391a4e6070c839f7783618335a941a7754c2690431306ea8536332112"
+  },
+  "evidenceBoundary": {
+    "excluded": [
+      "patched Windows NSIS startup until new CI",
+      "real Provider availability/failover",
+      "production released-version upgrade",
+      "code signing/notarization",
+      "three-platform performance baseline"
+    ]
+  }
+}

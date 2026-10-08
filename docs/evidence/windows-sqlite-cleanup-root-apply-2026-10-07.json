@@ -1,0 +1,11 @@
+{
+  "observedAt": "2026-10-07T06:01:59.070902+00:00",
+  "applied": true,
+  "localParentRevision": "c16ae0274a9066709baf8047951675b299b76092",
+  "patchSha256": "b968fd36fe26b1b590f3a1581a8de8ad95954f48c15fd1e427b12473dda8c992",
+  "target": "vendor/tauri-plugin-sql/src/sqlite_path_tests.rs",
+  "candidateSha256": "468fcfde814f6f77aa72f37acc637f8a15f02b79ac542b51d2bb44c3cfc9a13a",
+  "windowsCompiledOrExecuted": false,
+  "productionSqlPathMappingChanged": false,
+  "fullNativeGoalPassed": false
+}

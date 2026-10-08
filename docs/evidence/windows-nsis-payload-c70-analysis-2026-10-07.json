@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "windows-nsis-payload-mismatch-analysis",
+  "analyzedAtUtc": "2026-10-06T22:12:08Z",
+  "run": {
+    "runId": 37535219828,
+    "headSha": "c70ea1d67979f09c05227b5c078890dd8112d232",
+    "jobId": 112514305525,
+    "conclusion": "failure",
+    "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37535219828",
+    "artifactId": 11446833171,
+    "artifactName": "eastgenesis-desktop-Windows",
+    "artifactBytes": 12170752,
+    "artifactSha256": "882cf346c2235a351e8f941b496648907fbef8f6dca02ec39672c6fd66e7de70"
+  },
+  "historicalFailure": {
+    "fixedReport": "eastgenesis-c70-windows-install-failure.json",
+    "fixedReportSha256": "4e34aabd9b60f290125c8ef87d59085e3a2fb995387e8851e70111d3043e4bf9",
+    "error": "payload_mismatch",
+    "sourceBinaryIsolationProbe": true,
+    "nsisInstall": true,
+    "launchCount": 0,
+    "attempts": { "install": true, "reinstall": false, "uninstall": true },
+    "cleanup": { "nsisUninstall": true, "installedBinaryRemoved": true, "uninstallRegistryRemoved": true },
+    "historicalReportChanged": false
+  },
+  "actualPackage": {
+    "relativePath": "target/release/bundle/nsis/EastGenesis Desktop_0.1.0_x64-setup.exe",
+    "bytes": 5338547,
+    "sha256": "c91bd8d0d588149723183fb49a76ab86e036877e303bdefb2ed16055e8386992",
+    "extraction": { "tool": "7-Zip 23.01 console", "operation": "archive extraction only; no Windows executable was run", "format": "NSIS-3 Unicode, solid LZMA:23" },
+    "mainPayload": {
+      "name": "eastgenesis-desktop.exe",
+      "bytes": 15993856,
+      "sha256": "a3a9f11e8e4d94e4d8bd3aaadf89a8469cc46b9b290dbe0b937777b9a8746871",
+      "qaProbeSupportMarkerCount": 1,
+      "unknownBundleMarker": { "value": "__TAURI_BUNDLE_TYPE_VAR_UNK", "count": 0 },
+      "nsisBundleMarker": { "value": "__TAURI_BUNDLE_TYPE_VAR_NSS", "count": 2, "byteOffsets": [12798076, 12948479] },
+      "peCertificateTable": { "offset": 0, "bytes": 0 }
+    }
+  },
+  "pinnedSource": {
+    "tauriCliVersion": "2.12.0",
+    "tauriBundlerCrateVersion": "2.10.0",
+    "tag": "tauri-cli-v2.12.0",
+    "commit": "447fa9f3f993fe77724189e355078b38ce20baea",
+    "patchRule": { "from": "__TAURI_BUNDLE_TYPE_VAR_UNK", "to": "__TAURI_BUNDLE_TYPE_VAR_NSS", "asciiBytesEach": 27, "occurrence": "first matching UNK token" },
+    "bundleSource": "https://github.com/tauri-apps/tauri/blob/447fa9f3f993fe77724189e355078b38ce20baea/crates/tauri-bundler/src/bundle.rs#L40-L218",
+    "sourceSequence": [
+      { "lines": [131, 145], "operation": "copy the complete original main executable into a temporary file" },
+      { "lines": [90, 96], "operation": "replace the bundle-type token in the main executable before packaging" },
+      { "lines": [193, 193], "operation": "run NSIS bundling against the patched main executable" },
+      { "lines": [212, 218], "operation": "truncate and restore the original main executable after bundling" }
+    ],
+    "nsisMainBinaryInput": "https://github.com/tauri-apps/tauri/blob/447fa9f3f993fe77724189e355078b38ce20baea/crates/tauri-bundler/src/bundle/windows/nsis/mod.rs#L489-L492",
+    "nsisPayloadFileCommand": "https://github.com/tauri-apps/tauri/blob/447fa9f3f993fe77724189e355078b38ce20baea/crates/tauri-bundler/src/bundle/windows/nsis/installer.nsi#L639-L649"
+  },
+  "logEvidence": {
+    "file": "eastgenesis-c70-windows-112514305525.log",
+    "lines": [3041, 3044],
+    "observations": [
+      "isolated fixture application build completed",
+      "bundler logged patching the main executable with bundle type nsis",
+      "makensis produced the installer subsequently used by the smoke test"
+    ]
+  },
+  "conclusion": {
+    "verifiedMechanism": "Default NSIS bundling embeds a patched executable, then restores the loose source executable. Comparing the installed executable with the restored source SHA256 uses the wrong reference bytes.",
+    "actualPayloadConsistentWithMechanism": true,
+    "historicalSourceBytesOrSha256Retained": false,
+    "historicalInstalledBytesOrSha256Retained": false,
+    "generatedNsisConfigurationRetained": false,
+    "historicalByteDifferenceExclusivityVerified": false,
+    "limitation": "The historical artifact contains the installer and reports, but no loose source executable, installed-file digest or generated installer.nsi. This analysis proves the bundler mechanism and inspects the actual package payload; it does not claim that every historical source/installed byte difference was compared or that only three bytes differed. The two NSS occurrences must not be blindly reverse-patched."
+  },
+  "localFixContract": {
+    "strategy": "tauri_cli_2_12_0_nsis_bundle_type_patch",
+    "requiresInstalledCliVersion": "2.12.0",
+    "requiresUniqueUnpatchedSourceMarker": true,
+    "expectedPayload": "copy current source bytes in memory and apply the single fixed same-length UNK-to-NSS replacement",
+    "installAndRepairGate": "complete installed/repaired SHA256 must equal complete expected payload SHA256",
+    "probeBinding": "isolation probe remains bound to unchanged pristine source SHA256",
+    "reportDigests": ["sourceSha256", "expectedNsisSha256", "installedSha256", "repairedSha256"],
+    "scope": "unsigned isolated QA fixture; signed payload identity requires separate validation",
+    "windowsRuntimeRevalidation": "pending a new Windows CI run; local unit tests are not an NSIS runtime pass"
+  }
+}

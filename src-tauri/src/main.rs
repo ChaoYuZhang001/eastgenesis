@@ -2,6 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
+    if let Some(code) = eastgenesis_desktop_lib::qa_install_probe::early_exit_code() {
+        std::process::exit(code);
+    }
     // 内置 MCP 文件服务器：应用以子进程方式自启动（--mcp-files --allow …），不创建窗口，JSON-RPC 走标准输入输出
     let mut args = std::env::args_os().skip(1);
     if args.next().is_some_and(|a| a == "--mcp-files") {

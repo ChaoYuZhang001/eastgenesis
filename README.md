@@ -2,13 +2,13 @@
 
 汇天下之智 · 开创每一个可能
 
-一个不绑定模型厂商的 Agent 桌面应用。它按任务需要的能力、质量、成本和延迟自动选择模型，调用失败时换一家 Provider 继续执行；选了谁、为什么选、换过谁，都显示在路由面板和执行时间线上。支持 7 家官方 API（OpenAI、Anthropic、Gemini、DeepSeek、通义千问、Kimi、Ollama），也可以接中转站或其他兼容 OpenAI、Anthropic 协议的端点。
+一个不绑定模型厂商的统一 AI 工作台：用户面对一个 Composer，Chat、Work、Codex 是同一任务在聊天、资料处理和本地开发上的能力面，不是三个割裂的产品。系统按任务需要的能力、质量、成本和延迟自动选择模型，路由过程透明可追踪，调用失败时换一家 Provider 继续执行；选了谁、为什么选、换过谁，以及当前采用哪个工作能力面，都显示在路由面板和执行时间线上。多步骤任务会持久化计划和步骤结果，失败、取消或预算耗尽后可以从第一个未完成步骤继续，并重新生成工具参数。支持 7 家官方 API（OpenAI、Anthropic、Gemini、DeepSeek、通义千问、Kimi、Ollama），也可以接中转站或其他兼容 OpenAI、Anthropic 协议的端点。
 
 当前版本 0.1.0，未发布，没有签名。各里程碑的进度见 `docs/TASKS.md`，交付内容和验证情况见 `DELIVERY.md`。
 
 ## 技术栈
 
-Tauri 2（Rust）· React 18 + TypeScript + Vite · Zustand · shadcn/ui + Tailwind CSS · SQLite（tauri-plugin-sql）· Vitest + cargo test · pnpm 9.15.4
+Tauri 2（Rust）· React 18 + TypeScript + Vite · Zustand · shadcn/ui + Tailwind CSS · SQLite（tauri-plugin-sql）· Tauri Dialog 原生目录选择 · Vitest + cargo test · pnpm 9.15.4
 
 ## 开发
 
@@ -23,6 +23,17 @@ pnpm typecheck
 pnpm build              # 生成品牌主题、类型检查、打包前端
 cargo test -p eg-core   # Rust 核心
 ```
+
+桌面流式和打包验收不需要真实 API Key：
+
+```sh
+pnpm desktop:fixture:smoke    # staged / slow-first-token / truncated / 503 / idle
+pnpm tauri:build:qa           # 启用 qa-faults 的未签名桌面包
+pnpm desktop:bundle:smoke     # 检查当前平台的可交付 bundle 产物
+pnpm desktop:package:smoke    # Mac 包启动、接线和受控退出（不操作 webview）
+```
+
+跨平台原生门禁见 `.github/workflows/desktop.yml`；Windows/Linux 的安装包和 WebView 必须在对应 runner 上验证，不能用 Mac 结果替代。
 
 `pnpm dev:web` 的地址后加 `?mock=fail-init`、`?mock=fail-requests`、`?mock=slow`、`?mock=jev`（逗号分隔，可以组合），用来预览失败、慢速和 Jev 决策的状态。
 

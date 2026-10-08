@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "kind": "immutable_specific_ci_terminal_audit",
+  "capturedAt": "2026-10-07T05:38:56.629320+00:00",
+  "run": {
+    "id": 37575271906,
+    "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37575271906",
+    "headSha": "2b509b7a4bd048412d442ad31360c7c7316a10d7",
+    "publicTree": "9f1fe7c6a2366c1c8d56cd8106d2ee590a098247",
+    "localRevision": "c16ae0274a9066709baf8047951675b299b76092",
+    "localSubtree": "ba27d3872fe5a369844527c67399f058319a8299",
+    "event": "pull_request",
+    "attempt": 1,
+    "createdAt": "2026-10-07T05:13:42Z",
+    "status": "completed",
+    "conclusion": "failure",
+    "freshTerminalApiObservedAt": "2026-10-07T05:31:52.246517Z",
+    "freshTerminalApiFiles": [
+      "run-20261007T053152.246517Z.json",
+      "jobs-20261007T053152.246517Z.json"
+    ],
+    "runTerminalSha256": "7aac4d2d7a3a8e7cb82ee9b0b46667131fb9aa0a93b41cf8e75d11b9e3cc3963",
+    "jobsTerminalSha256": "078d70d1a2dbba84f4a44fa04ed2db48601447301d22a49e83734f9957f35d14"
+  },
+  "immutableSource": {
+    "bindingFile": "immutable-source-binding.json",
+    "bindingSha256": "d479df0219e207936cb47c47f807283c972023363e95b5d19ab98662d04d39f8",
+    "publicLocalBlobModeEquality": true,
+    "gitBlobsVerified": 733,
+    "totalBlobBytes": 16973688,
+    "onlyLocalExcludedPath": "MEMORY.md",
+    "excludedMemoryContentRead": false,
+    "copiedSelectedImmutableSourceFiles": 14,
+    "bindingSelectedSourceListOriginally13AndSqlTestAddedAs14": true
+  },
+  "jobConclusions": [
+    {
+      "id": 112642644025,
+      "name": "windows-latest",
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-10-07T05:13:46Z",
+      "completedAt": "2026-10-07T05:18:35Z"
+    },
+    {
+      "id": 112642644217,
+      "name": "macos-latest",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T05:13:49Z",
+      "completedAt": "2026-10-07T05:24:04Z"
+    },
+    {
+      "id": 112642644229,
+      "name": "ubuntu-latest",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T05:13:45Z",
+      "completedAt": "2026-10-07T05:30:35Z"
+    }
+  ],
+  "frontend": {
+    "populationFiles": 108,
+    "populationCases": 1073,
+    "windows": {
+      "coldPassed": 1056,
+      "coldSkipped": 17,
+      "crossProcessSeparatePassed": 3,
+      "nativeMcpStep": "skipped_after_rust_failure",
+      "uniquePassed": 1056,
+      "uniqueSkipped": 17,
+      "coldSkips": {
+        "mcpFiles": 6,
+        "desktopProcessCleanup": 6,
+        "memorySkillE2e": 1,
+        "killerScenario": 4
+      }
+    },
+    "macos": {
+      "coldPassed": 1062,
+      "coldSkipped": 11,
+      "crossProcessSeparatePassed": 3,
+      "nativeMcpPhasePassed": 15,
+      "nativePhasePreviouslySkipped": 11,
+      "nativePhaseDuplicates": 4,
+      "uniquePassed": 1073,
+      "uniqueSkipped": 0
+    },
+    "ubuntu": {
+      "coldPassed": 1062,
+      "coldSkipped": 11,
+      "crossProcessSeparatePassed": 3,
+      "nativeMcpPhasePassed": 15,
+      "nativePhasePreviouslySkipped": 11,
+      "nativePhaseDuplicates": 4,
+      "uniquePassed": 1073,
+      "uniqueSkipped": 0
+    },
+    "countRule": "Cold/native/cross-process phases overlap. Separate passed counts are not added wholesale."
+  },
+  "specificPathGates": {
+    "desktopGoalUpgradeInputs": {
+      "cases": 19,
+      "allThreeColdPhasesPassed": true,
+      "includesTwoDirectorySymlinkRealpathAndIdentityCases": true,
+      "immutableTestSource": "immutable-source/tests/desktop-goal-upgrade-inputs.test.ts",
+      "realpathCasesSourceLines": [
+        73,
+        95
+      ]
+    },
+    "windowsInstallDiagnosticProjection": {
+      "cases": 30,
+      "allThreeColdPhasesPassed": true,
+      "scope": "Node projection/contract/embedded script checks, not actual Windows NSIS lifecycle"
+    },
+    "sqlPath": {
+      "macos": {
+        "baselineCasesPassed": 6,
+        "qaFaultsRerunCasesPassed": 6
+      },
+      "ubuntu": {
+        "baselineCasesPassed": 6,
+        "qaFaultsRerunCasesPassed": 6
+      },
+      "windows": {
+        "baselineCasesPassed": 4,
+        "baselineCasesFailed": 1,
+        "nonUtf8UnixOnlyCase": "not_compiled",
+        "qaFaultsSecondCommand": "not_reached"
+      }
+    }
+  },
+  "rustSeparatePhaseCounts": {
+    "windows": {
+      "baselineDesktop": 36,
+      "baselineCore": 80,
+      "baselineMcp": 3,
+      "baselineTools": 2,
+      "baselineSql": {
+        "passed": 8,
+        "failed": 1
+      },
+      "qaFaults": "not_reached"
+    },
+    "macosAndUbuntu": {
+      "baselineDesktop": 36,
+      "baselineCore": 90,
+      "baselineMcp": 3,
+      "baselineTools": 2,
+      "baselineSql": 10,
+      "baselineDoc": 1,
+      "qaFaultsDesktop": 35,
+      "qaFaultsCore": 90,
+      "qaFaultsMcp": 3,
+      "qaFaultsTools": 2,
+      "qaFaultsSql": 16,
+      "qaFaultsDoc": 1
+    },
+    "boundary": "These Rust suites/phases have overlapping tests; no unique total is asserted."
+  },
+  "windowsFirstFailure": {
+    "jobId": 112642644025,
+    "stepNumber": 17,
+    "stepName": "Rust workspace tests",
+    "test": "wrapper::sqlite_path_tests::unchanged_database_creation_and_reopen_use_one_real_file",
+    "stage": "Directory::Drop temporary_directory_cleanup",
+    "sourcePath": "vendor/tauri-plugin-sql/src/sqlite_path_tests.rs",
+    "sourceLine": 170,
+    "sourceStatement": "fs::remove_dir_all(&self.0).unwrap();",
+    "sourceGitBlob": "e65c8909ef86775d9cd4f38b3e9836518453b6a3",
+    "nativeOsCode": 32,
+    "nativeErrorKind": "sharing_violation_file_used_by_another_process",
+    "cargoExitCode": 101,
+    "actualStdoutRawLines": [
+      2385,
+      2413
+    ],
+    "panicRawLines": [
+      2402,
+      2403
+    ],
+    "fileHoldingProcessOrWorkerIdentity": "unknown",
+    "controlledProcessJobSubstage": "not_observed",
+    "windowsQaBuild": "not_run",
+    "windowsNsisLifecycle": "not_run",
+    "windowsWebviewDom": "not_run",
+    "boundary": "This is an earlier Rust cleanup failure. It neither re-proves nor resolves the prior CF8 NSIS process_job issue."
+  },
+  "linuxActualWebdriver": {
+    "artifactId": 11463196744,
+    "archive": "linux-webdriver-diagnostic-artifact.zip",
+    "archiveBytes": 6808,
+    "archiveSha256": "bc133af6ac03046b5ccb5933a639221656c1e570ff849da20776c538b2e35827",
+    "suite": "linux-webdriver-diagnostics/webdriver-quality.json",
+    "suiteSha256": "d20ee232fc1ce22adfc11f1f626ef64d829275c9fe1fed5b25dc5260ada2c8a8",
+    "suitePassed": true,
+    "scenarios": [
+      {
+        "name": "staged",
+        "passed": true,
+        "checks": {
+          "streamingFirstChunk": true,
+          "completedResult": true
+        },
+        "firstBodyDelta": {
+          "status": "verified",
+          "metric": "submit_command_to_task_store_first_body_delta",
+          "source": "dom_data_stream_first_chunk_at",
+          "origin": "before_webdriver_click_command",
+          "latencyMs": 114
+        },
+        "terminalObserved": {
+          "status": "verified",
+          "metric": "submit_command_to_terminal_text_observed",
+          "source": "webdriver_terminal_text_observed",
+          "origin": "before_webdriver_click_command",
+          "latencyMs": 751
+        },
+        "nativeStreamIpc": {
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 77,
+              "firstBodyBytesLatencyMs": 114,
+              "transportTerminalLatencyMs": 730,
+              "transportTerminalKind": "done"
+            }
+          ]
+        }
+      },
+      {
+        "name": "slow-first-token",
+        "passed": true,
+        "checks": {
+          "streamingFirstChunk": true,
+          "completedResult": true
+        },
+        "firstBodyDelta": {
+          "status": "verified",
+          "metric": "submit_command_to_task_store_first_body_delta",
+          "source": "dom_data_stream_first_chunk_at",
+          "origin": "before_webdriver_click_command",
+          "latencyMs": 365
+        },
+        "terminalObserved": {
+          "status": "verified",
+          "metric": "submit_command_to_terminal_text_observed",
+          "source": "webdriver_terminal_text_observed",
+          "origin": "before_webdriver_click_command",
+          "latencyMs": 1008
+        },
+        "nativeStreamIpc": {
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 67,
+              "firstBodyBytesLatencyMs": 365,
+              "transportTerminalLatencyMs": 980,
+              "transportTerminalKind": "done"
+            }
+          ]
+        }
+      },
+      {
+        "name": "truncated",
+        "passed": true,
+        "checks": {
+          "partialOutputPreserved": true,
+          "terminalFailureVisible": true
+        },
+        "firstBodyDelta": {
+          "status": "verified",
+          "metric": "submit_command_to_task_store_first_body_delta",
+          "source": "dom_data_stream_first_chunk_at",
+          "origin": "before_webdriver_click_command",
+          "latencyMs": 70
+        },
+        "terminalObserved": {
+          "status": "verified",
+          "metric": "submit_command_to_terminal_text_observed",
+          "source": "webdriver_terminal_text_observed",
+          "origin": "before_webdriver_click_command",
+          "latencyMs": 298
+        },
+        "nativeStreamIpc": {
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 68,
+              "firstBodyBytesLatencyMs": 69,
+              "transportTerminalLatencyMs": 84,
+              "transportTerminalKind": "done"
+            }
+          ]
+        }
+      },
+      {
+        "name": "idle-cancel",
+        "passed": true,
+        "checks": {
+          "cancelControl": true,
+          "cancelledResult": true
+        },
+        "firstBodyDelta": {
+          "status": "not_recorded",
+          "metric": "submit_command_to_task_store_first_body_delta",
+          "source": "not_recorded",
+          "origin": "unknown"
+        },
+        "terminalObserved": {
+          "status": "verified",
+          "metric": "submit_command_to_terminal_text_observed",
+          "source": "webdriver_terminal_text_observed",
+          "origin": "before_webdriver_click_command",
+          "latencyMs": 428
+        },
+        "nativeStreamIpc": {
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 68,
+              "firstBodyBytesLatencyMs": 69,
+              "transportTerminalLatencyMs": 373,
+              "transportTerminalKind": "done"
+            }
+          ]
+        }
+      }
+    ],
+    "proven": [
+      "native WebDriver session",
+      "Tauri WebView DOM",
+      "route preview and task submission",
+      "streaming success/partial-output/cancellation controls"
+    ],
+    "excluded": [
+      "real Provider",
+      "filesystem dialog",
+      "ledger crash recovery",
+      "code signing/notarization",
+      "first paint or model first-token measurement",
+      "cold/warm startup or resource baseline"
+    ],
+    "performanceBoundary": "One descriptive sample per scenario. No p50/p95, model first-token, paint, startup, resources or real-provider distribution is proven."
+  },
+  "linuxPackageLifecycle": {
+    "debExtractSmoke": {
+      "passed": true,
+      "systemPackageDatabaseChanged": false,
+      "version": "0.1.0",
+      "bytes": 6696244,
+      "schemaVersion": 7,
+      "termination": "SIGTERM controlled; leader/group gone; zombie zero",
+      "actualStdoutFile": "job-112642644229-ubuntu-latest-actual-1-desktop-install-smoke.json"
+    },
+    "realDpkgLifecycle": {
+      "passed": true,
+      "versions": [
+        "0.1.0",
+        "0.1.1"
+      ],
+      "bytes": [
+        6696244,
+        6696242
+      ],
+      "schemaVersion": 7,
+      "stableProcessWindowMs": 4000,
+      "installedProcessIdentityBoth": true,
+      "syntheticSessionRetainedAfterUpgradeAndPurge": true,
+      "cleanupVerified": true,
+      "checksPassed": 10,
+      "actualStdoutFile": "job-112642644229-ubuntu-latest-actual-2-desktop-linux-upgrade-smoke.json",
+      "boundary": "QA version-only packages; no code/schema release evolution, updater, rollback, other formats or real providers."
+    }
+  },
+  "macos": {
+    "jobPassed": true,
+    "unsignedQaVersion": "0.1.0",
+    "architecture": "aarch64",
+    "bundleAppReportedMiB": 11.37,
+    "dmgReportedMiB": 6.61,
+    "dmgActualBytes": 6928969,
+    "packageSmokeValidatedByRunnerReport": true,
+    "actualRunnerStdout": "job-112642644217-macos-latest-actual-1-desktop-runner-evidence.json",
+    "realWebviewDom": "not_run",
+    "boundaryDeclaration": {
+      "workflowLines": [
+        327,
+        340
+      ],
+      "status": "not_run",
+      "reason": "tauri-driver 2.1.0 does not support macOS",
+      "commandEchoJsonExcludedFromActualStdout": true
+    },
+    "notApplicableChecks": "webdriver/install/upgrade/windowsInstall boolean true in validator are platform defaults, not lifecycle execution."
+  },
+  "actualStdoutExtraction": {
+    "indexFile": "actual-stdout-index.json",
+    "indexSha256": "6881c167905b7c366a0b07d8fe0625d5fe1d0f6658a547e2bc66107205864d45",
+    "actualKindJsonCount": 4,
+    "countByPlatform": {
+      "windows": 0,
+      "macos": 1,
+      "ubuntu": 3
+    },
+    "commandEchoGroupsExcluded": true
+  },
+  "additionalSmallWindowsArtifact": {
+    "archive": "windows-small-diagnostic-artifact.zip",
+    "bytes": 5071,
+    "sha256": "274afb165b982d00aa0c443f5f21072a0850cbb11aca7ebe4165cab5cca0d4d5",
+    "files": 6,
+    "scope": "pre-build synthetic provider/routing/golden/goal reports; not actual NSIS or native task evidence"
+  },
+  "localReviewNotCi": {
+    "file": "local-review/native-v8-readonly-review.json",
+    "sha256": "c263606686422a76f8e147457a693f8d47364e01ad70742a7d4473d0afb789f7",
+    "scope": "Separate read-only local v8 native harness delta review; not GitHub execution, not native pilot proof."
+  },
+  "scope": {
+    "largeInstallersDownloaded": false,
+    "ciCancelledOrRerun": false,
+    "repoOrGitEdited": false,
+    "privateConfigRead": false,
+    "nativeAppAxOrFixtureLaunchedByReviewer": false,
+    "priorFrozenEvidenceOverwritten": false
+  },
+  "limitations": [
+    "No real provider availability, signing/notarization, or formal release readiness is asserted.",
+    "Windows installer/DOM diagnostics are absent because execution failed before those steps.",
+    "Synthetic Node reports do not imply actual macOS AX interaction or production provider recovery.",
+    "The frozen capture includes prior in-progress snapshots for chronology; only terminal run/jobs files and fresh terminal API determine the final run conclusion."
+  ]
+}

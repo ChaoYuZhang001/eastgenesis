@@ -1,6 +1,7 @@
 // @vitest-environment node
 import raw from "../config/model_profiles.json";
-import { MODEL_PROFILES, ProfileError, modelName, providerReadiness, validateProfiles } from "@/decision/profiles";
+import { OFFICIAL_IDS, ADAPTER_RECOVERY_CONTRACTS } from "@/core/llm";
+import { MODEL_PROFILES, ProfileError, adapterRecoveryReady, modelName, providerReadiness, validateProfiles } from "@/decision/profiles";
 
 const base = {
   id: "openai/m",
@@ -69,5 +70,16 @@ describe("模型能力矩阵", () => {
     expect(providerReadiness("ollama", {})).toEqual({ ok: false, reason: "本机 Ollama 未启用（EG_OLLAMA=1）" });
     expect(providerReadiness("ollama", { EG_OLLAMA: "1" })).toEqual({ ok: true });
     expect(providerReadiness("custom:relay", {})).toMatchObject({ ok: false });
+  });
+
+  it("自动路由只接受声明恢复契约的官方适配器", () => {
+    expect(Object.keys(ADAPTER_RECOVERY_CONTRACTS)).toEqual([...OFFICIAL_IDS]);
+    for (const id of OFFICIAL_IDS) expect(adapterRecoveryReady(id)).toBe(true);
+    expect(adapterRecoveryReady("custom:future")).toBe(false);
+    // 已登记适配器但没有契约时，不能悄悄进入候选链。
+    expect(providerReadiness("custom-future", { CUSTOM_KEY: "x" }, new Set(["custom-future"]))).toEqual({
+      ok: false,
+      reason: "适配器缺少可恢复执行契约",
+    });
   });
 });

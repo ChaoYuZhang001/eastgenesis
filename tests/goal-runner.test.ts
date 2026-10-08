@@ -2,6 +2,7 @@
 import { applyGoalChange, newGoal, normalizeGoal, MAX_ROUNDS, type Goal, type GoalChange, type GoalRound, type RoundVerdict } from "@/decision/goal";
 import { emptyEvidence, type Evidence, type EvidenceResult } from "@/decision/evidence";
 import { GoalRunner, type RoundHandle, type RoundResult } from "@/lib/goal-runner";
+import type { StoredTurn } from "@/decision/session";
 
 const T = 1_700_000_000_000;
 const ev = (claim?: string): Evidence => ({ ...emptyEvidence(), ...(claim ? { claim } : {}) });
@@ -16,11 +17,12 @@ interface Step {
 const notDone = (reason = "还没做完"): EvidenceResult => ({ verdict: "not_done", reason, by: "rules" });
 const done = (reason = "已经产出结果"): EvidenceResult => ({ verdict: "done", reason, by: "rules" });
 
-function harness(description = "把下载文件夹里的合同归档", o: { maxLlmCalls?: number; applyFails?: string } = {}) {
+function harness(description = "把下载文件夹里的合同归档", o: { maxLlmCalls?: number; applyFails?: string; checkpointFails?: boolean } = {}) {
   let goal: Goal = { ...newGoal(normalizeGoal({ description, ...(o.maxLlmCalls ? { max_llm_calls: o.maxLlmCalls } : {}) }), T), status: "running" };
   const calls: { round: number; hint: string | null; maxLlmCalls: number; goalText?: string }[] = [];
   const cancelled: string[] = [];
   const errors: string[] = [];
+  const checkpoints: string[] = [];
   let steps: Step[] = [];
   /** 每轮被创建时的手柄：hold 用它让这一轮永不结束 */
   const held: ((r: RoundResult) => void)[] = [];
@@ -54,6 +56,10 @@ function harness(description = "把下载文件夹里的合同归档", o: { maxL
       return verify;
     },
     cancelTask: (id) => void cancelled.push(id),
+    checkpointTask: (id) => {
+      checkpoints.push(id);
+      if (o.checkpointFails) throw new Error("synthetic checkpoint exception must not escape");
+    },
     onError: (m) => void errors.push(m),
     now: () => T + ++n,
   });
@@ -64,6 +70,7 @@ function harness(description = "把下载文件夹里的合同归档", o: { maxL
     calls,
     cancelled,
     errors,
+    checkpoints,
     setGoal: (g: Goal) => void (goal = g),
     setSteps: (s: Step[]) => void (steps = s),
     release: (r?: Partial<RoundResult>) => {
@@ -87,6 +94,25 @@ const emptyRound = (index: number, status: GoalRound["status"] = "running", verd
 });
 
 describe("目标执行器：多轮循环", () => {
+  it("有序停止的 checkpoint 拒绝仍保留 stop boolean 和原轮，并报告可见固定存储错误", async () => {
+    const h = harness("暂停后保存恢复记录", { checkpointFails: true });
+    h.setSteps([{ verify: "hold" }]);
+    const id = h.goal().id;
+    const running = h.runner.run(id);
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    h.setGoal(applyGoalChange(h.goal(), { op: "transition", to: "paused" }, T + 100));
+    await expect(h.runner.stopAndCheckpoint(id)).resolves.toBe(true);
+    h.release({ status: "aborted", llmCalls: 0 }); await running;
+    expect(h.goal().status).toBe("paused");
+    expect(h.goal().rounds).toHaveLength(1);
+    expect(h.goal().rounds[0]).toMatchObject({ status: "interrupted", task_id: "task-r1" });
+    expect(h.cancelled).toEqual(["task-r1"]); expect(h.checkpoints).toEqual(["task-r1"]);
+    expect(h.errors).toEqual(["无法保存任务恢复记录，请检查本地存储后继续"]);
+    expect(h.runner.running(id)).toBe(false);
+    expect(await h.runner.stopAndCheckpoint(id)).toBe(false);
+    expect(h.errors).toHaveLength(1);
+  });
+
   it("未达成自动开下一轮，直到判定 done 才收尾；轮次、标题、步骤和调用次数都记在目标上", async () => {
     const h = harness();
     h.setSteps([{ verify: notDone("还差第 2 步") }, { verify: notDone("还差最后一步") }, { verify: done("已经产出归档清单") }]);
@@ -120,17 +146,31 @@ describe("目标执行器：多轮循环", () => {
     expect(h.calls).toHaveLength(1);
   });
 
-  it("执行出错也记一轮，连续失败到上限（3 次）时目标判失败", async () => {
+  it("执行出错暂停原轮，不自动新建任务；失败调用仍记进预算", async () => {
     const h = harness("整理照片");
     h.setSteps([{ result: { status: "failed", summary: "模型全都不可用", llmCalls: 2 } }]);
     await h.runner.run(h.goal().id);
     const g = h.goal();
-    expect(g.rounds.map((r) => r.status)).toEqual(["failed", "failed", "failed"]);
-    expect(g.rounds[0].verdict).toMatchObject({ by: "runtime" });
-    expect(g.rounds[0].verdict?.reason).toContain("模型全都不可用");
-    expect(g.status).toBe("failed");
+    expect(g.rounds.map((r) => r.status)).toEqual(["interrupted"]);
+    expect(g.rounds[0].task_id).toBe("task-r1");
+    expect(g.rounds[0].verdict).toBeNull();
+    expect(g.status).toBe("paused");
+    expect(h.calls).toHaveLength(1);
+    expect(h.checkpoints).toEqual(["task-r1"]);
     // 执行出错的一轮不问「达成没有」，但调用次数照样记（钱已经花了）
-    expect(g.used_llm_calls).toBe(6);
+    expect(g.used_llm_calls).toBe(2);
+  });
+
+  it("失败后的 checkpoint 写入出错仍停在原轮，只报告固定存储错误", async () => {
+    const h = harness("整理照片", { checkpointFails: true });
+    h.setSteps([{ result: { status: "failed", summary: "受控请求失败" } }]);
+    await h.runner.run(h.goal().id);
+    expect(h.goal().status).toBe("paused");
+    expect(h.goal().rounds.map((r) => r.status)).toEqual(["interrupted"]);
+    expect(h.calls).toHaveLength(1);
+    expect(h.checkpoints).toEqual(["task-r1"]);
+    expect(h.errors).toEqual(["无法保存任务恢复记录，请检查本地存储后继续"]);
+    expect(h.runner.running(h.goal().id)).toBe(false);
   });
 
   it("模型调用到上限时判失败（budget）；每轮的预算按剩余额度递减", async () => {
@@ -205,15 +245,112 @@ describe("目标执行器：多轮循环", () => {
     expect(h.calls).toHaveLength(1);
   });
 
-  it("需要用户处理和超出预算都按执行出错记，说明写进判定", async () => {
-    for (const status of ["needs_user", "budget_exceeded"] as const) {
-      const h = harness();
-      h.setSteps([{ result: { status, summary: "这一轮没跑完的原因" }, verify: done() }, { result: { status, summary: "这一轮没跑完的原因" }, verify: done() }, { result: { status, summary: "这一轮没跑完的原因" }, verify: done() }]);
-      await h.runner.run(h.goal().id);
-      expect(h.goal().rounds[0].verdict?.reason).toContain("这一轮没跑完的原因");
-      expect(h.goal().rounds[0].status).toBe("failed");
-      expect(h.goal().status).toBe("failed");
-    }
+  it("重启后的目标继续复用原任务 ID；没有 resume handle 时不新开一轮", async () => {
+    const base = newGoal(normalizeGoal({ description: "继续原任务" }), T);
+    const task: StoredTurn = {
+      id: "task-restart-round", seq: 1, goal: base.description, status: "aborted", summary: "中断",
+      events: [
+        { type: "run_start", runId: "run-old", goal: base.description },
+        { type: "plan", plan: { source: "fallback", steps: [{ id: "s1", goal: "继续", tool: "read_file" }] }, revision: 1 },
+        { type: "run_end", status: "aborted", summary: "中断" },
+      ],
+      lock: null, permission: "confirm", files: [], multi: false, startedAt: T, endedAt: T + 1,
+      goalId: base.id, mode: "goal", preference: "balanced", preferenceSource: "global", surfaceHint: null,
+    };
+    let goal: Goal = {
+      ...base,
+      status: "running",
+      rounds: [{ index: 1, title: "原轮次", items: [], status: "interrupted", evidence: ev(), verdict: null, task_id: task.id, task_checkpoint: task, started_at: T, finished_at: T + 1 }],
+    };
+    const resumed: string[] = [];
+    const errors: string[] = [];
+    const runner = new GoalRunner({
+      read: () => goal,
+      apply: async (_id, change) => {
+        goal = applyGoalChange(goal, change, T + 2);
+        return goal;
+      },
+      startRoundTask: () => { throw new Error("恢复场景不得新开任务"); },
+      resumeRoundTask: (_g, _round, _max) => {
+        resumed.push(task.id);
+        return { taskId: task.id, result: Promise.resolve({ ...round1, taskId: task.id }) };
+      },
+      checkDone: async () => done("恢复后完成"),
+      cancelTask: () => {},
+      onError: (message) => errors.push(typeof message === "string" ? message : JSON.stringify(message)),
+    });
+    await runner.run(goal.id);
+    expect(resumed).toEqual([task.id]);
+    expect(errors).toEqual([]);
+    expect(goal.status).toBe("completed");
+    expect(goal.rounds).toHaveLength(1);
+    expect(goal.rounds[0].task_id).toBe(task.id);
+  });
+
+  it("惰性任务句柄在 start_round 落库后才启动 Agent", async () => {
+    let goal: Goal = { ...newGoal(normalizeGoal({ description: "先落账再执行" }), T), status: "running" };
+    const order: string[] = [];
+    const runner = new GoalRunner({
+      read: () => goal,
+      apply: async (_id, change) => {
+        order.push(`apply:${change.op}`);
+        goal = applyGoalChange(goal, change, T + order.length);
+        return goal;
+      },
+      startRoundTask: () => ({
+        taskId: "task-lazy-start",
+        result: Promise.resolve({ ...round1, taskId: "task-lazy-start" }),
+        start: () => order.push("agent:start"),
+      }),
+      checkDone: async () => done(),
+      cancelTask: () => {},
+    });
+    await runner.run(goal.id);
+    expect(order.slice(0, 2)).toEqual(["apply:start_round", "agent:start"]);
+    expect(goal.status).toBe("completed");
+  });
+
+  it("恢复记录缺失时 fail-closed，不会新开任务", async () => {
+    const base = newGoal(normalizeGoal({ description: "缺少恢复记录" }), T);
+    let goal: Goal = {
+      ...base,
+      status: "running",
+      rounds: [{ index: 1, title: "中断轮次", items: [], status: "interrupted", evidence: ev(), verdict: null, task_id: null, started_at: T, finished_at: T + 1 }],
+    };
+    const calls: string[] = [];
+    const errors: string[] = [];
+    const runner = new GoalRunner({
+      read: () => goal,
+      apply: async (_id, change) => {
+        goal = applyGoalChange(goal, change, T + 2);
+        return goal;
+      },
+      startRoundTask: () => { calls.push("new"); throw new Error("不应新开"); },
+      checkDone: async () => done(),
+      cancelTask: () => {},
+      onError: (message) => errors.push(message),
+    });
+    await runner.run(goal.id);
+    expect(calls).toEqual([]);
+    expect(errors[0]).toContain("缺少");
+    expect(goal.status).toBe("paused");
+    expect(goal.rounds[0].status).toBe("interrupted");
+  });
+
+  it("需要用户处理时暂停并保留轮次，超出预算才按执行出错记", async () => {
+    const needsUser = harness();
+    needsUser.setSteps([{ result: { status: "needs_user", summary: "需要确认外部状态" } }]);
+    await needsUser.runner.run(needsUser.goal().id);
+    expect(needsUser.goal().status).toBe("paused");
+    expect(needsUser.goal().rounds[0].status).toBe("interrupted");
+    expect(needsUser.errors[0]).toContain("需要确认外部状态");
+
+    const budget = harness();
+    budget.setSteps([{ result: { status: "budget_exceeded", summary: "这一轮没跑完的原因" }, verify: done() }, { result: { status: "budget_exceeded", summary: "这一轮没跑完的原因" }, verify: done() }, { result: { status: "budget_exceeded", summary: "这一轮没跑完的原因" }, verify: done() }]);
+    await budget.runner.run(budget.goal().id);
+    expect(budget.goal().rounds[0].verdict?.reason).toContain("这一轮没跑完的原因");
+    expect(budget.goal().rounds[0].status).toBe("failed");
+    expect(budget.goal().status).toBe("failed");
   });
 
   it("完成校验抛错时按「拿不准」停下来等你确认，循环不崩", async () => {

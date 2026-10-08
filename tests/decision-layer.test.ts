@@ -110,6 +110,23 @@ describe("gateAction 权限闸门", () => {
     expect(d.value.verdict).toBe("allow");
     expect(d.meta.backend).toBe("rules");
   });
+  it("恢复非幂等副作用时，即使完全访问也必须重新确认", async () => {
+    const l = layer(ENV, undefined, "full");
+    const d = await l.gateAction({
+      tool: "write_file",
+      summary: "恢复写入报告",
+      args: { path: "out.md" },
+      recovery: { previousInvocationId: "task:s1:1", idempotent: false },
+    });
+    expect(d.value).toMatchObject({ verdict: "confirm", risk: "medium" });
+    expect(d.value.reasons).toContain("恢复任务：上一次调用可能已产生副作用，重新执行前必须确认");
+  });
+  it("工具能力声明的允许目录拒绝越界路径", async () => {
+    const d = await l().gateAction({ tool: "write_file", summary: "写入", args: { path: "~/other/out.md" }, capability: { roots: ["~/repo"] } });
+    expect(d.value).toEqual({ verdict: "deny", risk: "high", reasons: ["路径不在工具允许目录内（允许：~/repo）"] });
+    const traversal = await l().gateAction({ tool: "write_file", summary: "写入", args: { path: "~/repo/../other/out.md" }, capability: { roots: ["~/repo"] } });
+    expect(traversal.value.verdict).toBe("deny");
+  });
   it("决策层只能收紧：Jev 判高风险时改为确认；判低风险也放不开写操作", async () => {
     const high = jev(() => riskScore(2));
     const g1 = await layer({ ...ENV, TYPESAFE_API_KEY: KEY }, high.fetch).gateAction({ tool: "read_file", summary: "读取", args: { path: "notes.md" } });

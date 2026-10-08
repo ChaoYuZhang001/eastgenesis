@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "kind": "isolated-qa-startup-stage-local-validation",
+  "recordedAtUtc": "2026-10-07T00:13:23.519327+00:00",
+  "localParentRevision": "b97be50e917edca57ddb37bdaccdcf570f669eaa",
+  "sourceAndTestFilesSha256": {
+    "src-tauri/src/lib.rs": "f5d0eefe503dfabc04fdd8bb404137e670899a405918988ad1cc7ade182fc878",
+    "src-tauri/src/qa_startup_diagnostics.rs": "9dd68fa5044f3f6625d1350ab2800ef1356a6a7ca6f03c445a02bd024390cd18",
+    "src/lib/db.ts": "e6e00d20ab58e88623d8563dfeca5037b9039dd072475caa01f88631ce6c1042",
+    "src/lib/qa-startup.ts": "90113a36ea62f6596ada65435fea5b058d6faad4fb874f4ea39eeb202939f656",
+    "src/main.tsx": "e23418f880494b74acf990a88a2e6d6dc3ee82d5785c6011454bd10d3eeeb456",
+    "src/platform/tauri-backend.ts": "c14d36cbf4b313d89a7a4a51737ba13c904a4757481ee12ecf20680c4b656196",
+    "src/stores/app.ts": "1ab7c595ce2c19f5545bfc26ec1c253702cf2a3a884f0d11831f67d28e10e05d",
+    "tools/desktop-windows-install-smoke.ps1": "3777102cecd704ada69917c1a5625af7edb973e43cfdde089fbe002985462e2f",
+    "tools/desktop-windows-install-smoke.mjs": "0170c0da6bdb79f3d4376f5bcdbbee30cf8f7ccfc8644563366e5b84c6feeff4",
+    "tools/desktop-windows-install-smoke.d.mts": "e220c48ef69a7149f0d999fcec6e6bd8a4f0655009490430f3efd89327639d6d",
+    "tools/desktop-startup-trace.mjs": "fbf3f2a139071150fc70a4ead3691c5e5ad0f621c4ecf518a4a302f0b49a3bed",
+    "tools/desktop-startup-trace.d.mts": "55d60b572e9318c2ce2c90cb79dc38725c05a64fd65055631210a4f9e02977f2",
+    "tests/desktop-startup-trace.test.ts": "f6f9131a23e283092ce9333cea812c31defc452a444cf2b3dee89f2373d952a7",
+    "tests/desktop-windows-install-smoke.test.ts": "7bae5fd27bc5c3fad8c22c5ec5cf96da68e9a9a187388baf124743a94dcc3ea8",
+    "tests/qa-startup-diagnostics.test.ts": "1f29e0d1fe8a57490ce1430c026ce2ccdad6bc3b6283eb4b6cb78ac356f9d686",
+    "tools/desktop-macos-startup-trace-smoke.mjs": "b99a0da6d27b748c4cb205af19702e7404436fc9cf51d4f87ccb05886df6dcf4"
+  },
+  "validation": {
+    "frontendFull": {
+      "files": 101,
+      "passed": 981,
+      "failed": 0,
+      "startedAtLocal": "2026-10-07 08:00:25 Asia/Shanghai",
+      "durationSeconds": 74.34,
+      "workers": 2
+    },
+    "startupReaderAndWindowsHelper": {
+      "files": 2,
+      "passed": 67,
+      "failed": 0
+    },
+    "privateConfigSmoke": {
+      "files": 3,
+      "passed": 55,
+      "syntheticCredentialsOnly": true
+    },
+    "typecheck": "passed",
+    "rustWorkspace": {
+      "normalDesktop": 36,
+      "qaDesktop": 35,
+      "corePerMode": 90,
+      "stdioPerMode": [
+        3,
+        2
+      ],
+      "failed": 0
+    },
+    "isolatedMacQaBuild": {
+      "passed": true,
+      "sourceInputs": 288,
+      "sourceUnchanged": true,
+      "binarySha256": "5f6cb5460920749e14973dd2c39ebaf9cc3a8b8334d6d6ac10322c5a302ae784",
+      "formalReleaseBinding": false,
+      "manifest": "macos-startup-trace-build-manifest-2026-10-07.json"
+    }
+  },
+  "logs": [
+    {
+      "name": "eastgenesis-startup-trace-final-full-tests.log",
+      "bytes": 45885,
+      "sha256": "88db8530a6229a9b0f4e393deea52c2155e0125172d2dba722140d043edcdcec"
+    },
+    {
+      "name": "eastgenesis-startup-trace-consumer-final.log",
+      "bytes": 361,
+      "sha256": "ad9938191de200622888c6f75893de005baf8e067b5f5f2796cecd59df4917e5"
+    },
+    {
+      "name": "eastgenesis-startup-trace-final-typecheck.log",
+      "bytes": 82,
+      "sha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba"
+    },
+    {
+      "name": "eastgenesis-startup-trace-rust-normal.log",
+      "bytes": 10543,
+      "sha256": "a0bd71e0ca92748865312cddc061131cdd3746d5f0003273f5321e7b34e44656"
+    },
+    {
+      "name": "eastgenesis-startup-trace-rust-qa.log",
+      "bytes": 10473,
+      "sha256": "99dc3641f706fe8fd13a5c7138827b6f6fccc67d0643d121e06f24dbf029ebe5"
+    },
+    {
+      "name": "eastgenesis-startup-trace-private-config-smoke.log",
+      "bytes": 494,
+      "sha256": "286513fdc108c6542809c2fd0eff40395605b9b6b52c714c407f52486693f661"
+    },
+    {
+      "name": "eastgenesis-startup-trace-native-build.log",
+      "bytes": 6001,
+      "sha256": "709128a130382389f173a0764b4e71c943603ba5a6e5b630550a4545373e103b"
+    },
+    {
+      "name": "eastgenesis-startup-trace-native.log",
+      "bytes": 282,
+      "sha256": "d11d605781fbb7be0d6925c3e26aa91c894434f2df0f8324a71e0f4f5a2ca528"
+    },
+    {
+      "name": "eastgenesis-startup-trace-native-failed-pilot.log",
+      "bytes": 356,
+      "sha256": "47e14ded2e3cfb01b6626a610dac48b00d1c07b6958c6ab15a2f8d661fd908b2"
+    }
+  ],
+  "nativeMac": {
+    "passed": true,
+    "report": "macos-startup-trace-native-2026-10-07.json",
+    "reportSha256": "4c3c582bf8d7269a5e09d05a04cc1d90d49252b0ceba68f8965891896ecf040d",
+    "rounds": 2,
+    "attemptCountPerRound": 1,
+    "enabledRecords": 29,
+    "requiredMarkers": 10,
+    "schemaVersionPerRound": [
+      7,
+      7
+    ],
+    "guardOffSidecars": 0,
+    "sourceHashesIndependentlyChecked": 288,
+    "formalReleaseBinding": false,
+    "failedPilotReport": "macos-startup-trace-native-failed-pilot-2026-10-07.json",
+    "failedPilotReportSha256": "289424eec28a102dbe0e4a15220669e1df6221b0a56f4ab083f40ffc01b8eae8",
+    "failedPilotReason": "harness used executable directory for macOS appdata; Tauri resolves relative override against .app bundle parent; only harness corrected; binary unchanged",
+    "performanceBaseline": false,
+    "actualWindowsProof": false
+  },
+  "actualWindowsPowerShell": "not_run_locally",
+  "windowsRootCause": "unverified; new stage trace not present in prior snapshot 383",
+  "realProviders": false,
+  "earlierValidation": {
+    "initialFull": "101 files / 980 tests before two-cycle runId regression and main marker adjustment; final 981 replaces it",
+    "initialBuild": "successful pre-marker-adjustment pilot manifest/log retained separately; no GUI run used it",
+    "rustInitialCompile": "setup closure type inference fixed before final logged 35-pass agent QA and both Root workspace runs",
+    "initialFrontendFixture": "parallel Promise.all events were incorrectly treated as serial in one new test; fixed before final suites"
+  },
+  "observationBoundary": "complete means structurally valid diagnostic snapshot; absence can include IPC non-delivery; no startup latency or root cause inferred from stage absence"
+}

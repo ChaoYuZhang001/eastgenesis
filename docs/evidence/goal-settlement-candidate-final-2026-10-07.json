@@ -1,0 +1,148 @@
+{
+  "kind": "full_goal_settlement_candidate_report",
+  "expectedBase": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "candidateFrozen": true,
+  "scopeFiles": [
+    "src/decision/goal.ts",
+    "src/decision/session.ts",
+    "src/lib/goal-run.ts",
+    "src/lib/goal-runner.ts",
+    "src/stores/history.ts",
+    "src/stores/tasks.ts",
+    "tests/goal-settlement-recovery.test.ts",
+    "tests/goal-settlement-boundaries.test.ts"
+  ],
+  "scopeHashes": {
+    "src/decision/goal.ts": "e24995dae5fb642d40de5492a3d242fd3e7d69b25e26381ccada71de7ecd064f",
+    "src/decision/session.ts": "ebae15e61c80ef530066833314eac9d97d376296b5ae2276c34bfb7740bc2101",
+    "src/lib/goal-run.ts": "072179ba5892e9f6f46faae7c86d0767e3d74345fc4ca5dff0406a358628d681",
+    "src/lib/goal-runner.ts": "34a3790eb93d47e5c75ed1742ff027c4f44d6dbe7f14b7ddcdd42abbb658ff0d",
+    "src/stores/history.ts": "94c10956ae979099d5dac915d9c351868a90c4731ece68a26af8d00afb5ca4c0",
+    "src/stores/tasks.ts": "c7018da90743d0637a02ac08356d030afbb4bbd2760c190200eb4b7362bd646c",
+    "tests/goal-settlement-recovery.test.ts": "1bbd36a8e0efdf2da299ea6dffc3ec9d1ba39c378d8538760aa8b4d6cabeac63",
+    "tests/goal-settlement-boundaries.test.ts": "e468bfd45609fda90948c18c5de7b2da1a4024b20a189149b7623a5bd6ccdcaf"
+  },
+  "patch": "/tmp/eastgenesis-goal-settlement-recovery-b4-20261007.patch",
+  "patchSha256": "8dd6ce6bf96ebaf95b276c2d6daabfe3edd5f9ca170155168f66210c96a0aec0",
+  "freezeManifest": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-freeze.json",
+  "freezeManifestSha256": "e1788ab359001623424dd74e4e661bf8c66ea986a2b8140341405cadf837ed97",
+  "patchRecreationReport": "/tmp/eastgenesis-goal-settlement-b4-20261007/patch-recreation.json",
+  "patchRecreationReportSha256": "796cd597fee78bf4687aacbf6e924b71eab291d2604d8efcdac878f88e488d88",
+  "originalRed": {
+    "report": "/tmp/eastgenesis-goal-settlement-b4-20261007/base-red-v1.json",
+    "rawLog": "/tmp/eastgenesis-goal-settlement-b4-20261007/base-red-v1.log",
+    "rawLogSha256": "5e453df208ca6b06662eb0fbd784ec883883036e26a6c1adfec216fb76fa7de9",
+    "failed": 3,
+    "filtered": 4,
+    "exitCode": 1,
+    "preservedTestSha256": "1bbd36a8e0efdf2da299ea6dffc3ec9d1ba39c378d8538760aa8b4d6cabeac63"
+  },
+  "originalCompatibility": {
+    "report": "/tmp/eastgenesis-goal-settlement-b4-20261007/base-compatibility-v1.json",
+    "rawLogSha256": "a0690a1a41a2b5fc406a8c132053ad2d49782a0b5a8c5500af32023b463ff085",
+    "passed": 4,
+    "filtered": 3
+  },
+  "candidateNarrow": {
+    "report": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-narrow-v2.json",
+    "reportSha256": "2e099c6540308c638b73f4edc8dae407162eace0754379f0f8bd82a2b7bddccf",
+    "rawLog": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-narrow-v2.log",
+    "rawLogSha256": "9627cd9b88c44fab47aecf8cd25498fe36fb7a86e358fadc3e251110322ea548",
+    "exitCode": 0,
+    "testFiles": 13,
+    "uniqueTestsInThisFinalInvocation": 137,
+    "countsByFile": {
+      "tests/goal-settlement-recovery.test.ts": 7,
+      "tests/goal-settlement-boundaries.test.ts": 11,
+      "tests/completed-step-recovery.test.ts": 10,
+      "tests/goal-failed-recovery.test.ts": 4,
+      "tests/project-goal-storage.test.ts": 19,
+      "tests/session-storage.test.ts": 13,
+      "tests/goal-recovery-evidence.test.ts": 2,
+      "tests/goal-runner.test.ts": 19,
+      "tests/goal-model.test.ts": 19,
+      "tests/ui-goal-output.test.tsx": 7,
+      "tests/ui-goal-run.test.tsx": 13,
+      "tests/goal-store.test.ts": 9,
+      "tests/ui-history.test.tsx": 4
+    },
+    "notFullSuite": true
+  },
+  "candidateTypecheck": {
+    "report": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-typecheck-v2.json",
+    "reportSha256": "31cce92238c986edcb9b1a4a578b0d832c27d58b0bb71d5bc94dc40283dddd24",
+    "rawLog": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-typecheck-v2.log",
+    "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exitCode": 0,
+    "command": [
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ]
+  },
+  "currentRepository": {
+    "sourceFiles": 754,
+    "expectedBase": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+    "allowedIndependentChanges": {
+      "tools/desktop-windows-install-smoke.ps1": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397",
+      "tools/desktop-windows-install-smoke.mjs": "556aae85481f5fddc1f11fb0a687f93b48404b903979a5c79d0c432537ab97ad",
+      "tools/desktop-windows-install-smoke.d.mts": "fe37f7f7061542fa445c012e9b33eb87a8fc04d21a750737c2fd7288197c98ff",
+      "tests/desktop-windows-install-smoke.test.ts": "0a01425eb6bc2cfe406847d1d860f6440c038c8aa325bebb8ad220a8482ab0f3"
+    },
+    "exactMatch": true,
+    "noGoalSourceMutation": true
+  },
+  "lineRefsInFrozenCandidate": {
+    "src/decision/session.ts": {
+      "export interface RecoveryAccounting": 25,
+      "export function normalizeRecoveryAccounting": 34,
+      "function trimEvents": 122,
+      "recovery_accounting: normalize": 159
+    },
+    "src/decision/goal.ts": {
+      "export function recordLlmCalls": 313,
+      "llm_settlements: []": 258,
+      "case \"record_llm_calls\"": 503,
+      "if (v.llm_settlements !== undefined)": 557
+    },
+    "src/stores/tasks.ts": {
+      "let accounting = normalize": 315,
+      "let events = appendEvent": 325,
+      "return { ...outcomeOf(done": 435,
+      "async prepareGoalRecovery": 460
+    },
+    "src/stores/history.ts": {
+      "recovery_accounting: t.recovery": 75
+    },
+    "src/lib/goal-runner.ts": {
+      "readonly #settling": 70,
+      "const openRound": 124,
+      "if (pending.completed)": 137,
+      "if (!pending.accounting)": 148,
+      "if (r.accounting !== undefined)": 204,
+      "async #settle": 260
+    },
+    "src/lib/goal-run.ts": {
+      "prepareRecovery(goal)": 87,
+      "if (!allowModel)": 93
+    }
+  },
+  "validationDriver": "/tmp/eastgenesis-goal-settlement-b4-20261007/run-validation-v3.py",
+  "validationDriverSha256": "a798df8f7999c0dc8bc94107f3fbd3ef0ff4221e398ffae19b9dd3b631bd4683",
+  "formalReleaseBinding": false,
+  "paidProvidersUsed": false,
+  "nativeLaunched": false,
+  "sqlxOrWindowsRuntimeProof": false,
+  "receiptFormat": "optional per-round array of complete per-run immutable counts; new task round initializes [] (known start), absent legacy stays unknown",
+  "migration": "no SQL schema migration; optional versioned JSON fields only",
+  "limitations": [
+    "logical llm/llm_failed events are counted, not all raw provider fallback attempts or billed requests",
+    "independent positive-balance Jev accounting and task-id usage D remain out of scope",
+    "legacy missing settlement information stays unknown; no automatic budget allocation, no reconstructed past count",
+    "nonterminal persisted run count is a lower bound, never a full cost proof; no automatic model resume after losing live terminal",
+    "general stale-checkpoint freshness and all historical accepted-output loss are not claimed fixed",
+    "synthetic 700-event presentation load enters the genuine main Runtime run_start callback; no production performance claim",
+    "react act warnings and experimental node:sqlite warnings preserved; no full/native/release/real-provider revalidation"
+  ]
+}

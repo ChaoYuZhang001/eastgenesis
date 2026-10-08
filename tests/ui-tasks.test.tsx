@@ -1,5 +1,6 @@
 // 任务在会话里的完整表现（V3：卡片画布已下线，过程信息在回答下方的折叠路由行浮层里，docs/UI_LAYOUT_V3.md 2.2、5.2）
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { vi } from "vitest";
 import { ChatView } from "@/components/chat/ChatView";
 import { Dialogs } from "@/components/layout/Dialogs";
 import { effectiveProfiles } from "@/lib/engine";
@@ -22,6 +23,7 @@ describe("会话里的任务", () => {
     expect(screen.getByLabelText("任务描述")).toHaveValue("");
 
     const confirm = await within(c).findByRole("group", {}, LONG);
+    expect(within(c).getByText(/· Work 工作/)).toBeInTheDocument();
     expect(confirm).toHaveTextContent("前需要你的确认");
     expect(confirm).toHaveTextContent("风险");
     await drive(c);
@@ -45,6 +47,19 @@ describe("会话里的任务", () => {
     const line = within(c).getByRole("button", { name: /^已停止/ });
     fireEvent.click(line);
     expect(within(c).getByRole("list", { name: "执行步骤" })).toHaveTextContent("失败：");
+  });
+
+  it("失败后可以从未完成步骤继续，不重复已经完成的检索", async () => {
+    render(<><ChatView /><Dialogs /></>);
+    submit("整理周报并保存");
+    const c = card("整理周报并保存");
+    await drive(c, "demo_write_file");
+    const resume = within(c).getByRole("button", { name: "从未完成步骤继续" });
+    fireEvent.click(resume);
+    await waitFor(() => expect(within(c).getByRole("button", { name: "停止任务" })).toBeInTheDocument(), LONG);
+    await drive(c);
+    await within(c).findByText(/^已完成 · /, {}, LONG);
+    expect(within(c).getByRole("region", { name: "成果" })).toHaveTextContent("（模拟）已完成：整理周报并保存");
   });
 });
 
@@ -89,6 +104,8 @@ describe("工作目录", () => {
     fireEvent.click(within(screen.getByRole("menu", { name: "工作目录" })).getByRole("menuitem", { name: "选择其他文件夹…" }));
     let form = screen.getByRole("form", { name: "工作目录" });
     expect(prompt).not.toHaveBeenCalled();
+    fireEvent.click(within(form).getByRole("button", { name: "选择…" }));
+    expect(within(form).getByRole("alert")).toHaveTextContent("浏览器模式没有系统文件夹选择器");
     fireEvent.change(within(form).getByLabelText("文件夹路径"), { target: { value: "relative/path" } });
     fireEvent.click(within(form).getByRole("button", { name: "确定" }));
     expect(within(form).getByRole("alert")).toHaveTextContent("上下文文件夹要写绝对路径（可以用 ~/ 开头）");
@@ -169,12 +186,28 @@ describe("多 Agent 协同", () => {
 
 describe("回答下方的路由浮层", () => {
   it("执行过程：各阶段、每一步的模型；成本档和内部评分只在专家模式出现", async () => {
+    const originalClipboard = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
     render(<><ChatView /><Dialogs /></>);
     submit("写一段 Python 快速排序");
     const c = card("写一段 Python 快速排序");
     await drive(c);
 
     let overlay = openRoute(c);
+    expect(within(overlay).getByText(/历史快照已记录（可用于脱敏回放）/)).toBeInTheDocument();
+    fireEvent.click(within(overlay).getByText("查看快照摘要"));
+    expect(within(overlay).getByText(/能力矩阵摘要：/)).toBeInTheDocument();
+    expect(within(overlay).getByText(/历史链重算：一致 · 当前重放：未变化/)).toBeInTheDocument();
+    fireEvent.click(within(overlay).getByRole("button", { name: "复制脱敏证据" }));
+    await waitFor(() => expect(within(overlay).getByRole("status")).toHaveTextContent("已复制"));
+    const exported = JSON.parse(String(writeText.mock.calls.at(-1)?.[0]));
+    expect(exported.task.id).toMatch(/^task-/);
+    expect(exported.surfaceJourney).toEqual(expect.any(Array));
+    expect(exported.surfaceJourney.every((surface: string) => ["chat", "work", "codex"].includes(surface))).toBe(true);
+    expect(JSON.stringify(exported)).not.toContain("写一段 Python 快速排序");
+    if (originalClipboard) Object.defineProperty(navigator, "clipboard", originalClipboard);
+    else Object.defineProperty(navigator, "clipboard", { configurable: true, value: undefined });
     expect(within(overlay).queryByRole("region", { name: "内部评分" })).not.toBeInTheDocument();
     runTab(overlay);
     let log = within(overlay).getByRole("log", { name: "执行时间线" });

@@ -1,0 +1,317 @@
+{
+  "kind": "full_goal_settlement_independent_readonly_source_review",
+  "reviewedAt": "2026-10-07T07:52:34.000808+00:00",
+  "reviewVerdict": "No confirmed blocking defect found in the scoped candidate; recovery and evidence limits below remain explicit.",
+  "blockingFindings": [],
+  "patch": {
+    "path": "/tmp/eastgenesis-goal-settlement-recovery-b4-20261007.patch",
+    "bytes": 84577,
+    "sha256": "8dd6ce6bf96ebaf95b276c2d6daabfe3edd5f9ca170155168f66210c96a0aec0"
+  },
+  "freezeManifest": {
+    "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-freeze.json",
+    "bytes": 89263,
+    "sha256": "e1788ab359001623424dd74e4e661bf8c66ea986a2b8140341405cadf837ed97"
+  },
+  "candidateReport": {
+    "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-report.json",
+    "bytes": 7243,
+    "sha256": "1671f7a6425139790c8a7650df9519a3cd20ff763e13e0505b75757ec801fca2"
+  },
+  "scope": {
+    "src/decision/goal.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/decision/goal.ts",
+      "bytes": 30739,
+      "sha256": "e24995dae5fb642d40de5492a3d242fd3e7d69b25e26381ccada71de7ecd064f"
+    },
+    "src/decision/session.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/decision/session.ts",
+      "bytes": 8950,
+      "sha256": "ebae15e61c80ef530066833314eac9d97d376296b5ae2276c34bfb7740bc2101"
+    },
+    "src/lib/goal-run.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/lib/goal-run.ts",
+      "bytes": 6770,
+      "sha256": "072179ba5892e9f6f46faae7c86d0767e3d74345fc4ca5dff0406a358628d681"
+    },
+    "src/lib/goal-runner.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/lib/goal-runner.ts",
+      "bytes": 15693,
+      "sha256": "34a3790eb93d47e5c75ed1742ff027c4f44d6dbe7f14b7ddcdd42abbb658ff0d"
+    },
+    "src/stores/history.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/stores/history.ts",
+      "bytes": 11196,
+      "sha256": "94c10956ae979099d5dac915d9c351868a90c4731ece68a26af8d00afb5ca4c0"
+    },
+    "src/stores/tasks.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/stores/tasks.ts",
+      "bytes": 29740,
+      "sha256": "c7018da90743d0637a02ac08356d030afbb4bbd2760c190200eb4b7362bd646c"
+    },
+    "tests/goal-settlement-recovery.test.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/tests/goal-settlement-recovery.test.ts",
+      "bytes": 24137,
+      "sha256": "1bbd36a8e0efdf2da299ea6dffc3ec9d1ba39c378d8538760aa8b4d6cabeac63"
+    },
+    "tests/goal-settlement-boundaries.test.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/tests/goal-settlement-boundaries.test.ts",
+      "bytes": 29424,
+      "sha256": "e468bfd45609fda90948c18c5de7b2da1a4024b20a189149b7623a5bd6ccdcaf"
+    }
+  },
+  "all8SourceHashAndModeBindingsVerified": true,
+  "criticalUnchangedReadDependencies": {
+    "src/lib/db-goal.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/lib/db-goal.ts",
+      "bytes": 5802,
+      "sha256": "9be6115558d90606b5f5d6a42919ed004c92c9cb6b3d8fdb73e4434454cca0e4"
+    },
+    "src/stores/goals.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/stores/goals.ts",
+      "bytes": 6934,
+      "sha256": "1ea0abc140c0c438a67235c01497b7cb2d0ca5fba7b559ecee43e3b6de92a91b"
+    },
+    "src/components/goal/GoalDetail.tsx": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx",
+      "bytes": 16003,
+      "sha256": "6a98f2af53001b86f494a3fe90ddd617205e6584a0f22d453d4a066e9fe6fb54"
+    },
+    "src/components/task/TaskCard.tsx": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/task/TaskCard.tsx",
+      "bytes": 8585,
+      "sha256": "c2aad3dc4044fb0c37dd5e247479ef4045834155751fb7e1ccd4e8a8e84a9e91"
+    },
+    "src/components/task/TaskCanvas.tsx": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/task/TaskCanvas.tsx",
+      "bytes": 3530,
+      "sha256": "5d2183c603382d6636facc8cf832b629c82f404a6fb8ce9ea4326f2e5e84a4cd"
+    },
+    "src/components/chat/ChatView.tsx": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/chat/ChatView.tsx",
+      "bytes": 4452,
+      "sha256": "9e8dd089479b02633bbb7dbcdeef7682ba677f30ebe024fded001ac90a74d467"
+    },
+    "src/lib/recovery.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/lib/recovery.ts",
+      "bytes": 8663,
+      "sha256": "96bd574e9d3b758ded555b7ee35819a40c096037df8eaedc16326cd91fb8058d"
+    },
+    "src/lib/subagents.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/lib/subagents.ts",
+      "bytes": 2262,
+      "sha256": "87843b5a91e4546163414ad4ad0d22d865bf6ee080099b664964a3e115fc517b"
+    },
+    "src/agent/runtime.ts": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/agent/runtime.ts",
+      "bytes": 43715,
+      "sha256": "652ca3075647975e309e997fdd1e48ad273ac05f50f39243beed1f886da2d89a"
+    },
+    "src/App.tsx": {
+      "path": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx",
+      "bytes": 5407,
+      "sha256": "c64b3c47352e7c0dfa286c671bca1fe8ffb07ecc3b5fdf7ec60ef6300c1ff76c"
+    }
+  },
+  "allDependencyHashesMatchFreeze": true,
+  "verifiedDesign": [
+    {
+      "files": [
+        "src/stores/tasks.ts:265",
+        "src/stores/tasks.ts:300",
+        "src/stores/tasks.ts:315",
+        "src/stores/tasks.ts:322"
+      ],
+      "finding": "Actual main invocation closure counts logical llm/llm_failed including subagent call events; main run_start resets versioned run identity, current run_end marks final. Late call events invalidate final. Fresh resume is a new run identity/count rather than recount of retained old events."
+    },
+    {
+      "files": [
+        "src/stores/tasks.ts:460",
+        "src/stores/tasks.ts:466",
+        "src/stores/tasks.ts:473",
+        "src/lib/goal-runner.ts:125",
+        "src/lib/goal-runner.ts:148"
+      ],
+      "finding": "Recovery only settles a complete count when task/round ownership, known receipts, latest main run_start and terminal/final agree. A stored running/lost-terminal counter remains unknown lower bound, including synthetic restart aborted; no next Runtime budget is automatically allocated."
+    },
+    {
+      "files": [
+        "src/decision/goal.ts:313",
+        "src/decision/goal.ts:325",
+        "src/decision/goal.ts:340",
+        "src/lib/db-goal.ts:19",
+        "src/lib/db-goal.ts:64",
+        "src/lib/db-goal.ts:114"
+      ],
+      "finding": "Receipt and used_llm_calls are one pure Goal result and one existing SQLite UPDATE. Same-goal reads/updates queue in one JS process; repeated same run+same count returns current Goal without new UPDATE, mismatching count/foreign task/run or missing terminal proof refuses. New receipt only occurs after complete checkpoint persisted."
+    },
+    {
+      "files": [
+        "src/stores/tasks.ts:189",
+        "src/stores/tasks.ts:194",
+        "src/stores/tasks.ts:398",
+        "src/stores/tasks.ts:475"
+      ],
+      "finding": "Task checkpoint writes queue and obtain latest card when executing; final persistence failure returns needs_user while keeping in-memory actual run_end/accounting. Explicit preparation saves actual terminal before settlement or completed finalization."
+    },
+    {
+      "files": [
+        "src/lib/goal-runner.ts:137",
+        "src/lib/goal-runner.ts:144",
+        "src/lib/goal-run.ts:92",
+        "tests/goal-settlement-boundaries.test.ts:240",
+        "tests/goal-settlement-boundaries.test.ts:259"
+      ],
+      "finding": "Completed preparation bypasses new Runtime and can settle/finalize before ordinary exhaustion failure. Exact max uses rules or explicit user confirmation, allowModel=false; this branch never creates Jev engine. Unknown completed legacy also suppresses model completion check and does not fabricate old usage."
+    },
+    {
+      "files": [
+        "src/lib/goal-runner.ts:70",
+        "src/lib/goal-runner.ts:110",
+        "src/lib/goal-runner.ts:204",
+        "src/lib/goal-runner.ts:211",
+        "src/lib/goal-runner.ts:253",
+        "tests/goal-settlement-boundaries.test.ts:330",
+        "tests/goal-settlement-boundaries.test.ts:355"
+      ],
+      "finding": "Settling guard remains while stop deletes active entry, so another GoalRunner recovery cannot run before old late result settles. Real late result may be saved/charged while paused or abandoned, but aborted loop checks prevent finish/new Runtime after stop. Three concurrent invocations on same runner collapse to one loop."
+    },
+    {
+      "files": [
+        "src/stores/tasks.ts:325",
+        "src/stores/tasks.ts:327",
+        "src/decision/session.ts:122",
+        "src/decision/session.ts:145",
+        "tests/goal-settlement-boundaries.test.ts:377"
+      ],
+      "finding": "500 live /300 persisted caps remain. Current accounting run_start anchor is reinserted if otherwise trimmed; accounting comes from run metadata, not summing residual event windows."
+    },
+    {
+      "files": [
+        "src/decision/session.ts:34",
+        "src/decision/goal.ts:557",
+        "tests/goal-settlement-boundaries.test.ts:404"
+      ],
+      "finding": "Bounded integer0..500/final bool/version/task/run regex normalize into fixed plain records. Receipt arrays bound length500 and reject duplicate run IDs/negative/fraction/out-of-range values. Reserved unprefixed prototype identifiers fail run regex and array receipt representation avoids prototype-key maps."
+    }
+  ],
+  "userRecoveryPaths": {
+    "noncompletedLegacyOrRunningUnknown": {
+      "automaticResume": false,
+      "actualUiUnblockExists": false,
+      "path": [
+        "GoalDetail.tsx77-84 begin→GoalStore start",
+        "goal-runner.ts125 prepareRecovery",
+        "tasks.ts473 returns accounting null",
+        "goal-runner.ts148-151 fixed pause"
+      ],
+      "reason": "Top Continue repeats the same fail-closed decision. No recovery-accounting amendment or explicit unknown-counter acknowledgment operation/button exists. The error asks to confirm local records but UI provides no corresponding repair flow. Abandon/delete/new separate Goal are not same-task recovery.",
+      "classification": "Known recovery scope and UX gap, not proof that fail-closed itself is a defective safety decision."
+    },
+    "completedLegacy": {
+      "rulesOrUserFinish": true,
+      "actualUiPath": "prepare.completed→checkDone allowModelfalse→finish uncertain→GoalDetail AwaitingBar→resolve_uncertain done",
+      "oldUsageReconstructed": false,
+      "note": "AwaitingBar also offers explicit continue-next-round; that is a separate user-authorized future round, not automatic recovery of an unknown nonterminal invocation or proof of prior usage."
+    },
+    "lowerLevelTasksResume": {
+      "acceptsGoalCardAtApiLevel": true,
+      "currentGoalDetailUsesIt": false,
+      "legacyTaskCanvasMountedInCurrentApp": false,
+      "classification": "Direct store callers are not the audited GoalDetail flow; do not invent current mounted-UI bypass from unused legacy TaskCanvas."
+    }
+  },
+  "remainingLimits": [
+    {
+      "kind": "event_preservation",
+      "files": [
+        "src/lib/subagents.ts:47",
+        "src/stores/tasks.ts:327",
+        "tests/goal-settlement-boundaries.test.ts:377"
+      ],
+      "detail": "New logic protects run_start accounting anchor only. Accepted Chat/tool evidence that falls outside retained head/tail is not generally protected. 700-noise boundary asserts counters/anchor and no extra tool/model, not retention of every accepted marker under pressure. Existing bounded-history accepted-output freshness/loss remains outside this patch; do not claim all critical events retained."
+    },
+    {
+      "kind": "atomic_scope",
+      "files": [
+        "src/lib/db-goal.ts:64"
+      ],
+      "detail": "Serial queue is per JS module/process. One UPDATE atomically writes receipt+used, but this review/tests do not prove multiple separate frontend/process writers coordinate via CAS/transaction for Goal read-modify-write."
+    },
+    {
+      "kind": "parser_scope",
+      "files": [
+        "src/decision/session.ts:34",
+        "src/decision/goal.ts:557"
+      ],
+      "detail": "Parser projects fixed fields from persisted JSON and rejects tested malformed counts/IDs. Tests do not cover arbitrary prototype-backed JS getters/objects; normalizeRecoveryAccounting does not enforce exact own-key/prototype shape. No reachable persisted-JSON regression establishing a blocker was found."
+    },
+    {
+      "kind": "billing_and_usage",
+      "detail": "Counts are logical llm/llm_failed events, not all fallback wire attempts or provider billed requests. Independent positive-balance Jev accounting and task-id usage D remain unmodified."
+    },
+    {
+      "kind": "freshness_and_legacy",
+      "detail": "No generic stale-checkpoint freshness fix, no reconstruction of lost live terminal or legacy past costs, no unknown-count manual repair flow; legacy completed may honestly retain stored unknown usage rather than newly counted cost."
+    },
+    {
+      "kind": "validation_boundary",
+      "detail": "Existing artifact final narrow13files137pass/typecheck0 are hash/raw-log checked only. No test/compiler/App/network Provider was executed by reviewer; no full suite/new QA/native/Windows SQLx or release binding is proved."
+    }
+  ],
+  "priorActualValidationEvidence": {
+    "narrow": {
+      "report": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-narrow-v2.json",
+      "reportSha256": "2e099c6540308c638b73f4edc8dae407162eace0754379f0f8bd82a2b7bddccf",
+      "rawLog": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-narrow-v2.log",
+      "rawLogSha256": "9627cd9b88c44fab47aecf8cd25498fe36fb7a86e358fadc3e251110322ea548",
+      "exitCode": 0,
+      "testFiles": 13,
+      "uniqueTestsInThisFinalInvocation": 137,
+      "countsByFile": {
+        "tests/goal-settlement-recovery.test.ts": 7,
+        "tests/goal-settlement-boundaries.test.ts": 11,
+        "tests/completed-step-recovery.test.ts": 10,
+        "tests/goal-failed-recovery.test.ts": 4,
+        "tests/project-goal-storage.test.ts": 19,
+        "tests/session-storage.test.ts": 13,
+        "tests/goal-recovery-evidence.test.ts": 2,
+        "tests/goal-runner.test.ts": 19,
+        "tests/goal-model.test.ts": 19,
+        "tests/ui-goal-output.test.tsx": 7,
+        "tests/ui-goal-run.test.tsx": 13,
+        "tests/goal-store.test.ts": 9,
+        "tests/ui-history.test.tsx": 4
+      },
+      "notFullSuite": true
+    },
+    "typecheck": {
+      "report": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-typecheck-v2.json",
+      "reportSha256": "31cce92238c986edcb9b1a4a578b0d832c27d58b0bb71d5bc94dc40283dddd24",
+      "rawLog": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-final-typecheck-v2.log",
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0,
+      "command": [
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ]
+    },
+    "rawActualFinalCounts": {
+      "files": 13,
+      "passed": 137,
+      "failed": 0,
+      "skipped": 0
+    },
+    "originalRedLogAndTestBytesPreserved": true,
+    "notAddedToFrontendCiCount": true
+  },
+  "actions": {
+    "candidateRepoOrGitMutation": false,
+    "testOrTypecheckExecution": false,
+    "appOrAxOrNetworkProviderStarted": false,
+    "privateRead": false,
+    "onlyNewSmallTmpReviewReportWritten": true
+  }
+}

@@ -29,7 +29,7 @@ describe("设置 store", () => {
   it("测试连接：7 家官方 Provider 都走代理，报告实测耗时和模型列表，未配置 Key 时如实提示", async () => {
     const s = useSettings.getState();
     // 成功时带上实测耗时和服务返回的模型列表
-    expect(await s.testConnection("openai")).toMatchObject({ ok: true, message: "连接正常（HTTP 200），可用模型 2 个", models: ["mock-model", "gpt-5.6-luna"] });
+    expect(await s.testConnection("openai")).toMatchObject({ ok: true, message: "模型目录连接正常（HTTP 200），列出 2 个模型；尚未检查推理调用", models: ["mock-model", "gpt-5.6-luna"] });
     expect((await s.testConnection("openai")).latencyMs).toBeTypeOf("number");
     expect((await s.testConnection("anthropic")).ok).toBe(true);
     expect(await s.testConnection("google")).toMatchObject({ ok: false, message: "这个 Provider 还没有配置 API Key" });

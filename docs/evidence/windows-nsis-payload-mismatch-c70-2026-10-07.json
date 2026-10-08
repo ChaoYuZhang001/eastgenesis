@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "github-runner-report-extract",
+  "capturedAt": "2026-10-06T22:06:01.957841+00:00",
+  "source": {
+    "runId": 37535219828,
+    "jobId": 112514305525,
+    "headSha": "c70ea1d67979f09c05227b5c078890dd8112d232",
+    "platform": "windows-latest",
+    "jobConclusion": "failure",
+    "jobCompletedAtUtc": "2026-10-06T21:59:28Z",
+    "sourceLogLines": [
+      3064,
+      3122
+    ],
+    "rawReportBytes": 1557,
+    "rawReportSha256": "4e34aabd9b60f290125c8ef87d59085e3a2fb995387e8851e70111d3043e4bf9",
+    "artifact": {
+      "id": 11446833171,
+      "name": "eastgenesis-desktop-Windows",
+      "bytes": 12170752,
+      "headSha": "c70ea1d67979f09c05227b5c078890dd8112d232",
+      "runId": 37535219828
+    }
+  },
+  "interpretation": {
+    "overallLifecyclePassed": false,
+    "completedChecksTrue": 8,
+    "completedChecksTotal": 8,
+    "sourceIsolationProbePassed": true,
+    "installerDispatched": true,
+    "payloadMatchingPassed": false,
+    "applicationLaunchCount": 0,
+    "reinstallDispatched": false,
+    "uninstallerDispatched": true,
+    "installedBinaryRemoved": true,
+    "uninstallRegistrationRemoved": true,
+    "failureCategory": "payload_mismatch",
+    "mismatchRootCauseAtCapture": "not_yet_verified",
+    "recordedChecksAreNotCompleteLifecycleProof": true
+  },
+  "report": {
+    "schemaVersion": 1,
+    "kind": "desktop-windows-install-smoke",
+    "platform": "windows",
+    "format": "nsis",
+    "passed": false,
+    "checks": {
+      "hostedRunner": true,
+      "noExistingInstallation": true,
+      "sourceBinaryIsolationProbe": true,
+      "webView2Present": true,
+      "nsisInstall": true,
+      "nsisUninstall": true,
+      "installedBinaryRemoved": true,
+      "uninstallRegistryRemoved": true
+    },
+    "stages": [
+      "hostedRunner",
+      "noExistingInstallation",
+      "webView2Present",
+      "sourceBinaryIsolationProbe",
+      "nsisInstall",
+      "nsisUninstall",
+      "installedBinaryRemoved",
+      "uninstallRegistryRemoved"
+    ],
+    "launches": [],
+    "install": {
+      "mode": "nsis-install-reinstall-uninstall",
+      "isolatedPrefix": true,
+      "isolatedAppDirectories": true,
+      "systemPackageDatabaseChanged": true,
+      "attempts": {
+        "install": true,
+        "reinstall": false,
+        "uninstall": true
+      },
+      "sameVersionReinstall": false,
+      "crossVersionUpgrade": false,
+      "knownFoldersRegistryChanged": false
+    },
+    "errors": [
+      "payload_mismatch"
+    ],
+    "evidenceBoundary": {
+      "proven": [],
+      "excluded": [
+        "production default Known Folder storage or migration",
+        "old-version to new-version upgrade",
+        "automatic update or rollback",
+        "MSI or per-machine installation",
+        "normal user machine installation or UAC experience",
+        "UI hydration of the persisted session",
+        "real Provider availability",
+        "tool side-effect recovery",
+        "code signing or SmartScreen reputation"
+      ]
+    }
+  }
+}

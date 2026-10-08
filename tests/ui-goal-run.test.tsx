@@ -3,6 +3,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "@/App";
 import { emptyEvidence } from "@/decision/evidence";
+import { getBackend } from "@/platform";
 import { useChat } from "@/stores/chat";
 import { watchHistory } from "@/stores/history";
 import { useGoals } from "@/stores/goals";
@@ -14,8 +15,9 @@ import { LONG, resetStores } from "./ui-helpers";
 beforeEach(() => resetStores());
 
 async function boot() {
-  render(<App />);
+  const view = render(<App />);
   await waitFor(() => expect(screen.getByLabelText("任务描述")).toBeEnabled(), LONG);
+  return view;
 }
 
 /** 新建一个目标、打开详情页并开始（返回详情主区） */
@@ -33,6 +35,101 @@ async function startGoal(description: string) {
 }
 
 describe("目标模式：多轮执行", () => {
+  it("取消终态落盘等待期间两种继续入口均拒绝，收尾之后才能恢复同一任务", async () => {
+    await boot();
+    const backend = getBackend();
+    const update = backend.updateGoal.bind(backend);
+    let release = () => {};
+    const blocked = new Promise<void>((r) => { release = r; });
+    let waiting = false;
+    const spy = vi.spyOn(backend, "updateGoal").mockImplementation(async (id, change) => {
+      if (change.op === "checkpoint_round" && change.task.status === "aborted") { waiting = true; await blocked; }
+      return update(id, change);
+    });
+    try {
+      const { id, main } = await startGoal("把下载文件夹里的合同归档并保存一份清单");
+      const running = await within(main).findByRole("region", { name: "正在执行的一轮" }, LONG);
+      await within(running).findByRole("group", { name: /确认/ }, LONG);
+      const taskId = useTasks.getState().tasks[0].id;
+      act(() => useTasks.getState().cancel(taskId));
+      await waitFor(() => expect(waiting).toBe(true), LONG);
+      expect(useTasks.getState().tasks[0].status).toBe("aborted");
+      expect(useTasks.getState().resume(taskId)).toBe(false);
+      expect(useTasks.getState().resumeGoalRound("", { goalId: id, taskId })).toBeNull();
+      await act(async () => { release(); });
+      await waitFor(() => expect(useGoals.getState().items.find((g) => g.id === id)?.status).toBe("paused"), LONG);
+      let resumed = false;
+      await waitFor(() => { act(() => { resumed = useTasks.getState().resume(taskId); }); expect(resumed).toBe(true); }, LONG);
+      act(() => useTasks.getState().cancel(taskId));
+    } finally { release(); spy.mockRestore(); }
+  });
+
+  it("目标完成记录先落库，执行器才能 finish_round；延迟写不能把完成回写为 running", async () => {
+    await boot();
+    const backend = getBackend();
+    const update = backend.updateGoal.bind(backend);
+    const order: string[] = [];
+    const spy = vi.spyOn(backend, "updateGoal").mockImplementation(async (id, change) => {
+      if (change.op === "checkpoint_round") order.push(`checkpoint:${change.task.status}`);
+      if (change.op === "finish_round") {
+        expect(order.at(-1)).toBe("checkpoint:completed");
+        order.push("finish_round");
+      }
+      return update(id, change);
+    });
+    try {
+      const { id, main } = await startGoal("写一份周报");
+      await within(main).findByRole("region", { name: "等你确认" }, LONG);
+      expect(order).toContain("finish_round");
+      expect(useGoals.getState().items.find((g) => g.id === id)?.rounds[0].task_checkpoint?.status).toBe("completed");
+      await act(async () => { await new Promise((r) => setTimeout(r, 50)); });
+      expect((await backend.listGoals()).find((g) => g.id === id)?.rounds[0].task_checkpoint?.status).toBe("completed");
+    } finally { spy.mockRestore(); }
+  });
+
+  it("目标完成记录落库失败时停在 needs_user，不 finish_round 或自动新开一轮", async () => {
+    await boot();
+    const backend = getBackend();
+    const update = backend.updateGoal.bind(backend);
+    let finished = false;
+    const spy = vi.spyOn(backend, "updateGoal").mockImplementation(async (id, change) => {
+      if (change.op === "checkpoint_round" && change.task.status === "completed") throw new Error("test storage unavailable");
+      if (change.op === "finish_round") finished = true;
+      return update(id, change);
+    });
+    try {
+      const { id } = await startGoal("写一份周报");
+      await waitFor(() => expect(useGoals.getState().items.find((g) => g.id === id)?.status).toBe("paused"), LONG);
+      expect(useTasks.getState().tasks[0]?.status).toBe("needs_user");
+      expect(useGoals.getState().items.find((g) => g.id === id)?.rounds).toHaveLength(1);
+      expect(finished).toBe(false);
+    } finally { spy.mockRestore(); }
+  });
+
+  it("目标任务在完成写入期间被删除时不会复活任务或完成已删除目标", async () => {
+    await boot();
+    const backend = getBackend();
+    const update = backend.updateGoal.bind(backend);
+    let release = () => {};
+    const blocked = new Promise<void>((r) => { release = r; });
+    let waiting = false;
+    const spy = vi.spyOn(backend, "updateGoal").mockImplementation(async (id, change) => {
+      if (change.op === "checkpoint_round" && change.task.status === "completed") { waiting = true; await blocked; }
+      return update(id, change);
+    });
+    try {
+      const { id } = await startGoal("写一份周报");
+      await waitFor(() => expect(waiting).toBe(true), LONG);
+      const taskId = useTasks.getState().tasks[0].id;
+      act(() => useTasks.getState().close(taskId));
+      const removing = useGoals.getState().remove(id);
+      await waitFor(() => expect(useGoals.getState().items.some((g) => g.id === id)).toBe(false), LONG);
+      await act(async () => { release(); await removing; });
+      expect(useTasks.getState().tasks.some((t) => t.id === taskId)).toBe(false);
+      expect((await backend.listGoals()).some((g) => g.id === id)).toBe(false);
+    } finally { release(); spy.mockRestore(); }
+  });
+
   it("开始后自动跑一轮：轮次显示进行中的步骤、判定和折叠路由行，并记进目标的模型调用数", async () => {
     await boot();
     const { main } = await startGoal("把下载文件夹里的合同都归档");
@@ -66,6 +163,7 @@ describe("目标模式：多轮执行", () => {
     const { id, main } = await startGoal("把下载文件夹里的合同归档并保存一份清单");
     // 目标轮次不进会话列表，所以确认提示出现在详情页的「正在执行的一轮」里
     const running = await within(main).findByRole("region", { name: "正在执行的一轮" }, LONG);
+    expect(running).toHaveTextContent(/· Work 工作/);
     await within(running).findByRole("group", { name: /确认/ }, LONG);
 
     fireEvent.click(within(main).getByRole("button", { name: "暂停" }));
@@ -80,7 +178,33 @@ describe("目标模式：多轮执行", () => {
     // 那一轮的任务也停了，确认提示不再挂着
     await waitFor(() => expect(within(main).queryByRole("group", { name: /确认/ })).not.toBeInTheDocument(), LONG);
     expect(useTasks.getState().tasks.every((t) => t.status !== "running")).toBe(true);
+    const recovery = within(main).getByRole("region", { name: "恢复本轮" });
+    expect(recovery).toHaveTextContent("恢复原因：");
+    expect(recovery).toHaveTextContent("如果目标仍处于暂停状态");
     expect(main).toHaveTextContent("已暂停");
+  });
+
+  it("目标暂停后点击继续：复用原任务账本，不新建一轮任务", async () => {
+    await boot();
+    const { id, main } = await startGoal("把下载文件夹里的合同归档并保存一份清单");
+    const running = await within(main).findByRole("region", { name: "正在执行的一轮" }, LONG);
+    await within(running).findByRole("group", { name: /确认/ }, LONG);
+    const taskId = useTasks.getState().tasks[0]?.id;
+    expect(taskId).toMatch(/^task-/);
+
+    fireEvent.click(within(main).getByRole("button", { name: "暂停" }));
+    await waitFor(() => expect(useGoals.getState().items.find((g) => g.id === id)?.status).toBe("paused"), LONG);
+    expect(useGoals.getState().items.find((g) => g.id === id)?.rounds).toHaveLength(1);
+
+    fireEvent.click(within(main).getByRole("button", { name: "继续" }));
+    await waitFor(() => expect(useGoals.getState().items.find((g) => g.id === id)?.status).toBe("running"), LONG);
+    expect(useGoals.getState().items.find((g) => g.id === id)?.rounds).toHaveLength(1);
+    expect(useTasks.getState().tasks).toHaveLength(1);
+    expect(useTasks.getState().tasks[0]?.id).toBe(taskId);
+
+    await within(main).findByRole("region", { name: "正在执行的一轮" }, LONG);
+    fireEvent.click(within(main).getByRole("button", { name: "暂停" }));
+    await waitFor(() => expect(useGoals.getState().items.find((g) => g.id === id)?.status).toBe("paused"), LONG);
   });
 
   it("「继续下一轮」在确认之后才开下一轮；确认完成则收尾", async () => {
@@ -186,5 +310,27 @@ describe("目标模式：多轮执行", () => {
     expect(useGoals.getState().items.find((g) => g.id === id)?.rounds[0].task_id).toBe(taskId);
     // 旧数据（没有 task_id 的轮次）读回后是 null，不出错
     expect(emptyEvidence()).toEqual({ tool_calls: [], file_changes: [], command_outputs: [] });
+  });
+
+  it("重启后自动打开被打断的目标详情，让继续入口可见", async () => {
+    const backend = resetStores();
+    const first = await boot();
+    let id = "";
+    await act(async () => {
+      const g = await useGoals.getState().save({ description: "重启后继续整理资料" });
+      if (typeof g === "string") throw new Error(g);
+      id = g.id;
+      expect(await useGoals.getState().start(id)).toBeNull();
+      expect(await useGoals.getState().apply(id, { op: "start_round", plan: { title: "第一轮", items: ["读取资料"] } })).toEqual(expect.objectContaining({ status: "running" }));
+    });
+    expect((await backend.listGoals()).find((g) => g.id === id)?.status).toBe("running");
+    // 模拟窗口退出：下一次 boot 会把 running/running 安全恢复为 paused/interrupted。
+    first.unmount();
+    resetStores(backend);
+    await boot();
+    await waitFor(() => expect(useUi.getState().main).toEqual({ kind: "goal", id }), LONG);
+    const main = screen.getByRole("main", { name: "目标" });
+    expect(main).toHaveTextContent("应用在目标执行期间退出");
+    expect(within(main).getByRole("button", { name: "继续" })).toBeInTheDocument();
   });
 });

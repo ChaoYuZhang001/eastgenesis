@@ -1,0 +1,934 @@
+
+ RUN  v3.0.5 /Users/apple/Desktop/EastGenesis
+
+ ✓ tests/agent-runtime.test.ts (59 tests) 403ms
+ ✓ tests/desktop-windows-install-smoke.test.ts (68 tests) 810ms
+   ✓ Windows NSIS install smoke safety and evidence boundary > remains importable through Vite after a Windows CRLF checkout 424ms
+ ✓ tests/decision-router.test.ts (35 tests) 93ms
+(node:11225) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/goal-settlement-recovery.test.ts (7 tests) 295ms
+ ✓ tests/goal-settlement-boundaries.test.ts (11 tests) 661ms
+ ✓ tests/llm.test.ts (34 tests) 82ms
+ ✓ tests/completed-step-recovery.test.ts (10 tests) 143ms
+ ✓ tests/goal-failed-recovery.test.ts (4 tests) 245ms
+ ✓ tests/desktop-startup-trace.test.ts (43 tests) 1097ms
+ ✓ tests/route-failure-evidence.test.ts (19 tests) 680ms
+ ✓ tests/decision-layer.test.ts (21 tests) 87ms
+(node:11299) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/project-goal-storage.test.ts (19 tests) 65ms
+ ✓ tests/model-probe-budget.test.ts (14 tests) 36ms
+ ✓ tests/desktop-goal-upgrade-inputs.test.ts (19 tests) 2040ms
+ ✓ tests/cli.test.ts (17 tests) 159ms
+ ✓ tests/agent-mcp.test.ts (12 tests) 263ms
+ ✓ tests/acceptance.test.ts (9 tests) 134ms
+ ✓ tests/coordinator.test.ts (9 tests) 109ms
+ ✓ tests/mcp-files.test.ts (6 tests) 120ms
+ ✓ tests/provider-anthropic-loopback.test.ts (8 tests) 3123ms
+ ✓ tests/desktop-process-cleanup.test.ts (7 tests) 2195ms
+   ✓ desktop POSIX process cleanup > records forced cleanup when the leader ignores TERM 339ms
+   ✓ desktop POSIX process cleanup > cleans a surviving descendant after the leader exits 577ms
+   ✓ desktop POSIX process cleanup > cleans descendants when the caller has already observed an early leader exit 500ms
+   ✓ desktop POSIX process cleanup > accepts only dead members while a real supervisor holds a zombie for reaping 598ms
+ ✓ tests/desktop-runner-evidence.test.ts (13 tests) 1165ms
+(node:11829) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/session-storage.test.ts (13 tests) 43ms
+ ✓ tests/local-jev.test.ts (8 tests) 39ms
+ ✓ tests/desktop-webdriver-summary.test.ts (4 tests) 308ms
+(node:11845) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/invocation-crash-process.test.ts (3 tests) 1902ms
+   ✓ 真实独立进程崩溃窗口 > 仅计划的落后 checkpoint 在 recover-stale 时保持同一任务并等待用户 668ms
+   ✓ 真实独立进程崩溃窗口 > 仅计划的落后 checkpoint 在 recover-read-error 时保持同一任务并等待用户 627ms
+   ✓ 真实独立进程崩溃窗口 > 副作用已落地但账本仍为 started 时，重启实例用 probe 恢复为 applied 606ms
+ ✓ tests/local-jev-chain.test.ts (6 tests) 90ms
+ ✓ tests/provider-loopback.test.ts (10 tests) 105ms
+stdout | tests/memory-skill-e2e.test.ts > 技能沉淀：第二次整理明显更快 > 第一次跑完保存为技能；「再整理一次」直接按技能执行，用时 < 第一次的 50%
+技能沉淀：第一次 1253ms（模型调用 4 次），第二次 321ms（1 次），比例 0.26
+
+ ✓ tests/memory-skill-e2e.test.ts (4 tests) 1664ms
+   ✓ 技能沉淀：第二次整理明显更快 > 第一次跑完保存为技能；「再整理一次」直接按技能执行，用时 < 第一次的 50% 1604ms
+(node:11888) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/db-migrations.test.ts (6 tests) 17ms
+ ✓ tests/provider-matrix-budget.test.ts (14 tests) 21982ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > defaults to three shared requests and 128 requested tokens across both protocols and recovery 677ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > refuses the next request before dispatch when a smaller budget is exhausted 593ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > counts routed timeout retries against the same budget and aborts the response body (diagnostics disabled) 805ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > counts routed timeout retries against the same budget and aborts the response body (diagnostics enabled) 797ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > counts routed timeout retries against the same budget and aborts the response body (diagnostics disabled with forced GC) 764ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > does not follow an HTTP redirect outside the request counter 395ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > retains the output cap with the explicitly configured modern OpenAI parameter 403ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > rejects unsafe budget --real-request-budget before any dispatch 361ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > rejects unsafe budget --real-request-budget before any dispatch 354ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > rejects unsafe budget --real-request-budget before any dispatch 362ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > rejects unsafe budget --real-max-output-tokens before any dispatch 354ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > rejects unsafe budget --real-timeout-ms before any dispatch 366ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > rejects unsafe budget --real-request-budget before any dispatch 367ms
+   ✓ opt-in Provider matrix client budgets using synthetic loopback only > keeps the ordinary local matrix at 15 scenarios and four recovery contracts 15380ms
+ ✓ tests/session-recovery.test.ts (6 tests) 11ms
+ ✓ tests/desktop-evidence.test.ts (3 tests) 7ms
+ ✓ tests/official-endpoints.test.ts (11 tests) 22ms
+ ✓ tests/desktop-process-measurement.test.ts (9 tests) 11ms
+(node:11898) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-plan-mode.test.ts (6 tests) 171ms
+ ✓ tests/decision-jev.test.ts (10 tests) 107ms
+ ✓ tests/invocation-ledger-process.test.ts (1 test) 1096ms
+   ✓ 真实 SQLite 跨进程调用租约 > 两个独立进程只能有一个取得租约，过期后可接管并由新持有者续期/释放 1095ms
+ ✓ tests/agent-planner.test.ts (7 tests) 10ms
+(node:11912) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/invocation-ledger.test.ts (4 tests) 18ms
+ ✓ tests/check-done-evidence.test.ts (5 tests) 31ms
+ ✓ tests/jev-recorded.test.ts (11 tests) 85ms
+ ✓ tests/desktop-stream-measurement.test.ts (6 tests) 7ms
+ ✓ tests/decision-profiles.test.ts (15 tests) 9ms
+ ✓ tests/bench.test.ts (8 tests) 211ms
+ ✓ tests/recovery.test.ts (6 tests) 6ms
+ ✓ tests/killer-scenario.test.ts (5 tests) 173ms
+ ✓ tests/agent-tier.test.ts (5 tests) 1073ms
+   ✓ 简单问答的快速路径 > 「简单介绍一下你自己」只调一次模型，不规划、不反思、不总结；单次调用 1 秒时总耗时 < 5 秒 1017ms
+ ✓ tests/decision-rules.test.ts (25 tests) 46ms
+ ✓ tests/golden-task.test.ts (3 tests) 83ms
+ ✓ tests/desktop-macos-performance.test.ts (5 tests) 7ms
+ ✓ tests/tool-contract.test.ts (4 tests) 6ms
+ ✓ tests/desktop-evidence-validate.test.ts (2 tests) 153ms
+ ✓ tests/provider-matrix-real-controlled.test.ts (1 test) 1553ms
+   ✓ controlled real Provider recovery matrix > runs the opt-in two-provider path without external network or secret output 1552ms
+stdout | tests/routing-accuracy.test.ts > 路由准确率测试集 > 规则引擎（第 3 级）路由准确率 ≥ 70%（M3 目标；接入 Jev 后目标 85%）
+
+样例数：50
+路由准确率（主类型 + 硬性能力）：100.0%
+主类型准确率：100.0%
+严格准确率（全部标签）：88.0%
+按类型：qa 9/9 · code 10/10 · reasoning 8/8 · vision 7/7 · long_context 7/7 · tool_use 9/9
+能力标签 P/R：code 0.94/1.00 · long_context 1.00/1.00 · reasoning 0.89/0.67 · tool_use 1.00/1.00 · vision 1.00/1.00 · zh 1.00/1.00
+
+
+ ✓ tests/routing-accuracy.test.ts (3 tests) 60ms
+ ✓ tests/goal-recovery-evidence.test.ts (2 tests) 168ms
+ ✓ tests/desktop-linux-upgrade-smoke.test.ts (3 tests) 236ms
+ ✓ tests/desktop-install-smoke.test.ts (1 test) 73ms
+ ✓ tests/dev-tools-not-bundled.test.ts (3 tests) 3ms
+ ✓ tests/goal-runner.test.ts (19 tests) 74ms
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 取消终态落盘等待期间两种继续入口均拒绝，收尾之后才能恢复同一任务
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to RoundsList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at RoundsList (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:355:23)
+    at div
+    at main
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to ActiveRound inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ActiveRound (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:289:24)
+    at div
+    at main
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 取消终态落盘等待期间两种继续入口均拒绝，收尾之后才能恢复同一任务
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to RoundsList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at RoundsList (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:355:23)
+    at div
+    at main
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to ActiveRound inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ActiveRound (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:289:24)
+    at div
+    at main
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+ ✓ tests/ui-settings.test.tsx (11 tests) 1712ms
+   ✓ 设置页 · 模型与路由 > 能力矩阵：只保存和内置值不同的字段，可恢复默认 649ms
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 开始后自动跑一轮：轮次显示进行中的步骤、判定和折叠路由行，并记进目标的模型调用数
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/Users/apple/Desktop/EastGenesis/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 暂停停掉正在跑的那一轮：这一轮记为「被打断」，不再开下一轮
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/Users/apple/Desktop/EastGenesis/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 目标暂停后点击继续：复用原任务账本，不新建一轮任务
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/Users/apple/Desktop/EastGenesis/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 「继续下一轮」在确认之后才开下一轮；确认完成则收尾
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/Users/apple/Desktop/EastGenesis/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 每轮的模型调用记进使用记录，但目标轮次不会写出一条会话
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/Users/apple/Desktop/EastGenesis/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 同一时间有会话在跑时，目标轮次也不会被写进那个会话的回合里
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/Users/apple/Desktop/EastGenesis/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 落库的轮次带上执行它的任务 id；读回后仍能把轮次和任务对上
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/Users/apple/Desktop/EastGenesis/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/Users/apple/Desktop/EastGenesis/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/Users/apple/Desktop/EastGenesis/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/Users/apple/Desktop/EastGenesis/src/App.tsx:27:77)
+
+ ✓ tests/ui-goal-run.test.tsx (13 tests) 1987ms
+   ✓ 目标模式：多轮执行 > 取消终态落盘等待期间两种继续入口均拒绝，收尾之后才能恢复同一任务 408ms
+ ✓ tests/chat-helpers.test.ts (21 tests) 15ms
+ ✓ tests/ui-tasks.test.tsx (11 tests) 2297ms
+   ✓ 会话里的任务 > 提交后确认工具调用，产出成果；成果块列出改动的文件 424ms
+ ✓ tests/goal-model.test.ts (19 tests) 19ms
+ ✓ tests/ui-projects-goals.test.tsx (7 tests) 2179ms
+   ✓ 项目 > 新建：保存失败时显示 store 返回的原文；成功后出现在列表里，行的第二行是生效的路由偏好 368ms
+   ✓ 项目 > 工作台里点项目行：展开并设为当前项目；新任务归入它，占位文字和标签行随之变化 452ms
+   ✓ 项目 > 路由偏好继承：项目设成省钱，任务自动时用省钱（来自项目）；任务选最强时覆盖项目 605ms
+ ✓ tests/ui-home.test.tsx (12 tests) 1481ms
+   ✓ 首屏 > 锁定模型后跳过路由决策：路由行写明手动锁定；运行中只显示当前一步，完成后折叠成一行 332ms
+ ✓ tests/ui-goal-output.test.tsx (7 tests) 423ms
+   ✓ Goal 轮次正文 > 实际生成→失败→检查点重载→顶部继续→总结，正文保留在同Goal同轮同任务且只显示一次 362ms
+ ✓ tests/skill.test.ts (10 tests) 15ms
+ ✓ tests/ui-route-failure.test.tsx (12 tests) 301ms
+ ✓ tests/platform-mock.test.ts (17 tests) 35ms
+ ✓ tests/model-discovery-settings.test.ts (13 tests) 355ms
+ ✓ tests/custom-providers.test.ts (10 tests) 110ms
+ ✓ tests/goal-evidence.test.ts (18 tests) 20ms
+ ✓ tests/platform-tauri.test.ts (10 tests) 35ms
+ ✓ tests/mcp-tauri-transport.test.ts (6 tests) 17ms
+ ✓ tests/engine.test.ts (14 tests) 984ms
+   ✓ 浏览器模式端到端（mock 后端） > Jev 已配置但不可达时降级到规则引擎，并在 meta 中说明 831ms
+ ✓ tests/ui-assistant-turn.test.tsx (10 tests) 332ms
+ ✓ tests/stores.test.ts (12 tests) 325ms
+ ✓ tests/goal-store.test.ts (9 tests) 18ms
+ ✓ tests/ui-shell.test.tsx (8 tests) 1704ms
+   ✓ 主界面外壳（浏览器模式） > 启动页只覆盖初始化，完成后显示图标栏 + 内容栏 + 主区；没有常驻右侧面板 461ms
+   ✓ 主界面外壳（浏览器模式） > 搜索：点搜索图标出现搜索框，过滤内容栏；Esc 收起并把焦点还给搜索按钮 333ms
+   ✓ 主界面外壳（浏览器模式） > 右侧面板：有改动时才出现入口，点了才打开；Esc 或关闭按钮关掉；窄窗口先收起内容栏 347ms
+ ✓ tests/memory.test.ts (11 tests) 16ms
+ ✓ tests/goal-evidence-run.test.ts (10 tests) 9ms
+ ✓ tests/e2e-journeys.test.tsx (3 tests) 1229ms
+   ✓ 端到端：首次使用到拿到成果 > 配置 Key → 提交任务 → 确认写入 → 看到成果、路由记录 → 专家模式看时间线 → 保存为技能 907ms
+ ✓ tests/desktop-ipc-timing.test.ts (7 tests) 11ms
+ ✓ tests/model-discovery-routing.test.ts (4 tests) 104ms
+ ✓ tests/qa-startup-diagnostics.test.ts (6 tests) 240ms
+ ✓ tests/ui-helpers-v3.test.ts (9 tests) 8ms
+(node:12236) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/db-schema-bootstrap.test.ts (9 tests) 386ms
+ ✓ tests/ui-history.test.tsx (4 tests) 1584ms
+   ✓ 会话持久化 > 回合结束后写回；重启读回：会话在「最近」里，点开是同样的回答和路由记录，本月节省跨重启累计 980ms
+ ✓ tests/jev-backend.test.ts (11 tests) 39ms
+ ✓ tests/project-store.test.ts (5 tests) 13ms
+ ✓ tests/project-model.test.ts (11 tests) 10ms
+ ✓ tests/ui-file-roots.test.tsx (5 tests) 273ms
+ ✓ tests/savings.test.ts (9 tests) 62ms
+ ✓ tests/native-response-integrity.test.ts (11 tests) 28ms
+ ✓ tests/brand-theme.test.ts (9 tests) 76ms
+ ✓ tests/mcp-store.test.ts (5 tests) 165ms
+ ✓ tests/subagents.test.ts (5 tests) 8ms
+ ✓ tests/ui-lint.test.ts (5 tests) 12ms
+ ✓ tests/file-roots.test.ts (7 tests) 10ms
+ ✓ tests/db-memory.test.ts (4 tests) 8ms
+ ✓ tests/db-skill.test.ts (3 tests) 7ms
+ ✓ tests/classification-confidence.test.ts (7 tests) 6ms
+ ✓ tests/skill-store.test.ts (2 tests) 146ms
+ ✓ tests/app-store.test.ts (4 tests) 5ms
+ ✓ tests/memory-store.test.ts (2 tests) 112ms
+ ✓ tests/work-surface.test.ts (6 tests) 45ms
+ ✓ tests/splash.test.tsx (3 tests) 111ms
+ ✓ tests/route-record.test.ts (4 tests) 4ms
+
+ Test Files  110 passed (110)
+      Tests  1132 passed (1132)
+   Start at  15:53:06
+   Duration  71.92s (transform 2.12s, setup 10.71s, collect 12.05s, tests 64.76s, environment 25.19s, prepare 8.68s)
+
+JSON report written to /tmp/eastgenesis-settlement-windows-final-gates-20261007-r1/full-frontend.vitest.json

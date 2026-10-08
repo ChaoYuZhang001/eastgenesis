@@ -1,0 +1,552 @@
+{
+  "schemaVersion": 1,
+  "kind": "immutable-complete-ci-capture-sha256-index",
+  "createdAt": "2026-10-07T06:52:03.183562+00:00",
+  "runId": 37580929560,
+  "head": "1c739f737e74b62d49d715b61fb6f04cb74ac122",
+  "localCommit": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "terminalConclusion": "failure",
+  "indexedFiles": 107,
+  "indexedBytes": 2617727,
+  "indexSelfExcluded": true,
+  "zipExcluded": true,
+  "expectedZipMembers": 108,
+  "largeDesktopBundlesExcluded": true,
+  "files": [
+    {
+      "path": "analysis/independent-static-scope-binding.json",
+      "bytes": 468,
+      "sha256": "58f23b569c6130c6a059627671cb4f35489517b82322d55164702c5e6cb73483"
+    },
+    {
+      "path": "analysis/independent-static-scope.json",
+      "bytes": 12075,
+      "sha256": "3189bfc8e0a6bf00f815fe935e3ee621e13378c98b1b3734041761ec859fd4bf"
+    },
+    {
+      "path": "analysis/job-112660171376-terminal-parse.json",
+      "bytes": 29168,
+      "sha256": "22cd6e3eb230884045c7d916142abc9d8366ca731babedb29e7bc9d34952972a"
+    },
+    {
+      "path": "analysis/job-112660171518-terminal-parse.json",
+      "bytes": 23114,
+      "sha256": "14ba41d4d74a1d179cd351abd80b7164216f7a6181a9b510d48b9dd40fd5257a"
+    },
+    {
+      "path": "analysis/job-112660171525-terminal-parse.json",
+      "bytes": 33563,
+      "sha256": "05ad431473d47ec495238544b0596a5e63fef78dd09af2dffd83d60d05c817a9"
+    },
+    {
+      "path": "analysis/mac-first-terminal-parse.json",
+      "bytes": 4157,
+      "sha256": "7e7d75f13539649f1ba81aa884b7d7c2a8e318e5e270da9a815717085786d78d"
+    },
+    {
+      "path": "analysis/rust-executions-with-integration-labels.json",
+      "bytes": 21699,
+      "sha256": "7e9708e415d4618811a6490065398f53dc2d4523edff32b8393a66bb1fbb1d7a"
+    },
+    {
+      "path": "api/artifacts-mac-ubuntu-terminal.json",
+      "bytes": 2238,
+      "sha256": "3708fdcc9b9afae649884f691e4c1119e34468fba62afcb0ca360ba5f770a5a9"
+    },
+    {
+      "path": "api/artifacts-terminal.json",
+      "bytes": 2972,
+      "sha256": "172c18653468f87d35d49dee8b7691c9ead368e14c550a20b2671a6726207f1e"
+    },
+    {
+      "path": "api/head-discovery-initial.json",
+      "bytes": 13510,
+      "sha256": "eb4cf0efc5cb2602b387a9a9fd6b1e42115526ceaaa86d20661600f62c2bb326"
+    },
+    {
+      "path": "api/job-112660171376-terminal.json",
+      "bytes": 10456,
+      "sha256": "0ed5807914ddc12b746259f4355b6617163609e80cc6da0acee176057502ebd0"
+    },
+    {
+      "path": "api/job-112660171518-terminal.json",
+      "bytes": 10454,
+      "sha256": "98ae2ff832a082e294b911b7bf38aa0de7f34004b88ba9774d9abf9a756363e3"
+    },
+    {
+      "path": "api/job-112660171525-terminal.json",
+      "bytes": 10458,
+      "sha256": "c9d079deacb3569be4b33a87969ff831247e54f2f38bcfa0faa5002cd1c34708"
+    },
+    {
+      "path": "api/jobs-initial.json",
+      "bytes": 20522,
+      "sha256": "c785e80b48bd0b55ef85de230bdc8bdaf2e240748a83a6d557b71b11a4503c7a"
+    },
+    {
+      "path": "api/jobs-terminal-fresh.json",
+      "bytes": 23948,
+      "sha256": "f6ba5a331b9ffe0c33a28140054d068c60f208b0809b2b46e391bed711b1590d"
+    },
+    {
+      "path": "api/jobs-watch-0001.json",
+      "bytes": 20565,
+      "sha256": "7100a6fe7d5840dccb5ef6d079f1435098270ed8685da19c09a12400d39bb013"
+    },
+    {
+      "path": "api/jobs-watch-0002.json",
+      "bytes": 20565,
+      "sha256": "7100a6fe7d5840dccb5ef6d079f1435098270ed8685da19c09a12400d39bb013"
+    },
+    {
+      "path": "api/jobs-watch-0003.json",
+      "bytes": 20565,
+      "sha256": "7100a6fe7d5840dccb5ef6d079f1435098270ed8685da19c09a12400d39bb013"
+    },
+    {
+      "path": "api/jobs-watch-0004.json",
+      "bytes": 20995,
+      "sha256": "76a6bab6376a2857d87ac183c0d7b4319305aa40becc984547cc2cc84db284a2"
+    },
+    {
+      "path": "api/jobs-watch-0005.json",
+      "bytes": 21124,
+      "sha256": "35910178e473a699e81c7c87fad2bf8d95eb75ad724ceec149bdb4b7b805f08c"
+    },
+    {
+      "path": "api/jobs-watch-0006.json",
+      "bytes": 21339,
+      "sha256": "7ed07a0c258efbd28dfdd132890c063c76ce70a848d2845b977e60838d639132"
+    },
+    {
+      "path": "api/jobs-watch-0007.json",
+      "bytes": 22438,
+      "sha256": "3d866e8ec33e99bce424f082045e652b40a4946ce14008dcb0a58b482be85c19"
+    },
+    {
+      "path": "api/jobs-watch-0008.json",
+      "bytes": 22892,
+      "sha256": "44328d4a26c6d213e0bc6088a70f64f9afcc213f69060db7dc33fc686b90bccb"
+    },
+    {
+      "path": "api/jobs-watch-0009.json",
+      "bytes": 22892,
+      "sha256": "44328d4a26c6d213e0bc6088a70f64f9afcc213f69060db7dc33fc686b90bccb"
+    },
+    {
+      "path": "api/jobs-watch-0010.json",
+      "bytes": 22892,
+      "sha256": "44328d4a26c6d213e0bc6088a70f64f9afcc213f69060db7dc33fc686b90bccb"
+    },
+    {
+      "path": "api/jobs-watch-0011.json",
+      "bytes": 22892,
+      "sha256": "44328d4a26c6d213e0bc6088a70f64f9afcc213f69060db7dc33fc686b90bccb"
+    },
+    {
+      "path": "api/jobs-watch-0012.json",
+      "bytes": 22935,
+      "sha256": "78490ee76a0b4156e15a9a8011bd05adf85f747d98e63bf481b1945dbc9a4713"
+    },
+    {
+      "path": "api/jobs-watch-0013.json",
+      "bytes": 22935,
+      "sha256": "78490ee76a0b4156e15a9a8011bd05adf85f747d98e63bf481b1945dbc9a4713"
+    },
+    {
+      "path": "api/jobs-watch-0014.json",
+      "bytes": 22935,
+      "sha256": "78490ee76a0b4156e15a9a8011bd05adf85f747d98e63bf481b1945dbc9a4713"
+    },
+    {
+      "path": "api/jobs-watch-0015.json",
+      "bytes": 22935,
+      "sha256": "78490ee76a0b4156e15a9a8011bd05adf85f747d98e63bf481b1945dbc9a4713"
+    },
+    {
+      "path": "api/jobs-watch-0016.json",
+      "bytes": 23948,
+      "sha256": "f6ba5a331b9ffe0c33a28140054d068c60f208b0809b2b46e391bed711b1590d"
+    },
+    {
+      "path": "api/public-git-commit.json",
+      "bytes": 1210,
+      "sha256": "f39e23588a83869ee00c5bdd4844af9da590c483a34f930e9132a627e229fdb4"
+    },
+    {
+      "path": "api/public-tree-initial.json",
+      "bytes": 209071,
+      "sha256": "faa56f680de3ee1f235f8e4b6296790475f9e71f9ccde3bb831fac36896bc986"
+    },
+    {
+      "path": "api/run-final-confirmation.json",
+      "bytes": 13477,
+      "sha256": "6eacf082bbe26fb665207af0b3ddfa42c7894aafe95c0f2b91c2daae278cd20a"
+    },
+    {
+      "path": "api/run-initial.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-terminal-fresh.json",
+      "bytes": 13477,
+      "sha256": "6eacf082bbe26fb665207af0b3ddfa42c7894aafe95c0f2b91c2daae278cd20a"
+    },
+    {
+      "path": "api/run-watch-0001.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0002.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0003.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0004.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0005.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0006.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0007.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0008.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0009.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0010.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0011.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0012.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0013.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0014.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0015.json",
+      "bytes": 13474,
+      "sha256": "927b2d3ba6ae75cb87cd634d8761af916ef1825bd56b9d89b6297fc58826cfb8"
+    },
+    {
+      "path": "api/run-watch-0016.json",
+      "bytes": 13477,
+      "sha256": "6eacf082bbe26fb665207af0b3ddfa42c7894aafe95c0f2b91c2daae278cd20a"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/artifact-binding.json",
+      "bytes": 2283,
+      "sha256": "d8c97f42def457fc29d7183cf7f43a72b396a36ca2ff96f34ea5d18d2ba4099d"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/artifact.zip",
+      "bytes": 6805,
+      "sha256": "f51e2448f3bc8dedcf8395dfb3c039f9f8615e8be508d4394a5a1e0e87c26bcf"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/native-webdriver-probe.log",
+      "bytes": 18,
+      "sha256": "b7ae47c979c41feee7f30f01baafba8c9b8424512adc91217773fe91a99d036f"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/native-webdriver-status.json",
+      "bytes": 48,
+      "sha256": "bed52ecb0b6420312e601344e85ae47c33f90dd47dc6b08bbc688c488ee05dbd"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-environment.txt",
+      "bytes": 247,
+      "sha256": "2935aac9a6e7d682ae253e378134d0c4e154b8c35fe1678fe3f3215cb1c1c5bc"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality-idle-cancel.json",
+      "bytes": 1837,
+      "sha256": "23d8b76f23112460ce907dcdf67254047befe723f1d7d4764cac0dd1039206f7"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality-idle-cancel.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality-slow-first-token.json",
+      "bytes": 2121,
+      "sha256": "2f09a8d6762cf83051c886153f669dce66e8ede527853b45ee24673e83bbffd1"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality-slow-first-token.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality-staged.json",
+      "bytes": 2108,
+      "sha256": "6537cf3f452b9075ebd6cfb0570af5454d0b7a73ff743100ed75e9437751f735"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality-staged.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality-truncated.json",
+      "bytes": 2128,
+      "sha256": "d8f2180b49a2a6d812b934eee23c5416210b06d8ed7fdde6adf641b6ee8ec2e0"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality-truncated.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/11464403865-eastgenesis-webdriver-diagnostics-Linux/contents/webdriver-quality.json",
+      "bytes": 11397,
+      "sha256": "4833ce84215eab011cbc1736c9890dc1a837835dce700c37829f93bbe3d445b9"
+    },
+    {
+      "path": "capture-scope.json",
+      "bytes": 412,
+      "sha256": "aee70684008e84f0e2d26d2b1eaec0eadd227beb63e8c5b9d4fd7f8bb758c6d9"
+    },
+    {
+      "path": "capture-watch.py",
+      "bytes": 5939,
+      "sha256": "3c5d22c9dbcd3f63697ac7bf3304326afd985c484164ce6c167bb2474f951577"
+    },
+    {
+      "path": "logs/job-112660171376.log",
+      "bytes": 434789,
+      "sha256": "c4ad2428666be39fd5244addba2acf35ebecd7cef1e1c8e91b5ddda2ff9693ea"
+    },
+    {
+      "path": "logs/job-112660171518.log",
+      "bytes": 273123,
+      "sha256": "4f752422df7ccf8ca1756b5f5fea558379a917498446c33e8cc2901c0d4d0394"
+    },
+    {
+      "path": "logs/job-112660171525.log",
+      "bytes": 310941,
+      "sha256": "6513a916df7755f865b669dfdcee84a6638adc81513c4455e02ea1c7f4c8ffa4"
+    },
+    {
+      "path": "parse-terminal-log.py",
+      "bytes": 2725,
+      "sha256": "67d98836e98ccfa2fdbabb6b17e37594c5021fdfddd67454262215707add87e3"
+    },
+    {
+      "path": "publisher-binding.json",
+      "bytes": 708,
+      "sha256": "ab8c8a144f3d8e7ea746ce03d79321cb0a6b295a25273580d0371804f8d3570b"
+    },
+    {
+      "path": "publisher-record.json",
+      "bytes": 102939,
+      "sha256": "553e47c3b2781546c5d30892498b48b246cb009c62f286cbcdacff1b1034e751"
+    },
+    {
+      "path": "source/.github/workflows/desktop.yml",
+      "bytes": 19040,
+      "sha256": "b2091329630d40cc5859fd18619347650314c20882ef3b3064c73824e546df2a"
+    },
+    {
+      "path": "source/package.json",
+      "bytes": 2957,
+      "sha256": "b5396c29d929803ce613f2bcc396df6eab4f61cd2e66c900b496a8875e56056a"
+    },
+    {
+      "path": "source/src/lib/goal-run.ts",
+      "bytes": 6257,
+      "sha256": "dd0e3a2a75ee1a5b169200321c3457ff65546bf4943c1c3598e429890dad1a7c"
+    },
+    {
+      "path": "source/src/lib/goal-runner.ts",
+      "bytes": 12001,
+      "sha256": "a21906de8ea3ec2754260fbf6257c0c0f00259e28cc006260a52dad63af7854a"
+    },
+    {
+      "path": "source/src/stores/goals.ts",
+      "bytes": 6934,
+      "sha256": "1ea0abc140c0c438a67235c01497b7cb2d0ca5fba7b559ecee43e3b6de92a91b"
+    },
+    {
+      "path": "source/src-tauri/tauri.conf.json",
+      "bytes": 1020,
+      "sha256": "9855f0d8099816e33cb42c3bfb902ece208c5f2587b8ea47714d68b1d5dd63a2"
+    },
+    {
+      "path": "source/src-tauri/tauri.windows.install.qa.conf.json",
+      "bytes": 117,
+      "sha256": "e22155cb3e8044ae4236ce7e7498e6dc645fc18d2011388ce411017766775db5"
+    },
+    {
+      "path": "source/src-tauri/tauri.windows.qa.conf.json",
+      "bytes": 452,
+      "sha256": "ed39b84cf3346e37d7f1910b79b72f07ab4209abbbd14a408813ce525e6bb13c"
+    },
+    {
+      "path": "source/tests/goal-failed-recovery.test.ts",
+      "bytes": 16148,
+      "sha256": "de14996489ddd81bcd9d56ba33641aab2f44c6defa17d28d8c57917ee9114c75"
+    },
+    {
+      "path": "source/tests/goal-runner.test.ts",
+      "bytes": 19772,
+      "sha256": "88cd1a508bf5c4eaa69b2f10fc6b4fa05788f6369a5887046e11ed8276960171"
+    },
+    {
+      "path": "source/tools/desktop-bundle-smoke.mjs",
+      "bytes": 2130,
+      "sha256": "77b04e77220fe8664e100cd7cb1a590229648ba8bf7d25a9156bf406c7973530"
+    },
+    {
+      "path": "source/tools/desktop-evidence-validate.mjs",
+      "bytes": 7093,
+      "sha256": "06801adf38e0a1fa66206ff332b8cf3f994280c381008b963f1b976b94cdfe2a"
+    },
+    {
+      "path": "source/tools/desktop-install-smoke.mjs",
+      "bytes": 9756,
+      "sha256": "e50d18a5a796491ef02ee0580f038f2d1eaec13fedeedb698b28e9ef39fbf412"
+    },
+    {
+      "path": "source/tools/desktop-linux-upgrade-smoke.mjs",
+      "bytes": 14407,
+      "sha256": "452b1fbdfd6b63e701202303c332e806befa168f85e5519b3cea98347eb4a75e"
+    },
+    {
+      "path": "source/tools/desktop-package-smoke.mjs",
+      "bytes": 9729,
+      "sha256": "d72434b0246bda949bed0b31b720f27b076d68c2e7563790e77c0106b864aa5a"
+    },
+    {
+      "path": "source/tools/desktop-process-cleanup.mjs",
+      "bytes": 4260,
+      "sha256": "96138f637b706f1c7707b6906dcb4abb8bbd0311d180441f767ca3f36e956c53"
+    },
+    {
+      "path": "source/tools/desktop-runner-evidence-validate.mjs",
+      "bytes": 12542,
+      "sha256": "7025bdfccf947d6e930a500684448e55cf5318595a0b39e68331044ac0d155f0"
+    },
+    {
+      "path": "source/tools/desktop-webdriver-smoke.mjs",
+      "bytes": 26330,
+      "sha256": "ca4589cdf3a6610e2a401639d8d9905b57ced9f0f34cf9c00de4a7ad84fbaded"
+    },
+    {
+      "path": "source/tools/desktop-webdriver-summary.mjs",
+      "bytes": 5012,
+      "sha256": "ef371486d34a61ed147388fc009f958a6cc796e17bae1ea6d46408f540560d67"
+    },
+    {
+      "path": "source/tools/desktop-windows-install-smoke.d.mts",
+      "bytes": 2702,
+      "sha256": "11275fede5d0e7b88dc9f5c6f807632fc0406207f4962d1da28962752aa328ae"
+    },
+    {
+      "path": "source/tools/desktop-windows-install-smoke.mjs",
+      "bytes": 23691,
+      "sha256": "6a724a5bbeeff7611e4771655efefeb022e5ea18aafea9e229738e1448059ac4"
+    },
+    {
+      "path": "source/tools/desktop-windows-install-smoke.ps1",
+      "bytes": 43789,
+      "sha256": "b18a3fab792b541504e7c8425bdebd828700a3b292663df9571323de7f4b7402"
+    },
+    {
+      "path": "source/vendor/tauri-plugin-sql/src/sqlite_path_tests.rs",
+      "bytes": 14658,
+      "sha256": "468fcfde814f6f77aa72f37acc637f8a15f02b79ac542b51d2bb44c3cfc9a13a"
+    },
+    {
+      "path": "source/vendor/tauri-plugin-sql/src/wrapper.rs",
+      "bytes": 14660,
+      "sha256": "e37fdc94bcd0da39e7f49b2c4319c7e3af82a1b1b683d2b6fe7e5d50bd3cc346"
+    },
+    {
+      "path": "source-binding.json",
+      "bytes": 102516,
+      "sha256": "bf0cd0ee252fc9f6e9918a4ea121e5395287e52bba648c6e920ac48686a10bcc"
+    },
+    {
+      "path": "source-selected-index.json",
+      "bytes": 6389,
+      "sha256": "bd703917a9a770b80dc43a610ddcc54c1d440a19a0e90e97bad896313d5372f6"
+    },
+    {
+      "path": "stdout/job-112660171376-00-desktop-install-smoke.json",
+      "bytes": 1683,
+      "sha256": "bb64cd9946605924ecd32abb656b055f1ceda09d2692f1c5923eee7fae12175c"
+    },
+    {
+      "path": "stdout/job-112660171376-01-desktop-linux-upgrade-smoke.json",
+      "bytes": 2088,
+      "sha256": "a28193e240e383ba26f5e5158d20f1d4050ada672ed6a181b07cd3c0a83fd1dc"
+    },
+    {
+      "path": "stdout/job-112660171376-02-desktop-runner-evidence.json",
+      "bytes": 1470,
+      "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde"
+    },
+    {
+      "path": "stdout/job-112660171518-00-desktop-runner-evidence.json",
+      "bytes": 1206,
+      "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e"
+    },
+    {
+      "path": "stdout/job-112660171525-00-desktop-windows-install-smoke.json",
+      "bytes": 9504,
+      "sha256": "f1cdf747428001f4c65d35c3f96706c5883ac49bfdd592352e613b800c47d84d"
+    },
+    {
+      "path": "terminal-audit.json",
+      "bytes": 15741,
+      "sha256": "c86cf5eb6c20b5feb62534444bac27ce6356bd9e67665115340ed0c867e66e02"
+    },
+    {
+      "path": "terminal-observation.json",
+      "bytes": 1160,
+      "sha256": "2e1e9f19a08733ce7111953233339ca77b534e4d6de84a6f76ba1237b7249f7b"
+    }
+  ]
+}

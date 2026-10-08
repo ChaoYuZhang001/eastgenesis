@@ -1,7 +1,7 @@
 // 桌面端的 Provider 组装：可用性判断（只看后端给的「是否已配置」）、地域与本机服务偏好、构造适配器。
 // 适配器拿到占位 Key，请求经 proxiedFetch 交给 Rust 注入认证；base URL 只取官方表或 Rust 侧保存的自定义配置。
-import { AnthropicProvider, OpenAIProvider, officialEndpoint, regionBaseUrl, type LLMProvider } from "@/core/llm";
-import { ADAPTER_READY, type Availability, type ChainEntry, type HealthTracker } from "@/decision";
+import { AnthropicProvider, OpenAIProvider, ProviderError, adapterRecoveryContract, officialEndpoint, regionBaseUrl, type LLMProvider } from "@/core/llm";
+import { ADAPTER_READY, adapterRecoveryReady, type Availability, type ChainEntry, type HealthTracker } from "@/decision";
 import { PROXY_PLACEHOLDER_KEY, isValidModelName, proxiedFetch, type Backend, type CustomProvider, type KeyStatus } from "@/platform";
 
 export const isLocal = (url: string) => /^http:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?(\/|$)/.test(url);
@@ -55,10 +55,13 @@ export function statusAvailability(
     if (p.provider.startsWith("custom:")) {
       const c = custom.find((x) => x.id === p.provider);
       if (!c) return { ok: false, reason: "自定义 Provider 不存在" };
+      const protocol = c.protocol ?? "openai";
+      if (!adapterRecoveryContract(protocol)) return { ok: false, reason: "自定义 Provider 协议未声明可恢复契约" };
       if (!byId.get(p.provider)?.configured && !isLocal(c.base_url)) return { ok: false, reason: "缺少 API Key（在设置页配置）" };
       return health.status(p.id, p.provider);
     }
     if (!adapters.has(p.provider)) return { ok: false, reason: "适配器未实现" };
+    if (!adapterRecoveryReady(p.provider)) return { ok: false, reason: "适配器缺少可恢复执行契约" };
     if (p.provider === "ollama" && !prefs.ollama) return { ok: false, reason: "本机 Ollama 未启用（在设置页启用）" };
     const s = byId.get(p.provider);
     if (s?.needs_key !== false && !s?.configured) return { ok: false, reason: "缺少 API Key（在设置页配置）" };
@@ -97,8 +100,10 @@ export function providerFactory(backend: Backend, custom: readonly CustomProvide
     } else {
       const c = custom.find((x) => x.id === e.provider);
       if (!c) throw new Error(`没有找到 Provider：${e.provider}`);
+      const protocol = c.protocol ?? "openai";
+      if (!adapterRecoveryContract(protocol)) throw new ProviderError("config", c.id, { message: "自定义 Provider 协议未声明可恢复契约" });
       const init = { id: c.id, label: c.label, baseUrl: c.base_url, apiKey: PROXY_PLACEHOLDER_KEY, fetch, timeoutMs };
-      p = c.protocol === "anthropic" ? new AnthropicProvider(init) : new OpenAIProvider({ ...init, kind: "openai-compatible" });
+      p = protocol === "anthropic" ? new AnthropicProvider(init) : new OpenAIProvider({ ...init, kind: "openai-compatible" });
     }
     cache.set(e.provider, p);
     return p;

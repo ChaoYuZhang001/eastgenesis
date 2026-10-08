@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "github-runner-report-extract",
+  "capturedAt": "2026-10-06T21:00:54.189020+00:00",
+  "source": {
+    "runId": 37527468910,
+    "jobId": 112488011551,
+    "headSha": "e260544227c57f453a41edb6798f77d395117fbf",
+    "platform": "windows-latest",
+    "method": "exact JSON extracted from completed job log",
+    "reportSha256": "a44f0ea3c1b70bb4ccf4240591f7ec47f964980f47b24ef9fc1d60973dd29d77"
+  },
+  "interpretation": {
+    "nsisBuildSucceeded": true,
+    "installCommandReached": false,
+    "applicationLaunched": false,
+    "stoppedBefore": "installer_dispatch",
+    "error": "qa_isolation_missing",
+    "rawFixedInstallFieldsAreNotProofOfAttempt": true
+  },
+  "report": {
+    "schemaVersion": 1,
+    "kind": "desktop-windows-install-smoke",
+    "platform": "windows",
+    "format": "nsis",
+    "passed": false,
+    "checks": {
+      "hostedRunner": true,
+      "noExistingInstallation": true,
+      "webView2Present": true
+    },
+    "stages": [
+      "hostedRunner",
+      "noExistingInstallation",
+      "webView2Present"
+    ],
+    "launches": [],
+    "install": {
+      "mode": "nsis-install-reinstall-uninstall",
+      "isolatedPrefix": true,
+      "isolatedAppDirectories": true,
+      "systemPackageDatabaseChanged": true,
+      "sameVersionReinstall": true,
+      "crossVersionUpgrade": false,
+      "knownFoldersRegistryChanged": false
+    },
+    "errors": [
+      "qa_isolation_missing"
+    ],
+    "evidenceBoundary": {
+      "proven": [],
+      "excluded": [
+        "production default Known Folder storage or migration",
+        "old-version to new-version upgrade",
+        "automatic update or rollback",
+        "MSI or per-machine installation",
+        "normal user machine installation or UAC experience",
+        "UI hydration of the persisted session",
+        "real Provider availability",
+        "tool side-effect recovery",
+        "code signing or SmartScreen reputation"
+      ]
+    }
+  }
+}

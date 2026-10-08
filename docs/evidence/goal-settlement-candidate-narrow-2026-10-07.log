@@ -1,0 +1,776 @@
+
+ RUN  v3.0.5 /private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate
+
+(node:2374) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/goal-settlement-recovery.test.ts (7 tests) 348ms
+ ✓ tests/goal-settlement-boundaries.test.ts (11 tests) 722ms
+ ✓ tests/completed-step-recovery.test.ts (10 tests) 169ms
+ ✓ tests/goal-failed-recovery.test.ts (4 tests) 298ms
+(node:2424) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/project-goal-storage.test.ts (19 tests) 61ms
+(node:2426) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/session-storage.test.ts (13 tests) 48ms
+ ✓ tests/goal-recovery-evidence.test.ts (2 tests) 166ms
+ ✓ tests/goal-runner.test.ts (19 tests) 80ms
+ ✓ tests/goal-model.test.ts (19 tests) 21ms
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 取消终态落盘等待期间两种继续入口均拒绝，收尾之后才能恢复同一任务
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to RoundsList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at RoundsList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:355:23)
+    at div
+    at main
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to ActiveRound inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ActiveRound (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:289:24)
+    at div
+    at main
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 取消终态落盘等待期间两种继续入口均拒绝，收尾之后才能恢复同一任务
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to RoundsList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at RoundsList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:355:23)
+    at div
+    at main
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to ActiveRound inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ActiveRound (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:289:24)
+    at div
+    at main
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 开始后自动跑一轮：轮次显示进行中的步骤、判定和折叠路由行，并记进目标的模型调用数
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 暂停停掉正在跑的那一轮：这一轮记为「被打断」，不再开下一轮
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 目标暂停后点击继续：复用原任务账本，不新建一轮任务
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 「继续下一轮」在确认之后才开下一轮；确认完成则收尾
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 每轮的模型调用记进使用记录，但目标轮次不会写出一条会话
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+ ✓ tests/ui-goal-output.test.tsx (7 tests) 430ms
+   ✓ Goal 轮次正文 > 实际生成→失败→检查点重载→顶部继续→总结，正文保留在同Goal同轮同任务且只显示一次 368ms
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 同一时间有会话在跑时，目标轮次也不会被写进那个会话的回合里
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+stderr | tests/ui-goal-run.test.tsx > 目标模式：多轮执行 > 落库的轮次带上执行它的任务 id；读回后仍能把轮次和任务对上
+Warning: An update to HomeList inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to Dialogs inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at Dialogs (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/Dialogs.tsx:15:55)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalRow inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalRow (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:389:20)
+    at li
+    at ul
+    at nav
+    at div
+    at section
+    at Group (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:165:18)
+    at HomeList (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:587:48)
+    at div
+    at aside
+    at ContentPanel (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/layout/ContentPanel.tsx:20:25)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalView inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalView (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:59:21)
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+Warning: An update to GoalDetail inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at GoalDetail (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/components/goal/GoalDetail.tsx:42:23)
+    at div
+    at App (/private/tmp/eastgenesis-goal-settlement-b4-20261007/candidate/src/App.tsx:27:77)
+
+ ✓ tests/ui-goal-run.test.tsx (13 tests) 2065ms
+   ✓ 目标模式：多轮执行 > 取消终态落盘等待期间两种继续入口均拒绝，收尾之后才能恢复同一任务 411ms
+ ✓ tests/goal-store.test.ts (9 tests) 19ms
+ ✓ tests/ui-history.test.tsx (4 tests) 1531ms
+   ✓ 会话持久化 > 回合结束后写回；重启读回：会话在「最近」里，点开是同样的回答和路由记录，本月节省跨重启累计 941ms
+
+ Test Files  13 passed (13)
+      Tests  137 passed (137)
+   Start at  15:36:38
+   Duration  10.55s (transform 1.27s, setup 1.40s, collect 4.23s, tests 5.96s, environment 3.05s, prepare 1.20s)
+

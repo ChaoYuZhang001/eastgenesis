@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "kind": "windows-producer-toolchain-and-json-depth-independent-readonly-review",
+  "createdAt": "2026-10-07T07:27:53.318299+00:00",
+  "source": {
+    "path": "/tmp/eastgenesis-windows123-facts-_ewu2_vu/frozen-final/tools/desktop-windows-install-smoke.ps1",
+    "bytes": 48149,
+    "sha256": "9400152bdc54246e22204891d859b986b4567430a2b7325910352bd011d94397",
+    "embeddedCsharp": {
+      "bytes": 12041,
+      "sha256": "e567c176fe207a1b7b6f60cfa8a3a64831f063d894d5a04564d7a8b895c7de57",
+      "startLine": 600,
+      "endLine": 761,
+      "encoding": "exact UTF-8 here-string literal payload bytes; opening/closing delimiter separator newlines excluded; not compiled/executed"
+    }
+  },
+  "host": {
+    "platform": "macOS-26.7.1-x86_64-i386-64bit-Mach-O",
+    "machine": "x86_64",
+    "pathDiscovery": {
+      "pwsh": null,
+      "powershell": null,
+      "dotnet": null,
+      "csc": null,
+      "mcs": null,
+      "mono": null
+    },
+    "knownExecutableRoots": [
+      {
+        "path": "/usr/local/share/dotnet/dotnet",
+        "executableFile": false
+      },
+      {
+        "path": "/opt/homebrew/bin/pwsh",
+        "executableFile": false
+      },
+      {
+        "path": "/usr/local/bin/pwsh",
+        "executableFile": false
+      },
+      {
+        "path": "/opt/homebrew/bin/dotnet",
+        "executableFile": false
+      },
+      {
+        "path": "/usr/local/bin/dotnet",
+        "executableFile": false
+      },
+      {
+        "path": "/Library/Frameworks/Mono.framework/Versions/Current/Commands/mcs",
+        "executableFile": false
+      },
+      {
+        "path": "/Library/Frameworks/Mono.framework/Versions/Current/Commands/csc",
+        "executableFile": false
+      }
+    ],
+    "commonPatterns": [
+      "/usr/local/microsoft/powershell/*/pwsh",
+      "/opt/microsoft/powershell/*/pwsh",
+      "/Applications/PowerShell.app/Contents/MacOS/pwsh",
+      "/usr/share/dotnet/dotnet",
+      "/usr/local/share/dotnet/*/dotnet",
+      "/Users/apple/.dotnet/dotnet",
+      "/Users/apple/.local/bin/pwsh",
+      "/Library/Frameworks/Mono.framework/Versions/*/Commands/mcs",
+      "/Library/Frameworks/Mono.framework/Versions/*/Commands/csc"
+    ],
+    "patternMatches": [],
+    "discoveryScope": "PATH plus explicitly listed common installation roots, not a full-filesystem enumeration",
+    "versionResults": {
+      "pwsh": "unavailable: no executable discovered; version not invoked",
+      "powershell": "unavailable: no executable discovered; version not invoked",
+      "dotnet": "unavailable: no executable discovered; version not invoked",
+      "csc": "unavailable: no executable discovered; version not invoked",
+      "mcs": "unavailable: no executable discovered; version not invoked",
+      "mono": "unavailable: no executable discovered; version not invoked"
+    }
+  },
+  "compileOnlyAssessment": {
+    "availableDiscoveredToolchain": false,
+    "compileAttempted": false,
+    "compilePassed": false,
+    "nativeApiInvoked": false,
+    "conclusion": "No available pwsh/dotnet/csc/mcs/mono found in the bounded executable discovery. No substitute compile pass is created; full embedded C# compilation and PowerShell serialization remain pending Windows CI.",
+    "ifToolchainAvailable": "A library-target compilation of the unchanged literal could check types/syntax without invoking any method or Windows P/Invoke; no such compile was attempted here."
+  },
+  "jsonDepthStaticReview": {
+    "baselineAndFinalDepth": 8,
+    "line": 854,
+    "statementUnchanged": true,
+    "shapeChain": [
+      "report IDictionary",
+      "startupDiagnostics array",
+      "diagnostic IDictionary",
+      "processStartInputFacts IDictionary",
+      "application/cwd/command Hashtable",
+      "scalar or null fields"
+    ],
+    "conservativeMaximumShapeLevelsIncludingRootAndLeaf": 6,
+    "conclusion": "Existing Depth 8 exceeds the static fixed shape depth; no new nested object is deeper than the existing allowance. This is static shape review, not actual PowerShell ConvertTo-Json execution.",
+    "serializationExecuted": false,
+    "unknownFactNullsNotPromoted": true
+  },
+  "roleCallReview": {
+    "sixCallsites": [
+      {
+        "baseline": "$handle = Start-Controlled $python \"`\"$pythonScript`\" `\"$database`\" $Mode `\"$probeOutput`\"\"",
+        "final": "$handle = Start-Controlled $python \"`\"$pythonScript`\" `\"$database`\" $Mode `\"$probeOutput`\"\" $probeRole",
+        "fixedRoleExpression": "$probeRole",
+        "firstTwoArgumentTextUnchanged": true
+      },
+      {
+        "baseline": "$reader = Start-Controlled $configuration.nodeBinary \"`\"$($configuration.startupTraceReader)`\" --trace `\"$tracePath`\" --run-id $RunId --output `\"$traceOutput`\"\"",
+        "final": "$reader = Start-Controlled $configuration.nodeBinary \"`\"$($configuration.startupTraceReader)`\" --trace `\"$tracePath`\" --run-id $RunId --output `\"$traceOutput`\"\" 'startup_trace_reader'",
+        "fixedRoleExpression": "'startup_trace_reader'",
+        "firstTwoArgumentTextUnchanged": true
+      },
+      {
+        "baseline": "$script:app = Start-Controlled $binary ''",
+        "final": "$script:app = Start-Controlled $binary '' 'installed_app'",
+        "fixedRoleExpression": "'installed_app'",
+        "firstTwoArgumentTextUnchanged": true
+      },
+      {
+        "baseline": "$handle = Start-Controlled $copy \"/S _?=$($configuration.installDirectory)\"",
+        "final": "$handle = Start-Controlled $copy \"/S _?=$($configuration.installDirectory)\" 'nsis_uninstall'",
+        "fixedRoleExpression": "'nsis_uninstall'",
+        "firstTwoArgumentTextUnchanged": true
+      },
+      {
+        "baseline": "$handle = Start-Controlled $configuration.packagePath \"/S /NS /D=$($configuration.installDirectory)\"",
+        "final": "$handle = Start-Controlled $configuration.packagePath \"/S /NS /D=$($configuration.installDirectory)\" 'nsis_install'",
+        "fixedRoleExpression": "'nsis_install'",
+        "firstTwoArgumentTextUnchanged": true
+      },
+      {
+        "baseline": "$handle = Start-Controlled $configuration.packagePath \"/S /NS /D=$($configuration.installDirectory)\"",
+        "final": "$handle = Start-Controlled $configuration.packagePath \"/S /NS /D=$($configuration.installDirectory)\" 'nsis_install'",
+        "fixedRoleExpression": "'nsis_install'",
+        "firstTwoArgumentTextUnchanged": true
+      }
+    ],
+    "modeMappingFixedAndUnknownFallback": true,
+    "nativeOriginalFiveArgumentsUnchanged": true,
+    "actualCommandStringBuilderLineUnchanged": true,
+    "roleNotConcatenatedIntoCommand": true,
+    "launchRoleOnlyPassedToFactsCapture": true
+  },
+  "boundaries": {
+    "candidateEdited": false,
+    "repoGitMutation": false,
+    "privateConfigRead": false,
+    "appAxProviderExecution": false,
+    "installedDownloadedModifiedSystem": false,
+    "powershellCsharpWindowsExecution": false
+  },
+  "conclusion": "No additional blocking issue in static JSON depth or fixed-role argument propagation. Producer compile and real serialization validation still require Windows CI."
+}

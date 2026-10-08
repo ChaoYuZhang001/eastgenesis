@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "kind": "desktop-native-picker-sandbox",
+  "platform": "macos",
+  "appVersion": "0.1.0",
+  "appIdentifier": "com.eastgenesis.desktop",
+  "createdAt": "2026-10-06T20:24:21.429Z",
+  "scenarios": [
+    {
+      "scenario": "workdir_cancel",
+      "status": "passed",
+      "assertions": {
+        "realNativeCancel": true,
+        "noContextChange": true,
+        "noRootGrant": true
+      }
+    },
+    {
+      "scenario": "workdir_context",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "selectedContextVisible": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "project_context",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "projectVisible": true,
+        "sqliteContextPersisted": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "ungranted_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "fileUnchanged": true
+      }
+    },
+    {
+      "scenario": "settings_cancel",
+      "status": "passed",
+      "assertions": {
+        "realNativeCancel": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "explicit_root_grant",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "onlyExplicitRootAdded": true,
+        "builtinReconnected": true,
+        "defaultRootFixed": true,
+        "builtinReconnectedEvidence": "UI running status after restart attempt; effective roots were disproved by the next real task"
+      }
+    },
+    {
+      "scenario": "authorized_read_write",
+      "status": "failed",
+      "failedStage": "authorized_tools_completed"
+    },
+    {
+      "scenario": "outside_write_denied",
+      "status": "not_run"
+    },
+    {
+      "scenario": "symlink_read_denied",
+      "status": "not_run"
+    },
+    {
+      "scenario": "symlink_write_denied",
+      "status": "not_run"
+    },
+    {
+      "scenario": "root_removed",
+      "status": "not_run"
+    },
+    {
+      "scenario": "removed_root_write_denied",
+      "status": "not_run"
+    }
+  ],
+  "evidenceBoundary": {
+    "proven": [
+      "real native workdir selection and cancel",
+      "real native project selection, UI context and SQLite persistence",
+      "workdir/project context does not grant file access",
+      "ungranted real Rust file write denied with unchanged owned file",
+      "real native settings cancel leaves roots unchanged",
+      "explicit settings root persisted and builtin UI reports running",
+      "old binary still denies the newly granted directory in the same process"
+    ],
+    "excluded": [
+      "real Provider",
+      "Windows/Linux native picker",
+      "production file-root persist-failure transaction fix",
+      "signing/notarization",
+      "all filesystem adversarial races",
+      "authorized read/write after grant",
+      "outside and symlink cases in this desktop run",
+      "same-process root removal and default-root task after removal"
+    ]
+  },
+  "binarySha256": "552c8e86168491003348334d4714de1bcd2957ee12488b424e34f8e468f75e86",
+  "harnessSha256": "ae6def81ca72c19f99147052b49e500509116f41fe27f740edcd4ea87c03cf7f",
+  "sourceRevision": "e3a9971f7a27807f14ae241c426711fcf4fb4b56",
+  "compiledFileRootsRevision": "e3a9971f",
+  "compiledFileRootsSha256": "6f4d2a4cf31431e07021563b953620e677103c3a284133320bf8bfcd2c3f21fd",
+  "osVersion": "26.7.1",
+  "architecture": "x64",
+  "lastObservedTask": {
+    "status": "needs_user",
+    "resultOk": [
+      false
+    ],
+    "pathDenied": true
+  },
+  "passed": false,
+  "failedStage": "authorized_tools_completed",
+  "observedFixedUiLabels": [],
+  "observedNativeButtons": [],
+  "nativeFieldDiagnostics": {
+    "textFields": 0,
+    "comboBoxes": 0,
+    "textAreas": 0,
+    "ownedTargetMatches": 0
+  },
+  "observedWindowShape": "1:0",
+  "fixtureRequestCounts": {
+    "plan": 4,
+    "args": 2,
+    "stream": 0,
+    "json": 7
+  },
+  "controlledCleanup": true,
+  "finishedAt": "2026-10-06T20:26:24.580Z"
+}

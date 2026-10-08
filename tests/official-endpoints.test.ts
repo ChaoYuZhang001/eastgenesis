@@ -2,7 +2,7 @@
 // 官方端点表：TS 与 Rust 白名单一致；各家请求差异；本机服务不带 Key。
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { BUILTIN_PROVIDERS, OFFICIAL_ENDPOINTS, OFFICIAL_IDS, createProvider, type FetchLike, type ProviderConfig } from "@/core/llm";
+import { ADAPTER_RECOVERY_CONTRACTS, BUILTIN_PROVIDERS, OFFICIAL_ENDPOINTS, OFFICIAL_IDS, createProvider, type FetchLike, type ProviderConfig } from "@/core/llm";
 import { EnvSecretSource } from "@/core/secrets";
 import { MODEL_PROFILES } from "@/decision";
 
@@ -56,6 +56,15 @@ describe("官方端点表", () => {
     for (const p of BUILTIN_PROVIDERS) {
       const profile = MODEL_PROFILES.find((m) => m.id === `${p.id}/${p.defaultModel}`);
       expect(profile?.enabled, `${p.id}/${p.defaultModel}`).toBe(true);
+    }
+  });
+
+  it("7 家内置适配器都声明取消、终态、部分输出和错误归一化契约", async () => {
+    for (const id of OFFICIAL_IDS) {
+      const cfg = builtin(id);
+      const env = cfg.apiKeyRef?.replace("env:", "") ?? "";
+      const p = await createProvider(cfg, new EnvSecretSource(env ? { [env]: KEY } : {}), { fetch: capture(reply).fetch });
+      expect(p.capabilities.recovery).toEqual(ADAPTER_RECOVERY_CONTRACTS[id]);
     }
   });
 });

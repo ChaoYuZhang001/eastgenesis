@@ -54,6 +54,37 @@ describe("首屏", () => {
     expect(screen.queryByRole("article")).not.toBeInTheDocument();
   });
 
+  it("输入时显示预计工作能力，说明这是本地预判而非锁定模式", async () => {
+    await boot();
+    const box = screen.getByLabelText("任务描述");
+    fireEvent.change(box, { target: { value: "打开 Git 仓库，修复 bug 并运行测试" } });
+    const preview = screen.getByRole("status", { name: "预计工作能力" });
+    expect(preview).toHaveTextContent("Codex 开发");
+    expect(preview).toHaveAttribute("title", expect.stringContaining("提交后由决策层复核"));
+    fireEvent.change(box, { target: { value: "解释一下向量数据库" } });
+    expect(screen.getByRole("status", { name: "预计工作能力" })).toHaveTextContent("Chat 对话");
+  });
+
+  it("+ 菜单可以给任务一个能力面提示，但不把它变成权限或模型锁定", async () => {
+    await boot();
+    const add = screen.getByRole("button", { name: "添加" });
+    fireEvent.click(add);
+    const menu = screen.getByRole("menu", { name: "添加" });
+    fireEvent.click(within(menu).getByRole("menuitem", { name: /工作能力/ }));
+    const surfaces = screen.getByRole("menu", { name: "工作能力" });
+    fireEvent.click(within(surfaces).getByRole("menuitemradio", { name: /Codex 开发/ }));
+    expect(useChat.getState()).toMatchObject({ surfaceHint: "codex", permission: "confirm", lock: null });
+    expect(screen.getByRole("status", { name: "预计工作能力" })).toHaveTextContent("Codex 开发");
+    expect(screen.getByRole("list", { name: "这次任务的设置" })).toHaveTextContent("Codex 开发");
+    fireEvent.change(screen.getByLabelText("任务描述"), { target: { value: "解释 Rust 所有权" } });
+    fireEvent.click(screen.getByRole("button", { name: "提交任务" }));
+    await waitFor(() => {
+      const event = useTasks.getState().tasks[0]?.events.find((e) => e.type === "route");
+      expect(event?.type === "route" && event.decision.classification.surface).toBe("codex");
+    }, LONG);
+    await stopAll();
+  });
+
   it("Enter 换行，⌘↩ 或 Ctrl+Enter 发送", async () => {
     await boot();
     const box = screen.getByLabelText("任务描述");

@@ -54,7 +54,11 @@ describe("MCP 客户端", () => {
     expect(await c.initialize()).toMatchObject({ protocolVersion: "2025-06-18", serverInfo: { name: "mem" } });
     expect(t.sent.some((m) => m.method === "notifications/initialized")).toBe(true);
     expect((await c.listTools()).map((x) => x.name)).toEqual(["a", "b"]);
-    expect(await c.callTool("a", { x: 1 })).toEqual({ ok: true, content: "called a\n[图片]" });
+    expect(await c.callTool("a", { x: 1 }, undefined, "eg-test-key")).toEqual({ ok: true, content: "called a\n[图片]" });
+    expect(t.sent.find((m) => m.method === "tools/call")?.params).toMatchObject({ _meta: { "com.eastgenesis/idempotencyKey": "eg-test-key" } });
+    const before = t.sent.filter((m) => m.method === "tools/call").length;
+    await Promise.all([c.callTool("a", {}, undefined, "eg-same-call"), c.callTool("a", {}, undefined, "eg-same-call")]);
+    expect(t.sent.filter((m) => m.method === "tools/call").length).toBe(before + 1);
     expect((await c.callTool("fails", {})).ok).toBe(false);
     await expect(c.callTool("bad", {})).rejects.toMatchObject({ code: "rpc", rpcCode: -32602 });
   });
@@ -114,6 +118,27 @@ describe("mcpTools 白名单与信任策略", () => {
 
   it("服务器 ID 必须合法", () => {
     expect(() => mcpTools(client, infos, { server: "Bad Server", allowTools: "*" })).toThrow(/服务器 ID/);
+  });
+
+  it("内置 files 工具为可恢复写入提供状态探测", async () => {
+    const calls: { name: string; args: Record<string, unknown>; key?: string }[] = [];
+    const fsClient = {
+      callTool: async (name: string, args: Record<string, unknown>, _signal?: AbortSignal, key?: string) => {
+        calls.push({ name, args, ...(key ? { key } : {}) });
+        return name === "read_file" ? { ok: true, content: "", data: { path: args.path, size: 2, content: "完成", truncated: false } } : { ok: false, content: "路径不存在（not_found）" };
+      },
+    };
+    const { tools } = mcpTools(fsClient, [
+      { name: "read_file", annotations: { readOnlyHint: true } },
+      { name: "write_file", annotations: { destructiveHint: true, idempotentHint: false } },
+      { name: "get_file_info", annotations: { readOnlyHint: true } },
+    ], { server: "files", allowTools: "*", trustAnnotations: true });
+    const write = tools.find((tool) => tool.name === "mcp__files__write_file");
+    expect(write?.probe).toBeTypeOf("function");
+    const result = await write!.probe!({ path: "~/Downloads/report.md", content: "完成" }, { signal: new AbortController().signal });
+    expect(result).toMatchObject({ state: "applied", artifacts: [{ action: "modify", path: "~/Downloads/report.md", ok: true }] });
+    await expect(write!.probe!({ path: "~/Downloads/report.md", content: "其他内容" }, { signal: new AbortController().signal })).resolves.toMatchObject({ state: "conflict" });
+    expect(calls[0]).toMatchObject({ name: "read_file", args: { path: "~/Downloads/report.md" } });
   });
 });
 

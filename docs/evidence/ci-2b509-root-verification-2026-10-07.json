@@ -1,0 +1,41 @@
+{
+  "observedAt": "2026-10-07T05:55:15.532214+00:00",
+  "passed": true,
+  "runId": 37575271906,
+  "headSha": "2b509b7a4bd048412d442ad31360c7c7316a10d7",
+  "status": "completed",
+  "conclusion": "failure",
+  "jobs": [
+    {
+      "id": 112642644025,
+      "name": "windows-latest",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 112642644217,
+      "name": "macos-latest",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 112642644229,
+      "name": "ubuntu-latest",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "indexSha256": "4198d762c74bbffccad34780980a2e9a747df49760a8cc7db65141cc2bfec148",
+  "verifiedIndexedFiles": 85,
+  "verifiedIndexedBytes": 2271864,
+  "zipSha256": "957273157e67894055740f0c543f73962b5d1cd7602be38aef3c44aa17bcafb4",
+  "verifiedZipMembers": 86,
+  "sourceFilesVerified": 733,
+  "sourceContentBytes": 16973688,
+  "sourceCurrentEqualsImmutableGitBlobs": true,
+  "publicTreeAndSoleParentVerifiedFromFreshApi": true,
+  "memoryContentRead": false,
+  "windowsFirstFailureVerified": "Rust sqlite_path_tests Directory::drop Os32; NSIS not reached",
+  "actualNetworkTransferBytesMeasured": false,
+  "newWindowsProcessJobDiagnosisExecuted": false
+}

@@ -4,6 +4,26 @@ export type TaskType = "qa" | "code" | "reasoning" | "vision" | "long_context" |
 export type Capability = "code" | "long_context" | "reasoning" | "tool_use" | "vision" | "zh";
 export type Lang = "zh" | "en" | "mixed";
 
+/**
+ * 统一工作台里的能力面。
+ *
+ * 这不是一个需要用户手动切换的产品模式：同一个 Goal 可以在不同步骤
+ * 依次使用 Chat、Work 和 Codex。它只描述当前任务需要哪一类桌面能力，
+ * 供路由、权限和结果展示使用。
+ */
+export type WorkSurface = "chat" | "work" | "codex";
+export const WORK_SURFACES: readonly WorkSurface[] = ["chat", "work", "codex"];
+export const WORK_SURFACE_LABEL: Record<WorkSurface, string> = {
+  chat: "Chat 对话",
+  work: "Work 工作",
+  codex: "Codex 开发",
+};
+export const WORK_SURFACE_HINT: Record<WorkSurface, string> = {
+  chat: "对话、问答和轻量分析",
+  work: "研究、文件和交付物",
+  codex: "代码、终端和仓库操作",
+};
+
 export const TASK_TYPES: readonly TaskType[] = ["qa", "code", "reasoning", "vision", "long_context", "tool_use"];
 export const CAPABILITIES: readonly Capability[] = ["code", "long_context", "reasoning", "tool_use", "vision", "zh"];
 
@@ -42,6 +62,8 @@ export interface Attachment {
 export interface TaskInput {
   text: string;
   attachments?: Attachment[];
+  /** 可选的显式提示；普通用户不需要填写，统一工作台默认自动推断。 */
+  surfaceHint?: WorkSurface;
 }
 
 export interface Classification {
@@ -54,6 +76,9 @@ export interface Classification {
   confidence: number;
   /** 命中的信号，供路由面板展示 */
   signals: string[];
+  /** 统一工作台的能力面；旧记录没有此字段时按 chat 兼容。 */
+  surface?: WorkSurface;
+  surfaceReason?: string;
 }
 
 export function typeFromCapabilities(caps: readonly Capability[]): TaskType {

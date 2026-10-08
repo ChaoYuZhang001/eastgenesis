@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "kind": "historical-checkpoint-source-compatibility-audit",
+  "checkedAt": "2026-10-07T01:38:04.468486+00:00",
+  "repository": "ChaoYuZhang001/eastgenesis",
+  "publishedReleasesFound": 0,
+  "tagsFound": 0,
+  "historicalSourceBindings": [
+    {
+      "revision": "c9d749693bd375e2acfbd32c4ec71a4a20415006",
+      "committedAt": "2026-10-02T10:30:10+08:00",
+      "sourceHashes": {
+        "Cargo.toml": "ecc6cee4e1622623c73f557cb47f0c25ff04c8333ede60944e059079a567083f",
+        "Cargo.lock": "be8394050109839e55f1f41afd3aa5978e4cdfea93fae3b3b53264b1314941c3",
+        "package.json": "f57afaedb91bd7daa4007fdce9d1f2c08c8a5f2c3b0fed2ef8a06e1666b590fa",
+        "pnpm-lock.yaml": "af9a80ccef2f75a499c631aea7fbf4fc15f09d696b412cb5e33952161a0669ff",
+        "src/stores/tasks.ts": "abbdead317b430efab22957b3eed24d137021091d40858a604eec01096921291",
+        "src/agent/runtime.ts": "599f3f2867ee802a7d42f23a0c48e7f3727954fa560b453fda4d5930c4a919ff",
+        "src-tauri/src/keychain.rs": "157347d4730951da03f21b325ff6f80a9d7b94345275622ef5f10cda4731ec24",
+        "src-tauri/src/lib.rs": "ebe83575c897f0dd360496cf286b344515793d8e3b60d297c8bd80c525863111"
+      }
+    },
+    {
+      "revision": "2292d5706d12fe0d638cd4d9201d555a77a1bbb3",
+      "committedAt": "2026-10-06T07:49:46+08:00",
+      "sourceHashes": {
+        "Cargo.toml": "ecc6cee4e1622623c73f557cb47f0c25ff04c8333ede60944e059079a567083f",
+        "Cargo.lock": "7736bcd5eb2aa2849ae3488edd52c21731fe5cde227ae07cdc0e7987e90c6c96",
+        "package.json": "2c21a73a9107840141e2e871ef86969e4e2aaa4aa28b3f744046c526ad9741d4",
+        "pnpm-lock.yaml": "005838f343b76d505ab33bd12d6a482c710c43dee758fd0fc7a0ab16b1fe9a77",
+        "src/decision/session.ts": "6b223d726810a17fda954e4a8772bdcd8fba1ac92411ce3320c6f92b9fa3f44a",
+        "src/decision/goal.ts": "f4cde34b05df242fa2d7e55fb4d2f8c6b9b3a4457f75aebb72a1051526f86891",
+        "src/stores/tasks.ts": "496bc898273fffb9a57bb60b7ae5f3d56a06705b7043413eab226fe19bff8893",
+        "src/agent/runtime.ts": "5d0b8d0867067ffe3e1fdc7b93f793c84f5d45bee354bc075eefd1c23280e546",
+        "src-tauri/src/keychain.rs": "157347d4730951da03f21b325ff6f80a9d7b94345275622ef5f10cda4731ec24",
+        "src-tauri/src/lib.rs": "12ce30ba2d1bbc90e24a79eb2752dc85f440a92de07f96317db7d01cb0645533"
+      }
+    },
+    {
+      "revision": "f44a4d3faa0897897c5fe03e9f3874a8d64a6b30",
+      "committedAt": "2026-10-06T11:24:10+08:00",
+      "sourceHashes": {
+        "Cargo.toml": "ecc6cee4e1622623c73f557cb47f0c25ff04c8333ede60944e059079a567083f",
+        "Cargo.lock": "7736bcd5eb2aa2849ae3488edd52c21731fe5cde227ae07cdc0e7987e90c6c96",
+        "package.json": "2c21a73a9107840141e2e871ef86969e4e2aaa4aa28b3f744046c526ad9741d4",
+        "pnpm-lock.yaml": "005838f343b76d505ab33bd12d6a482c710c43dee758fd0fc7a0ab16b1fe9a77",
+        "src/decision/session.ts": "6b223d726810a17fda954e4a8772bdcd8fba1ac92411ce3320c6f92b9fa3f44a",
+        "src/decision/goal.ts": "0f1ad7bf096990dc6e527bf858a60d76b018a4cae055b476967edb72c10a7612",
+        "src/stores/tasks.ts": "3dd6965048637169ced178b87668a21f4d28777a6f219187f620b0516c40ce27",
+        "src/agent/runtime.ts": "5d0b8d0867067ffe3e1fdc7b93f793c84f5d45bee354bc075eefd1c23280e546",
+        "src-tauri/src/keychain.rs": "157347d4730951da03f21b325ff6f80a9d7b94345275622ef5f10cda4731ec24",
+        "src-tauri/src/lib.rs": "12ce30ba2d1bbc90e24a79eb2752dc85f440a92de07f96317db7d01cb0645533"
+      }
+    },
+    {
+      "revision": "4a88d966aa327122695d62f8035cd1eb79c79b8c",
+      "committedAt": "2026-10-07T03:45:15+08:00",
+      "sourceHashes": {
+        "Cargo.toml": "ecc6cee4e1622623c73f557cb47f0c25ff04c8333ede60944e059079a567083f",
+        "Cargo.lock": "7736bcd5eb2aa2849ae3488edd52c21731fe5cde227ae07cdc0e7987e90c6c96",
+        "package.json": "b5396c29d929803ce613f2bcc396df6eab4f61cd2e66c900b496a8875e56056a",
+        "pnpm-lock.yaml": "005838f343b76d505ab33bd12d6a482c710c43dee758fd0fc7a0ab16b1fe9a77",
+        "src/decision/session.ts": "0062d2d58f8f4951c8b459674bb087b633959ff508e05d130e43ea0636b3076e",
+        "src/decision/goal.ts": "0f1ad7bf096990dc6e527bf858a60d76b018a4cae055b476967edb72c10a7612",
+        "src/stores/tasks.ts": "1608449c662b9aadd81ff283fa69851e7de4e2c65828844046a4d31d75acaac9",
+        "src/agent/runtime.ts": "7af0a1bf2378f7502719e731c85d75e6ab80d7a1e34757e76495a2a5cbb7de90",
+        "src-tauri/src/keychain.rs": "66d5441737fa4a132a4480f693afdc1fc02cba2ecef1cef2a71b2899265ccced",
+        "src-tauri/src/lib.rs": "e3d38e4454381fa890ca193c514f0d6f2b2dc36eebe2a06b2f75761035e93f9b"
+      }
+    }
+  ],
+  "findings": [
+    "Migration 4-7 were introduced together, with frontend schemaVersion already 7; a prefix 1-6 fixture is not a checked-in schema6 app predecessor",
+    "GoalRound checkpoint began in f44a4d3f; its older writer used delayed snapshots without current forced side-effect persistence",
+    "4a88d966 is an isolated QA writer candidate with forced side-effect checkpoint and QA keychain isolation, not a published production release",
+    "StoredTurn and GoalRound checkpoint have no independent version envelope; their optional fields are normalized by the current parser",
+    "The concrete plan-only snapshot plus newer durable ledger bug has a reproduced runtime regression and fix; this source audit alone does not prove native compatibility"
+  ],
+  "nextNativeScope": "Rebuild exact 4a88d966 isolated QA app, let it create actual goal/task/ledger and crash; current app hydrates and resumes same physical profile with both complete build manifests",
+  "evidenceBoundary": {
+    "proven": [
+      "historical scoped Git source identity",
+      "empty releases and tags API at capture",
+      "source-level checkpoint persistence differences"
+    ],
+    "excluded": [
+      "historical binary execution",
+      "historical production release upgrade",
+      "current app hydration of an actual old native writer",
+      "real Provider"
+    ]
+  }
+}

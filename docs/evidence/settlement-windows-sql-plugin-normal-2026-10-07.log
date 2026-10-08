@@ -1,0 +1,27 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.89s
+     Running unittests src/lib.rs (target/debug/deps/tauri_plugin_sql-24e6b5a667722f6d)
+
+running 12 tests
+test wrapper::sqlite_path_tests::directory_cleanup_preserves_non_sharing_errors_without_retry ... ok
+test wrapper::sqlite_path_tests::runtime_tasks_drop_while_the_directory_is_still_present ... ok
+test wrapper::sqlite_path_tests::application_directory_is_an_opaque_filename ... ok
+test wrapper::sqlite_path_tests::opaque_directory_escaping_does_not_change_caller_query_options ... ok
+test wrapper::sqlite_path_tests::verbatim_disk_and_unc_paths_survive_the_sqlx_url_parser ... ok
+test wrapper::sqlite_path_tests::caller_url_query_and_existing_mapping_semantics_are_retained ... ok
+test wrapper::sqlite_path_tests::absolute_caller_keeps_the_original_non_utf8_directory_behavior ... ok
+test commands::migration_retry_tests::dirty_metadata_remains_rejected_on_every_retry ... ok
+test commands::migration_retry_tests::checksum_mismatch_remains_rejected_on_every_retry ... ok
+test wrapper::sqlite_path_tests::unchanged_database_creation_and_reopen_use_one_real_file ... ok
+test commands::migration_retry_tests::failed_sql_rolls_back_retains_definitions_and_repair_allows_one_application ... ok
+test commands::migration_retry_tests::concurrent_load_cannot_bypass_an_unfinished_migration ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+   Doc-tests tauri_plugin_sql
+
+running 1 test
+test vendor/tauri-plugin-sql/src/lib.rs - Builder::build (line 231) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 2.58s; merged doctests compilation took 2.53s

@@ -89,9 +89,13 @@ impl Sandbox {
     pub fn show(&self, real: &Path) -> String {
         for h in [&self.home_real, &self.home].into_iter().flatten() {
             if let Ok(rest) = real.strip_prefix(h) {
-                return if rest.as_os_str().is_empty() { "~".into() } else { format!("~/{}", rest.display()) };
+                return if rest.as_os_str().is_empty() {
+                    "~".into()
+                } else {
+                    format!("~/{}", rest.to_string_lossy().replace('\\', "/"))
+                };
             }
         }
-        real.display().to_string()
+        real.to_string_lossy().replace('\\', "/")
     }
 }

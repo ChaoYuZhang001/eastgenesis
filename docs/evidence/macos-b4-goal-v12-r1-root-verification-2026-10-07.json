@@ -1,0 +1,62 @@
+{
+  "kind": "native-v12-and-r1-actual-independent-root-verification",
+  "verifiedAt": "2026-10-07T07:03:23.675Z",
+  "passed": true,
+  "sourceRevision": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "sourceTree": "299d70a34eaaed6a92e312b8d6e0684848872548",
+  "manifestSha256": "d28a1ab3db438a46b8c0acd603e63f5559b94db0b8e4b5a96d47ca9717fc8ce5",
+  "proofs": [
+    {
+      "revision": "v12",
+      "reportSha256": "c4aa5ec480716e89cfa33ed15e3acff69d0de512f78524cc91a1c0da0032ede4",
+      "reportBytes": 1025359,
+      "nativePassed": true,
+      "sourceFilesVerified": 754,
+      "typedAxActionsVerified": 80,
+      "freshOwnedPidAndCfIdentityProofsVerified": 51,
+      "fullRestartAndRecoveredDatabaseIdentityVerified": true,
+      "toolLedgerAppliedCount": 2,
+      "fileBytesInodeMtimeUnchanged": true,
+      "logicalCalls": [
+        3,
+        4
+      ],
+      "actualWirePosts": [
+        4,
+        1
+      ],
+      "goalCompletedAfterExplicitQaConfirmation": true,
+      "oldOwnedGroupsFreshlyGone": true,
+      "elapsedMs": 25873
+    },
+    {
+      "revision": "v12-r1",
+      "reportSha256": "28db71939675c4c348f613afd14d4bff590f5d091f38aabe953e914b3e0e70bd",
+      "reportBytes": 1025412,
+      "nativePassed": true,
+      "sourceFilesVerified": 754,
+      "typedAxActionsVerified": 80,
+      "freshOwnedPidAndCfIdentityProofsVerified": 51,
+      "fullRestartAndRecoveredDatabaseIdentityVerified": true,
+      "toolLedgerAppliedCount": 2,
+      "fileBytesInodeMtimeUnchanged": true,
+      "logicalCalls": [
+        3,
+        4
+      ],
+      "actualWirePosts": [
+        4,
+        1
+      ],
+      "goalCompletedAfterExplicitQaConfirmation": true,
+      "oldOwnedGroupsFreshlyGone": true,
+      "elapsedMs": 26790
+    }
+  ],
+  "limits": [
+    "Two synthetic loopback providers in actual Tauri/AX; not real upstream provider evidence.",
+    "Completion includes explicit QA confirmation of produced artifacts.",
+    "The scenario is not a broad assistant-quality or performance benchmark.",
+    "Separate storage-failure settlement and completed-finalization regressions remain under investigation."
+  ]
+}

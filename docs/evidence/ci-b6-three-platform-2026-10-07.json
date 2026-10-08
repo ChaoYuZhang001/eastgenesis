@@ -1,0 +1,437 @@
+{
+  "kind": "ci-b6-root-independent-verification",
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-07T02:33:20.717213+00:00",
+  "runId": 37559890652,
+  "headSha": "b6a4923b46656cd54cf858862f8fb27bdc19551d",
+  "localCommit": "a035aa93659a6b834a85aa166677fd663913b9b5",
+  "sourceTree": "59f78ecb67c50b8806fc46397e6ad6a2b1ff7c45",
+  "sourceArchiveBytes": 14295040,
+  "sourceOnly": true,
+  "runStatus": "completed",
+  "runConclusion": "failure",
+  "captureIndexSha256": "ba2475611a271c358a81f9896d8417810a7e7b7c366d9a078c4d3b749ebe2b47",
+  "capturedFiles": 69,
+  "capturedBytes": 1683427,
+  "allCapturedFileHashesVerified": true,
+  "freshGithubRunJobsTreeVerified": true,
+  "jobs": [
+    {
+      "id": 112594535379,
+      "name": "macos-latest",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T02:00:43Z",
+      "completedAt": "2026-10-07T02:08:19Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37559890652/job/112594535379"
+    },
+    {
+      "id": 112594535653,
+      "name": "windows-latest",
+      "conclusion": "failure",
+      "startedAt": "2026-10-07T02:00:40Z",
+      "completedAt": "2026-10-07T02:23:55Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37559890652/job/112594535653"
+    },
+    {
+      "id": 112594535672,
+      "name": "ubuntu-latest",
+      "conclusion": "success",
+      "startedAt": "2026-10-07T02:00:40Z",
+      "completedAt": "2026-10-07T02:17:48Z",
+      "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37559890652/job/112594535672"
+    }
+  ],
+  "rawReports": [
+    {
+      "path": "macos-desktop-runner-evidence-1.json",
+      "kind": "desktop-runner-evidence",
+      "rawLogPath": "macos-job-112594535379.log",
+      "lineStart": 3126,
+      "lineEnd": 3169,
+      "runId": 37559890652,
+      "headSha": "b6a4923b46656cd54cf858862f8fb27bdc19551d",
+      "jobId": 112594535379,
+      "reportBytes": 1206,
+      "reportSha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e",
+      "rawLogSha256": "6165002237e735c2057069439750ca615788799677e046838feb638430dfac6d",
+      "rootReextractedEqual": true
+    },
+    {
+      "path": "ubuntu-desktop-install-smoke-1.json",
+      "kind": "desktop-install-smoke",
+      "rawLogPath": "ubuntu-job-112594535672.log",
+      "lineStart": 4743,
+      "lineEnd": 4802,
+      "runId": 37559890652,
+      "headSha": "b6a4923b46656cd54cf858862f8fb27bdc19551d",
+      "jobId": 112594535672,
+      "reportBytes": 1683,
+      "reportSha256": "a7c1d2edfd2ac3db53e0677d341e4b02be736d9e74a6db4299ac48d9fa572d9d",
+      "rawLogSha256": "6da0504e16ae03ff0be661f9eef8bf8311f2ad9bcd99023db0dbb6cc9fb14595",
+      "rootReextractedEqual": true
+    },
+    {
+      "path": "ubuntu-desktop-linux-upgrade-smoke-2.json",
+      "kind": "desktop-linux-upgrade-smoke",
+      "rawLogPath": "ubuntu-job-112594535672.log",
+      "lineStart": 4849,
+      "lineEnd": 4928,
+      "runId": 37559890652,
+      "headSha": "b6a4923b46656cd54cf858862f8fb27bdc19551d",
+      "jobId": 112594535672,
+      "reportBytes": 2088,
+      "reportSha256": "95fb4c58728d05629470ea784005d9d3620a573314cdd46c93ccea1c8ef99585",
+      "rawLogSha256": "6da0504e16ae03ff0be661f9eef8bf8311f2ad9bcd99023db0dbb6cc9fb14595",
+      "rootReextractedEqual": true
+    },
+    {
+      "path": "ubuntu-desktop-runner-evidence-3.json",
+      "kind": "desktop-runner-evidence",
+      "rawLogPath": "ubuntu-job-112594535672.log",
+      "lineStart": 4961,
+      "lineEnd": 5013,
+      "runId": 37559890652,
+      "headSha": "b6a4923b46656cd54cf858862f8fb27bdc19551d",
+      "jobId": 112594535672,
+      "reportBytes": 1470,
+      "reportSha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde",
+      "rawLogSha256": "6da0504e16ae03ff0be661f9eef8bf8311f2ad9bcd99023db0dbb6cc9fb14595",
+      "rootReextractedEqual": true
+    },
+    {
+      "path": "windows-desktop-windows-install-smoke-1.json",
+      "kind": "desktop-windows-install-smoke",
+      "rawLogPath": "windows-job-112594535653.log",
+      "lineStart": 3276,
+      "lineEnd": 3587,
+      "runId": 37559890652,
+      "headSha": "b6a4923b46656cd54cf858862f8fb27bdc19551d",
+      "jobId": 112594535653,
+      "reportBytes": 8435,
+      "reportSha256": "6a03f5c652387f6e692c999e94d16d8d884fe6932802d3e81994f81cf7a00deb",
+      "rawLogSha256": "20cfdf170996e8e2c0a3caf7b0fe52832bcc5110ae850fd259bac501d3b31d95",
+      "rootReextractedEqual": true
+    }
+  ],
+  "smallArtifactsDigestAndMembersVerified": true,
+  "desktopBundleArtifactsDownloaded": false,
+  "coverage": {
+    "macos": {
+      "coldPassed": 987,
+      "coldSkipped": 11,
+      "population": 998,
+      "nativeMcpStep": {
+        "passed": 15,
+        "skipped": 0,
+        "population": 15,
+        "summaryLine": 2642
+      },
+      "repeatedColdCases": 4,
+      "uniquePopulationExecuted": 998,
+      "additionalCrashProcessCasesRepeated": 3,
+      "remainingPlatformSpecificSkips": 0
+    },
+    "windows": {
+      "coldPassed": 981,
+      "coldSkipped": 17,
+      "population": 998,
+      "nativeMcpStep": {
+        "passed": 15,
+        "skipped": 0,
+        "population": 15,
+        "summaryLine": 2732
+      },
+      "repeatedColdCases": 4,
+      "uniquePopulationExecuted": 992,
+      "additionalCrashProcessCasesRepeated": 3,
+      "remainingPlatformSpecificSkips": 6
+    },
+    "ubuntu": {
+      "coldPassed": 987,
+      "coldSkipped": 11,
+      "population": 998,
+      "nativeMcpStep": {
+        "passed": 15,
+        "skipped": 0,
+        "population": 15,
+        "summaryLine": 3985
+      },
+      "repeatedColdCases": 4,
+      "uniquePopulationExecuted": 998,
+      "additionalCrashProcessCasesRepeated": 3,
+      "remainingPlatformSpecificSkips": 0
+    },
+    "rawExecutionCountsAreNotUniqueCases": true,
+    "sqlite": "Node experimental warnings do not mean SQLite is unavailable; three cross-process cases must be assessed from their actual test summaries."
+  },
+  "windows": {
+    "checks": {
+      "hostedRunner": true,
+      "noExistingInstallation": true,
+      "sourceBinaryIsolationProbe": true,
+      "webView2Present": true,
+      "nsisInstall": true,
+      "installedPayload": true,
+      "installedRegistry": true,
+      "nsisUninstall": true,
+      "installedBinaryRemoved": true,
+      "uninstallRegistryRemoved": true
+    },
+    "startupDiagnostics": [
+      {
+        "cycle": 1,
+        "outcome": "failed",
+        "failureStage": "database_timeout",
+        "elapsedMs": 34355,
+        "stableWindowPassed": true,
+        "databaseExists": false,
+        "schemaProbeAttempts": 0,
+        "schemaProbeFailures": 0,
+        "schemaProbeState": "not_attempted",
+        "lastProbeFailureStage": null,
+        "rootProcessAlive": true,
+        "rootWindowPresent": true,
+        "jobActiveProcessCount": 7,
+        "startupTrace": {
+          "status": "observed",
+          "reason": "complete",
+          "runId": "27cb8192-ad84-4db0-ae3d-423b9c5c8f48",
+          "records": [
+            {
+              "seq": 1,
+              "source": "native",
+              "stage": "native_started",
+              "elapsedMs": 0,
+              "frontendSeq": null
+            },
+            {
+              "seq": 2,
+              "source": "native",
+              "stage": "builder_started",
+              "elapsedMs": 0,
+              "frontendSeq": null
+            },
+            {
+              "seq": 3,
+              "source": "native",
+              "stage": "sql_plugin_ready",
+              "elapsedMs": 3,
+              "frontendSeq": null
+            },
+            {
+              "seq": 4,
+              "source": "native",
+              "stage": "plugin_setup_started",
+              "elapsedMs": 3,
+              "frontendSeq": null
+            },
+            {
+              "seq": 5,
+              "source": "native",
+              "stage": "plugin_setup_finished",
+              "elapsedMs": 3,
+              "frontendSeq": null
+            },
+            {
+              "seq": 6,
+              "source": "native",
+              "stage": "builder_finished",
+              "elapsedMs": 5,
+              "frontendSeq": null
+            },
+            {
+              "seq": 7,
+              "source": "native",
+              "stage": "setup_started",
+              "elapsedMs": 2968,
+              "frontendSeq": null
+            },
+            {
+              "seq": 8,
+              "source": "native",
+              "stage": "app_config_path_resolved",
+              "elapsedMs": 2968,
+              "frontendSeq": null
+            },
+            {
+              "seq": 9,
+              "source": "native",
+              "stage": "provider_store_loaded",
+              "elapsedMs": 2968,
+              "frontendSeq": null
+            },
+            {
+              "seq": 10,
+              "source": "native",
+              "stage": "native_state_ready",
+              "elapsedMs": 2969,
+              "frontendSeq": null
+            },
+            {
+              "seq": 11,
+              "source": "native",
+              "stage": "setup_finished",
+              "elapsedMs": 2969,
+              "frontendSeq": null
+            },
+            {
+              "seq": 12,
+              "source": "native",
+              "stage": "page_started",
+              "elapsedMs": 3064,
+              "frontendSeq": null
+            },
+            {
+              "seq": 13,
+              "source": "frontend",
+              "stage": "document_start",
+              "elapsedMs": 3075,
+              "frontendSeq": 1
+            },
+            {
+              "seq": 14,
+              "source": "frontend",
+              "stage": "frontend_entry",
+              "elapsedMs": 3110,
+              "frontendSeq": 2
+            },
+            {
+              "seq": 15,
+              "source": "frontend",
+              "stage": "react_render_called",
+              "elapsedMs": 3111,
+              "frontendSeq": 3
+            },
+            {
+              "seq": 16,
+              "source": "native",
+              "stage": "page_finished",
+              "elapsedMs": 3112,
+              "frontendSeq": null
+            },
+            {
+              "seq": 17,
+              "source": "frontend",
+              "stage": "bootstrap_started",
+              "elapsedMs": 3258,
+              "frontendSeq": 4
+            },
+            {
+              "seq": 18,
+              "source": "frontend",
+              "stage": "backend_tauri",
+              "elapsedMs": 3259,
+              "frontendSeq": 5
+            },
+            {
+              "seq": 19,
+              "source": "frontend",
+              "stage": "backend_init_started",
+              "elapsedMs": 3260,
+              "frontendSeq": 6
+            },
+            {
+              "seq": 20,
+              "source": "frontend",
+              "stage": "app_info_started",
+              "elapsedMs": 3260,
+              "frontendSeq": 7
+            },
+            {
+              "seq": 21,
+              "source": "frontend",
+              "stage": "sql_import_started",
+              "elapsedMs": 3260,
+              "frontendSeq": 8
+            },
+            {
+              "seq": 22,
+              "source": "frontend",
+              "stage": "sql_import_resolved",
+              "elapsedMs": 3271,
+              "frontendSeq": 9
+            },
+            {
+              "seq": 23,
+              "source": "frontend",
+              "stage": "db_load_called",
+              "elapsedMs": 3271,
+              "frontendSeq": 10
+            },
+            {
+              "seq": 24,
+              "source": "native",
+              "stage": "sql_load_entered",
+              "elapsedMs": 3285,
+              "frontendSeq": null
+            },
+            {
+              "seq": 25,
+              "source": "native",
+              "stage": "sql_connect_started",
+              "elapsedMs": 3285,
+              "frontendSeq": null
+            },
+            {
+              "seq": 26,
+              "source": "native",
+              "stage": "get_app_info_received",
+              "elapsedMs": 3285,
+              "frontendSeq": null
+            },
+            {
+              "seq": 27,
+              "source": "native",
+              "stage": "sql_connect_configuration_failed",
+              "elapsedMs": 3285,
+              "frontendSeq": null
+            },
+            {
+              "seq": 28,
+              "source": "frontend",
+              "stage": "app_info_resolved",
+              "elapsedMs": 3288,
+              "frontendSeq": 11
+            },
+            {
+              "seq": 29,
+              "source": "frontend",
+              "stage": "db_load_failed",
+              "elapsedMs": 3289,
+              "frontendSeq": 12
+            },
+            {
+              "seq": 30,
+              "source": "frontend",
+              "stage": "backend_init_failed",
+              "elapsedMs": 3289,
+              "frontendSeq": 13
+            },
+            {
+              "seq": 31,
+              "source": "frontend",
+              "stage": "frontend_boot_failed",
+              "elapsedMs": 3289,
+              "frontendSeq": 14
+            }
+          ]
+        }
+      }
+    ],
+    "errors": [
+      "database_timeout"
+    ],
+    "reinstall": "not_run",
+    "nativeWebDriver": "not_run"
+  },
+  "evidenceBoundary": {
+    "excluded": [
+      "real Provider reliability or failover",
+      "historical production release upgrade",
+      "production Windows Known Folder path",
+      "signing/notarization",
+      "three-platform performance baseline",
+      "uncommitted later harness or path patch"
+    ]
+  }
+}

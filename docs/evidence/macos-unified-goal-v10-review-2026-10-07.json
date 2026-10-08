@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent_readonly_native_v10_delta_review",
+  "createdAt": "2026-10-07T05:56:25.458068+00:00",
+  "inputs": {
+    "controller": {
+      "path": "/tmp/eastgenesis-unified-goal-native-v10-frozen.mjs",
+      "bytes": 86812,
+      "sha256": "0bd90214c5c520834adde95a24ba2fba389807df814a250a9551b6aa43b490a7"
+    },
+    "swift": {
+      "path": "/tmp/eastgenesis-unified-goal-ax-v9-frozen.swift",
+      "bytes": 15245,
+      "sha256": "62d8774749b96ebd52fab22d23729355511d0cd933ef52854cd6f87c387430f8"
+    },
+    "staticReport": {
+      "path": "/tmp/eastgenesis-unified-goal-native-static-check-v10.json",
+      "bytes": 11789,
+      "sha256": "ab93cfe521a5f5134f17284dd3d2ac6b18b1b8ee8802a224da367b9c4c912b03"
+    },
+    "drivingActualV9": {
+      "path": "/tmp/eastgenesis-unified-goal-candidate-diagnostics-c16ae-v9.json",
+      "bytes": 275249,
+      "sha256": "48011c1e0c0955aa6f0251577a13af17515149aff5e559f31866958e36da5f83"
+    }
+  },
+  "nativePassed": false,
+  "reviewerRanAppAxFixtureOrTests": false,
+  "reviewerEditedRepoGitOrPrivate": false,
+  "additionalBlockingFindings": [],
+  "checks": [
+    "Diff is limited to PID-scoped ownedPasteScript readiness and strict completion parsing/action metadata. Swift v9 hash is unchanged, including candidate-only, rawmatch uniqueness, no CF deduplication, full-scan typed batch/PID/active/control gates.",
+    "Only the already-resolved System Events process with matching owned unix PID receives set frontmost=true. No application name, global frontmost-process selection, unrelated window activation or approval-dialog click is introduced.",
+    "Phase3 includes frontmost setter, at most20 checks and19 requested10ms delays. Original final frontmost guard remains before phase4. Existing osascript deadline/maxBuffer and scenario120s work budget remain unchanged.",
+    "CmdA occurs once atphase4; a second frontmost guard atphase5 precedes single CmdV. Neither key is in the readiness loop. There is no business retry or paste replay.",
+    "Every phase>=4 failure and unknown/timeout/protocol/readback error retain conservative keystrokeMayHaveExecuted=true. Phase3 -27010 remains a fixed native tag proving no keys have been reached in this script invocation.",
+    "Completion must be a string <=128 characters and exact owned_paste_completed_ready_checks_1..20 after trim. Legacy marker, zero/21/leadingzero/noninteger/multiline/extra data are rejected. Successful record remains keystrokes_completed and still requires exact AX readback equality.",
+    "Only readiness counters/maximums/frontmost guards/one-shot flags are recorded. No raw native exception, paste value or sensitive process/clipboard content is newly stored.",
+    "Actual v9 SHA48011c1e0c0955aa6f0251577a13af17515149aff5e559f31866958e36da5f83 is terminalfailed/cleanup.safe, phase3 owned_frontmost_guard/-27010, keystrokeMayHaveExecutedfalse, POST0 before Goal. This motivates bounded owned readiness but is not actualv10 success.",
+    "Static117 sourceStart/sourceEnd match final frozen controller+Swift and all117 entries pass. They remain structural/synthetic-wrapper evidence; actual System Events readiness/keys/CFEqual is not executed by this review."
+  ],
+  "continueConclusion": "No additional blocking defect found in frozen v10 delta. Parent may run a new unique input gate bound to unchanged c16/733 QA, then one new unique bounded candidate-diagnostics-only pilot. Full Goal and CF deduplication remain outside this reviewed action.",
+  "limits": [
+    "The190ms value bounds requested delay durations, not observed wall-clock time including AppleEvent scheduling/query latency. Existing outer command deadline enforces failure, and unknown timeout cannot be treated as zero-key evidence.",
+    "Frontmost check and keystroke dispatch are not an OS atomic transaction. Second guard narrows the CmdA→CmdV focus-loss interval but cannot eliminate an adversarial/user focus race.",
+    "Activating the owned App after prior AX field focus does not independently prove that field remains focused. Existing exact readback detects value mismatch; there is no new generic widget-target proof.",
+    "Actual v10 helper/System Events API behavior and candidate CFEqual/PID identity remain unverified. Readiness success cannot be promoted to same-Goal recovery, real provider or release proof.",
+    "No new per-action/scenario timeout, auto-retry, CF deduplication or reduction of recovery/storage gates is included."
+  ]
+}

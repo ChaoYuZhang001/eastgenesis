@@ -7,6 +7,7 @@ const root = resolve(__dirname, "..");
 const brandMd = readFileSync(join(root, "docs/BRAND.md"), "utf8");
 const tokens = extractTokens(brandMd);
 const byName = Object.fromEntries(tokens.map((t) => [t.name, t.value]));
+const lf = (text: string) => text.replaceAll("\r\n", "\n");
 
 /** src/ 下的源码（不含生成的 brand-tokens.css），外加 index.html 和 tailwind.config.ts */
 function sources(): { file: string; text: string }[] {
@@ -48,8 +49,10 @@ describe("品牌主题：与 BRAND.md 一致", () => {
   });
 
   it("生成的 brand-tokens.css、brand-theme.ts 与 BRAND.md 同步", () => {
-    expect(readFileSync(join(root, "src/styles/brand-tokens.css"), "utf8")).toBe(renderCss(tokens));
-    expect(readFileSync(join(root, "src/styles/brand-theme.ts"), "utf8")).toBe(renderTheme(tokens));
+    // Windows Git checkouts may materialize tracked text as CRLF; generated
+    // output intentionally uses LF so the semantic content is portable.
+    expect(lf(readFileSync(join(root, "src/styles/brand-tokens.css"), "utf8"))).toBe(renderCss(tokens));
+    expect(lf(readFileSync(join(root, "src/styles/brand-theme.ts"), "utf8"))).toBe(renderTheme(tokens));
   });
 
   it("Tailwind 主题使用生成结果：品牌色可带透明度，尺寸与圆角来自变量", () => {

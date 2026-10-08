@@ -1,6 +1,6 @@
 // 模型能力矩阵：加载、校验 config/model_profiles.json，判断 Provider 是否就绪。
 import raw from "../../config/model_profiles.json";
-import { OFFICIAL_ENDPOINTS, OFFICIAL_IDS } from "../core/llm/official";
+import { ADAPTER_RECOVERY_CONTRACTS, OFFICIAL_ENDPOINTS, OFFICIAL_IDS } from "../core/llm/official";
 import { CAPABILITIES, type Capability, type ModelProfile } from "./types";
 
 /** context_window 不小于这个值的模型才标 long_context */
@@ -70,6 +70,14 @@ export const PROVIDER_KEY_ENV: Readonly<Record<string, string | null>> = Object.
 /** 已有适配器的 Provider：7 家官方全部就绪（M6） */
 export const ADAPTER_READY: ReadonlySet<string> = new Set(OFFICIAL_IDS);
 
+/**
+ * 适配器是否具备可恢复执行契约。把这项检查放在可用性判断里，保证能力
+ * 不完整的 Provider 不会先进入自动路由、再在流式输出中途暴露问题。
+ */
+export function adapterRecoveryReady(provider: string): boolean {
+  return Boolean(ADAPTER_RECOVERY_CONTRACTS[provider as keyof typeof ADAPTER_RECOVERY_CONTRACTS]);
+}
+
 /** CLI 下本机 Ollama 需要显式启用（EG_OLLAMA=1），否则没在运行时也会被路由选中 */
 export const OLLAMA_ENV = "EG_OLLAMA";
 
@@ -83,6 +91,7 @@ export function providerReadiness(
 ): Readiness {
   if (provider.startsWith("custom:")) return { ok: false, reason: "自定义 Provider 尚未配置" };
   if (!adapters.has(provider)) return { ok: false, reason: "适配器未实现" };
+  if (!adapterRecoveryReady(provider)) return { ok: false, reason: "适配器缺少可恢复执行契约" };
   if (provider === "ollama" && env[OLLAMA_ENV]?.trim() !== "1") return { ok: false, reason: `本机 Ollama 未启用（${OLLAMA_ENV}=1）` };
   const envName = PROVIDER_KEY_ENV[provider];
   if (envName && !env[envName]?.trim()) return { ok: false, reason: `缺少 API Key（${envName}）` };

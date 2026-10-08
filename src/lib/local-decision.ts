@@ -1,5 +1,6 @@
 // 桌面端的本地决策模型（第 2 级）：只能选本机服务，即 Ollama 或地址在本机的自定义 Provider，任务内容和工具输出不离开本机。
 // 请求和普通模型调用一样经 proxiedFetch 交给 Rust（浏览器模式交给模拟后端），适配器与路由共用一份缓存。
+import type { GoalMeterScope } from "@/core/goal-quota";
 import type { LLMProvider } from "@/core/llm";
 import { LocalJevBackend, modelName, type ChainEntry, type ModelProfile } from "@/decision";
 import type { CustomProvider } from "@/platform";
@@ -17,6 +18,7 @@ export function localJevBackend(
   profiles: readonly ModelProfile[],
   custom: readonly CustomProvider[],
   providerFor: (e: Pick<ChainEntry, "provider">) => Promise<LLMProvider>,
+  goalMeter?: GoalMeterScope,
 ): LocalJevBackend {
   if (!id) return new LocalJevBackend(null, "没有选择本地决策模型（在设置页选择）");
   const p = localJevCandidates(profiles, custom).find((x) => x.id === id);
@@ -31,5 +33,5 @@ export function localJevBackend(
       ];
       return (await provider.chat({ model: modelName(p), messages, temperature: 0, maxTokens: 300, signal })).text;
     },
-  });
+  }, undefined, undefined, goalMeter);
 }

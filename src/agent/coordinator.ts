@@ -1,3 +1,5 @@
+import { GoalQuotaControlError, isGoalQuotaControlError } from "../core/goal-quota";
+import { goalQuotaSummary, resolveGoalMeter } from "../core/goal-model-call";
 // 多 Agent 协同：先把目标拆成 2–4 个互不依赖的子任务，按角色交给子 Agent 并行执行（默认最多同时 2 个），最后合并成果。
 // 每个子 Agent 是完整的 AgentRuntime：独立路由、规划、工具调用、反思和纠错。需要确认的操作排队，一次只请用户处理一个。
 // 子 Agent 的事件包在 { type: "subagent" } 里转发，时间线和子 Agent 面板据此展示每个子 Agent 的模型与进度。
@@ -36,16 +38,21 @@ export class Coordinator {
     };
     let specs: SubAgentSpec[] = [];
     let fallback = false;
+    let quotaControl: RunResult["quotaControl"];
     const results: (RunResult | null)[] = [];
     const finish = (status: RunStatus, summary: string): RunResult => {
       const s = redact(summary);
       emit({ type: "run_end", status, summary: s });
       const done = results.filter((r): r is RunResult => r != null);
       const steps = specs.map((a) => ({ id: a.id, goal: `${a.role}：${a.goal}`, tool: null }));
-      return { runId, status, summary: s, plan: { steps, source: fallback ? "fallback" : "llm" }, steps: done.flatMap((r) => r.steps), replans: done.reduce((n, r) => n + r.replans, 0), events };
+      return { runId, status, summary: s, plan: { steps, source: fallback ? "fallback" : "llm" }, steps: done.flatMap((r) => r.steps), replans: done.reduce((n, r) => n + r.replans, 0), events, ...(quotaControl ? { quotaControl } : {}) };
     };
 
+    const quotaSummary = () => [goalQuotaSummary(quotaControl!.code), ...results.flatMap((r, i) => r?.status === "completed" && r.summary ? [`【${specs[i].role}】\n${r.summary}`] : [])].join("\n\n");
+
     try {
+      resolveGoalMeter(opts.goalExecution !== undefined ? opts.goalExecution : d.goalExecution, d.goalMeter);
+      if (d.goalMeter && opts.taskId !== undefined && opts.taskId !== d.goalMeter.taskId) throw new GoalQuotaControlError("quota_invalid_request");
       emit({ type: "run_start", runId, goal });
       const notes = d.memories ?? [];
       if (notes.length) emit({ type: "memory", items: notes.map(({ id, kind, text }) => ({ id, kind, text })) });
@@ -81,11 +88,13 @@ export class Coordinator {
 
       let cursor = 0;
       const worker = async () => {
-        while (cursor < specs.length) {
+        while (cursor < specs.length && !quotaControl) {
           const i = cursor++;
           const spec = specs[i];
+          const invocationTaskId = d.goalMeter ? `${d.goalMeter.taskId}:child:${spec.id}` : undefined;
           const sub = new AgentRuntime({
             ...d,
+            ...(invocationTaskId ? { invocationTaskId } : {}),
             skills: [],
             // 对齐称呼、风格只在合并后的最终成果里问一次，子 Agent 不问
             onboarding: false,
@@ -96,14 +105,17 @@ export class Coordinator {
             onEvent: (event) => emit({ type: "subagent", agent: spec.id, event }),
           });
           try {
-            results[i] = await sub.run(spec.goal, { signal, route: opts.route, history: opts.history, files: opts.files });
-          } catch {
+            results[i] = await sub.run(spec.goal, { signal, route: opts.route, history: opts.history, files: opts.files, ...(d.goalMeter ? { taskId: d.goalMeter.taskId, goalExecution: d.goalExecution } : {}) });
+            if (results[i]?.quotaControl) quotaControl = results[i]!.quotaControl;
+          } catch (error) {
+            if (isGoalQuotaControlError(error)) quotaControl = { code: error.code };
             results[i] = null;
           }
         }
       };
       const width = Math.max(1, Math.min(d.concurrency ?? SUBAGENT_CONCURRENCY, specs.length));
       await Promise.all(Array.from({ length: width }, () => worker()));
+      if (quotaControl) return finish("needs_user", quotaSummary());
       if (signal?.aborted) return finish("aborted", "任务已取消");
 
       const outcome = specs.map((s, i) => ({ s, r: results[i] ?? null }));
@@ -133,7 +145,8 @@ export class Coordinator {
           signal,
         );
         summary = m.text.trim() || "（模型没有返回合并结果）";
-      } catch {
+      } catch (error) {
+        if (isGoalQuotaControlError(error)) throw error;
         if (signal?.aborted) return finish("aborted", "任务已取消");
         // 合并失败时直接拼接各子 Agent 的成果，不丢掉已经做完的部分
         summary = ok.map((o) => `【${o.s.role}】\n${o.r!.summary}`).join("\n\n");
@@ -142,6 +155,10 @@ export class Coordinator {
       if (missing.length) summary += `\n\n未完成的子任务：${missing.map(label).join("；")}`;
       return finish("completed", summary);
     } catch (e) {
+      if (isGoalQuotaControlError(e)) {
+        quotaControl = { code: e.code };
+        return finish("needs_user", quotaSummary());
+      }
       if (signal?.aborted) return finish("aborted", "任务已取消");
       return finish("failed", `运行出错：${e instanceof Error ? e.message : String(e)}`);
     }

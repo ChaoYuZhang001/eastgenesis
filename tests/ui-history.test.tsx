@@ -1,4 +1,4 @@
-// 会话持久化（迁移 5）：重启后会话、回合、本月节省都能读回；删除的会话不再出现；进行中的回合不写进数据库
+// 会话持久化（迁移 5）：重启后会话、回合、本月节省都能读回；运行中的回合保存 checkpoint，删除的会话不再出现
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "@/App";
 import { createMockBackend, type Backend } from "@/platform";
@@ -72,7 +72,7 @@ describe("会话持久化", () => {
     expect(within(recent()).getByText("还没有会话")).toBeInTheDocument();
   });
 
-  it("进行中的回合不写进数据库：同一会话里前一轮结束写回时，还在等确认的那一轮不在里面", async () => {
+  it("进行中的回合写入 checkpoint：同一会话里前一轮等确认时，后一轮写回不会覆盖它；重启后可以继续", async () => {
     const backend = createMockBackend();
     const first = await boot(backend);
     // 第一轮停在写入确认上，第二轮是简单问答、很快结束并触发写回
@@ -80,7 +80,7 @@ describe("会话持久化", () => {
     await within(card("整理周报并保存")).findByRole("group", {}, LONG);
     submit("你好");
     await waitFor(() => expect(useTasks.getState().tasks.find((t) => t.goal === "你好")?.status).toBe("completed"), LONG);
-    await waitFor(async () => expect((await backend.listSessions())[0]?.turns.map((t) => t.goal)).toEqual(["你好"]));
+    await waitFor(async () => expect((await backend.listSessions())[0]?.turns.map((t) => t.goal)).toEqual(["整理周报并保存", "你好"]));
     expect(useTasks.getState().tasks.find((t) => t.goal === "整理周报并保存")?.status).toBe("running");
     // 停掉以后才写回，状态如实是「已停止」
     act(() => {
@@ -88,5 +88,28 @@ describe("会话持久化", () => {
     });
     await waitFor(async () => expect((await backend.listSessions())[0]?.turns.map((t) => [t.goal, t.status])).toEqual([["整理周报并保存", "aborted"], ["你好", "completed"]]));
     first.unmount();
+
+    await boot(backend);
+    fireEvent.click(within(recent()).getByRole("button", { name: /整理周报并保存/ }));
+    const recovered = card("整理周报并保存");
+    expect(within(recovered).getByRole("button", { name: "从未完成步骤继续" })).toBeInTheDocument();
+  });
+
+  it("重启后自动打开没有终态的 running checkpoint，让恢复入口立即可见", async () => {
+    const backend = createMockBackend();
+    const first = await boot(backend);
+    submit("整理周报并保存");
+    await within(card("整理周报并保存")).findByRole("group", {}, LONG);
+    await waitFor(async () => expect((await backend.listSessions())[0]?.turns[0]?.status).toBe("running"));
+    // 先卸载订阅，再停止当前进程内的等待；数据库里仍保留退出前的 running checkpoint。
+    first.unmount();
+    act(() => {
+      for (const t of useTasks.getState().tasks) useTasks.getState().cancel(t.id);
+    });
+
+    await boot(backend);
+    expect(useChat.getState().activeId).toBe((await backend.listSessions())[0]?.id);
+    const recovered = screen.getByRole("article", { name: "任务：整理周报并保存" });
+    expect(within(recovered).getByRole("button", { name: "从未完成步骤继续" })).toBeInTheDocument();
   });
 });

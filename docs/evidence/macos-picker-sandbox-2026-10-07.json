@@ -1,0 +1,322 @@
+{
+  "schemaVersion": 1,
+  "kind": "desktop-native-picker-sandbox",
+  "platform": "macos",
+  "appVersion": "0.1.0",
+  "appIdentifier": "com.eastgenesis.desktop",
+  "createdAt": "2026-10-06T20:33:52.429Z",
+  "scenarios": [
+    {
+      "scenario": "workdir_cancel",
+      "status": "passed",
+      "assertions": {
+        "realNativeCancel": true,
+        "noContextChange": true,
+        "noRootGrant": true
+      }
+    },
+    {
+      "scenario": "workdir_context",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "selectedContextVisible": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "project_context",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "projectVisible": true,
+        "sqliteContextPersisted": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "ungranted_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "fileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101003616,
+            "mtimeMs": 1791318832532.571,
+            "digest": "736c2b37d0015c31d1e854f1ed0723ef217e71e15ef8e12782c734142a7fac97"
+          },
+          "after": {
+            "inode": 101003616,
+            "mtimeMs": 1791318832532.571,
+            "digest": "736c2b37d0015c31d1e854f1ed0723ef217e71e15ef8e12782c734142a7fac97"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "settings_cancel",
+      "status": "passed",
+      "assertions": {
+        "realNativeCancel": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "explicit_root_grant",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "onlyExplicitRootAdded": true,
+        "builtinUiRunning": true,
+        "defaultRootFixed": true
+      }
+    },
+    {
+      "scenario": "authorized_read_write",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "completed",
+        "toolResultOk": [
+          true,
+          true
+        ],
+        "pathDenied": false,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": false,
+        "successfulToolResults": 2,
+        "realArtifactVerified": true,
+        "artifactSha256": "28b20187177b3a99aa8d62d19c0ba9b26f6c6f30abec8257b846b6f61fc694e5"
+      }
+    },
+    {
+      "scenario": "outside_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "outsideFileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101003617,
+            "mtimeMs": 1791318832532.9167,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          },
+          "after": {
+            "inode": 101003617,
+            "mtimeMs": 1791318832532.9167,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "symlink_read_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 0,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "canonicalEscapeDenied": true,
+        "outsideFileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101003617,
+            "mtimeMs": 1791318832532.9167,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          },
+          "after": {
+            "inode": 101003617,
+            "mtimeMs": 1791318832532.9167,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "symlink_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "canonicalEscapeDenied": true,
+        "outsideFileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101003617,
+            "mtimeMs": 1791318832532.9167,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          },
+          "after": {
+            "inode": 101003617,
+            "mtimeMs": 1791318832532.9167,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "root_removed",
+      "status": "passed",
+      "assertions": {
+        "extraRootRemoved": true,
+        "builtinReconnected": true,
+        "defaultRootFixed": true
+      }
+    },
+    {
+      "scenario": "removed_root_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "fileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101004711,
+            "mtimeMs": 1791318938645.246,
+            "digest": "28b20187177b3a99aa8d62d19c0ba9b26f6c6f30abec8257b846b6f61fc694e5"
+          },
+          "after": {
+            "inode": 101004711,
+            "mtimeMs": 1791318938645.246,
+            "digest": "28b20187177b3a99aa8d62d19c0ba9b26f6c6f30abec8257b846b6f61fc694e5"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "default_downloads_retained",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "completed",
+        "toolResultOk": [
+          true,
+          true
+        ],
+        "pathDenied": false,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": false,
+        "successfulToolResults": 2,
+        "defaultRootStillUsable": true,
+        "realArtifactVerified": true,
+        "artifactSha256": "28b20187177b3a99aa8d62d19c0ba9b26f6c6f30abec8257b846b6f61fc694e5"
+      }
+    }
+  ],
+  "evidenceBoundary": {
+    "proven": [
+      "real native picker selection and cancel",
+      "workdir/project context does not grant file access",
+      "explicit settings root grants and reconnects builtin MCP",
+      "real authorized file read/write",
+      "Rust canonical sandbox denies outside and symlink escape",
+      "root removal revokes access and retains fixed Downloads"
+    ],
+    "excluded": [
+      "real Provider",
+      "Windows/Linux native picker",
+      "file-root persistence failure injection in this UI run",
+      "signing/notarization",
+      "all filesystem adversarial races"
+    ]
+  },
+  "binarySha256": "b7ce68b84a935cfb902535346d390c98b1491431ae75a758dd474c17ff90b96d",
+  "harnessSha256": "f59edc15f920cec8a89c6cea794ecf74ef1862a13c0474c5ca6eb5e50d857da5",
+  "sourceRevision": "e3a9971f7a27807f14ae241c426711fcf4fb4b56",
+  "compiledSource": {
+    "mode": "working_tree_after_build",
+    "revision": "e3a9971f7a27807f14ae241c426711fcf4fb4b56",
+    "files": {
+      "crates/eg-core/src/file_roots.rs": "39774a96a8ec3e97ccfdf1fff29395ec40789db10dd2b76b2deca3a84ea7b94b",
+      "crates/eg-core/src/mcp_service.rs": "bf4efa0f71f5025b92ca81ceecc255efcf1955ffa8b15ad29a41540d4ee624f7",
+      "src-tauri/src/lib.rs": "cd9c2997a85d7e8a205f117ef6430897a5c27a82ea1c0b411f3c5b3bd79a4780",
+      "src/platform/types.ts": "07b19d913edaee531746990fcaea390d56c897fbcbaf5f0bdf36bb6040dd9859",
+      "src/platform/tauri-backend.ts": "9f5d4c3ead7e3c42bb2d0a7b3c837188dec40910de28fb65d7ce480721cff82d",
+      "src/stores/mcp.ts": "96a6e307a423336975e7acd4cdd4775be6887fdf08ce73d79e8ec8523d7550de",
+      "src/components/settings/FileRoots.tsx": "094bc2b207190e765752814f6b9f7df8fdb4bda026b4306a205f8713918da749"
+    }
+  },
+  "sourceWorkingTreeChangesIncluded": true,
+  "osVersion": "26.7.1",
+  "architecture": "x64",
+  "lastObservedTask": {
+    "status": "completed",
+    "resultOk": [
+      true,
+      true
+    ],
+    "pathDenied": false
+  },
+  "passed": true,
+  "fixtureRequestCounts": {
+    "plan": 16,
+    "args": 7,
+    "stream": 2,
+    "json": 24
+  },
+  "controlledCleanup": true,
+  "finishedAt": "2026-10-06T20:37:38.578Z",
+  "postRunVerification": {
+    "committedRevision": "aebe9c8acb4c1c583e0e90863f88c3f9f1e840e5",
+    "boundSourceMatchesCommittedRevision": true,
+    "binaryHarnessAndSourcesCheckedBeforeSuccess": true,
+    "temporaryProfileRemovedBeforeReportWrite": true
+  }
+}

@@ -1,3 +1,5 @@
+import { GoalQuotaControlError, isGoalQuotaControlError } from "../core/goal-quota";
+import { resolveGoalMeter, type GoalModelExecution } from "../core/goal-model-call";
 // Jev 决策层：routeTask、chooseTool、checkDone、checkDoneWithEvidence、gateAction、evaluateResult、replan。
 // 每个决策都经过三级降级链，并在 meta 里说明由哪一级做出、跳过了哪些及原因（透明度优先）。
 // checkDoneWithEvidence（目标模式）例外：先规则后 Jev，结论里的 by 写明由谁判断。
@@ -28,6 +30,9 @@ export interface ActionRequest {
   tool: string;
   summary: string;
   args?: Record<string, unknown>;
+  capability?: { roots?: readonly string[]; permissions?: readonly string[] };
+  /** 从上次未完成步骤恢复时的副作用保护；不能由模型文本自行设置。 */
+  recovery?: { previousInvocationId?: string; idempotent: boolean };
 }
 export type Verdict = "allow" | "confirm" | "deny";
 export interface GateDecision {
@@ -68,6 +73,28 @@ const RANK: Record<Risk, number> = { low: 0, medium: 1, high: 2 };
 const maxRisk = (a: Risk, b: Risk): Risk => (RANK[a] >= RANK[b] ? a : b);
 const RULES_META = (): DecisionMeta => ({ backend: "rules", level: 3, degraded: false, confidence: 1, skipped: [], latencyMs: 0 });
 
+const pathArgs = (args: Record<string, unknown> | undefined): string[] =>
+  Object.entries(args ?? {})
+    .filter(([key, value]) => /^(?:path|source|src|from|destination|to|dst)$/i.test(key) && typeof value === "string")
+    .map(([, value]) => String(value));
+const pathInRoot = (path: string, root: string): boolean => {
+  const clean = (x: string) => {
+    const slash = x.replace(/\\/g, "/").replace(/\/+/g, "/");
+    const prefix = slash.startsWith("~/") ? "~/" : slash.startsWith("/") ? "/" : "";
+    const body = prefix === "~/" ? slash.slice(2) : prefix === "/" ? slash.slice(1) : slash;
+    const parts: string[] = [];
+    for (const part of body.split("/")) {
+      if (!part || part === ".") continue;
+      if (part === ".." && parts.length && parts.at(-1) !== "..") parts.pop();
+      else if (part !== "..") parts.push(part);
+    }
+    return `${prefix}${parts.join("/")}`.replace(/\/$/, "") || prefix.replace(/\/$/, "");
+  };
+  const p = clean(path);
+  const r = clean(root);
+  return p === r || p.startsWith(`${r}/`);
+};
+
 export function describeMeta(m: DecisionMeta): string {
   const skipped = m.skipped.map((s) => `${s.backend}：${s.reason}`).join("；");
   return `决策来源：${m.backend}（第 ${m.level} 级${m.degraded ? "，已降级" : ""}，置信度 ${m.confidence.toFixed(2)}）${skipped ? `；跳过 ${skipped}` : ""}`;
@@ -75,6 +102,7 @@ export function describeMeta(m: DecisionMeta): string {
 
 export interface DecisionLayerOptions {
   chain: FallbackChain;
+  goalExecution?: GoalModelExecution;
   availability: Availability;
   /** 工具白名单 */
   tools?: readonly ToolDef[];
@@ -100,8 +128,10 @@ export class DecisionLayer {
   readonly #profiles?: readonly ModelProfile[];
   readonly #judge: EvidenceJudge | null;
   readonly #minConfidence: number;
+  readonly #goalExecution?: GoalModelExecution;
 
   constructor(o: DecisionLayerOptions) {
+    this.#goalExecution = o.goalExecution && Object.freeze({ ...o.goalExecution });
     this.#chain = o.chain;
     this.#availability = o.availability;
     this.tools = o.tools ?? [];
@@ -127,14 +157,17 @@ export class DecisionLayer {
       permission?: PermissionMode;
     } = {},
   ): DecisionLayer {
+    const goalMeter = resolveGoalMeter(o.jev?.goalExecution, o.jev?.goalMeter);
+    const jevOptions = { ...o.jev, goalMeter, fetch: o.fetch };
     let client: JevClient | null = null;
     let reason: string | undefined;
     try {
-      client = JevClient.fromEnv(env, { ...o.jev, fetch: o.fetch });
+      client = JevClient.fromEnv(env, jevOptions);
     } catch (e) {
+      if (isGoalQuotaControlError(e)) throw e;
       reason = `Jev 配置有误：${(e as Error).message}`;
     }
-    const chain = new FallbackChain([new CloudJevBackend(client, reason), new LocalJevBackend(o.local ?? null), new RuleBasedBackend()], {
+    const chain = new FallbackChain([new CloudJevBackend(client, reason), new LocalJevBackend(o.local ?? null, undefined, undefined, goalMeter), new RuleBasedBackend()], {
       now: o.now,
       minConfidence: o.minConfidence,
     });
@@ -146,7 +179,8 @@ export class DecisionLayer {
       profiles: o.profiles,
       health,
       permission: o.permission,
-      judge: client,
+      goalExecution: o.jev?.goalExecution,
+      judge: client && goalMeter ? JevClient.fromEnv(env, { ...jevOptions, quotaKind: "goal_verifier" }) : client,
       minConfidence: o.minConfidence,
     });
   }
@@ -183,6 +217,7 @@ export class DecisionLayer {
     evidence: Evidence,
     context: { taskId: string; projectId?: string; signal?: AbortSignal },
   ): Promise<EvidenceResult> {
+    if (this.#goalExecution && context.taskId !== this.#goalExecution.taskId) throw new GoalQuotaControlError("quota_invalid_request");
     const signal = context.signal;
     if (signal?.aborted) throw new JevError("aborted");
     const text = String(goal ?? "").slice(0, MAX_GOAL_CHARS);
@@ -193,6 +228,7 @@ export class DecisionLayer {
       const r = await this.#judge.noul(evidenceRecord(text, evidence), JEV_EVIDENCE_QUESTION, signal);
       return verdictFromProbability(r.noul, this.#minConfidence);
     } catch (e) {
+      if (isGoalQuotaControlError(e)) throw e;
       if (signal?.aborted || (e instanceof JevError && e.code === "aborted")) throw e instanceof JevError ? e : new JevError("aborted");
       const code = e instanceof JevError ? e.code : "internal";
       return { verdict: "uncertain", reason: `Jev 调用失败（${code}），请你确认`, by: "jev" };
@@ -217,6 +253,13 @@ export class DecisionLayer {
     const text = `${a.tool} ${a.summary} ${JSON.stringify(a.args ?? {})}`;
     if (DENY.some((r) => r.test(text))) {
       return { value: { verdict: "deny", risk: "high", reasons: ["命中禁止规则（破坏性命令）"] }, meta: RULES_META() };
+    }
+    const roots = a.capability?.roots ?? [];
+    if (roots.length) {
+      const paths = pathArgs(a.args);
+      if (paths.some((path) => !roots.some((root) => pathInRoot(path, root)))) {
+        return { value: { verdict: "deny", risk: "high", reasons: [`路径不在工具允许目录内（允许：${roots.join("、")}）`] }, meta: RULES_META() };
+      }
     }
     const mode = this.permission;
     if (mode === "readonly" && tool.sideEffect !== "none") {
@@ -245,6 +288,12 @@ export class DecisionLayer {
       risk = maxRisk(risk, "medium");
       strict = true;
       reasons.push("涉及敏感路径（密钥、凭据）");
+    }
+    if (a.recovery && !a.recovery.idempotent) {
+      verdict = "confirm";
+      risk = maxRisk(risk, tool.sideEffect === "destructive" ? "high" : "medium");
+      strict = true;
+      reasons.push("恢复任务：上一次调用可能已产生副作用，重新执行前必须确认");
     }
     if (strict || (verdict !== "allow" && mode !== "full")) return { value: { verdict, risk, reasons }, meta: RULES_META() };
 

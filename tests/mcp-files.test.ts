@@ -1,6 +1,6 @@
 // @vitest-environment node
 // 内置文件 MCP 服务器（Rust：eg-mcp-files）接入 TS 运行时：白名单、副作用分级、删除二次确认、输出按不可信数据包裹
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,6 +9,7 @@ import { DecisionLayer } from "@/decision/decision-layer";
 import { assertServerAllowed, mcpTools } from "@/agent/mcp/client";
 import { connectStdioServer } from "@/agent/mcp/stdio";
 import { AgentRuntime } from "@/agent/runtime";
+import { makeToolInvocation } from "@/agent/tool-contract";
 import { ToolRegistry } from "@/agent/tools";
 import type { ConfirmRequest, LlmRequest } from "@/agent/types";
 
@@ -140,6 +141,40 @@ describe.skipIf(!existsSync(BIN))("内置文件 MCP 服务器", () => {
       expect(asked).toEqual(["mcp__files__create_directory", "mcp__files__move_file"]);
       expect(readFileSync(join(dl, "技术", "spec.pdf"), "utf8")).toBe("%PDF-1.4");
       expect(existsSync(join(dl, "spec.pdf"))).toBe(false);
+    } finally {
+      await transport.close();
+    }
+  });
+
+  it("恢复前确认写入已经落地时不重复写文件，也不再弹确认", async () => {
+    const { home, dl } = sandbox();
+    const file = join(dl, "report.md");
+    writeFileSync(file, "已完成");
+    const originalStat = statSync(file);
+    const { transport, registry } = await connect(home);
+    try {
+      const decision = DecisionLayer.fromEnv({ OPENAI_API_KEY: "x" }, { tools: registry.defs() });
+      const step = { id: "s1", goal: "写入报告", tool: "mcp__files__write_file", args: { path: "~/Downloads/report.md", content: "已完成", overwrite: true } };
+      const previous = makeToolInvocation({ taskId: "task-mcp-probe", stepId: step.id, attempt: 1, tool: registry.get(step.tool)!, args: step.args });
+      const events: import("@/agent").AgentEvent[] = [];
+      const asked: ConfirmRequest[] = [];
+      const r = await new AgentRuntime({
+        decision,
+        tools: registry,
+        llm: () => fakeLlm({ steps: [step] }),
+        confirm: async (req) => (asked.push(req), true),
+        onEvent: (event) => events.push(event),
+      }).run("写入报告", {
+        taskId: "task-mcp-probe",
+        resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", invocationId: previous.invocationId, idempotencyKey: previous.idempotencyKey }], nextStepIndex: 0 },
+      });
+      expect(r.status).toBe("completed");
+      expect(asked).toEqual([]);
+      expect(events.find((event) => event.type === "probe")).toMatchObject({ state: "applied" });
+      expect(events.some((event) => event.type === "tool_result")).toBe(false);
+      expect(r.steps.at(-1)).toMatchObject({ status: "done", executionState: "applied" });
+      expect(readFileSync(file, "utf8")).toBe("已完成");
+      expect(statSync(file)).toMatchObject({ ino: originalStat.ino, mtimeMs: originalStat.mtimeMs });
     } finally {
       await transport.close();
     }

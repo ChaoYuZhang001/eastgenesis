@@ -1,0 +1,27 @@
+{
+  "observedAt": "2026-10-07T06:03:01.288570+00:00",
+  "applied": true,
+  "patchSha256": "1b17fa43521507485ba2a4b936b06dec3d7e583ff7b92f3e281f85346ca13741",
+  "files": [
+    {
+      "path": "src/lib/goal-run.ts",
+      "sha256": "dd0e3a2a75ee1a5b169200321c3457ff65546bf4943c1c3598e429890dad1a7c"
+    },
+    {
+      "path": "src/lib/goal-runner.ts",
+      "sha256": "a21906de8ea3ec2754260fbf6257c0c0f00259e28cc006260a52dad63af7854a"
+    },
+    {
+      "path": "tests/goal-failed-recovery.test.ts",
+      "sha256": "de14996489ddd81bcd9d56ba33641aab2f44c6defa17d28d8c57917ee9114c75"
+    },
+    {
+      "path": "tests/goal-runner.test.ts",
+      "sha256": "88cd1a508bf5c4eaa69b2f10fc6b4fa05788f6369a5887046e11ed8276960171"
+    }
+  ],
+  "candidateOnlyIsolatedTestsPassed": true,
+  "actualCurrentWorktreeTestsPending": true,
+  "nativeFullGoalPassed": false,
+  "staleCheckpointFreshnessEstablished": false
+}

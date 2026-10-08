@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "kind": "read_only_windows_process_job_patch_review",
+  "reviewedAt": "2026-10-07T04:55:47.885012+00:00",
+  "patch": {
+    "path": "/tmp/eastgenesis-windows-process-job-diagnostic.patch",
+    "sha256": "6b8b0066c4dac87f7ab846acfa52485d948c5fc573a81b1f36eba4c1c9993f46",
+    "bytes": 25510
+  },
+  "authorReport": {
+    "path": "/tmp/eastgenesis-windows-process-job-diagnostic-report-20261007.json",
+    "sha256": "325395a0f1fc70a520b9b4916d2f69b1d9f2af2d185dfbf0ab35d817426ee100",
+    "bytes": 203238
+  },
+  "baselineHeadExpected": "31dcc35279f0e0e06d843d3d04a172bf987708b8",
+  "baselineHeadObservedAtInitialReview": "31dcc35279f0e0e06d843d3d04a172bf987708b8",
+  "headObservedAtReviewEnd": "31dcc35279f0e0e06d843d3d04a172bf987708b8",
+  "files": [
+    {
+      "path": "tools/desktop-windows-install-smoke.ps1",
+      "expectedBaseSha256": "3777102cecd704ada69917c1a5625af7edb973e43cfdde089fbe002985462e2f",
+      "baseSha256ObservedEarlier": "3777102cecd704ada69917c1a5625af7edb973e43cfdde089fbe002985462e2f",
+      "baseMatchedAtInitialReview": true,
+      "currentSha256AtReviewEnd": "3777102cecd704ada69917c1a5625af7edb973e43cfdde089fbe002985462e2f",
+      "currentStillBase": true,
+      "candidateSha256": "b18a3fab792b541504e7c8425bdebd828700a3b292663df9571323de7f4b7402",
+      "candidateMatchesReport": true,
+      "candidateBytes": 43789
+    },
+    {
+      "path": "tools/desktop-windows-install-smoke.mjs",
+      "expectedBaseSha256": "0170c0da6bdb79f3d4376f5bcdbbee30cf8f7ccfc8644563366e5b84c6feeff4",
+      "baseSha256ObservedEarlier": "0170c0da6bdb79f3d4376f5bcdbbee30cf8f7ccfc8644563366e5b84c6feeff4",
+      "baseMatchedAtInitialReview": true,
+      "currentSha256AtReviewEnd": "0170c0da6bdb79f3d4376f5bcdbbee30cf8f7ccfc8644563366e5b84c6feeff4",
+      "currentStillBase": true,
+      "candidateSha256": "6a724a5bbeeff7611e4771655efefeb022e5ea18aafea9e229738e1448059ac4",
+      "candidateMatchesReport": true,
+      "candidateBytes": 23691
+    },
+    {
+      "path": "tools/desktop-windows-install-smoke.d.mts",
+      "expectedBaseSha256": "e220c48ef69a7149f0d999fcec6e6bd8a4f0655009490430f3efd89327639d6d",
+      "baseSha256ObservedEarlier": "e220c48ef69a7149f0d999fcec6e6bd8a4f0655009490430f3efd89327639d6d",
+      "baseMatchedAtInitialReview": true,
+      "currentSha256AtReviewEnd": "e220c48ef69a7149f0d999fcec6e6bd8a4f0655009490430f3efd89327639d6d",
+      "currentStillBase": true,
+      "candidateSha256": "11275fede5d0e7b88dc9f5c6f807632fc0406207f4962d1da28962752aa328ae",
+      "candidateMatchesReport": true,
+      "candidateBytes": 2702
+    },
+    {
+      "path": "tests/desktop-windows-install-smoke.test.ts",
+      "expectedBaseSha256": "7bae5fd27bc5c3fad8c22c5ec5cf96da68e9a9a187388baf124743a94dcc3ea8",
+      "baseSha256ObservedEarlier": "7bae5fd27bc5c3fad8c22c5ec5cf96da68e9a9a187388baf124743a94dcc3ea8",
+      "baseMatchedAtInitialReview": true,
+      "currentSha256AtReviewEnd": "7bae5fd27bc5c3fad8c22c5ec5cf96da68e9a9a187388baf124743a94dcc3ea8",
+      "currentStillBase": true,
+      "candidateSha256": "720b2b513f348a99c6276b3201d9d78afad0024b677c31aeb49ebef064083329",
+      "candidateMatchesReport": true,
+      "candidateBytes": 35361
+    }
+  ],
+  "validatedExistingEvidence": [
+    {
+      "name": "red-validation-v3.json",
+      "path": "/tmp/eastgenesis-win-process-job-diagnostic-20261007/red-validation-v3.json",
+      "sha256": "f50ac50034479ad613d4c09a9da80438d6df2b102c0ea3bb3a99a003cde3bdda",
+      "exitCode": 1,
+      "startEndSourcesEqual": true,
+      "rawLog": "/tmp/eastgenesis-win-process-job-diagnostic-20261007/red-v3.log",
+      "rawLogSha256": "67dff2754023f0960f746e262bb4847adc13900b92818f5d440255834d56acbe",
+      "nativeWindowsApiExecuted": false,
+      "realProvidersUsed": false
+    },
+    {
+      "name": "candidate-validation-v4.json",
+      "path": "/tmp/eastgenesis-win-process-job-diagnostic-20261007/candidate-validation-v4.json",
+      "sha256": "7c50030affc44fbe73926f4375e00ce936fa54aaa89b7dbc56ccac47f0452a45",
+      "exitCode": 0,
+      "startEndSourcesEqual": true,
+      "rawLog": "/tmp/eastgenesis-win-process-job-diagnostic-20261007/candidate-v4.log",
+      "rawLogSha256": "bb7ee0e0f41bd19720ece619d22f9c35bd9cbc4c88815123e8ee2c6185d7b8b8",
+      "nativeWindowsApiExecuted": false,
+      "realProvidersUsed": false
+    },
+    {
+      "name": "typecheck-validation-v2.json",
+      "path": "/tmp/eastgenesis-win-process-job-diagnostic-20261007/typecheck-validation-v2.json",
+      "sha256": "c0bb6c35a412a81ab345235ab86a117b615b2414a8290592cbfb45f969ff0921",
+      "exitCode": 0,
+      "startEndSourcesEqual": true,
+      "rawLog": "/tmp/eastgenesis-win-process-job-diagnostic-20261007/typecheck-v2.log",
+      "rawLogSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nativeWindowsApiExecuted": false,
+      "realProvidersUsed": false
+    }
+  ],
+  "findings": [
+    {
+      "topic": "Win32 error capture",
+      "result": "No blocker",
+      "candidatePsLines": [
+        608,
+        610,
+        639,
+        645,
+        663,
+        679,
+        682,
+        688,
+        690
+      ],
+      "evidence": "DllImport SetLastError=true remains. Failing Win32 APIs call LaunchFailure.Win32 before cleanup. The first factory statement reads Marshal.GetLastWin32Error; wrapper projects stage/uint32 error/int32 HResult/uint32 suspend count only."
+    },
+    {
+      "topic": "ResumeThread paths",
+      "result": "No blocker",
+      "candidatePsLines": [
+        679,
+        682,
+        686,
+        688,
+        696
+      ],
+      "evidence": "CreateProcess CREATE_SUSPENDED|CREATE_UNICODE_ENVIRONMENT 0x404; AssignProcessToJobObject and managed handle retained before resume. UINT_MAX captures Win32 error; unexpected successful count0 or greater than1 throws with count only, without stale Win32. Only count1 marks resumed. Unresumed child is terminated in finally."
+    },
+    {
+      "topic": "Failure classification and schema gate",
+      "result": "No blocker",
+      "candidatePsLines": [
+        306,
+        307,
+        423,
+        430,
+        432,
+        443,
+        456,
+        459
+      ],
+      "evidence": "A Start-Controlled launch failure leaves probe stage process_job; first such failure is rethrown immediately. Typed failure is captured before startup-trace reader can replace shared state. 4s stable window and external Python schema7/sessions/toolInvocations/leaseIndex proof remain; frontend trace cannot substitute."
+    },
+    {
+      "topic": "MJS projection and negative cases",
+      "result": "No blocker",
+      "evidence": "Exact4keys fixed-stage enum bounded int32/uint32 numeric tuples. Rejects text/leaked fields, missing data, unknown stage, overflow, mixed Win32/HResult and impossible resume tuples. Legacy missing field remains accepted only as compatibility; process_job report still fails. Present typed tuple permitted only failed process_job, normal present field must null."
+    },
+    {
+      "topic": "Validation boundary",
+      "result": "Explicit unverified native behavior",
+      "evidence": "Existing candidate raw log30pass, red26pass+4fail, no-emit typecheck exit0 independently matched hashes. Tests include actual MJS projection and embedded Python. PS/CSharp/source checks are structural only. PowerShell/Add-Type/WinAPI/NSIS were not executed."
+    }
+  ],
+  "decision": {
+    "sourceBlockers": [],
+    "canContinue": "Apply only this immutable four-file patch after rechecking baseline and four base hashes; run normal repository checks on applied tree, then disposable hosted Windows CI.",
+    "claimsNotSupported": [
+      "Windows root cause solved",
+      "Add-Type compiles on Windows",
+      "actual typed WinAPI diagnostic produced",
+      "NSIS lifecycle passed",
+      "formal release ready"
+    ]
+  },
+  "boundaries": {
+    "reviewerModifiedRepo": false,
+    "reviewerModifiedGit": false,
+    "reviewerLaunchedAppOrAx": false,
+    "reviewerReadPrivateProviderConfig": false,
+    "reviewerReranTestsOrNativeApi": false,
+    "onlyNewOwnReviewFileCreated": true
+  },
+  "officialSemantics": [
+    {
+      "title": "Microsoft ResumeThread",
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-resumethread",
+      "checkedAt": "2026-10-07",
+      "support": "Returns previous suspend count, UINT_MAX is failure;0 not suspended,1 resumed,greater than1 still suspended."
+    },
+    {
+      "title": "Microsoft Marshal.GetLastWin32Error",
+      "url": "https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getlastwin32error?view=net-9.0",
+      "checkedAt": "2026-10-07",
+      "support": "Returns error saved for last PInvoke with SetLastError=true. Do not replace with own direct GetLastError PInvoke."
+    }
+  ]
+}

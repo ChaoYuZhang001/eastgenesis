@@ -35,13 +35,27 @@ export function artifactsOf(events: readonly AgentEvent[]): { files: FileTouch[]
   const commands: CommandRun[] = [];
   for (const outer of events) {
     const e = outer.type === "subagent" ? outer.event : outer;
-    if (e.type !== "tool_result" || !e.step.tool) continue;
+    const probeApplied = e.type === "probe" && e.state === "applied";
+    if (e.type !== "tool_result" && !probeApplied) continue;
+    if (!e.step.tool) continue;
+    const ok = e.type === "tool_result" ? e.ok : true;
+    const output = e.type === "tool_result" ? e.content : e.detail;
+    if (e.artifacts?.length) {
+      for (const ref of e.artifacts) {
+        if (ref.kind === "command" && ref.action === "execute") {
+          commands.push({ command: ref.command ?? e.step.tool, ok: ref.ok, output });
+        } else if (ref.kind === "file" && ref.path) {
+          files.push({ path: ref.path, action: ref.action === "create" ? "created" : ref.action === "move" ? "moved" : ref.action === "delete" ? "deleted" : ref.action === "read" ? "read" : "modified", ok: ref.ok, ...(ref.to ? { to: ref.to } : {}) });
+        }
+      }
+      continue;
+    }
     const kind = classify(e.step.tool);
     if (!kind) continue;
     const args = e.step.args ?? {};
     if (kind === "command") {
       const command = str(args.command) ?? str(args.cmd) ?? e.step.tool;
-      commands.push({ command, ok: e.ok, output: e.content });
+      commands.push({ command, ok, output });
       continue;
     }
     // 两种命名都要认：内置文件服务器用 src / dst，其它 MCP 服务器常用 source / destination
@@ -49,7 +63,7 @@ export function artifactsOf(events: readonly AgentEvent[]): { files: FileTouch[]
     if (!path) continue;
     const to = kind === "moved" ? (str(args.destination) ?? str(args.to) ?? str(args.dst) ?? undefined) : undefined;
     const prev = files.findIndex((f) => f.path === path && f.action === kind);
-    const item: FileTouch = { path, action: kind, ok: e.ok, ...(to && { to }) };
+    const item: FileTouch = { path, action: kind, ok, ...(to && { to }) };
     if (prev >= 0) files[prev] = item;
     else files.push(item);
   }

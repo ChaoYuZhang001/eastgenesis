@@ -6,7 +6,10 @@ import type { ChainEntry, RouteDecision } from "@/decision/router";
 import { routedLlm } from "@/agent/llm";
 import { AGENT_SYSTEM, AgentRuntime, ONBOARDING_MARK, PERSONA, type AgentDeps } from "@/agent/runtime";
 import { ToolRegistry, executeTool, wrapUntrusted } from "@/agent/tools";
+import { makeToolInvocation } from "@/agent/tool-contract";
+import type { InvocationLedgerRecord } from "@/agent/tool-contract";
 import type { AgentEvent, ConfirmRequest, LlmCall, LlmPurpose, LlmRequest, Tool } from "@/agent/types";
+import { recoveryCheckpoint } from "@/lib/recovery";
 
 const ENV = { OPENAI_API_KEY: "x" };
 const mk = (name: string, sideEffect: Tool["sideEffect"], run: Tool["run"], description = name): Tool => ({ name, description, sideEffect, run });
@@ -23,27 +26,269 @@ function setup(tools: Tool[], script: Partial<Record<LlmPurpose, string[]>>, ext
   };
   const events: AgentEvent[] = [];
   const rt = new AgentRuntime({ decision, tools: registry, llm: () => llm, onEvent: (e) => events.push(e), ...extra });
-  return { rt, events, reqs };
+  return { rt, events, reqs, decision };
 }
 const strategies = (events: AgentEvent[]) => events.flatMap((e) => (e.type === "recover" ? [e.strategy] : []));
+const ledgerRecord = (invocation: ReturnType<typeof makeToolInvocation>, change: Partial<InvocationLedgerRecord> = {}): InvocationLedgerRecord => ({
+  ...invocation, state: "started", artifacts: [], createdAt: 1, updatedAt: 2, ...change,
+});
 
 describe("Agent 运行时", () => {
+  it.each(["started", "unknown", "applied"] as const)("仅计划的旧 checkpoint 命中 %s 账本时不按新调用重放副作用", async (state) => {
+    const run = vi.fn(async () => ({ ok: true, content: "不应重复执行", structured: true }));
+    const probe = vi.fn(async () => ({ state: "not_applied" as const, detail: "不应在缺少身份时探测" }));
+    const confirm = vi.fn(async () => true);
+    const put = vi.fn(async (_record: InvocationLedgerRecord) => {});
+    const claim = vi.fn(async () => state === "applied" ? "terminal" as const : "acquired" as const);
+    const tool = { ...mk("write_file", "local_write", run), probe };
+    const args = { path: "fixture.txt", content: "固定内容" };
+    const step = { id: "s1", goal: "写入沙箱文件", tool: tool.name, args };
+    const invocation = makeToolInvocation({ taskId: "task-plan-only", stepId: step.id, attempt: 1, tool, args });
+    const durable = ledgerRecord(invocation, {
+      state,
+      detail: "旧进程已保存的账本证据",
+      ...(state === "applied" ? {} : { leaseOwner: "old-process", leaseExpiresAt: 10 }),
+    });
+    // An older writer may persist the plan before a slow step-route/args call,
+    // then exit after the durable ledger has advanced past that snapshot.
+    const checkpoint = recoveryCheckpoint([
+      { type: "plan", plan: { steps: [step], source: "llm" }, revision: 1 },
+      { type: "run_end", status: "aborted", summary: "旧快照没有步骤事件" },
+    ])!;
+    expect(checkpoint.records).toEqual([]);
+    const get = vi.fn(async (key: string) => key === invocation.idempotencyKey ? durable : null);
+    const { rt, events } = setup([tool], { args: [JSON.stringify(args)] }, {
+      now: () => 100,
+      confirm,
+      ledger: { get, put, claim },
+    });
+    const result = await rt.run("写入沙箱文件", { taskId: invocation.taskId, resume: checkpoint });
+
+    expect(result.status).toBe(state === "applied" ? "completed" : "needs_user");
+    expect(get).toHaveBeenCalledWith(invocation.idempotencyKey);
+    expect(run).not.toHaveBeenCalled();
+    expect(probe).not.toHaveBeenCalled();
+    expect(confirm).not.toHaveBeenCalled();
+    expect(put).not.toHaveBeenCalled();
+    expect(claim).not.toHaveBeenCalled();
+    expect(events.find((event) => event.type === "probe")).toMatchObject(state === "applied"
+      ? { state: "applied", idempotencyKey: invocation.idempotencyKey, detail: durable.detail }
+      : { state: "unknown", detail: expect.stringContaining("缺少可验证的原始身份") });
+  });
+
+  it("仅计划的 checkpoint 没有先前账本时仍允许一次正常新调用", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "执行一次", structured: true }));
+    const probe = vi.fn(async () => ({ state: "unknown" as const, detail: "没有先前调用" }));
+    const states: string[] = [];
+    const tool = { ...mk("write_file", "local_write", run), probe };
+    const step = { id: "s1", goal: "写入沙箱文件", tool: tool.name, args: { path: "fixture.txt" } };
+    const checkpoint = recoveryCheckpoint([
+      { type: "plan", plan: { steps: [step], source: "llm" }, revision: 1 },
+      { type: "run_end", status: "aborted", summary: "步骤尚未开始" },
+    ])!;
+    const { rt, events } = setup([tool], { args: [JSON.stringify(step.args)] }, {
+      confirm: async () => true,
+      ledger: { get: async () => null, put: async (record) => { states.push(record.state); } },
+    });
+    expect((await rt.run("写入沙箱文件", { taskId: "task-plan-new", resume: checkpoint })).status).toBe("completed");
+    expect(run).toHaveBeenCalledOnce();
+    expect(probe).not.toHaveBeenCalled();
+    expect(states).toEqual(["planned", "started", "applied"]);
+    expect(events.filter((event) => event.type === "gate")).toHaveLength(1);
+    expect(events.find((event) => event.type === "gate")).not.toHaveProperty("recovery");
+  });
+
+  it("仅计划的旧 checkpoint 首次账本读取抛错时不能当作没有记录继续副作用", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "不应再次执行", structured: true }));
+    const probe = vi.fn(async () => ({ state: "applied" as const, detail: "不应在读取失败后探测" }));
+    const confirm = vi.fn(async () => true);
+    const put = vi.fn(async (_record: InvocationLedgerRecord) => {});
+    // The old row exists and its lease has expired. A subsequent write/claim
+    // can succeed even when the initial read temporarily fails.
+    const claim = vi.fn(async () => "acquired" as const);
+    const tool = { ...mk("write_file", "local_write", run), probe };
+    const args = { path: "fixture.txt", content: "固定内容" };
+    const step = { id: "s1", goal: "写入沙箱文件", tool: tool.name, args };
+    const invocation = makeToolInvocation({ taskId: "task-plan-read-failed", stepId: step.id, attempt: 1, tool, args });
+    const durable = ledgerRecord(invocation, { state: "started", leaseOwner: "old-process", leaseExpiresAt: 10 });
+    const get = vi.fn(async (key: string) => key === invocation.idempotencyKey ? durable : null)
+      .mockImplementationOnce(async () => { throw new Error("synthetic temporary ledger read failure"); });
+    const checkpoint = recoveryCheckpoint([
+      { type: "plan", plan: { steps: [step], source: "llm" }, revision: 1 },
+      { type: "run_end", status: "aborted", summary: "旧快照没有步骤事件" },
+    ])!;
+    expect(checkpoint.records).toEqual([]);
+    const { rt, events } = setup([tool], { args: [JSON.stringify(args)] }, {
+      now: () => 100,
+      confirm,
+      ledger: { get, put, claim },
+    });
+    const result = await rt.run("写入沙箱文件", { taskId: invocation.taskId, resume: checkpoint });
+
+    expect.soft(result.status).toBe("needs_user");
+    expect(get).toHaveBeenCalledWith(invocation.idempotencyKey);
+    expect.soft(run).not.toHaveBeenCalled();
+    expect.soft(probe).not.toHaveBeenCalled();
+    expect.soft(confirm).not.toHaveBeenCalled();
+    expect.soft(put).not.toHaveBeenCalled();
+    expect.soft(claim).not.toHaveBeenCalled();
+    expect.soft(events.some((event) => event.type === "gate")).toBe(false);
+    expect(result.summary).toContain("无法读取工具调用账本");
+    expect(result.summary).not.toContain("synthetic temporary ledger read failure");
+    expect(JSON.stringify(events)).not.toContain("synthetic temporary ledger read failure");
+  });
+
+  it("副作用执行前必须完成持久化屏障；失败不能写 started 或执行工具", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "ok" }));
+    const states: string[] = [];
+    const { rt } = setup([mk("write_file", "local_write", run)], {
+      plan: [plan({ goal: "写入沙箱文件", tool: "write_file", args: { path: "fixture.txt" } })],
+    }, {
+      confirm: async () => true,
+      beforeSideEffect: async () => { throw new Error("storage unavailable"); },
+      ledger: { get: async () => null, put: async (r) => { states.push(r.state); } },
+    });
+    expect((await rt.run("写入沙箱文件")).status).toBe("needs_user");
+    expect(run).not.toHaveBeenCalled();
+    expect(states).not.toContain("started");
+  });
+
+  it("持久化屏障先于 started、故障点与真实工具；普通任务未配置时保持兼容", async () => {
+    const order: string[] = [];
+    const tool = mk("write_file", "local_write", async () => { order.push("tool"); return { ok: true, content: "ok", structured: true }; });
+    const { rt } = setup([tool], { plan: [plan({ goal: "写入沙箱文件", tool: tool.name, args: { path: "fixture.txt" } })] }, {
+      confirm: async () => true,
+      beforeSideEffect: async () => { order.push("checkpoint"); },
+      ledger: { get: async () => null, put: async (r) => { order.push(r.state); } },
+      faultHooks: { onPoint: ({ point }) => { order.push(point); } },
+    });
+    expect((await rt.run("写入沙箱文件")).status).toBe("completed");
+    expect(order).toEqual(["planned", "checkpoint", "started", "after_ledger_started", "tool", "after_tool_before_ledger_commit", "applied"]);
+    const compatible = setup([tool], { plan: [plan({ goal: "写入沙箱文件", tool: tool.name, args: {} })] }, { confirm: async () => true });
+    expect((await compatible.rt.run("写入沙箱文件")).status).toBe("completed");
+  });
+
+  it("持久化期间取消不能抢占租约或执行副作用", async () => {
+    const ctrl = new AbortController();
+    const run = vi.fn(async () => ({ ok: true, content: "ok" }));
+    const claim = vi.fn(async () => "acquired" as const);
+    const { rt } = setup([mk("write_file", "local_write", run)], { plan: [plan({ goal: "写入沙箱文件", tool: "write_file", args: {} })] }, {
+      confirm: async () => true,
+      beforeSideEffect: async () => { ctrl.abort(); },
+      ledger: { get: async () => null, put: async () => {}, claim },
+    });
+    expect((await rt.run("写入沙箱文件", { signal: ctrl.signal })).status).toBe("aborted");
+    expect(run).not.toHaveBeenCalled();
+    expect(claim).not.toHaveBeenCalled();
+  });
+
+  it("慢持久化完成后使用新的时钟抢占租约", async () => {
+    let clock = 1_000;
+    const claim = vi.fn(async (_key: string, _owner: string, _now: number, _ttl: number) => "acquired" as const);
+    const records: InvocationLedgerRecord[] = [];
+    const tool = mk("write_file", "local_write", async () => ({ ok: true, content: "ok", structured: true }));
+    const { rt } = setup([tool], { plan: [plan({ goal: "写入沙箱文件", tool: tool.name, args: {} })] }, {
+      confirm: async () => true,
+      now: () => clock,
+      beforeSideEffect: async () => { clock = 900_000; },
+      ledger: { get: async () => null, put: async (r) => { records.push(r); }, claim },
+    });
+    expect((await rt.run("写入沙箱文件")).status).toBe("completed");
+    expect(claim.mock.calls[0]?.[2]).toBe(900_000);
+    expect(records.find((r) => r.state === "started")?.leaseExpiresAt).toBe(1_500_000);
+  });
+
+  it.each(["unknown", "throw"])("副作用探针 %s 时保存 unknown 并 needs_user，不进入批准渠道", async (kind) => {
+    const run = vi.fn(async () => ({ ok: true, content: "must not run" }));
+    const confirm = vi.fn(async () => true);
+    const states: string[] = [];
+    const tool = { ...mk("write_file", "local_write", run), probe: async () => {
+      if (kind === "throw") throw new Error("probe unavailable");
+      return { state: "unknown" as const, detail: "indeterminate" };
+    } };
+    const step = { id: "s1", goal: "写入沙箱文件", tool: tool.name, args: {} };
+    const previous = makeToolInvocation({ taskId: "task-unknown", stepId: step.id, attempt: 1, tool, args: step.args });
+    const { rt } = setup([tool], {}, { confirm, ledger: { get: async () => null, put: async (r) => { states.push(r.state); } } });
+    const result = await rt.run("写入沙箱文件", { taskId: "task-unknown", resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: previous.idempotencyKey }], nextStepIndex: 0 } });
+    expect(result.status).toBe("needs_user");
+    expect(states.at(-1)).toBe("unknown");
+    expect(run).not.toHaveBeenCalled();
+    expect(confirm).not.toHaveBeenCalled();
+  });
+
+  it("只读工具探针 unknown 仍可继续，不套用副作用禁止重放规则", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "ok", structured: true }));
+    const tool = { ...mk("read_file", "none", run), probe: async () => ({ state: "unknown" as const, detail: "indeterminate" }) };
+    const step = { id: "s1", goal: "读取沙箱文件", tool: tool.name, args: {} };
+    const { rt } = setup([tool], {});
+    expect((await rt.run("读取沙箱文件", { resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown" }], nextStepIndex: 0 } })).status).toBe("completed");
+    expect(run).toHaveBeenCalledOnce();
+  });
+
   it("规划 → 执行 → 反思 → 汇总；工具输出作为不可信数据交给模型", async () => {
     const read = mk("read_file", "none", async () => ({ ok: true, content: "notes.md 文件内容：路由已完成" }), "读取本地文件内容");
-    const { rt, events, reqs } = setup([read], {
+    const { rt, events, reqs, decision } = setup([read], {
       plan: [plan({ goal: "读取 notes.md 文件内容", tool: "read_file", args: { path: "notes.md" } }, { goal: "总结 notes.md 的要点", tool: null })],
       answer: ["要点：路由已完成"],
     });
+    const routeTask = vi.spyOn(decision, "routeTask");
     const r = await rt.run("总结 notes.md 的要点");
     expect(r.status).toBe("completed");
     expect(r.steps.map((s) => s.status)).toEqual(["done", "done"]);
     expect(events.map((e) => e.type)).toEqual([
       "run_start", "route", "llm", "plan",
-      "step_start", "gate", "tool_result", "reflect",
-      "step_start", "llm", "reflect",
+      "step_route", "step_start", "gate", "tool_result", "reflect",
+      "step_route", "step_start", "llm", "reflect",
       "llm", "reflect", "run_end",
     ]);
+    const stepRoutes = events.filter((e): e is Extract<AgentEvent, { type: "step_route" }> => e.type === "step_route");
+    expect(stepRoutes.map((e) => e.surface)).toEqual(["work", "chat"]);
+    expect(routeTask).toHaveBeenCalledTimes(3);
+    expect(routeTask.mock.calls.slice(1).map(([q]) => q.text)).toEqual([
+      expect.stringContaining("读取 notes.md 文件内容"),
+      expect.stringContaining("总结 notes.md 的要点"),
+    ]);
+    const stepStarts = events.filter((e): e is Extract<AgentEvent, { type: "step_start" }> => e.type === "step_start");
+    expect(stepStarts.map((e) => e.surface)).toEqual(["work", "chat"]);
+    expect(stepStarts[0].surfaceReason).toContain("研究");
     expect(reqs.find((q) => q.purpose === "answer")!.messages[1].content).toContain('<tool_output source="read_file" untrusted="true">');
+  });
+
+  it("同一个 Goal 可以按步骤自动经过 Work → Codex → Chat", async () => {
+    const read = mk("read_file", "none", async () => ({ ok: true, content: "项目说明：统一工作台" }), "读取本地文件内容");
+    const test = mk("run_command", "none", async () => ({ ok: true, content: "测试通过：42 tests" }), "运行仓库终端测试");
+    const { rt, events } = setup([read, test], {
+      plan: [plan(
+        { goal: "读取项目说明", tool: "read_file", args: { path: "README.md" } },
+        { goal: "运行仓库测试", tool: "run_command", args: { cmd: "pnpm test" } },
+        { goal: "总结测试结果", tool: null },
+      )],
+      answer: ["读取了项目说明并确认测试结果"],
+      summary: ["项目说明已读取，仓库测试通过"],
+    });
+    const result = await rt.run("读取项目说明，运行测试并总结结果");
+    expect(result.status).toBe("completed");
+    const routes = events.filter((event): event is Extract<AgentEvent, { type: "step_route" }> => event.type === "step_route");
+    expect(routes.map((event) => event.surface)).toEqual(["work", "codex", "chat"]);
+    const starts = events.filter((event): event is Extract<AgentEvent, { type: "step_start" }> => event.type === "step_start");
+    expect(starts.map((event) => event.surface)).toEqual(["work", "codex", "chat"]);
+    expect(starts[1]?.surfaceReason).toContain("代码仓库");
+  });
+
+  it("恢复运行跳过已完成步骤，只从 checkpoint 指定的步骤继续", async () => {
+    const first = { id: "s1", goal: "已经读取资料", tool: null };
+    const next = { id: "s2", goal: "继续整理资料", tool: null };
+    const { rt, events, reqs } = setup([], { answer: ["继续完成", "总结完成"] });
+    const r = await rt.run("继续整理资料", {
+      resume: {
+        plan: { steps: [first, next], source: "llm" },
+        records: [{ step: first, status: "done", attempts: 1 }],
+        nextStepIndex: 1,
+      },
+    });
+    expect(r.status).toBe("completed");
+    expect(events.filter((e) => e.type === "step_start").map((e) => e.step.id)).toEqual(["s2"]);
+    expect(reqs.map((q) => q.purpose)).toEqual(["answer", "summary"]);
   });
 
   it("有副作用的操作先确认；确认请求和事件里的参数已脱敏", async () => {
@@ -58,6 +303,357 @@ describe("Agent 运行时", () => {
     expect(confirm.mock.calls[0][0]).toMatchObject({ tool: "write_file", risk: "medium", args: { path: "out.md", content: "token=[REDACTED]" } });
     expect(run).toHaveBeenCalledWith({ path: "out.md", content: "token=abc123" }, expect.anything());
     expect(JSON.stringify(events)).not.toContain("abc123");
+  });
+
+  it("工具调用带幂等键和产物清单；重试共享逻辑键", async () => {
+    const invocations: string[] = [];
+    const write = mk("write_file", "local_write", async (_args, ctx) => {
+      invocations.push(`${ctx.invocation?.invocationId}:${ctx.invocation?.idempotencyKey}`);
+      return { ok: true, content: "已写入 out.md" };
+    }, "写入本地文件");
+    const { rt, events } = setup([write], { plan: [plan({ goal: "写入 out.md", tool: "write_file", args: { path: "out.md" } })] }, { confirm: async () => true });
+    const r = await rt.run("写入 out.md", { taskId: "task-contract" });
+    expect(r.status).toBe("completed");
+    expect(invocations[0]).toMatch(/^task-contract:s1:1:eg-[0-9a-f]+$/);
+    expect(events.find((e) => e.type === "tool_result")).toMatchObject({ invocationId: "task-contract:s1:1", artifacts: [{ kind: "file", action: "modify", path: "out.md", ok: true }] });
+    expect(r.steps[0]).toMatchObject({ invocationId: "task-contract:s1:1", idempotencyKey: expect.stringMatching(/^eg-/), artifacts: [{ path: "out.md" }] });
+  });
+
+  it("恢复非幂等写入时重新要求确认，并把恢复标记写进闸门事件", async () => {
+    const confirm = vi.fn(async (_req: ConfirmRequest) => true);
+    const write = mk("write_file", "local_write", async () => ({ ok: true, content: "已写入报告" }), "写入本地文件");
+    const step = { id: "s1", goal: "写入报告", tool: "write_file", args: { path: "report.md" } };
+    const { rt, events } = setup([write], { summary: ["恢复后总结完成"] }, { confirm });
+    const r = await rt.run("写入报告", {
+      taskId: "task-recover",
+      resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, invocationId: "task-recover:s1:1" }], nextStepIndex: 0 },
+    });
+    expect(r.status).toBe("completed");
+    expect(confirm).toHaveBeenCalled();
+    expect(confirm.mock.calls[0]![0].reasons).toContain("恢复任务：上一次调用可能已产生副作用，重新执行前必须确认");
+    expect(events.find((e) => e.type === "gate")).toMatchObject({ recovery: true, verdict: "confirm" });
+  });
+
+  it("恢复前探测确认副作用已经落地时跳过重复写入", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "不应再次写入" }));
+    const probe = vi.fn(async () => ({ state: "applied" as const, detail: "目标文件内容与本次写入一致", artifacts: [{ kind: "file" as const, action: "modify" as const, path: "report.md", ok: true }] }));
+    const write = { ...mk("write_file", "local_write", run, "写入本地文件"), probe };
+    const step = { id: "s1", goal: "写入报告", tool: "write_file", args: { path: "report.md", content: "完成" } };
+    const previous = makeToolInvocation({ taskId: "task-probe", stepId: step.id, attempt: 1, tool: write, args: step.args });
+    const { rt, events } = setup([write], { summary: ["恢复后总结完成"] });
+    const r = await rt.run("写入报告", {
+      taskId: "task-probe",
+      resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: previous.idempotencyKey }], nextStepIndex: 0 },
+    });
+    expect(r.status).toBe("completed");
+    expect(probe).toHaveBeenCalledOnce();
+    expect(run).not.toHaveBeenCalled();
+    expect(events.find((e) => e.type === "probe")).toMatchObject({ state: "applied", detail: "目标文件内容与本次写入一致" });
+    expect(events.some((e) => e.type === "gate")).toBe(false);
+    expect(r.steps.at(-1)).toMatchObject({ status: "done", executionState: "applied", artifacts: [{ path: "report.md" }] });
+  });
+
+  it("恢复时参数漂移会停在 needs_user，不把未知副作用当成新调用", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "不应执行" }));
+    const write = mk("write_file", "local_write", run, "写入本地文件");
+    const oldStep = { id: "s1", goal: "写入报告", tool: "write_file", args: { path: "report.md", content: "旧内容" } };
+    const oldInvocation = makeToolInvocation({ taskId: "task-drift", stepId: "s1", attempt: 1, tool: write, args: oldStep.args });
+    const resumedStep = { ...oldStep, args: { path: "other.md", content: "新内容" } };
+    const { rt, events } = setup([write], { summary: ["不应总结"] });
+    const r = await rt.run("写入报告", {
+      taskId: "task-drift",
+      resume: { plan: { steps: [resumedStep], source: "llm" }, records: [{ step: oldStep, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: oldInvocation.idempotencyKey }], nextStepIndex: 0 },
+    });
+    expect(r.status).toBe("needs_user");
+    expect(run).not.toHaveBeenCalled();
+    expect(events.find((e) => e.type === "probe")).toMatchObject({ state: "unknown", detail: expect.stringContaining("参数与上一次调用不一致") });
+  });
+
+  it.each([true, false])("连续两次恢复不会把漂移参数洗成可信身份；原 gate 身份存在=%s", async (hasIdentity) => {
+    const run = vi.fn(async () => ({ ok: true, content: "must not execute" }));
+    const probe = vi.fn(async () => ({ state: "not_applied" as const, detail: "new target absent" }));
+    const tool = { ...mk("write_file", "local_write", run), probe };
+    const step = { id: "s1", goal: "写入沙箱文件", tool: tool.name, args: { path: "original.txt" } };
+    const original = makeToolInvocation({ taskId: "task-gate-drift", stepId: step.id, attempt: 1, tool, args: step.args });
+    const history: AgentEvent[] = [{ type: "plan", plan: { steps: [step], source: "llm" }, revision: 0 },
+      { type: "step_start", step, attempt: 1, surface: "work" },
+      { type: "gate", step, verdict: "allow", risk: "low", reasons: [], backend: "rules", ...(hasIdentity ? { invocationId: original.invocationId, idempotencyKey: original.idempotencyKey } : {}) },
+      { type: "run_end", status: "aborted", summary: "interrupted" }];
+    const put = vi.fn(async () => {});
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const checkpoint = recoveryCheckpoint(history)!;
+      expect(checkpoint.nextStepIndex).toBe(0);
+      expect(checkpoint.records[0].idempotencyKey).toBe(hasIdentity ? original.idempotencyKey : undefined);
+      const next = setup([tool], { args: [JSON.stringify({ path: "changed.txt" })] }, { confirm: async () => true, ledger: { get: async () => null, put } });
+      expect((await next.rt.run("写入沙箱文件", { taskId: "task-gate-drift", resume: checkpoint })).status).toBe("needs_user");
+      history.push(...next.events);
+    }
+    expect(run).not.toHaveBeenCalled();
+    expect(probe).not.toHaveBeenCalled();
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it.each(["applied", "conflict", "unknown", "missing", "different-key", "different-digest"] as const)("applied 探测期间 terminal 竞争以最新 %s 账本为准，checkpoint 不跳过冲突步骤", async (latestKind) => {
+    const run = vi.fn(async () => ({ ok: true, content: "must not execute" }));
+    const tool = { ...mk("write_file", "local_write", run), probe: async () => ({ state: "applied" as const, detail: "stale probe result" }) };
+    const step = { id: "s1", goal: "写入沙箱文件", tool: tool.name, args: { path: "fixture.txt" } };
+    const original = makeToolInvocation({ taskId: "task-probe-race", stepId: step.id, attempt: 1, tool, args: step.args });
+    const initial = ledgerRecord(original);
+    const latest = latestKind === "missing" ? null : ledgerRecord(original, {
+      state: latestKind === "conflict" || latestKind === "unknown" ? latestKind : "applied",
+      ...(latestKind === "different-key" ? { idempotencyKey: "different-key" } : {}),
+      ...(latestKind === "different-digest" ? { argsDigest: "different-digest" } : {}), detail: "latest durable evidence",
+    });
+    let reads = 0;
+    const put = vi.fn(async () => {});
+    const { rt, events } = setup([tool], {}, { ledger: { get: async () => ++reads === 1 ? initial : latest, put, claim: async () => "terminal" } });
+    const result = await rt.run("写入沙箱文件", { taskId: original.taskId, resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: original.idempotencyKey }], nextStepIndex: 0 } });
+    expect(result.status).toBe(latestKind === "applied" ? "completed" : "needs_user");
+    expect(run).not.toHaveBeenCalled();
+    expect(put.mock.calls).toHaveLength(1); // only planned; no stale terminal write
+    if (latestKind === "applied") expect(events.find((e) => e.type === "probe")).toMatchObject({ state: "applied", detail: "latest durable evidence" });
+    else {
+      expect(events.filter((e) => e.type === "probe").every((e) => e.state !== "applied")).toBe(true);
+      expect(recoveryCheckpoint(events)).toMatchObject({ nextStepIndex: 0, uncertainSteps: [{ id: "s1" }] });
+    }
+  });
+
+  it.each(["unknown", "conflict"] as const)("过期旧 owner 的 %s 探测必须先接管，再保存和释放；抢占失败不得写终态", async (state) => {
+    for (const claimResult of ["acquired", "busy", "missing"] as const) {
+      const run = vi.fn(async () => ({ ok: true, content: "must not execute" }));
+      const tool = { ...mk("write_file", "local_write", run), probe: async () => ({ state, detail: "conservative result" }) };
+      const step = { id: "s1", goal: "写入沙箱文件", tool: tool.name, args: {} };
+      const original = makeToolInvocation({ taskId: "task-probe-owner", stepId: step.id, attempt: 1, tool, args: step.args });
+      const old = ledgerRecord(original, { leaseOwner: "expired-owner", leaseExpiresAt: 10 });
+      const order: string[] = [];
+      let newOwner = "";
+      const { rt, events } = setup([tool], {}, { now: () => 20, ledger: {
+        get: async () => old,
+        claim: async (_key, owner) => { newOwner = owner; order.push("claim"); return claimResult; },
+        put: async (record) => { order.push(record.state); if (record.state === state) expect(record.leaseOwner).toBe(newOwner); },
+        release: async (_key, owner) => { expect(owner).toBe(newOwner); order.push("release"); },
+      } });
+      expect((await rt.run("写入沙箱文件", { taskId: original.taskId, resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: original.idempotencyKey }], nextStepIndex: 0 } })).status).toBe("needs_user");
+      expect(order).toEqual(claimResult === "acquired" ? ["planned", "claim", state, "release"] : ["planned", "claim"]);
+      expect(run).not.toHaveBeenCalled();
+      expect(recoveryCheckpoint(events)?.nextStepIndex).toBe(0);
+    }
+  });
+
+  it("未知副作用没有探针时 fail-closed，不自动重放", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "不应执行" }));
+    const write = mk("write_file", "local_write", run, "写入本地文件");
+    const step = { id: "s1", goal: "写入报告", tool: "write_file", args: { path: "report.md", content: "完成" } };
+    const previous = makeToolInvocation({ taskId: "task-no-probe", stepId: step.id, attempt: 1, tool: write, args: step.args });
+    const { rt, events } = setup([write], { summary: ["不应总结"] });
+    const r = await rt.run("写入报告", {
+      taskId: "task-no-probe",
+      resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: previous.idempotencyKey }], nextStepIndex: 0 },
+    });
+    expect(r.status).toBe("needs_user");
+    expect(run).not.toHaveBeenCalled();
+    expect(events.find((e) => e.type === "probe")).toMatchObject({ state: "unknown", detail: expect.stringContaining("没有可用探针") });
+  });
+
+  it("相同参数且探针确认未落地时才允许进入恢复闸门", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "已写入报告" }));
+    const write = {
+      ...mk("write_file", "local_write", run, "写入本地文件"),
+      probe: async () => ({ state: "not_applied" as const, detail: "报告尚未落地" }),
+    };
+    const step = { id: "s1", goal: "写入报告", tool: "write_file", args: { path: "report.md", content: "完成" } };
+    const previous = makeToolInvocation({ taskId: "task-same-args", stepId: "s1", attempt: 1, tool: write, args: step.args });
+    const { rt, events } = setup([write], { summary: ["恢复后总结完成"] }, { confirm: async () => true });
+    const r = await rt.run("写入报告", {
+      taskId: "task-same-args",
+      resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: previous.idempotencyKey }], nextStepIndex: 0 },
+    });
+    expect(r.status).toBe("completed");
+    expect(run).toHaveBeenCalledOnce();
+    expect(events.find((e) => e.type === "gate")).toMatchObject({ recovery: true, verdict: "confirm" });
+  });
+
+  it("跨重启账本确认副作用已经落地时跳过重复写入", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "不应再次写入" }));
+    const write = mk("write_file", "local_write", run, "写入本地文件");
+    const args = { path: "report.md", content: "完成" };
+    const invocation = makeToolInvocation({ taskId: "task-ledger", stepId: "s1", attempt: 1, tool: write, args });
+    const ledger = new Map<string, InvocationLedgerRecord>([[invocation.idempotencyKey, {
+      taskId: invocation.taskId,
+      stepId: invocation.stepId,
+      invocationId: invocation.invocationId,
+      idempotencyKey: invocation.idempotencyKey,
+      tool: invocation.tool,
+      argsDigest: invocation.argsDigest,
+      attempt: invocation.attempt,
+      state: "applied" as const,
+      artifacts: [{ kind: "file" as const, action: "modify" as const, path: "report.md", ok: true }],
+      detail: "上次进程已写入",
+      createdAt: 1,
+      updatedAt: 2,
+    }]]);
+    const { rt, events } = setup([write], { summary: ["恢复后总结完成"] }, {
+      ledger: {
+        get: async (key) => ledger.get(key) ?? null,
+        put: async (record) => { ledger.set(record.idempotencyKey, record); },
+      },
+    });
+    const step = { id: "s1", goal: "写入报告", tool: "write_file", args };
+    const r = await rt.run("写入报告", {
+      taskId: "task-ledger",
+      resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: invocation.idempotencyKey }], nextStepIndex: 0 },
+    });
+    expect(r.status).toBe("completed");
+    expect(run).not.toHaveBeenCalled();
+    expect(events.find((e) => e.type === "probe")).toMatchObject({ state: "applied", detail: "上次进程已写入", idempotencyKey: invocation.idempotencyKey });
+    expect(r.steps.at(-1)).toMatchObject({ status: "done", executionState: "applied", artifacts: [{ path: "report.md" }] });
+  });
+
+  it("故障窗口夹具在最终账本提交前中断，恢复探测会跳过已落地副作用", async () => {
+    let applied = false;
+    const calls: string[] = [];
+    const ledger = new Map<string, InvocationLedgerRecord>();
+    const claim = async (key: string, owner: string, now: number, ttlMs: number) => {
+      const old = ledger.get(key);
+      if (!old) return "missing" as const;
+      if (old.leaseOwner && old.leaseOwner !== owner && (old.leaseExpiresAt ?? 0) > now) return "busy" as const;
+      ledger.set(key, { ...old, leaseOwner: owner, leaseExpiresAt: now + ttlMs });
+      return "acquired" as const;
+    };
+    const put = async (record: InvocationLedgerRecord) => { ledger.set(record.idempotencyKey, record); };
+    const write = {
+      ...mk("write_file", "local_write", async () => {
+        calls.push("run");
+        applied = true;
+        return { ok: true, content: "已写入 report.md" };
+      }, "写入本地文件"),
+      probe: async () => applied
+        ? { state: "applied" as const, detail: "恢复探测确认 report.md 已落地", artifacts: [{ kind: "file" as const, action: "modify" as const, path: "report.md", ok: true }] }
+        : { state: "not_applied" as const, detail: "report.md 尚未落地" },
+    };
+    const step = { id: "s1", goal: "写入 report.md", tool: "write_file", args: { path: "report.md", content: "完成" } };
+    const fault = setup([write], { plan: [plan(step)] }, {
+      confirm: async () => true,
+      now: () => 100,
+      ledgerLeaseMs: 10,
+      ledger: { get: async (key) => ledger.get(key) ?? null, put, claim, renew: async () => true, release: async () => {} },
+      faultHooks: { onPoint: ({ point }) => { if (point === "after_tool_before_ledger_commit") throw new Error("simulated process stop"); } },
+    });
+    const interrupted = await fault.rt.run("写入 report.md", { taskId: "task-fault-window" });
+    expect(interrupted.status).toBe("failed");
+    expect(calls).toEqual(["run"]);
+    const key = "task-fault-window:s1:1";
+    const pending = [...ledger.values()].find((record) => record.invocationId === key);
+    expect(pending).toMatchObject({ state: "started", leaseOwner: expect.any(String) });
+
+    const recovery = setup([write], { summary: ["恢复后总结完成"] }, {
+      confirm: async () => true,
+      now: () => 111,
+      ledgerLeaseMs: 10,
+      ledger: { get: async (k) => ledger.get(k) ?? null, put, claim, renew: async () => true, release: async () => {} },
+    });
+    const resumed = await recovery.rt.run("写入 report.md", {
+      taskId: "task-fault-window",
+      resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: pending!.idempotencyKey }], nextStepIndex: 0 },
+    });
+    expect(resumed.status).toBe("completed");
+    expect(calls).toEqual(["run"]);
+    expect(recovery.events.find((event) => event.type === "probe")).toMatchObject({ state: "applied", detail: "恢复探测确认 report.md 已落地" });
+  });
+
+  it("另一个进程持有恢复租约时停止，避免两个实例同时执行副作用", async () => {
+    const run = vi.fn(async () => ({ ok: true, content: "不应执行" }));
+    const write = mk("write_file", "local_write", run, "写入本地文件");
+    const args = { path: "report.md", content: "完成" };
+    const invocation = makeToolInvocation({ taskId: "task-busy", stepId: "s1", attempt: 1, tool: write, args });
+    const ledger = new Map<string, InvocationLedgerRecord>([[invocation.idempotencyKey, {
+      taskId: invocation.taskId,
+      stepId: invocation.stepId,
+      invocationId: invocation.invocationId,
+      idempotencyKey: invocation.idempotencyKey,
+      tool: invocation.tool,
+      argsDigest: invocation.argsDigest,
+      attempt: invocation.attempt,
+      state: "unknown" as const,
+      artifacts: [],
+      leaseOwner: "other-process",
+      leaseExpiresAt: 10_000,
+      createdAt: 1,
+      updatedAt: 2,
+    }]]);
+    const { rt, events } = setup([write], { summary: ["不应总结"] }, {
+      now: () => 100,
+      ledger: {
+        get: async (key) => ledger.get(key) ?? null,
+        put: async (record) => { ledger.set(record.idempotencyKey, record); },
+        claim: async () => "busy",
+      },
+    });
+    const step = { id: "s1", goal: "写入报告", tool: "write_file", args };
+    const r = await rt.run("写入报告", {
+      taskId: "task-busy",
+      resume: { plan: { steps: [step], source: "llm" }, records: [{ step, status: "failed", attempts: 1, executionState: "unknown", idempotencyKey: invocation.idempotencyKey }], nextStepIndex: 0 },
+    });
+    expect(r.status).toBe("needs_user");
+    expect(run).not.toHaveBeenCalled();
+    expect(events.find((e) => e.type === "probe")).toMatchObject({ state: "unknown", detail: expect.stringContaining("另一个运行实例") });
+  });
+
+  it("长工具执行期间续租；租约续期失败时把成功响应降级为未知", async () => {
+    const run = vi.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 80));
+      return { ok: true, content: "工具返回成功" };
+    });
+    const write = mk("write_file", "local_write", run, "写入本地文件");
+    const ledger = new Map<string, InvocationLedgerRecord>();
+    const renew = vi.fn(async (_key: string, _owner: string, _now: number, _ttl: number) => true);
+    const { rt } = setup([write], { plan: [plan({ goal: "写入报告", tool: "write_file", args: { path: "report.md" } })] }, {
+      confirm: async () => true,
+      ledgerLeaseMs: 30,
+      ledger: {
+        get: async (key) => ledger.get(key) ?? null,
+        put: async (record) => { ledger.set(record.idempotencyKey, record); },
+        claim: async (key, owner, now, ttlMs) => {
+          const old = ledger.get(key);
+          if (!old) return "missing";
+          ledger.set(key, { ...old, leaseOwner: owner, leaseExpiresAt: now + ttlMs });
+          return "acquired";
+        },
+        renew,
+        release: async (key, owner) => {
+          const old = ledger.get(key);
+          if (old?.leaseOwner === owner) ledger.set(key, { ...old, leaseOwner: undefined, leaseExpiresAt: undefined });
+        },
+      },
+    });
+    const r = await rt.run("写入报告");
+    expect(r.status).toBe("completed");
+    expect(renew).toHaveBeenCalled();
+    expect(run).toHaveBeenCalledOnce();
+
+    const lostRun = vi.fn(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      return { ok: true, content: "远端可能已经写入" };
+    });
+    const lost = setup([mk("write_file", "local_write", lostRun, "写入本地文件")], { plan: [plan({ goal: "写入报告", tool: "write_file", args: { path: "lost.md" } })] }, {
+      confirm: async () => true,
+      ledgerLeaseMs: 30,
+      ledger: {
+        get: async (key) => ledger.get(key) ?? null,
+        put: async (record) => { ledger.set(record.idempotencyKey, record); },
+        claim: async (key, owner, now, ttlMs) => {
+          const old = ledger.get(key);
+          if (!old) return "missing";
+          ledger.set(key, { ...old, leaseOwner: owner, leaseExpiresAt: now + ttlMs });
+          return "acquired";
+        },
+        renew: async () => false,
+        release: async () => {},
+      },
+    });
+    const lostResult = await lost.rt.run("写入报告");
+    expect(lostResult.status).toBe("needs_user");
+    expect(lostResult.steps[0]).toMatchObject({ executionState: "unknown" });
   });
 
   it("用户拒绝则停止整个任务；没有确认渠道时默认拒绝", async () => {
@@ -180,6 +776,132 @@ describe("Agent 运行时", () => {
     const llm = routedLlm({ chain: [e("openai/m1"), e("openai/m2")] } as unknown as RouteDecision, async () => provider as never);
     expect(await llm({ purpose: "answer", messages: [{ role: "user", content: "hi" }] })).toMatchObject({ text: "ok", profileId: "openai/m2" });
     expect(models).toEqual(["m1", "m2"]);
+  });
+
+  it("routedLlm：answer 有 onDelta 时走 SSE，完整响应后才返回；规划类请求仍走 chat", async () => {
+    const e = (id: string): ChainEntry => ({
+      profileId: id,
+      provider: "openai",
+      stage: "primary",
+      score: 0,
+      breakdown: { capability: 0, quality: 0, cost: 0, latency: 0, availability: 1, total: 0 },
+      reason: "",
+    });
+    const calls: string[] = [];
+    const provider = {
+      chat: async (req: { model: string }) => {
+        calls.push(`chat:${req.model}`);
+        return { providerId: "openai", model: req.model, text: "规划 JSON", usage: null, finishReason: "stop" as const, latencyMs: 1 };
+      },
+      async *stream(req: { model: string }) {
+        calls.push(`stream:${req.model}`);
+        yield { type: "delta" as const, text: "流式" };
+        yield { type: "delta" as const, text: "回答" };
+        yield { type: "done" as const, response: { providerId: "openai", model: req.model, text: "流式回答", usage: null, finishReason: "stop" as const, latencyMs: 2 } };
+      },
+    };
+    const llm = routedLlm({ chain: [e("openai/m1")] } as unknown as RouteDecision, async () => provider as never);
+    const deltas: string[] = [];
+    const answer = await llm({ purpose: "answer", messages: [], onDelta: (d) => deltas.push(`${d.profileId}:${d.text}`) });
+    expect(answer).toMatchObject({ text: "流式回答", profileId: "openai/m1" });
+    expect(deltas).toEqual(["openai/m1:流式", "openai/m1:回答"]);
+    expect(calls).toEqual(["stream:m1"]);
+    await llm({ purpose: "plan", messages: [] });
+    expect(calls).toEqual(["stream:m1", "chat:m1"]);
+  });
+
+  it("Provider 声明不支持 SSE 时退回完整响应，不把能力缺口当成降级失败", async () => {
+    const e: ChainEntry = {
+      profileId: "openai/m1",
+      provider: "openai",
+      stage: "primary",
+      score: 0,
+      breakdown: { capability: 0, quality: 0, cost: 0, latency: 0, availability: 1, total: 0 },
+      reason: "",
+    };
+    const calls: string[] = [];
+    const provider = {
+      capabilities: { streaming: false, systemPrompt: true },
+      chat: async () => {
+        calls.push("chat");
+        return { providerId: "openai", model: "m1", text: "完整回答", usage: null, finishReason: "stop" as const, latencyMs: 1 };
+      },
+      async *stream() {
+        calls.push("stream");
+        yield { type: "done" as const, response: { providerId: "openai", model: "m1", text: "不应调用", usage: null, finishReason: "stop" as const, latencyMs: 1 } };
+      },
+    };
+    const llm = routedLlm({ chain: [e] } as unknown as RouteDecision, async () => provider as never);
+    const deltas: string[] = [];
+    await expect(llm({ purpose: "answer", messages: [], onDelta: (d) => deltas.push(d.text) })).resolves.toMatchObject({ text: "完整回答" });
+    expect(calls).toEqual(["chat"]);
+    expect(deltas).toEqual([]);
+  });
+
+  it("运行时拒绝声明不完整恢复契约的适配器，并沿链切换", async () => {
+    const entry = (profileId: string, provider: string): ChainEntry => ({
+      profileId,
+      provider,
+      stage: "fallback",
+      score: 0,
+      breakdown: { capability: 0, quality: 0, cost: 0, latency: 0, availability: 1, total: 0 },
+      reason: "",
+    });
+    const incomplete = {
+      capabilities: {
+        streaming: true,
+        systemPrompt: true,
+        recovery: { abortSignal: true, streamTerminal: false as const, partialOutput: false, normalizedErrors: true },
+      },
+      chat: async () => ({ providerId: "a", model: "m1", text: "不应调用", usage: null, finishReason: "stop" as const, latencyMs: 1 }),
+      async *stream() {
+        throw new Error("不应调用");
+      },
+    };
+    const good = {
+      chat: async () => ({ providerId: "b", model: "m2", text: "可恢复", usage: null, finishReason: "stop" as const, latencyMs: 1 }),
+    };
+    const llm = routedLlm(
+      { chain: [entry("a/m1", "a"), entry("b/m2", "b")] } as unknown as RouteDecision,
+      async (e) => (e.provider === "a" ? incomplete : good) as never,
+    );
+    await expect(llm({ purpose: "plan", messages: [] })).resolves.toMatchObject({ profileId: "b/m2", text: "可恢复" });
+  });
+
+  it("流式正文已经输出后中断：停止降级链并标记 partialOutput", async () => {
+    const e = (id: string, provider: string): ChainEntry => ({
+      profileId: id,
+      provider,
+      stage: "primary",
+      score: 0,
+      breakdown: { capability: 0, quality: 0, cost: 0, latency: 0, availability: 1, total: 0 },
+      reason: "",
+    });
+    let fallbackCalled = false;
+    const first = {
+      chat: async () => ({ providerId: "a", model: "m1", text: "", usage: null, finishReason: "stop" as const, latencyMs: 1 }),
+      async *stream() {
+        yield { type: "delta" as const, text: "已经输出" };
+        throw new ProviderError("network", "a");
+      },
+    };
+    const second = {
+      chat: async () => {
+        fallbackCalled = true;
+        return { providerId: "b", model: "m2", text: "不应静默拼接", usage: null, finishReason: "stop" as const, latencyMs: 1 };
+      },
+      async *stream() {
+        fallbackCalled = true;
+        yield { type: "done" as const, response: { providerId: "b", model: "m2", text: "不应静默拼接", usage: null, finishReason: "stop" as const, latencyMs: 1 } };
+      },
+    };
+    const llm = routedLlm(
+      { chain: [e("a/m1", "a"), e("b/m2", "b")] } as unknown as RouteDecision,
+      async (entry) => (entry.provider === "a" ? first : second) as never,
+    );
+    const err = await llm({ purpose: "answer", messages: [], onDelta: () => {} }).catch((x) => x);
+    expect(err).toMatchObject({ code: "route_exhausted", partialOutput: true });
+    expect(fallbackCalled).toBe(false);
   });
 
   it("routedLlm：超时先对同一模型重试一次；重试的中间记录不算降级，单独计数", async () => {

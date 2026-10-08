@@ -4,6 +4,7 @@ import type { AppError, AppInfo } from "@/lib/ipc";
 import type { Goal, GoalChange, GoalInput } from "@/decision/goal";
 import type { Project, ProjectInput, ProjectUsage } from "@/decision/project";
 import type { SessionInput, StoredSession, UsageCall } from "@/decision/session";
+import type { InvocationLedgerRecord, InvocationLeaseResult, RuntimeFaultPoint } from "@/agent/tool-contract";
 
 export type { Goal, GoalChange, GoalInput, Project, ProjectInput, ProjectUsage, SessionInput, StoredSession, UsageCall };
 
@@ -66,6 +67,13 @@ export interface ProxyResponse {
   status: number;
   body: string;
 }
+
+/** Tauri Channel envelope for unbuffered Provider SSE responses. */
+export type ProxyStreamEvent =
+  | { type: "headers"; status: number }
+  | { type: "chunk"; data: number[] }
+  | { type: "done" }
+  | { type: "error"; error: AppError };
 
 /** mcp.json 引用的密钥：只有「是否已提供」，没有值 */
 export interface McpRefStatus {
@@ -166,6 +174,8 @@ export interface SkillInput {
 }
 
 export interface McpHandlers {
+  /** 绑定这一次启动的事件；未指定时保留按服务器监听的行为。 */
+  connectionId?: string;
   onLine: (line: string) => void;
   onExit: (reason: string) => void;
 }
@@ -194,6 +204,8 @@ export interface Backend {
   deleteCustomProvider(id: string): Promise<void>;
 
   providerRequest(req: ProxyRequest): Promise<ProxyResponse>;
+  /** Optional raw response stream. Browser mock intentionally uses buffered providerRequest. */
+  providerStream?(req: ProxyRequest, signal?: AbortSignal): Promise<Response>;
 
   /** 内置文件服务器允许访问的目录：默认项（fixed）在前，用户加的在后 */
   fileRootsList(): Promise<FileRoot[]>;
@@ -201,15 +213,17 @@ export interface Backend {
   fileRootsAdd(path: string): Promise<FileRoot[]>;
   /** 移除一个用户加的目录；默认目录不能移除 */
   fileRootsRemove(path: string): Promise<FileRoot[]>;
+  /** 桌面端原生目录选择器；浏览器 mock 不提供，调用方应保留手填路径 */
+  pickDirectory?(defaultPath?: string): Promise<string | null>;
 
   /** MCP 登记表只读：服务器由用户在 mcp.json 里登记，界面不能添加或修改 */
   mcpList(): Promise<McpRegistry>;
   /** 先注册监听再启动进程，避免丢掉最早的输出；返回取消监听的函数 */
   onMcp(server: string, h: McpHandlers): Promise<() => void>;
   /** 只能按 ID 启动登记过的服务器；返回启动时生效的配置 */
-  mcpStart(server: string): Promise<McpServerView>;
-  mcpSend(server: string, line: string): Promise<void>;
-  mcpStop(server: string): Promise<boolean>;
+  mcpStart(server: string, connectionId?: string): Promise<McpServerView>;
+  mcpSend(server: string, line: string, connectionId?: string): Promise<void>;
+  mcpStop(server: string, connectionId?: string): Promise<boolean>;
   /** 只进不出；只能写 mcp.json 里引用了的钥匙串条目 */
   setMcpSecret(server: string, name: string, value: string): Promise<void>;
   deleteMcpSecret(server: string, name: string): Promise<void>;
@@ -256,6 +270,20 @@ export interface Backend {
   recordUsage(calls: readonly UsageCall[]): Promise<void>;
   /** created_at >= since 的调用记录，按时间先后 */
   listUsage(since: number): Promise<UsageCall[]>;
+
+  /** 工具调用账本：可选以兼容旧宿主；桌面端由 SQLite 迁移 6 提供。 */
+  getToolInvocation?(idempotencyKey: string): Promise<InvocationLedgerRecord | null>;
+  saveToolInvocation?(record: InvocationLedgerRecord): Promise<void>;
+  claimToolInvocation?(idempotencyKey: string, owner: string, now: number, ttlMs: number): Promise<InvocationLeaseResult>;
+  renewToolInvocation?(idempotencyKey: string, owner: string, now: number, ttlMs: number): Promise<boolean>;
+  releaseToolInvocation?(idempotencyKey: string, owner: string): Promise<void>;
+
+  /** QA 构建专用：返回环境变量选择的故障窗口；普通构建固定返回 null。 */
+  qaFaultPoint?(): Promise<RuntimeFaultPoint | null>;
+  /** QA 构建专用的隔离测试租约；普通构建固定返回 null。 */
+  qaLedgerLeaseMs?(): Promise<number | null>;
+  /** QA 构建专用：让 Tauri 进程在指定窗口终止；普通后端不提供。 */
+  qaFaultExit?(point: RuntimeFaultPoint): Promise<void>;
 
   /** 非敏感设置（路由偏好、能力矩阵覆盖等），JSON 字符串 */
   loadSetting(key: string): Promise<string | null>;

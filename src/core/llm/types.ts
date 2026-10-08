@@ -47,9 +47,26 @@ export type StreamEvent =
 
 export type ProviderKind = "openai" | "anthropic" | "openai-compatible";
 
+/**
+ * 自动路由依赖的恢复语义。字段保持可选是为了兼容旧的测试 Provider 和
+ * 第三方实现；正式注册的适配器必须在 official.ts 中声明对应契约。
+ */
+export interface ProviderRecoveryCapabilities {
+  /** 请求能够接收 AbortSignal，用户取消不会被错误地当成可重试故障。 */
+  abortSignal: boolean;
+  /** 流式协议有可验证的终止事件（例如 [DONE] 或 message_stop）。 */
+  streamTerminal: "sse_done" | "message_stop" | false;
+  /** 已输出正文后发生错误时，运行时能阻止拼接第二个模型的半截结果。 */
+  partialOutput: boolean;
+  /** HTTP、流内错误已经归一到 ProviderErrorCode。 */
+  normalizedErrors: boolean;
+}
+
 export interface ProviderCapabilities {
   streaming: boolean;
   systemPrompt: boolean;
+  /** 缺省表示旧实现未提供机器可检验的能力声明。 */
+  recovery?: ProviderRecoveryCapabilities;
 }
 
 export interface LLMProvider {

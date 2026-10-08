@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { FolderOpen, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toAppError } from "@/lib/ipc";
+import { getBackend } from "@/platform";
 import { useFileRoots } from "@/stores/file-roots";
 import { useMcp } from "@/stores/mcp";
 import { ResultNote } from "./controls";
@@ -15,11 +17,19 @@ export function FileRoots() {
   const builtin = useMcp((s) => s.registry?.servers.find((x) => x.builtin)?.id ?? null);
   const [value, setValue] = useState("");
   const [note, setNote] = useState<string | null>(null);
+  const [choosing, setChoosing] = useState(false);
 
   useEffect(() => void load(), [load]);
 
-  const restartBuiltin = async () => {
-    if (builtin) await restart(builtin);
+  const restartBuiltin = async (): Promise<string | null> => {
+    if (!builtin) return null;
+    try {
+      await restart(builtin);
+    } catch (e) {
+      return toAppError(e).message;
+    }
+    const connection = useMcp.getState().conns[builtin];
+    return connection?.status === "failed" ? connection.error ?? "内置文件服务器重启失败，请稍后重试" : null;
   };
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,8 +38,28 @@ export function FileRoots() {
     const err = await add(v);
     if (err) return setNote(err);
     setValue("");
+    setNote(await restartBuiltin());
+  };
+  const choose = async () => {
+    const picker = getBackend().pickDirectory;
+    if (!picker) {
+      setNote("浏览器模式没有系统文件夹选择器，请直接填写路径");
+      return;
+    }
+    setChoosing(true);
     setNote(null);
-    await restartBuiltin();
+    try {
+      const selected = await picker(value.trim() || undefined);
+      if (!selected) return;
+      const err = await add(selected);
+      if (err) return setNote(err);
+      setValue("");
+      setNote(await restartBuiltin());
+    } catch (e) {
+      setNote(toAppError(e).message);
+    } finally {
+      setChoosing(false);
+    }
   };
 
   return (
@@ -55,7 +85,7 @@ export function FileRoots() {
                   onClick={async () => {
                     const err = await remove(r.path);
                     setNote(err);
-                    if (!err) await restartBuiltin();
+                    if (!err) setNote(await restartBuiltin());
                   }}
                 >
                   <Trash2 aria-hidden />
@@ -78,6 +108,10 @@ export function FileRoots() {
         <Button type="submit" size="sm" variant="secondary" disabled={!value.trim() || busy !== null}>
           <Plus aria-hidden />
           加入
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={() => void choose()} disabled={choosing || busy !== null}>
+          <FolderOpen aria-hidden />
+          {choosing ? "选择中…" : "选择…"}
         </Button>
       </form>
       {note && <ResultNote result={{ ok: false, message: note }} />}

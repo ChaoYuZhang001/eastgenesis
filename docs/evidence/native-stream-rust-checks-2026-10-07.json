@@ -1,0 +1,111 @@
+{
+  "generated_at_utc": "2026-10-06T21:17:44.485628+00:00",
+  "evidence_scope": "Compiled current Rust production implementation and real local TCP fixtures. Not native app IPC, external provider, or release proof.",
+  "implementation": {
+    "transport": "async reqwest 0.12.28 send/chunk",
+    "cancellation": "sticky AtomicBool + Notify notify_one; std::future::poll_fn prioritizes cancel, absolute deadline, then network",
+    "read_timeout_seconds": 60,
+    "total_timeout_seconds": 180,
+    "connect_timeout_seconds": 15,
+    "redirect_policy": "none",
+    "max_response_bytes": 16777216,
+    "incremental_redaction": "existing PlannedRequest::scrub_stream, no eg-core changes",
+    "terminal_cancellation": "existing successful Done semantics"
+  },
+  "registry": {
+    "capacity_records": 256,
+    "pending_and_finished_ttl_seconds": 180,
+    "precancel_consumed_once": true,
+    "active_and_recent_finished_id_reuse": "rejected duplicate_stream_id",
+    "cleanup_identity": "Arc::ptr_eq with RAII cleanup, including plan_request error/future drop",
+    "capacity_behavior": "fails closed; cannot register untracked new streams",
+    "boundary": "Existing frontend generates unique UUID stream IDs. Reuse after tombstone TTL cannot distinguish arbitrarily late old cancellation without a protocol generation token."
+  },
+  "loopback_assertions": {
+    "worker_return_and_peer_close_limit_ms": 500,
+    "cancel_cases": [
+      "pending_headers",
+      "idle_body",
+      "after_first_partial_chunk"
+    ],
+    "cancel_test_read_budget_ms": 800,
+    "cancel_test_total_budget_ms": 1000,
+    "fixture_limit_ms": 2000,
+    "fixture_close_proof": "only actual EOF/ConnectionReset/ConnectionAborted sends observation; fixture deadline cleanup never counts",
+    "signal_before_await": "no request connection and no emitted events",
+    "absolute_total_cap": "120 ms cap under 800 ms read budget in both header/body stalls",
+    "valid_slow_stream": "five 30 ms chunks outlive 80 ms read budget and succeed within 500 ms total",
+    "error_preservation": [
+      "HTTP 503 status/body",
+      "network error with prior partial output",
+      "idle timeout after headers including delayed callback"
+    ]
+  },
+  "results": {
+    "ordinary": {
+      "passed": 13,
+      "failed": 0,
+      "duration_seconds": 0.72,
+      "log_path": "/tmp/eg-native-stream-rust-ordinary-20261007.log",
+      "cancellation_worker_and_peer_timings": [
+        {
+          "worker_integer_ms": 0,
+          "peer_close_integer_ms": 0,
+          "precision": "integer truncation; zero means less than 1 ms"
+        },
+        {
+          "worker_integer_ms": 0,
+          "peer_close_integer_ms": 0,
+          "precision": "integer truncation; zero means less than 1 ms"
+        },
+        {
+          "worker_integer_ms": 0,
+          "peer_close_integer_ms": 0,
+          "precision": "integer truncation; zero means less than 1 ms"
+        }
+      ]
+    },
+    "qa_faults": {
+      "passed": 13,
+      "failed": 0,
+      "duration_seconds": 0.71,
+      "log_path": "/tmp/eg-native-stream-rust-qa-20261007.log",
+      "cancellation_worker_and_peer_timings": [
+        {
+          "worker_integer_ms": 0,
+          "peer_close_integer_ms": 0,
+          "precision": "integer truncation; zero means less than 1 ms"
+        },
+        {
+          "worker_integer_ms": 0,
+          "peer_close_integer_ms": 0,
+          "precision": "integer truncation; zero means less than 1 ms"
+        },
+        {
+          "worker_integer_ms": 0,
+          "peer_close_integer_ms": 0,
+          "precision": "integer truncation; zero means less than 1 ms"
+        }
+      ]
+    },
+    "core_provider": {
+      "passed": 12,
+      "failed": 0,
+      "duration_seconds": 0.0,
+      "log_path": "/tmp/eg-native-stream-core-provider-20261007.log"
+    }
+  },
+  "production_prefix_sha256": "d3e940bbef41e10b59183e3840c676c1f74a1a6adb450bcbe9c122f2ec153c28",
+  "files": {
+    "src-tauri/src/net.rs": "423c2053ec7abcceb31313d87ed6cad896cc9d1973a8e1f52c8ab671c4ba2d8b",
+    "src-tauri/src/lib.rs": "96795246773ea920b2f86901453cf48ee887c6c57b4f3d3895ce135e9167d60c",
+    "src-tauri/Cargo.toml": "0c08b9914244a5b968625c6a7352d787d445eb5949ed38ec4c3aad0127451f4c",
+    "Cargo.lock": "62eda30b53690c55df54caba21f266f9931074d7f9279380ef9520a41cf9da1c"
+  },
+  "remaining_owner_root": [
+    "Full workspace ordinary and qa-faults suites",
+    "Build fresh native package",
+    "Native IPC/socket cancellation acceptance",
+    "Public hygiene/release/CI gates"
+  ]
+}

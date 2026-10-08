@@ -1,0 +1,494 @@
+{
+  "runId": 37544262739,
+  "headSha": "30d30c5f7488a5b8ebd1f511a879215eaa8f6945",
+  "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37544262739",
+  "createdAtUtc": "2026-10-06T23:02:23Z",
+  "capturedAtUtc": "2026-10-06T23:26:07.162175+00:00",
+  "status": "completed",
+  "conclusion": "failure",
+  "macos": {
+    "jobId": 112544363424,
+    "conclusion": "success",
+    "completedAtUtc": "2026-10-06T23:15:52Z",
+    "ordinaryDesktopRustPassed": 31,
+    "qaDesktopRustPassed": 30,
+    "backendRustPassedPerMode": 90,
+    "slowAndIdleAndTotalDeadlineTestsPassed": true,
+    "packagedRunnerChecksPassed": 24,
+    "packagedRunnerChecksTotal": 24,
+    "webViewDomStatus": "not_run",
+    "webViewDomReason": "tauri-driver macOS unsupported",
+    "sourceBinding": {
+      "manifest": "macos-run-binding-manifest.json",
+      "manifestSha256": "70ef7f5347975bd130f3908bf19ac63fccc6fe1a352f2b216c24444faa1744c6",
+      "sourceLogSha256": "002e2e406016efc61a5cc39f2aafdf398ad8812ee434c59841ad7a2c6452d238",
+      "sourceReports": [
+        {
+          "name": "macos-desktop-runner-evidence.json",
+          "kind": "desktop-runner-evidence",
+          "passed": true,
+          "sourceLineStart": 3030,
+          "sourceLineEnd": 3073,
+          "bytes": 1206,
+          "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e",
+          "checksTotal": 24,
+          "checksTrue": 24
+        }
+      ]
+    }
+  },
+  "ubuntu": {
+    "jobId": 112544363635,
+    "conclusion": "success",
+    "completedAtUtc": "2026-10-06T23:19:17Z",
+    "debExtractChecksPassed": 6,
+    "dpkgChecksPassed": 10,
+    "runnerChecksPassed": 33,
+    "webDriverScenariosPassed": 4,
+    "packages": [
+      {
+        "role": "baseline",
+        "name": "east-genesis-desktop",
+        "version": "0.1.0",
+        "architecture": "amd64",
+        "bytes": 6676778
+      },
+      {
+        "role": "upgrade",
+        "name": "east-genesis-desktop",
+        "version": "0.1.1",
+        "architecture": "amd64",
+        "bytes": 6676768
+      }
+    ],
+    "install": {
+      "mode": "dpkg-system",
+      "disposableRunner": true,
+      "isolatedUserData": true,
+      "systemInstallAttempted": true,
+      "systemPackageDatabaseChanged": true,
+      "cleanupVerified": true,
+      "database": {
+        "schemaVersion": 7,
+        "toolInvocations": true,
+        "sessionSentinel": true
+      },
+      "launches": [
+        {
+          "version": "0.1.0",
+          "schemaVersion": 7,
+          "installedProcessIdentity": true,
+          "stableProcessWindowMs": 4000,
+          "controlledCleanup": true
+        },
+        {
+          "version": "0.1.1",
+          "schemaVersion": 7,
+          "installedProcessIdentity": true,
+          "stableProcessWindowMs": 4000,
+          "controlledCleanup": true
+        }
+      ]
+    },
+    "nativeIpcTiming": [
+      {
+        "scenario": "idle-cancel",
+        "passed": true,
+        "nativeIpcTimingMeasurement": {
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "interpretation": "native IPC callback arrival at the WebView; body bytes can include SSE metadata; not model first token or first paint",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 70,
+              "firstBodyBytesLatencyMs": 71,
+              "transportTerminalLatencyMs": 413,
+              "transportTerminalKind": "done"
+            }
+          ]
+        },
+        "nativeIpcTimingVerified": null
+      },
+      {
+        "scenario": "slow-first-token",
+        "passed": true,
+        "nativeIpcTimingMeasurement": {
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "interpretation": "native IPC callback arrival at the WebView; body bytes can include SSE metadata; not model first token or first paint",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 71,
+              "firstBodyBytesLatencyMs": 367,
+              "transportTerminalLatencyMs": 980,
+              "transportTerminalKind": "done"
+            }
+          ]
+        },
+        "nativeIpcTimingVerified": null
+      },
+      {
+        "scenario": "staged",
+        "passed": true,
+        "nativeIpcTimingMeasurement": {
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "interpretation": "native IPC callback arrival at the WebView; body bytes can include SSE metadata; not model first token or first paint",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 76,
+              "firstBodyBytesLatencyMs": 113,
+              "transportTerminalLatencyMs": 727,
+              "transportTerminalKind": "done"
+            }
+          ]
+        },
+        "nativeIpcTimingVerified": null
+      },
+      {
+        "scenario": "truncated",
+        "passed": true,
+        "nativeIpcTimingMeasurement": {
+          "source": "tauri_debug_callback_map_arrival",
+          "origin": "before_webdriver_click_command",
+          "interpretation": "native IPC callback arrival at the WebView; body bytes can include SSE metadata; not model first token or first paint",
+          "performanceBaseline": false,
+          "status": "verified",
+          "channels": [
+            {
+              "ordinal": 1,
+              "status": "verified",
+              "headersLatencyMs": 67,
+              "firstBodyBytesLatencyMs": 68,
+              "transportTerminalLatencyMs": 82,
+              "transportTerminalKind": "done"
+            }
+          ]
+        },
+        "nativeIpcTimingVerified": null
+      }
+    ],
+    "timingBoundary": "per-synthetic-scenario n=1; callback arrival before click command origin; body bytes may include SSE metadata; no performance baseline or real provider evidence",
+    "sourceBinding": {
+      "manifest": "ubuntu-run-binding-manifest.json",
+      "manifestSha256": "b389a66896a34db45ca5788a17e6c8fada15549eb476d72b6c846f306f6ac711",
+      "sourceLogSha256": "84004365d9e5edc28c0db4a3f9c6be1003bf051557ef8dee4e060456ab689ca0",
+      "sourceReports": [
+        {
+          "name": "ubuntu-desktop-install-smoke.json",
+          "kind": "desktop-install-smoke",
+          "passed": true,
+          "sourceLineStart": 4626,
+          "sourceLineEnd": 4685,
+          "bytes": 1683,
+          "sha256": "d97c0787c0900106e3deafaebe1db2041690545e72d7ba2c328254b8759fb8b0",
+          "checksTotal": 6,
+          "checksTrue": 6
+        },
+        {
+          "name": "ubuntu-desktop-linux-upgrade-smoke.json",
+          "kind": "desktop-linux-upgrade-smoke",
+          "passed": true,
+          "sourceLineStart": 4732,
+          "sourceLineEnd": 4811,
+          "bytes": 2088,
+          "sha256": "71d63d5f6c23d17116208f0f8a3c8cafc3160fd606dfb5674bef5511de5eae09",
+          "checksTotal": 10,
+          "checksTrue": 10
+        },
+        {
+          "name": "ubuntu-desktop-runner-evidence.json",
+          "kind": "desktop-runner-evidence",
+          "passed": true,
+          "sourceLineStart": 4844,
+          "sourceLineEnd": 4896,
+          "bytes": 1470,
+          "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde",
+          "checksTotal": 33,
+          "checksTrue": 33
+        }
+      ]
+    }
+  },
+  "windows": {
+    "runId": 37544262739,
+    "headSha": "30d30c5f7488a5b8ebd1f511a879215eaa8f6945",
+    "jobId": 112544363612,
+    "jobConclusion": "failure",
+    "jobCompletedAtUtc": "2026-10-06T23:24:06Z",
+    "sourceReport": {
+      "name": "windows-desktop-windows-install-smoke.json",
+      "bytes": 2544,
+      "sha256": "74d1b99d7d003a346c84b6f4179ff3ef06b1d777673e12d5cf06886cf83de950"
+    },
+    "passed": false,
+    "errors": [
+      "database_timeout"
+    ],
+    "startupDiagnostics": [
+      {
+        "cycle": 1,
+        "outcome": "failed",
+        "failureStage": "database_timeout",
+        "elapsedMs": 34371,
+        "stableWindowPassed": true,
+        "databaseExists": false,
+        "schemaProbeAttempts": 0,
+        "schemaProbeFailures": 0,
+        "schemaProbeState": "not_attempted",
+        "lastProbeFailureStage": null,
+        "rootProcessAlive": true,
+        "rootWindowPresent": true,
+        "jobActiveProcessCount": 7
+      }
+    ],
+    "payloadBinding": {
+      "strategy": "tauri_cli_2_12_0_nsis_bundle_type_patch",
+      "cliVersion": "2.12.0",
+      "sourceSha256": "8c6dc40e4cd67646563b6ab1ed55df0f7e9408385b6d8a40da6876f6ef9e2a56",
+      "expectedNsisSha256": "d688f88f4a26c87fac2fce3d3b5ce47c88a57d548ac8a16d1f6e4c3b246a74dd",
+      "installedSha256": "d688f88f4a26c87fac2fce3d3b5ce47c88a57d548ac8a16d1f6e4c3b246a74dd",
+      "repairedSha256": null
+    },
+    "installAttempts": {
+      "install": true,
+      "reinstall": false,
+      "uninstall": true
+    },
+    "launchCount": 0,
+    "checks": {
+      "hostedRunner": true,
+      "noExistingInstallation": true,
+      "sourceBinaryIsolationProbe": true,
+      "webView2Present": true,
+      "nsisInstall": true,
+      "installedPayload": true,
+      "installedRegistry": true,
+      "nsisUninstall": true,
+      "installedBinaryRemoved": true,
+      "uninstallRegistryRemoved": true
+    },
+    "stages": [
+      "hostedRunner",
+      "noExistingInstallation",
+      "webView2Present",
+      "sourceBinaryIsolationProbe",
+      "nsisInstall",
+      "installedPayload",
+      "installedRegistry",
+      "nsisUninstall",
+      "installedBinaryRemoved",
+      "uninstallRegistryRemoved"
+    ],
+    "sourceBinding": {
+      "manifest": "windows-run-binding-manifest.json",
+      "manifestSha256": "57032c09fb6e66ff2616b36c07c16920707e211b6d11d44c561d788a61355e42",
+      "sourceLogSha256": "55e1013dd1c7a498db9f3a8304c7a3db32e46a1e71b92686a8589375f6e25adc",
+      "sourceReports": [
+        {
+          "name": "windows-desktop-windows-install-smoke.json",
+          "kind": "desktop-windows-install-smoke",
+          "passed": false,
+          "sourceLineStart": 3088,
+          "sourceLineEnd": 3175,
+          "bytes": 2544,
+          "sha256": "74d1b99d7d003a346c84b6f4179ff3ef06b1d777673e12d5cf06886cf83de950",
+          "checksTotal": 10,
+          "checksTrue": 10
+        }
+      ]
+    }
+  },
+  "artifactMetadata": [
+    {
+      "id": 11450662994,
+      "name": "eastgenesis-desktop-Windows",
+      "size_in_bytes": 12171232,
+      "expired": false
+    },
+    {
+      "id": 11450521226,
+      "name": "eastgenesis-desktop-macOS",
+      "size_in_bytes": 13926379,
+      "expired": false
+    },
+    {
+      "id": 11450407378,
+      "name": "eastgenesis-desktop-Linux",
+      "size_in_bytes": 228085063,
+      "expired": false
+    },
+    {
+      "id": 11449952935,
+      "name": "eastgenesis-webdriver-diagnostics-Linux",
+      "size_in_bytes": 6819,
+      "expired": false
+    }
+  ],
+  "scope": {
+    "sourceEdited": false,
+    "ciDispatched": false,
+    "largeDesktopArtifactsDownloaded": false,
+    "smallDiagnosticsArchiveDownloadedBytes": 6819,
+    "privateProviderConfigReadOrCalled": false
+  },
+  "schemaVersion": 1,
+  "kind": "immutable-three-platform-ci-summary",
+  "rootVerifiedAtUtc": "2026-10-06T23:28:36.872300+00:00",
+  "captureBinding": {
+    "indexSha256": "7acb3752dabd6d67f63a2e4f11447b3108bdde47750892d9dc23630766e33aca",
+    "fileCount": 25,
+    "files": [
+      {
+        "name": "artifacts-metadata.json",
+        "bytes": 721,
+        "sha256": "c306b10be1d23fb2306a2937f11b16c79afb081be8797e8ae5c72637c8c82528"
+      },
+      {
+        "name": "final-run-snapshot.json",
+        "bytes": 32500,
+        "sha256": "fee79bb0dc9bd65cbf937bb87750f42c8b361bdf34489421a1ae1beb567a6c8a"
+      },
+      {
+        "name": "linux-webdriver-diagnostics.zip",
+        "bytes": 6819,
+        "sha256": "f7cbf342b6bafc056e82952ccf5f4d17f8aecd9c32bcdc34cceda0c8d83b34b2"
+      },
+      {
+        "name": "macos-desktop-runner-evidence.json",
+        "bytes": 1206,
+        "sha256": "9594b9b618d634b1daef048b24b03cdaffb43385caebc196044235e7b22de08e"
+      },
+      {
+        "name": "macos-job-112544363424.log",
+        "bytes": 260518,
+        "sha256": "002e2e406016efc61a5cc39f2aafdf398ad8812ee434c59841ad7a2c6452d238"
+      },
+      {
+        "name": "macos-job-api-metadata.json",
+        "bytes": 7792,
+        "sha256": "6590c61bec1ad36c1e7db39e52e6b3674b7b0bdc4e47257bb96edb2837e1b1b6"
+      },
+      {
+        "name": "macos-run-binding-manifest.json",
+        "bytes": 4632,
+        "sha256": "70ef7f5347975bd130f3908bf19ac63fccc6fe1a352f2b216c24444faa1744c6"
+      },
+      {
+        "name": "public-evidence-summary.json",
+        "bytes": 8579,
+        "sha256": "65b380de6aa7c5e652f6f39ee55415d2f8164d1d11c7636f7208608b17c5cab1"
+      },
+      {
+        "name": "ubuntu-desktop-install-smoke.json",
+        "bytes": 1683,
+        "sha256": "d97c0787c0900106e3deafaebe1db2041690545e72d7ba2c328254b8759fb8b0"
+      },
+      {
+        "name": "ubuntu-desktop-linux-upgrade-smoke.json",
+        "bytes": 2088,
+        "sha256": "71d63d5f6c23d17116208f0f8a3c8cafc3160fd606dfb5674bef5511de5eae09"
+      },
+      {
+        "name": "ubuntu-desktop-runner-evidence.json",
+        "bytes": 1470,
+        "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde"
+      },
+      {
+        "name": "ubuntu-job-112544363635.log",
+        "bytes": 422388,
+        "sha256": "84004365d9e5edc28c0db4a3f9c6be1003bf051557ef8dee4e060456ab689ca0"
+      },
+      {
+        "name": "ubuntu-job-api-metadata.json",
+        "bytes": 7794,
+        "sha256": "11c78d36962e2e284f1a0159381f55197cb5b625a9e069c4ca8c1cc68d36a00d"
+      },
+      {
+        "name": "ubuntu-native-ipc-timing-fixed-summary.json",
+        "bytes": 3362,
+        "sha256": "85a85076f40707cd3fc57ac28a1e5e8c0e7713bc800dd763bedb4dfb23105048"
+      },
+      {
+        "name": "ubuntu-run-binding-manifest.json",
+        "bytes": 7039,
+        "sha256": "b389a66896a34db45ca5788a17e6c8fada15549eb476d72b6c846f306f6ac711"
+      },
+      {
+        "name": "ubuntu-webdriver-quality-idle-cancel.json",
+        "bytes": 1837,
+        "sha256": "f6fa436a9064dd6e7e19226c030b5ea60ff99e79a0c6fc42431c34cb2087625a"
+      },
+      {
+        "name": "ubuntu-webdriver-quality-slow-first-token.json",
+        "bytes": 2123,
+        "sha256": "46a4e439ec7390d98ca6c417e253822c72631b3ccb8914954ce745af13634c71"
+      },
+      {
+        "name": "ubuntu-webdriver-quality-staged.json",
+        "bytes": 2111,
+        "sha256": "892477409014baea51b09af3a9c2dd54f83dc00971a9f41ae3422fa403cae420"
+      },
+      {
+        "name": "ubuntu-webdriver-quality-truncated.json",
+        "bytes": 2128,
+        "sha256": "9e27f18cdf37472e6598ebc2ba03a498e6452ade18e683d5d87d66cba64e8312"
+      },
+      {
+        "name": "ubuntu-webdriver-quality.json",
+        "bytes": 11407,
+        "sha256": "bc4c00b96858eeea6b6cef02486e8953d2120c82a0f87b334f1151a70ba1b486"
+      },
+      {
+        "name": "windows-desktop-windows-install-smoke.json",
+        "bytes": 2544,
+        "sha256": "74d1b99d7d003a346c84b6f4179ff3ef06b1d777673e12d5cf06886cf83de950"
+      },
+      {
+        "name": "windows-job-112544363612.log",
+        "bytes": 274602,
+        "sha256": "55e1013dd1c7a498db9f3a8304c7a3db32e46a1e71b92686a8589375f6e25adc"
+      },
+      {
+        "name": "windows-job-api-metadata.json",
+        "bytes": 7796,
+        "sha256": "a178532d6601a55b0510d4afe90553c27c1aa0c6b02383207dd5e65ab90ee59c"
+      },
+      {
+        "name": "windows-run-binding-manifest.json",
+        "bytes": 4695,
+        "sha256": "57032c09fb6e66ff2616b36c07c16920707e211b6d11d44c561d788a61355e42"
+      },
+      {
+        "name": "windows-startup-diagnostics-fixed-summary.json",
+        "bytes": 2034,
+        "sha256": "10d49554359e42c3204a42dae9aea98dc172cdddf49f3c23ba6783763a93a89e"
+      }
+    ],
+    "allHashesVerified": true,
+    "jobApiAndRunHeadVerified": true
+  },
+  "evidenceBoundary": {
+    "newModelDiscoveryCodeCovered": false,
+    "realProviders": false,
+    "productionSchemaMigration": false,
+    "signingAndNotarization": false,
+    "windowsDatabaseCreated": false,
+    "windowsSecondNsisCycle": false,
+    "fullThreePlatformPerformanceBaseline": false,
+    "windowsFailureRootCause": "unverified",
+    "completedLaunchLedgerEmptyDoesNotMeanNoLaunchDispatch": true
+  }
+}

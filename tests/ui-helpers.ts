@@ -42,7 +42,7 @@ export function resetStores(backend: Backend = createMockBackend()): Backend {
     error: null,
   });
   useTasks.setState({ tasks: [], activeId: null });
-  useChat.setState({ sessions: [], activeId: null, draft: "", files: [], lock: null, permission: "confirm", multi: false, preference: null, mode: "quick", workdir: null, servers: null, query: "" });
+  useChat.setState({ sessions: [], activeId: null, draft: "", files: [], lock: null, permission: "confirm", multi: false, preference: null, mode: "quick", workdir: null, servers: null, surfaceHint: null, query: "" });
   useMcp.setState({ registry: null, loadError: null, conns: {} });
   useMemory.setState({ loaded: false, items: [], error: null });
   useSkills.setState({ loaded: false, items: [], error: null });

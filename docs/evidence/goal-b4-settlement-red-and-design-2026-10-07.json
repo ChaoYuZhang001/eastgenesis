@@ -1,0 +1,66 @@
+{
+  "kind": "verified_full_goal_original_red_and_candidate_design",
+  "createdAt": "2026-10-07T07:03:31.132994+00:00",
+  "expectedBase": "b4cfd3aa37a5dd6804444fd0bbe90187d61f39fe",
+  "fixtureRoot": "/tmp/eastgenesis-goal-settlement-b4-20261007",
+  "test": "/tmp/eastgenesis-goal-settlement-b4-20261007/base/tests/goal-settlement-recovery.test.ts",
+  "testSha256": "1bbd36a8e0efdf2da299ea6dffc3ec9d1ba39c378d8538760aa8b4d6cabeac63",
+  "sourceFileCount": 754,
+  "runs": [
+    {
+      "label": "red-v1",
+      "command": [
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "tests/goal-settlement-recovery.test.ts",
+        "--minWorkers=2",
+        "--maxWorkers=2",
+        "-t",
+        "完整 Goal："
+      ],
+      "startedAt": "2026-10-07T06:58:06.896432+00:00",
+      "endedAt": "2026-10-07T06:58:10.039623+00:00",
+      "exitCode": 1,
+      "sourceUnchanged": true,
+      "repositoryUnchanged": true,
+      "rawLog": "/tmp/eastgenesis-goal-settlement-b4-20261007/base-red-v1.log",
+      "rawLogSha256": "5e453df208ca6b06662eb0fbd784ec883883036e26a6c1adfec216fb76fa7de9",
+      "boundReport": "/tmp/eastgenesis-goal-settlement-b4-20261007/base-red-v1.json",
+      "boundReportSha256": "386f8cbe518470f515b58a5831a3b4c0fdd9979a2cd9d60da44674a6dee64e28"
+    },
+    {
+      "label": "compatibility-v1",
+      "command": [
+        "pnpm",
+        "exec",
+        "vitest",
+        "run",
+        "tests/goal-settlement-recovery.test.ts",
+        "--minWorkers=2",
+        "--maxWorkers=2",
+        "-t",
+        "Goal 执行失败保留原轮"
+      ],
+      "startedAt": "2026-10-07T06:58:52.820437+00:00",
+      "endedAt": "2026-10-07T06:58:55.598601+00:00",
+      "exitCode": 0,
+      "sourceUnchanged": true,
+      "repositoryUnchanged": true,
+      "rawLog": "/tmp/eastgenesis-goal-settlement-b4-20261007/base-compatibility-v1.log",
+      "rawLogSha256": "a0690a1a41a2b5fc406a8c132053ad2d49782a0b5a8c5500af32023b463ff085",
+      "boundReport": "/tmp/eastgenesis-goal-settlement-b4-20261007/base-compatibility-v1.json",
+      "boundReportSha256": "71f7f0e34d561564f5dc2558edf61707feace3a1998b2ee0d3a389e89e1da7b4"
+    }
+  ],
+  "redTestsFailed": 3,
+  "existingCompatibilityTestsPassed": 4,
+  "design": "/tmp/eastgenesis-goal-settlement-b4-20261007/candidate-design.md",
+  "designSha256": "55f8080a05c653eba06949f8f66d16d9bfc4656385865aabd3b1ef8cb0b01807",
+  "candidateImplemented": false,
+  "repoModified": false,
+  "gitMutated": false,
+  "paidProviderUsed": false,
+  "nativeLaunched": false
+}

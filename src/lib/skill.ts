@@ -98,7 +98,10 @@ export function stepsFromEvents(events: readonly AgentEvent[]): SkillStep[] {
     if (e.type === "step_start") steps.set(e.step.id, { goal: e.step.goal, tool: e.step.tool, state: "running" });
     else if (e.type === "tool_result") mark(e.step.id, e.ok ? "done" : "failed");
     else if ((e.type === "confirm" && !e.approved) || (e.type === "gate" && e.verdict === "deny") || e.type === "recover") mark(e.step.id, "failed");
-    else if (e.type === "reflect" && e.step && steps.get(e.step.id)?.state === "running") mark(e.step.id, "done");
+    else if (e.type === "reflect" && e.step) {
+      if (e.accepted === false) mark(e.step.id, "failed");
+      else if (e.accepted === true || steps.get(e.step.id)?.state === "running") mark(e.step.id, "done");
+    }
     else if (e.type === "run_end") for (const s of steps.values()) if (s.state === "running") s.state = e.status === "completed" ? "done" : "failed";
   }
   return [...steps.values()].filter((s) => s.state === "done").map((s) => ({ goal: s.goal.slice(0, MAX_STEP_GOAL), tool: s.tool }));
@@ -169,7 +172,10 @@ function doneIds(events: readonly AgentEvent[]): string[] {
     if (e.type === "step_start") state.set(e.step.id, "running");
     else if (e.type === "tool_result") mark(e.step.id, e.ok ? "done" : "failed");
     else if ((e.type === "confirm" && !e.approved) || (e.type === "gate" && e.verdict === "deny") || e.type === "recover") mark(e.step.id, "failed");
-    else if (e.type === "reflect" && e.step && state.get(e.step.id) === "running") mark(e.step.id, "done");
+    else if (e.type === "reflect" && e.step) {
+      if (e.accepted === false) mark(e.step.id, "failed");
+      else if (e.accepted === true || state.get(e.step.id) === "running") mark(e.step.id, "done");
+    }
     else if (e.type === "run_end") for (const [id, s] of state) if (s === "running") state.set(id, e.status === "completed" ? "done" : "failed");
   }
   return [...state].filter(([, s]) => s === "done").map(([id]) => id);

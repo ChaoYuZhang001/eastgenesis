@@ -1,15 +1,16 @@
 import { useId, useState, type FormEvent } from "react";
-import { Plus, X } from "lucide-react";
+import { FolderOpen, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Input, Select, Textarea } from "@/components/ui/input";
-import { MAX_PROJECT_DESC, MAX_PROJECT_NAME, MAX_INSTRUCTIONS, type Project } from "@/decision/project";
+import { MAX_PROJECT_DESC, MAX_PROJECT_NAME, MAX_INSTRUCTIONS, normalizeFolders, type Project } from "@/decision/project";
 import type { Preference } from "@/decision";
 import { PREFERENCE_LABEL } from "@/lib/sidebar-rows";
+import { toAppError } from "@/lib/ipc";
+import { getBackend } from "@/platform";
 import { useProjects } from "@/stores/projects";
 
 // 新建和编辑共用（docs/UI_LAYOUT_V3.md 2.5）。保存失败时，把 store 返回的中文原文显示出来，不另起文案。
-// 上下文文件夹：桌面端的系统文件夹对话框需要 tauri-plugin-dialog，这里先手填绝对路径（以 / 或 ~/ 开头），由 normalizeFolders 校验。
 export function ProjectDialog({ project, onClose }: { project: Project | null; onClose: () => void }) {
   const save = useProjects((s) => s.save);
   const ids = { name: useId(), desc: useId(), ins: useId(), pref: useId(), folder: useId(), err: useId() };
@@ -21,6 +22,7 @@ export function ProjectDialog({ project, onClose }: { project: Project | null; o
   const [folder, setFolder] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [choosing, setChoosing] = useState(false);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -34,6 +36,26 @@ export function ProjectDialog({ project, onClose }: { project: Project | null; o
     const f = folder.trim();
     if (f && !folders.includes(f)) setFolders([...folders, f]);
     setFolder("");
+  };
+  const chooseFolder = async () => {
+    const picker = getBackend().pickDirectory;
+    if (!picker) {
+      setError("浏览器模式没有系统文件夹选择器，请直接填写路径");
+      return;
+    }
+    setChoosing(true);
+    setError(null);
+    try {
+      const selected = await picker(folder.trim() || folders.at(-1));
+      if (!selected) return;
+      const [path] = normalizeFolders([selected]);
+      if (path && !folders.includes(path)) setFolders([...folders, path]);
+      setFolder("");
+    } catch (x) {
+      setError(toAppError(x).message);
+    } finally {
+      setChoosing(false);
+    }
   };
 
   return (
@@ -100,6 +122,10 @@ export function ProjectDialog({ project, onClose }: { project: Project | null; o
             <Button type="button" size="sm" variant="outline" className="h-9" onClick={addFolder} disabled={!folder.trim()}>
               <Plus aria-hidden />
               添加
+            </Button>
+            <Button type="button" size="sm" variant="outline" className="h-9" onClick={() => void chooseFolder()} disabled={choosing}>
+              <FolderOpen aria-hidden />
+              {choosing ? "选择中…" : "选择…"}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">只是记录这个项目相关的文件夹；文件工具能访问哪些目录仍由内置文件服务器的允许列表决定。</p>

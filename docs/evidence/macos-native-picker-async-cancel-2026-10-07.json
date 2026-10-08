@@ -1,0 +1,377 @@
+{
+  "schemaVersion": 1,
+  "kind": "desktop-native-picker-sandbox",
+  "platform": "macos",
+  "appVersion": "0.1.0",
+  "appIdentifier": "com.eastgenesis.desktop",
+  "createdAt": "2026-10-06T21:26:26.791Z",
+  "scenarios": [
+    {
+      "scenario": "workdir_cancel",
+      "status": "passed",
+      "assertions": {
+        "realNativeCancel": true,
+        "noContextChange": true,
+        "noRootGrant": true
+      }
+    },
+    {
+      "scenario": "workdir_context",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "selectedContextVisible": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "project_context",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "projectVisible": true,
+        "sqliteContextPersisted": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "ungranted_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "fileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101026056,
+            "mtimeMs": 1791321986894.6667,
+            "digest": "736c2b37d0015c31d1e854f1ed0723ef217e71e15ef8e12782c734142a7fac97"
+          },
+          "after": {
+            "inode": 101026056,
+            "mtimeMs": 1791321986894.6667,
+            "digest": "736c2b37d0015c31d1e854f1ed0723ef217e71e15ef8e12782c734142a7fac97"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "settings_cancel",
+      "status": "passed",
+      "assertions": {
+        "realNativeCancel": true,
+        "rootsUnchanged": true
+      }
+    },
+    {
+      "scenario": "explicit_root_grant",
+      "status": "passed",
+      "assertions": {
+        "realNativeSelection": true,
+        "onlyExplicitRootAdded": true,
+        "builtinUiRunning": true,
+        "defaultRootFixed": true
+      }
+    },
+    {
+      "scenario": "authorized_read_write",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "completed",
+        "toolResultOk": [
+          true,
+          true
+        ],
+        "pathDenied": false,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": false,
+        "successfulToolResults": 2,
+        "realArtifactVerified": true,
+        "artifactSha256": "28b20187177b3a99aa8d62d19c0ba9b26f6c6f30abec8257b846b6f61fc694e5"
+      }
+    },
+    {
+      "scenario": "outside_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "outsideFileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101026057,
+            "mtimeMs": 1791321986894.993,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          },
+          "after": {
+            "inode": 101026057,
+            "mtimeMs": 1791321986894.993,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "symlink_read_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 0,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "canonicalEscapeDenied": true,
+        "outsideFileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101026057,
+            "mtimeMs": 1791321986894.993,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          },
+          "after": {
+            "inode": 101026057,
+            "mtimeMs": 1791321986894.993,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "symlink_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "canonicalEscapeDenied": true,
+        "outsideFileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101026057,
+            "mtimeMs": 1791321986894.993,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          },
+          "after": {
+            "inode": 101026057,
+            "mtimeMs": 1791321986894.993,
+            "digest": "7ca5c92bcef678132e1b8e7392136eeeb1e9ee5be98cd40bccaaf5fd718b3ca1"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "root_removed",
+      "status": "passed",
+      "assertions": {
+        "extraRootRemoved": true,
+        "builtinReconnected": true,
+        "defaultRootFixed": true
+      }
+    },
+    {
+      "scenario": "removed_root_write_denied",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "needs_user",
+        "toolResultOk": [
+          false
+        ],
+        "pathDenied": true,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": true,
+        "successfulToolResults": 0,
+        "fileUnchanged": true,
+        "fingerprint": {
+          "before": {
+            "inode": 101026306,
+            "mtimeMs": 1791322091636.2764,
+            "digest": "28b20187177b3a99aa8d62d19c0ba9b26f6c6f30abec8257b846b6f61fc694e5"
+          },
+          "after": {
+            "inode": 101026306,
+            "mtimeMs": 1791322091636.2764,
+            "digest": "28b20187177b3a99aa8d62d19c0ba9b26f6c6f30abec8257b846b6f61fc694e5"
+          }
+        }
+      }
+    },
+    {
+      "scenario": "default_downloads_retained",
+      "status": "passed",
+      "assertions": {
+        "taskCreatedThroughUi": true,
+        "sqliteTerminalRecord": true,
+        "sqliteTerminalStatus": "completed",
+        "toolResultOk": [
+          true,
+          true
+        ],
+        "pathDenied": false,
+        "approvalClicks": 1,
+        "onlySyntheticFixtureProfile": true,
+        "rustSandboxDenied": false,
+        "successfulToolResults": 2,
+        "defaultRootStillUsable": true,
+        "realArtifactVerified": true,
+        "artifactSha256": "28b20187177b3a99aa8d62d19c0ba9b26f6c6f30abec8257b846b6f61fc694e5"
+      }
+    }
+  ],
+  "evidenceBoundary": {
+    "proven": [
+      "real native picker selection and cancel",
+      "workdir/project context does not grant file access",
+      "explicit settings root grants and reconnects builtin MCP",
+      "real authorized file read/write",
+      "Rust canonical sandbox denies outside and symlink escape",
+      "root removal revokes access and retains fixed Downloads"
+    ],
+    "excluded": [
+      "real Provider",
+      "Windows/Linux native picker",
+      "file-root persistence failure injection in this UI run",
+      "signing/notarization",
+      "all filesystem adversarial races"
+    ]
+  },
+  "binarySha256": "56405de93a809cb6cfaedb5e74430592c59890f96cac918142e4312a63c6000d",
+  "harnessSha256": "f59edc15f920cec8a89c6cea794ecf74ef1862a13c0474c5ca6eb5e50d857da5",
+  "sourceRevision": "aebe9c8acb4c1c583e0e90863f88c3f9f1e840e5",
+  "compiledSource": {
+    "mode": "working_tree_after_build",
+    "revision": "aebe9c8acb4c1c583e0e90863f88c3f9f1e840e5",
+    "files": {
+      "crates/eg-core/src/file_roots.rs": "39774a96a8ec3e97ccfdf1fff29395ec40789db10dd2b76b2deca3a84ea7b94b",
+      "crates/eg-core/src/mcp_service.rs": "bf4efa0f71f5025b92ca81ceecc255efcf1955ffa8b15ad29a41540d4ee624f7",
+      "src-tauri/src/lib.rs": "96795246773ea920b2f86901453cf48ee887c6c57b4f3d3895ce135e9167d60c",
+      "src/platform/types.ts": "07b19d913edaee531746990fcaea390d56c897fbcbaf5f0bdf36bb6040dd9859",
+      "src/platform/tauri-backend.ts": "9f5d4c3ead7e3c42bb2d0a7b3c837188dec40910de28fb65d7ce480721cff82d",
+      "src/stores/mcp.ts": "96a6e307a423336975e7acd4cdd4775be6887fdf08ce73d79e8ec8523d7550de",
+      "src/components/settings/FileRoots.tsx": "094bc2b207190e765752814f6b9f7df8fdb4bda026b4306a205f8713918da749"
+    }
+  },
+  "sourceWorkingTreeChangesIncluded": true,
+  "osVersion": "26.7.1",
+  "architecture": "x64",
+  "lastObservedTask": {
+    "status": "completed",
+    "resultOk": [
+      true,
+      true
+    ],
+    "pathDenied": false
+  },
+  "passed": true,
+  "fixtureRequestCounts": {
+    "plan": 16,
+    "args": 7,
+    "stream": 2,
+    "json": 24
+  },
+  "controlledCleanup": true,
+  "finishedAt": "2026-10-06T21:30:11.205Z",
+  "formalReleaseBinding": false,
+  "independentFrozenHarnessBinding": {
+    "start": {
+      "binarySha256": "56405de93a809cb6cfaedb5e74430592c59890f96cac918142e4312a63c6000d",
+      "harnessSha256": "f59edc15f920cec8a89c6cea794ecf74ef1862a13c0474c5ca6eb5e50d857da5",
+      "manifestSha256": "e0f4154e0f2e8dfd6d06ea3c0bb66ce5797c030ce749c4344341ce230f047ecd",
+      "sourceHashes": {
+        "src-tauri/src/net.rs": "423c2053ec7abcceb31313d87ed6cad896cc9d1973a8e1f52c8ab671c4ba2d8b",
+        "src-tauri/src/lib.rs": "96795246773ea920b2f86901453cf48ee887c6c57b4f3d3895ce135e9167d60c",
+        "src-tauri/src/main.rs": "1e751d0f3372d74d5c5b5d1b7a5750a7da689bf906509b388a629a09727f933e",
+        "src-tauri/src/qa_install_probe.rs": "8af3294f3fd44cf1af90032d0fb318e91830cd5981dc02300cb366a89d435ddf",
+        "src-tauri/src/keychain.rs": "66d5441737fa4a132a4480f693afdc1fc02cba2ecef1cef2a71b2899265ccced",
+        "src-tauri/Cargo.toml": "0c08b9914244a5b968625c6a7352d787d445eb5949ed38ec4c3aad0127451f4c",
+        "Cargo.lock": "62eda30b53690c55df54caba21f266f9931074d7f9279380ef9520a41cf9da1c",
+        "src/platform/tauri-backend.ts": "9f5d4c3ead7e3c42bb2d0a7b3c837188dec40910de28fb65d7ce480721cff82d",
+        "src/platform/proxy-fetch.ts": "a9cc43d9707ba797658f761e293616034c2ed410fba2c0c064d9d7d540cea456",
+        "src/core/llm/http.ts": "1a1927485f7054bccada515a396bb296ed6cd69730c006bbe3431d122103aeff",
+        "src/stores/tasks.ts": "1608449c662b9aadd81ff283fa69851e7de4e2c65828844046a4d31d75acaac9",
+        "src/components/chat/AssistantTurn.tsx": "524bace911de6fac188daa6ae1866339f4242bdea48c3161a33af0e8b89a52c1",
+        "crates/eg-core/src/file_roots.rs": "39774a96a8ec3e97ccfdf1fff29395ec40789db10dd2b76b2deca3a84ea7b94b",
+        "crates/eg-core/src/mcp_service.rs": "bf4efa0f71f5025b92ca81ceecc255efcf1955ffa8b15ad29a41540d4ee624f7",
+        "src/platform/types.ts": "07b19d913edaee531746990fcaea390d56c897fbcbaf5f0bdf36bb6040dd9859",
+        "src/platform/mcp-transport.ts": "ff3b070dca61c7285e598b0b6a72d2c2f84b2c4800dc3ed647ec8e544fa861d5",
+        "src/stores/mcp.ts": "96a6e307a423336975e7acd4cdd4775be6887fdf08ce73d79e8ec8523d7550de",
+        "src/components/settings/FileRoots.tsx": "094bc2b207190e765752814f6b9f7df8fdb4bda026b4306a205f8713918da749",
+        "src/agent/runtime.ts": "7af0a1bf2378f7502719e731c85d75e6ab80d7a1e34757e76495a2a5cbb7de90",
+        "src/lib/engine.ts": "a66a1e434beee65f4f6a6847d08fbb34a02dc5817c3bf62ae33f7d7c7d84a42a",
+        "src/lib/recovery.ts": "6316e91df1c42ed99a58ae1d4699b630816fd99dd5de2230012eeb909cf645ed"
+      }
+    },
+    "end": {
+      "binarySha256": "56405de93a809cb6cfaedb5e74430592c59890f96cac918142e4312a63c6000d",
+      "harnessSha256": "f59edc15f920cec8a89c6cea794ecf74ef1862a13c0474c5ca6eb5e50d857da5",
+      "manifestSha256": "e0f4154e0f2e8dfd6d06ea3c0bb66ce5797c030ce749c4344341ce230f047ecd",
+      "sourceHashes": {
+        "src-tauri/src/net.rs": "423c2053ec7abcceb31313d87ed6cad896cc9d1973a8e1f52c8ab671c4ba2d8b",
+        "src-tauri/src/lib.rs": "96795246773ea920b2f86901453cf48ee887c6c57b4f3d3895ce135e9167d60c",
+        "src-tauri/src/main.rs": "1e751d0f3372d74d5c5b5d1b7a5750a7da689bf906509b388a629a09727f933e",
+        "src-tauri/src/qa_install_probe.rs": "8af3294f3fd44cf1af90032d0fb318e91830cd5981dc02300cb366a89d435ddf",
+        "src-tauri/src/keychain.rs": "66d5441737fa4a132a4480f693afdc1fc02cba2ecef1cef2a71b2899265ccced",
+        "src-tauri/Cargo.toml": "0c08b9914244a5b968625c6a7352d787d445eb5949ed38ec4c3aad0127451f4c",
+        "Cargo.lock": "62eda30b53690c55df54caba21f266f9931074d7f9279380ef9520a41cf9da1c",
+        "src/platform/tauri-backend.ts": "9f5d4c3ead7e3c42bb2d0a7b3c837188dec40910de28fb65d7ce480721cff82d",
+        "src/platform/proxy-fetch.ts": "a9cc43d9707ba797658f761e293616034c2ed410fba2c0c064d9d7d540cea456",
+        "src/core/llm/http.ts": "1a1927485f7054bccada515a396bb296ed6cd69730c006bbe3431d122103aeff",
+        "src/stores/tasks.ts": "1608449c662b9aadd81ff283fa69851e7de4e2c65828844046a4d31d75acaac9",
+        "src/components/chat/AssistantTurn.tsx": "524bace911de6fac188daa6ae1866339f4242bdea48c3161a33af0e8b89a52c1",
+        "crates/eg-core/src/file_roots.rs": "39774a96a8ec3e97ccfdf1fff29395ec40789db10dd2b76b2deca3a84ea7b94b",
+        "crates/eg-core/src/mcp_service.rs": "bf4efa0f71f5025b92ca81ceecc255efcf1955ffa8b15ad29a41540d4ee624f7",
+        "src/platform/types.ts": "07b19d913edaee531746990fcaea390d56c897fbcbaf5f0bdf36bb6040dd9859",
+        "src/platform/mcp-transport.ts": "ff3b070dca61c7285e598b0b6a72d2c2f84b2c4800dc3ed647ec8e544fa861d5",
+        "src/stores/mcp.ts": "96a6e307a423336975e7acd4cdd4775be6887fdf08ce73d79e8ec8523d7550de",
+        "src/components/settings/FileRoots.tsx": "094bc2b207190e765752814f6b9f7df8fdb4bda026b4306a205f8713918da749",
+        "src/agent/runtime.ts": "7af0a1bf2378f7502719e731c85d75e6ab80d7a1e34757e76495a2a5cbb7de90",
+        "src/lib/engine.ts": "a66a1e434beee65f4f6a6847d08fbb34a02dc5817c3bf62ae33f7d7c7d84a42a",
+        "src/lib/recovery.ts": "6316e91df1c42ed99a58ae1d4699b630816fd99dd5de2230012eeb909cf645ed"
+      }
+    },
+    "allStartEndBindingsMatch": true,
+    "allSourcesMatchCompiledManifest": true
+  }
+}

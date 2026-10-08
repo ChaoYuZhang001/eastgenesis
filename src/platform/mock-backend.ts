@@ -3,6 +3,7 @@
 // - 不发网络请求：模型和 Jev 请求返回模拟响应；
 // - MCP 进程换成内存里的登记表和回显服务器（mock-mcp.ts）。
 import type { AppError } from "@/lib/ipc";
+import type { InvocationLedgerRecord } from "@/agent/tool-contract";
 import { assertSettingKey } from "@/lib/db";
 import { mockReply, type MockChatMessage } from "./mock-llm";
 import { createMockMcp } from "./mock-mcp";
@@ -40,6 +41,8 @@ export function createMockBackend(o: MockOptions = {}): Backend {
   let jev = o.jevConfigured ?? false;
   const custom = new Map<string, CustomProvider>();
   const settings = new Map<string, string>();
+  const invocations = new Map<string, InvocationLedgerRecord>();
+  const copyInvocation = (record: InvocationLedgerRecord): InvocationLedgerRecord => ({ ...record, artifacts: record.artifacts.map((a) => ({ ...a })) });
   // 项目、目标、记忆互相引用：目标和记忆挂到项目下之前查项目还在；删除项目时连带删除目标和记忆
   const alive = (id: string) => projects.alive(id);
   const memory = createMockMemoryStore(Date.now, alive);
@@ -65,7 +68,7 @@ export function createMockBackend(o: MockOptions = {}): Backend {
     if (o.failRequests) return json(503, { error: { message: "（模拟）服务暂时不可用" } });
     // 模型列表：OpenAI 与 Anthropic 的 /models 都是 { data: [{ id }] }；带一个和官方同名的型号，演示能力参照
     if (path === "/models") return json(200, { data: (o.listModels ?? ["mock-model", "gpt-5.6-luna"]).map((id) => ({ id })) });
-    let req: { model?: string; messages?: MockChatMessage[]; system?: string };
+    let req: { model?: string; messages?: MockChatMessage[]; system?: string; stream?: boolean };
     try {
       req = JSON.parse(body ?? "{}");
     } catch {
@@ -78,6 +81,26 @@ export function createMockBackend(o: MockOptions = {}): Backend {
     const text = mockReply(messages);
     const inTok = Math.ceil(JSON.stringify(messages).length / 4);
     const outTok = Math.ceil(text.length / 2);
+    // 浏览器 mock 也返回真实 SSE 形状，让适配器和 Agent Runtime 的流式路径保持与桌面代理一致。
+    if (req.stream) {
+      if (target === "anthropic" || custom.get(target)?.protocol === "anthropic") {
+        const model = req.model ?? "mock-model";
+        const body = [
+          `event: message_start\ndata: ${JSON.stringify({ type: "message_start", message: { id: "msg_mock", model, usage: { input_tokens: inTok, output_tokens: 0 } } })}\n\n`,
+          `event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", delta: { type: "text_delta", text } })}\n\n`,
+          `event: message_delta\ndata: ${JSON.stringify({ type: "message_delta", delta: { stop_reason: "end_turn" }, usage: { output_tokens: outTok } })}\n\n`,
+          `event: message_stop\ndata: ${JSON.stringify({ type: "message_stop" })}\n\n`,
+        ].join("");
+        return { status: 200, body };
+      }
+      const model = req.model ?? "mock-model";
+      const body = [
+        `data: ${JSON.stringify({ id: "chatcmpl_mock", model, choices: [{ index: 0, delta: { role: "assistant", content: text }, finish_reason: null }] })}\n\n`,
+        `data: ${JSON.stringify({ id: "chatcmpl_mock", model, choices: [{ index: 0, delta: {}, finish_reason: "stop" }], usage: { prompt_tokens: inTok, completion_tokens: outTok } })}\n\n`,
+        "data: [DONE]\n\n",
+      ].join("");
+      return { status: 200, body };
+    }
     if (target === "anthropic" || custom.get(target)?.protocol === "anthropic") {
       return json(200, { id: "msg_mock", model: req.model, content: [{ type: "text", text }], stop_reason: "end_turn", usage: { input_tokens: inTok, output_tokens: outTok } });
     }
@@ -185,6 +208,36 @@ export function createMockBackend(o: MockOptions = {}): Backend {
     ...projects.api,
     ...goals.api,
     ...sessions.api,
+
+    getToolInvocation: async (key: string) => invocations.get(key) ? copyInvocation(invocations.get(key)!) : null,
+    saveToolInvocation: async (record: InvocationLedgerRecord) => {
+      const old = invocations.get(record.idempotencyKey);
+      if (old?.state === "applied" || old?.state === "conflict") return;
+      if (old?.leaseOwner && !record.leaseOwner) return;
+      if (old?.leaseOwner && record.leaseOwner && old.leaseOwner !== record.leaseOwner) return;
+      const saved = record.state === "applied" || record.state === "conflict"
+        ? { ...record, leaseOwner: undefined, leaseExpiresAt: undefined }
+        : record;
+      invocations.set(record.idempotencyKey, copyInvocation(saved));
+    },
+    claimToolInvocation: async (key: string, owner: string, now: number, ttlMs: number) => {
+      const old = invocations.get(key);
+      if (!old) return "missing" as const;
+      if (old.state === "applied" || old.state === "conflict") return "terminal" as const;
+      if (old.leaseOwner && old.leaseOwner !== owner && (old.leaseExpiresAt ?? 0) > now) return "busy" as const;
+      invocations.set(key, { ...old, leaseOwner: owner, leaseExpiresAt: now + ttlMs, updatedAt: now });
+      return "acquired" as const;
+    },
+    renewToolInvocation: async (key: string, owner: string, now: number, ttlMs: number) => {
+      const old = invocations.get(key);
+      if (!old || old.state === "applied" || old.state === "conflict" || old.leaseOwner !== owner) return false;
+      invocations.set(key, { ...old, leaseExpiresAt: now + ttlMs, updatedAt: now });
+      return true;
+    },
+    releaseToolInvocation: async (key: string, owner: string) => {
+      const old = invocations.get(key);
+      if (old?.leaseOwner === owner) invocations.set(key, { ...old, leaseOwner: undefined, leaseExpiresAt: undefined });
+    },
 
     async loadSetting(key) {
       assertSettingKey(key);

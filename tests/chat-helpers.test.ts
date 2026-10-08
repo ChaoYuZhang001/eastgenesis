@@ -6,7 +6,7 @@ import { doneText, progressOf, toolText } from "@/lib/progress";
 import type { AgentEvent } from "@/agent";
 import { DIGEST_MAX, digestReasoning, reasoningParts } from "@/lib/reasoning";
 import { toTimeline } from "@/lib/timeline";
-import { fallbackVerb, formatDuration, formatTokens, routeLineText, routeSummary, type RouteSummary } from "@/lib/route-summary";
+import { fallbackVerb, formatDuration, formatTokens, latestSurface, routeLineText, routeSummary, surfaceJourney, surfaceJourneyFromEvents, surfaceJourneyText, surfaceJourneyTextFromEvents, type RouteSummary } from "@/lib/route-summary";
 import { historyOf, MAX_TITLE, title, visibleSessions } from "@/stores/chat";
 import type { TaskCard } from "@/stores/tasks";
 
@@ -86,7 +86,7 @@ describe("路由行", () => {
     expect(t).not.toMatch(/评分|成本档位|本模型|tokens|\ds$/);
     expect(routeLineText(base)).toBe("使用 relay/claude-x（共 2 个模型） · 降级 2 次");
     expect(routeLineText({ ...base, locked: true, fallbacks: [] })).toBe("手动锁定 relay/claude-x");
-    expect(routeLineText({ ...base, used: null, failures: [{ profileId: "x", reason: "r" }] })).toBe("1 个模型都没有成功 · 降级 2 次");
+    expect(routeLineText({ ...base, used: null, failures: [{ profileId: "x", reason: "r" }] })).toBe("本次尝试的 1 个模型均未成功 · 降级 2 次");
   });
 
   it("兜底的原因按实际选到的模型写：本机模型才说「最省钱」，云端模型只说是最后兜底", () => {
@@ -112,6 +112,20 @@ describe("路由行", () => {
     expect(routeLineText({ ...base, fallbacks: [...base.fallbacks, slow] })).toMatch(/降级 3 次（1 次因超时）$/);
     expect(fallbackVerb(slow)).toBe("因超时降级到");
     expect(fallbackVerb(base.fallbacks[0]!)).toBe("降级到");
+  });
+
+  it("跨能力面时在折叠行显示同一任务链，单能力面保持简洁", () => {
+    const journey = { workSurface: "work" as const, stepRoutes: [
+      { stepId: "read", goal: "读取资料", surface: "work" as const, surfaceLabel: "Work 工作", profileId: "openai/a", reason: "文件能力" },
+      { stepId: "test", goal: "运行测试", surface: "codex" as const, surfaceLabel: "Codex 开发", profileId: "openai/a", reason: "代码能力" },
+      { stepId: "answer", goal: "总结结果", surface: "chat" as const, surfaceLabel: "Chat 对话", profileId: "openai/a", reason: "对话能力" },
+    ] };
+    expect(surfaceJourney(journey)).toEqual(["work", "codex", "chat"]);
+    expect(surfaceJourneyText(journey)).toBe("能力链 Work → Codex → Chat");
+    expect(routeLineText({ ...base, ...journey })).toContain("能力链 Work → Codex → Chat");
+    expect(surfaceJourney({ workSurface: "work", stepRoutes: [{ ...journey.stepRoutes[2]!, surface: "chat" }] })).toEqual(["chat"]);
+    expect(surfaceJourneyText({ workSurface: "chat", stepRoutes: [] })).toBeNull();
+    expect(routeLineText({ ...base, workSurface: "chat", stepRoutes: [] })).not.toContain("能力链");
   });
 });
 
@@ -141,12 +155,60 @@ describe("路由摘要：降级原因", () => {
         excluded: [],
       },
       meta: { backend: "rules", level: 3, degraded: false, confidence: 1, skipped: [], latencyMs: 0 },
-    } as unknown as Parameters<typeof routeSummary>[0];
+    } as unknown as NonNullable<Parameters<typeof routeSummary>[0]>;
     const s = routeSummary(route, events)!;
     expect(s.fallbacks.map((f) => [f.from, f.to, f.timeout])).toEqual([
       ["openai/a", "openai/b", true],
       ["openai/b", "custom:relay/claude-x", false],
     ]);
+  });
+
+  it("汇总步骤级路由，回答浮层能看见同一任务跨能力面切换", () => {
+    const route = {
+      decision: {
+        classification: { type: "tool_use", capabilities: ["tool_use"] },
+        primary: null,
+        chain: [],
+        weights: { capability: 0.3, quality: 0.35, cost: 0.2, latency: 0.15 },
+        reasons: [],
+        excluded: [],
+      },
+      meta: { backend: "rules", level: 3, degraded: false, confidence: 1, skipped: [], latencyMs: 0 },
+    } as unknown as NonNullable<Parameters<typeof routeSummary>[0]>;
+    const stepDecision = { ...route.decision, primary: { profileId: "openai/a", reason: "匹配工具能力" }, chain: [{ profileId: "openai/a", provider: "openai", stage: "primary", reason: "匹配工具能力" }] } as never;
+    const s = routeSummary(route, [{
+      type: "step_route",
+      step: { id: "s1", goal: "读取报告", tool: "read_file" },
+      surface: "work",
+      surfaceReason: "需要研究、本地文件或交付物能力",
+      profileId: "openai/a",
+      reasons: [],
+      decision: stepDecision,
+      meta: route.meta,
+    }]);
+    expect(s?.stepRoutes).toEqual([{ stepId: "s1", goal: "读取报告", surface: "work", surfaceLabel: "Work 工作", profileId: "openai/a", reason: "匹配工具能力" }]);
+  });
+});
+
+describe("运行中的能力面", () => {
+  const step = (surface: "chat" | "work" | "codex"): AgentEvent => ({
+    type: "step_start",
+    step: { id: `step-${surface}`, goal: "执行任务", tool: null },
+    attempt: 1,
+    surface,
+  });
+
+  it("取最近一步，并递归读取子 Agent 的路由事件", () => {
+    expect(latestSurface([step("work"), step("codex")])).toBe("codex");
+    expect(latestSurface([{ type: "subagent", agent: "research", event: step("work") }])).toBe("work");
+    expect(latestSurface([{ type: "llm", purpose: "answer", profileId: "openai/a", latencyMs: 1, usage: null }])).toBeNull();
+  });
+
+  it("按执行顺序去重能力链，并在跨面后生成运行中摘要", () => {
+    const events: AgentEvent[] = [step("work"), step("work"), { type: "subagent", agent: "coder", event: step("codex") }];
+    expect(surfaceJourneyFromEvents(events)).toEqual(["work", "codex"]);
+    expect(surfaceJourneyTextFromEvents(events)).toBe("能力链 Work → Codex");
+    expect(surfaceJourneyTextFromEvents([step("chat")])).toBeNull();
   });
 });
 

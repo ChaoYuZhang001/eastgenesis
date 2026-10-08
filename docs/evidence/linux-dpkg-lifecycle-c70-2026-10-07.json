@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "github-runner-report-extract",
+  "capturedAt": "2026-10-06T22:06:01.957066+00:00",
+  "source": {
+    "runId": 37535219828,
+    "jobId": 112514305624,
+    "headSha": "c70ea1d67979f09c05227b5c078890dd8112d232",
+    "platform": "ubuntu-latest",
+    "jobConclusion": "success",
+    "jobCompletedAtUtc": "2026-10-06T21:54:13Z",
+    "artifactIds": {
+      "desktopLinux": 11445889805,
+      "webDriverDiagnostics": 11446234209
+    },
+    "artifactBytes": {
+      "desktopLinux": 228075001,
+      "webDriverDiagnostics": 4469
+    }
+  },
+  "interpretation": {
+    "dpkgLifecyclePassed": true,
+    "lifecycleChecks": 10,
+    "runnerChecks": 33,
+    "webDriverScenarios": 4,
+    "sameSourceQaVersionIncrement": true,
+    "crossSchemaMigrationProven": false,
+    "performanceBaselineProven": false,
+    "realProviderProven": false
+  },
+  "reports": {
+    "desktop-linux-upgrade-smoke.json": {
+      "source": {
+        "name": "desktop-linux-upgrade-smoke.json",
+        "source": "jobLog",
+        "sourceLineStart": 4641,
+        "sourceLineEnd": 4720,
+        "bytes": 2088,
+        "sha256": "505016a572dde7d8d15cdccb1233de30a71d1a2903ee4e18113bc49308713bc8",
+        "passed": true,
+        "checkTotal": 10,
+        "checksTrue": 10
+      },
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-linux-upgrade-smoke",
+        "platform": "linux",
+        "format": "deb",
+        "passed": true,
+        "checks": {
+          "baselineInstalled": true,
+          "desktopEntry": true,
+          "dependencies": true,
+          "baselineLaunched": true,
+          "newerVersionInstalled": true,
+          "upgradeLaunched": true,
+          "sessionRetained": true,
+          "sqliteSchema": true,
+          "uninstalled": true,
+          "uninstallRetainsUserData": true
+        },
+        "packages": [
+          {
+            "role": "baseline",
+            "name": "east-genesis-desktop",
+            "version": "0.1.0",
+            "architecture": "amd64",
+            "bytes": 6675670
+          },
+          {
+            "role": "upgrade",
+            "name": "east-genesis-desktop",
+            "version": "0.1.1",
+            "architecture": "amd64",
+            "bytes": 6675662
+          }
+        ],
+        "install": {
+          "mode": "dpkg-system",
+          "disposableRunner": true,
+          "isolatedUserData": true,
+          "systemInstallAttempted": true,
+          "systemPackageDatabaseChanged": true,
+          "cleanupVerified": true,
+          "database": {
+            "schemaVersion": 7,
+            "toolInvocations": true,
+            "sessionSentinel": true
+          },
+          "launches": [
+            {
+              "version": "0.1.0",
+              "schemaVersion": 7,
+              "installedProcessIdentity": true,
+              "stableProcessWindowMs": 4000,
+              "controlledCleanup": true
+            },
+            {
+              "version": "0.1.1",
+              "schemaVersion": 7,
+              "installedProcessIdentity": true,
+              "stableProcessWindowMs": 4000,
+              "controlledCleanup": true
+            }
+          ]
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "actual dpkg installation and upgrade between two QA bundle versions",
+            "both installed versions start with SQLite schema 7",
+            "synthetic session survives upgrade and purge",
+            "installed executable and desktop entry exist before uninstall"
+          ],
+          "excluded": [
+            "code or schema changes between releases",
+            "desktop menu click or WebView task execution",
+            "real Provider",
+            "automatic updater or rollback",
+            "other Linux distributions or package formats",
+            "production release signing"
+          ]
+        }
+      }
+    },
+    "desktop-runner-evidence.json": {
+      "source": {
+        "name": "desktop-runner-evidence.json",
+        "source": "jobLog",
+        "sourceLineStart": 4753,
+        "sourceLineEnd": 4805,
+        "bytes": 1470,
+        "sha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde",
+        "passed": true,
+        "checkTotal": 33,
+        "checksTrue": 33
+      },
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-runner-evidence",
+        "platform": "linux",
+        "passed": true,
+        "checks": {
+          "providerShape": true,
+          "providerPassed": true,
+          "providerScenarios": true,
+          "providerRecovery": true,
+          "controlledShape": true,
+          "controlledPassed": true,
+          "controlledScenarios": true,
+          "controlledRecovery": true,
+          "routingShape": true,
+          "routingPassed": true,
+          "goldenShape": true,
+          "goldenPassed": true,
+          "goldenTasks": true,
+          "goalRecovery": true,
+          "goalValidation": true,
+          "webdriverShape": true,
+          "webdriverPassed": true,
+          "webdriverScenarios": true,
+          "package": true,
+          "installShape": true,
+          "installPassed": true,
+          "installFormat": true,
+          "installMode": true,
+          "installChecks": true,
+          "upgradeShape": true,
+          "upgradePassed": true,
+          "upgradeChecks": true,
+          "upgradeMode": true,
+          "upgradeVersions": true,
+          "upgradeDatabase": true,
+          "upgradeLaunches": true,
+          "windowsInstall": true,
+          "redaction": true
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "required CI evidence files exist and pass their fixed schemas",
+            "platform-specific WebDriver/package evidence is present when applicable",
+            "uploaded JSON passes the shared redaction boundary"
+          ],
+          "excluded": [
+            "real Provider availability or SLA",
+            "real macOS WebView interaction",
+            "installation/upgrade success beyond the recorded package smoke"
+          ]
+        }
+      }
+    },
+    "webdriver-quality.json": {
+      "source": {
+        "name": "webdriver-quality.json",
+        "sourceArtifactId": 11446234209,
+        "bytes": 1888,
+        "sha256": "c366414bedb115db30429ec5c6e6777a5aeb1b34f75b31203b1cdbe8186e9492",
+        "passed": true,
+        "kind": "desktop-webdriver-suite",
+        "scenario": null
+      },
+      "report": {
+        "schemaVersion": 1,
+        "kind": "desktop-webdriver-suite",
+        "passed": true,
+        "scenarios": [
+          {
+            "scenario": "staged",
+            "passed": true,
+            "firstChunkLatencyMs": 114,
+            "checks": {
+              "streamingFirstChunk": true,
+              "completedResult": true
+            }
+          },
+          {
+            "scenario": "slow-first-token",
+            "passed": true,
+            "firstChunkLatencyMs": 366,
+            "checks": {
+              "streamingFirstChunk": true,
+              "completedResult": true
+            }
+          },
+          {
+            "scenario": "truncated",
+            "passed": true,
+            "firstOutputLatencyMs": 143,
+            "checks": {
+              "partialOutputPreserved": true,
+              "terminalFailureVisible": true
+            }
+          },
+          {
+            "scenario": "idle-cancel",
+            "passed": true,
+            "checks": {
+              "cancelControl": true,
+              "cancelledResult": true
+            }
+          }
+        ],
+        "timing": {
+          "metric": "webview-qa-fixture",
+          "firstChunk": {
+            "samplesMs": [
+              114,
+              366
+            ],
+            "sampleCount": 2,
+            "minMs": 114,
+            "maxMs": 366,
+            "p50Ms": 114,
+            "p95Ms": 366,
+            "percentileMethod": "nearest-rank"
+          },
+          "firstOutput": {
+            "samplesMs": [
+              143
+            ],
+            "sampleCount": 1,
+            "minMs": 143,
+            "maxMs": 143,
+            "p50Ms": 143,
+            "p95Ms": 143,
+            "percentileMethod": "nearest-rank"
+          },
+          "interpretation": "Linux/Windows 真实 Tauri WebView 到本地 QA fixture 首段或首个保留输出的观测；不等于真实 Provider 延迟，也不包含冷启动"
+        },
+        "evidenceBoundary": {
+          "proven": [
+            "native WebDriver session",
+            "Tauri WebView DOM",
+            "route preview and task submission",
+            "streaming success/partial-output/cancellation controls"
+          ],
+          "excluded": [
+            "real Provider",
+            "filesystem dialog",
+            "ledger crash recovery",
+            "code signing/notarization"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "local-native-response-integrity-checks",
+  "capturedAt": "2026-10-06T22:17:17.341891+00:00",
+  "scope": {
+    "platform": "macos-x64",
+    "sourceWorkingTreeChangesIncluded": true,
+    "formalReleaseBinding": false,
+    "productionReadTimeoutSeconds": 60,
+    "productionTotalTimeoutSeconds": 180,
+    "responseAcceptedBytesMaximum": 16777216
+  },
+  "sourceHashes": {
+    "src-tauri/src/net.rs": "dea5754712af5d4d3b8c3e9e824a77fc4c9b1bd07c3d5155286458efa67c2dfb",
+    "src/platform/proxy-fetch.ts": "f8c6e70b272cd69d48414c0d1b65abfa5afa580448a5d3851858c024ee2f4e65",
+    "src/core/llm/http.ts": "97115eaf282c004274002e53f0d55db31ff2a73bdacf7259ccbe22561face2a5",
+    "src/core/llm/anthropic.ts": "e5705f67a11d70066cb91c4245a460efe21e954f9f6bada803b4d35c538446c7",
+    "src/core/llm/errors.ts": "b9dcb25584a98f95b38d36d426443edb692f787bc2262b45877ff54be40ad8bc",
+    "src/decision/router.ts": "26df20fbc46213c685c07e1ea2f61763078d34ce56b9b01e0fcfc38574c75bf7",
+    "src/decision/local-jev-parse.ts": "d43d0587bea5b3287c004bd087c82f4ab531a418b9fe1ac53eae07d529b8bf5f",
+    "tests/native-response-integrity.test.ts": "680391e32c058104cac7046a7dea05042d63cd539ff54e22951c2b09c3118f31",
+    "tests/decision-router.test.ts": "0eaf5c5f01e8a6e23bc24820934a0c1f5fc2c1544b14f35594855aada6e95a10",
+    "tools/desktop-stream-measurement.mjs": "847da5007a61a9d1ba2482299d1ef88beeee815b264d7e0198fed3ae04684055",
+    "tools/desktop-webdriver-smoke.mjs": "5c5725af0f8c147b8b9768b07efd9ea8c61f225207dd0a97ea47e93cc175e169",
+    "tools/desktop-webdriver-summary.mjs": "6ee94a07b7d2667685494f4622703e3bfcc0c15b955d34cdd0bf83b628b82874",
+    "tools/desktop-windows-install-smoke.mjs": "4d2c0a1cdc85ba507e0ccac923e6e5db940141d10903ec8d4fa55f9e09c3eaea",
+    "tools/desktop-windows-install-smoke.ps1": "d3c16c1fad59d2c11bc9fb29f0791bdf2babdeb6227bb4c9972fbaa98e789205",
+    "tools/desktop-windows-install-smoke.d.mts": "d73701b29b3f6bd8aeb93a2dd93dae18982545527d3946f4b4f7fe1ba54b80e2",
+    "tests/desktop-windows-install-smoke.test.ts": "be387852ec772d65b7cfadfbb56e095e92fc5675e58a92fdcbec1b4be932ef5e"
+  },
+  "functionalContracts": {
+    "jsonBoundary": {
+      "cases": [
+        "MAX-1",
+        "MAX",
+        "MAX+1"
+      ],
+      "strictUtf8": true,
+      "oversizeCode": "response_too_large"
+    },
+    "streamUtf8": {
+      "preservesChineseAndEmojiAcrossIndependentTcpFrames": true,
+      "invalidAndIncompleteUtf8Code": "invalid_response",
+      "pendingIncompleteUtf8BytesMaximum": 3,
+      "lossyDecodeUsed": false
+    },
+    "streamBoundary": {
+      "acceptsExactMaximumOnlyAfterTrueEof": true,
+      "extraRawBytesEmitOversizeError": true,
+      "extraBytesNotDecodedOrEmitted": true,
+      "networkBytesReceivedHardCappedAtMaximum": false,
+      "cancelAndDeadlineRemainEffectiveAtMaximum": true
+    },
+    "frontend": {
+      "fixedNativeErrorCodesPreserved": true,
+      "nativeMessageAndDetailFieldsTrusted": false,
+      "partialOutputPreservedBeforeFailure": true,
+      "openaiDoneCancelsUnreadBody": true,
+      "anthropicMessageStopCancelsUnreadBody": true
+    },
+    "routing": {
+      "oversizeStopsBeforeSecondModel": true,
+      "oversizeRecordsProviderHealthFailure": false,
+      "invalidResponseWithoutOutputCanFallbackWithRecordedAttempts": true,
+      "failureAfterPartialOutputStops": true
+    },
+    "fixture": {
+      "longValidStreamHeadersAndChunksAcknowledged": true,
+      "experimentReadTimeoutMilliseconds": 1000,
+      "experimentFiveChunkSpacingMilliseconds": 250,
+      "experimentTotalTimeoutMilliseconds": 5000,
+      "productionTimeoutsChanged": false,
+      "testLockPoisonCannotCascade": true,
+      "originalCiClientFailureRootCauseProven": false
+    },
+    "performanceEvidence": {
+      "scenariosCombinedIntoPercentiles": false,
+      "missingFirstDeltaTimestampReplacedByPollTime": false,
+      "legacyNumericTimingVerified": false,
+      "singleSampleP50P95": null,
+      "performanceBaseline": false
+    }
+  },
+  "validation": {
+    "ordinaryRustWorkspace": {
+      "passed": true,
+      "desktopLibTests": 31,
+      "coreTests": 90,
+      "realStdioTests": [
+        3,
+        2
+      ]
+    },
+    "qaRustWorkspace": {
+      "passed": true,
+      "desktopLibTests": 30,
+      "coreTests": 90,
+      "realStdioTests": [
+        3,
+        2
+      ]
+    },
+    "rustNetTargeted": {
+      "ordinaryPassed": 22,
+      "qaPassed": 22,
+      "longValidStreamRepeatPasses": 5
+    },
+    "ipcAdapterRegressions": {
+      "passed": 11,
+      "mechanism": "mock IPC channel through actual adapters; no native process"
+    },
+    "routeExecutorRegressions": {
+      "passed": 35,
+      "newCases": 4,
+      "mechanism": "actual executeWithFallback with synthetic invocations"
+    },
+    "frontendFullBeforeRouteAddition": {
+      "files": 93,
+      "passed": 865
+    },
+    "finalFrontendFull": {
+      "files": 93,
+      "passed": 874,
+      "durationSeconds": 64.0,
+      "startedAtLocal": "2026-10-07 06:15:05 CST",
+      "workers": 2
+    },
+    "typecheckAfterRouteAddition": true,
+    "finalWindowsHelpers": {
+      "helperPassed": 19,
+      "runnerPassed": 13,
+      "nativeWindowsExecution": false
+    },
+    "nativeCancelCandidate": {
+      "binarySha256": "76af4ff199126b96c9ef31bdc4e66c4bbce70f7af514bd5ef0030fd7da74e1d0",
+      "compiledSourceCount": 25,
+      "assertionsPassed": 13,
+      "report": "macos-native-cancel-integrity-2026-10-07.json",
+      "guiUtf8AndOversizeAcceptanceRun": false,
+      "formalReleaseBinding": false
+    },
+    "syntheticConfigRedactionSmoke": {
+      "passed": 54,
+      "combinedWithWindowsRunnerPassed": 86,
+      "privateProviderConfigurationRead": false,
+      "realProviderRequests": false
+    },
+    "finalTypecheck": true,
+    "finalBuild": {
+      "passed": true,
+      "mechanism": "Tauri QA build beforeBuildCommand runs pnpm build",
+      "report": "macos-integrity-build-manifest-2026-10-07.json"
+    },
+    "localValidationLogDigests": {
+      "eastgenesis-integrity-final-full-frontend.log": {
+        "bytes": 44637,
+        "sha256": "2d3d6aba2162e41e76696be411b2c37aaa0c9e2ae7ba0651859356235295ede0"
+      },
+      "eastgenesis-integrity-final-config-windows-smoke.log": {
+        "bytes": 874,
+        "sha256": "e2ea51aabd0052a6820c0b791a63fc3563898626da455c2eece51aea6ae87062"
+      },
+      "eastgenesis-integrity-final-typecheck.log": {
+        "bytes": 82,
+        "sha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba"
+      },
+      "eastgenesis-integrity-ordinary-workspace.log": {
+        "bytes": 10009,
+        "sha256": "44beea64cb66e2db736d3d32207909134c4fb37eab326cb3555cc687a90a1a48"
+      },
+      "eastgenesis-integrity-qa-workspace.log": {
+        "bytes": 9939,
+        "sha256": "2d4d024ebcd79c60eef592a6a9c2c8077d0538a4e3b3900dd6cda3b797c8b438"
+      }
+    }
+  },
+  "evidenceBoundary": {
+    "proven": [
+      "actual bounded loopback TCP UTF8/size/cancel tests",
+      "structured native IPC error classification through frontend adapters",
+      "actual routing executor attempt and health policy regressions",
+      "truthful descriptive fixture timing provenance"
+    ],
+    "excluded": [
+      "real Provider availability, charging, or remote compute termination",
+      "native GUI UTF8/oversize acceptance",
+      "new three platform CI result",
+      "startup, first paint, or CPU/RSS performance baseline",
+      "Windows installation lifecycle success",
+      "signing or notarization"
+    ]
+  }
+}

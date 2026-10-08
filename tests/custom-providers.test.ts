@@ -130,21 +130,24 @@ describe("模型探测", () => {
         return b.providerRequest(r);
       },
     };
-    expect(await probeModels(slow, c, ["a", "ok1", "b", "ok2", "ok3", "ok4"], { concurrency: 2 })).toEqual({ unavailable: ["a", "b"], probed: 6, suspicious: false });
+    expect(await probeModels(slow, c, ["a", "ok1", "b", "ok2", "ok3", "ok4"], { concurrency: 2 })).toMatchObject({ unavailable: ["a", "b"], probed: 6, suspicious: false, ok: 4, missing: 2, unknown: 0, notProbed: 0 });
     expect(peak).toBe(2);
-    expect(await probeModels(b, c, ["a", "b", "c"])).toEqual({ unavailable: [], probed: 3, suspicious: true });
+    expect(await probeModels(b, c, ["a", "b", "c"])).toMatchObject({ unavailable: [], probed: 3, suspicious: true });
     // 只有一个模型且 404：照实标记
-    expect(await probeModels(b, c, ["a"])).toEqual({ unavailable: ["a"], probed: 1, suspicious: false });
+    expect(await probeModels(b, c, ["a"])).toMatchObject({ unavailable: ["a"], probed: 1, suspicious: false });
     expect((await probeModels(b, c, ["x", "y", "z"], { max: 2 })).probed).toBe(2);
   });
 
-  it("设置：读取列表后自动探测，404 的模型记为不可用并从下拉隐藏；列表没变时测试连接不重复探测", async () => {
+  it("设置：目录读取不推理，用户明确检查后保存结果；刷新和测试连接不追加检查", async () => {
     const b = createMockBackend({ listModels: ["gpt-x", "ghost", "gpt-y"], missingModels: ["ghost"] });
     let probes = 0;
     const spy: Backend = { ...b, providerRequest: (r) => (r.method === "POST" && probes++, b.providerRequest(r)) };
     resetStores(spy);
     await useSettings.getState().saveCustom(relay(), KEY);
-    await waitFor(() => expect(useSettings.getState().modelCache["custom:relay"]?.probedAt).toBeDefined());
+    await waitFor(() => expect(useSettings.getState().modelCache["custom:relay"]?.models).toHaveLength(3));
+    expect(probes).toBe(0);
+    expect(useSettings.getState().modelCache["custom:relay"]?.probedAt).toBeUndefined();
+    await useSettings.getState().probeModels("custom:relay");
     const entry = useSettings.getState().modelCache["custom:relay"]!;
     expect(entry.models).toEqual(["gpt-x", "ghost", "gpt-y"]);
     expect(entry.unavailable).toEqual(["ghost"]);
@@ -161,11 +164,13 @@ describe("模型探测", () => {
     await useSettings.getState().testConnection("custom:relay");
     expect(useSettings.getState().probingIds).toEqual([]);
     expect(probes).toBe(3);
-    // 手动刷新：总是重新探测
-    await useSettings.getState().refreshModels("custom:relay", true);
-    await waitFor(() => expect(probes).toBe(6));
-    await waitFor(() => expect(useSettings.getState().probingIds).toEqual([]));
+    // 刷新只读目录，重新检查必须再次明确触发
+    await useSettings.getState().refreshModels("custom:relay");
+    expect(probes).toBe(3);
     expect(useSettings.getState().modelCache["custom:relay"]?.unavailable).toEqual(["ghost"]);
+    expect(useSettings.getState().modelCache["custom:relay"]?.probeSummary).toMatchObject({ total: 3, probed: 3, ok: 2, missing: 1, unknown: 0, notProbed: 0, stopReason: null });
+    await useSettings.getState().probeModels("custom:relay");
+    expect(probes).toBe(6);
   });
 
   it("旧缓存没有探测字段也能读；不可用列表只保留仍在列表里的型号", () => {

@@ -4,6 +4,8 @@
 // - 小模型自报的置信度偏高：最多记 0.8；没给置信度按 0.5，低于阈值同样交给下一级。
 // - 任务内容和工具输出放在 <data> 里并注明不可信，发送前脱敏、截断；硬规则和白名单仍在决策层执行。
 // - 单次 8 秒超时；用户取消不算失败。
+import { isGoalQuotaControlError, type GoalMeterScope } from "../core/goal-quota";
+import { invokeGoalModel, isTerminalModelFailure, recordTerminalModelFailure } from "../core/goal-model-call";
 import { ProviderError } from "../core/llm/errors";
 import { classificationFromProbs } from "./classification";
 import type { Decided, DecisionBackend, ReplanInput, ReplanStrategy, Risk, ToolSpec } from "./fallback";
@@ -40,6 +42,7 @@ export class LocalJevBackend implements DecisionBackend {
     private readonly model: LocalDecisionModel | null,
     private readonly missingReason = "没有选择本地决策模型",
     private readonly timeoutMs = LOCAL_JEV_TIMEOUT_MS,
+    private readonly goalMeter?: GoalMeterScope,
   ) {}
   unavailableReason() {
     return this.model ? null : this.missingReason;
@@ -47,6 +50,10 @@ export class LocalJevBackend implements DecisionBackend {
 
   /** task：要判断什么；fields：放进 <data> 的内容；format：输出格式，写在最后便于模型照做 */
   async #ask(task: string, fields: Record<string, string>, format: string, signal?: AbortSignal): Promise<Record<string, unknown>> {
+    return invokeGoalModel(this.goalMeter, "local_decision", "decision", () => this.#askRaw(task, fields, format, signal));
+  }
+
+  async #askRaw(task: string, fields: Record<string, string>, format: string, signal?: AbortSignal): Promise<Record<string, unknown>> {
     const m = this.model;
     if (!m) throw new JevError("config", { message: this.missingReason });
     if (signal?.aborted) throw new JevError("aborted");
@@ -62,10 +69,14 @@ export class LocalJevBackend implements DecisionBackend {
       const user = `${task}\n\n${dataBlock(fields)}\n\n输出格式：${format}${noThink(m.id)}`;
       return parseDecision(await Promise.race([m.ask(SYSTEM, user, ctl.signal), stop]));
     } catch (e) {
+      if (isGoalQuotaControlError(e)) throw e;
       if (signal?.aborted) throw new JevError("aborted");
       if (timedOut) throw new JevError("timeout", { message: `本地决策模型超过 ${this.timeoutMs / 1000} 秒没有返回` });
       if (e instanceof JevError) throw e;
-      if (e instanceof ProviderError) throw new JevError(CODE_MAP[e.code], { message: `本地决策模型调用失败（${e.code}）` });
+      if (e instanceof ProviderError) {
+        const mapped = new JevError(CODE_MAP[e.code], { message: `本地决策模型调用失败（${e.code}）` });
+        throw isTerminalModelFailure(e) ? recordTerminalModelFailure(mapped) : mapped;
+      }
       throw new JevError("internal", { message: "本地决策模型调用失败" });
     } finally {
       clearTimeout(timer);

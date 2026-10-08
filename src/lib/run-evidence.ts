@@ -27,6 +27,12 @@ export function evidenceOf(events: readonly AgentEvent[], readOnly: (tool: strin
   const file_changes: FileChangeEvidence[] = [];
   const command_outputs: CommandEvidence[] = [];
   for (const e of list) {
+    if (e.type === "probe") {
+      if (e.state !== "applied" || !e.step.tool) continue;
+      const target = targetOf(e.step.args ?? {});
+      tool_calls.push({ tool: e.step.tool, read_only: readOnly(e.step.tool), ok: true, ...(target ? { target } : {}) });
+      continue;
+    }
     if (e.type !== "tool_result" || !e.step.tool) continue;
     const target = targetOf(e.step.args ?? {});
     tool_calls.push({ tool: e.step.tool, read_only: readOnly(e.step.tool), ok: e.ok, ...(target ? { target } : {}) });

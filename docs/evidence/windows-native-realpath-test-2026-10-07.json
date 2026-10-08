@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-07T02:57:48Z",
+  "localParentRevision": "4fca797429fd66f839a6e4ea83613d6834b108d0",
+  "publicCandidate": "567fc9e1fc14c991a973440b06d8ccf589576733",
+  "ciRun": 37563580233,
+  "windowsJob": 112606129427,
+  "windowsFrontend": {
+    "passed": 999,
+    "skipped": 17,
+    "failed": 1,
+    "total": 1017,
+    "failure": "directory_alias_expected_legacy_short_path_actual_native_long_path",
+    "acceptedProjectAndPrefix": true,
+    "unexpectedProjectRejected": true,
+    "rustSqlAndInstallerNotRun": true
+  },
+  "change": "test expectation uses native realpath plus actual directory dev/ino identity; production harness unchanged",
+  "sourceHashes": {
+    "tests/desktop-goal-upgrade-inputs.test.ts": "177eab078c7ac6dc7b1f7d32f850f1db8a40efa3e1b9c31f906db37d1b72471e",
+    "tools/desktop-goal-upgrade-recovery-smoke.mjs": "90f02f5f5d02428e1a791f7f136af6b898553e3a50cb398199daa1d568073d8a"
+  },
+  "localChecks": {
+    "inputTests": {
+      "command": "pnpm exec vitest run tests/desktop-goal-upgrade-inputs.test.ts --minWorkers=2 --maxWorkers=2",
+      "sessionId": 33991,
+      "exitCode": 0,
+      "passed": 19,
+      "skipped": 0,
+      "logSha256": "4c2a0499a0fb0e7bf1d58cb1911184c714aba6f71b737f4efc1d2ae9b19c1e96"
+    },
+    "typecheck": {
+      "command": "pnpm run typecheck",
+      "sessionId": 37180,
+      "exitCode": 0,
+      "logSha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba"
+    }
+  },
+  "scope": {
+    "host": "macOS",
+    "nativeAppsLaunched": false,
+    "newWindowsRunPassed": false,
+    "realProvider": false,
+    "fullSuiteRerun": false
+  },
+  "previousFull1017SuiteBindsOriginalTest": true,
+  "previousTestSha256": "b6d28eb4b6f803ecd4244456d9972c10edb3a794f2ceaefedd43dfb260cb0b91"
+}

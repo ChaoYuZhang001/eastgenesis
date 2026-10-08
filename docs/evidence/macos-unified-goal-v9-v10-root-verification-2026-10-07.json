@@ -1,0 +1,62 @@
+{
+  "observedAt": "2026-10-07T05:59:44.363972+00:00",
+  "verificationPassed": true,
+  "nativeFullGoalPassed": false,
+  "sourceRevision": "c16ae0274a9066709baf8047951675b299b76092",
+  "sourceInputsVerified": 733,
+  "sourceCurrentMatchesCompiledManifest": true,
+  "reports": [
+    {
+      "version": 9,
+      "reportSha256": "48011c1e0c0955aa6f0251577a13af17515149aff5e559f31866958e36da5f83",
+      "status": "failed",
+      "elapsedMs": 9429,
+      "candidateIdentityVerified": false,
+      "nativePassed": false,
+      "goalNotRun": true,
+      "cleanupAndBindingVerified": true,
+      "processGroups": [
+        30968,
+        30965
+      ],
+      "failure": "owned frontmost guard before any keystroke; no business retry"
+    },
+    {
+      "version": 10,
+      "reportSha256": "610282e8282ad87aa05ad4a6f9b461d1d766673c6303324745035a44b0ce53c9",
+      "status": "candidate_identity_diagnostics_passed_goal_not_run",
+      "elapsedMs": 11193,
+      "candidateIdentityVerified": true,
+      "nativePassed": false,
+      "goalNotRun": true,
+      "cleanupAndBindingVerified": true,
+      "processGroups": [
+        36776,
+        36774
+      ],
+      "candidateEvidence": [
+        {
+          "ownedPid": 36776,
+          "occurrences": 2,
+          "actualCFEqual": true,
+          "actualPidLookupPassed": true,
+          "visible": false
+        },
+        {
+          "ownedPid": 36776,
+          "occurrences": 2,
+          "actualCFEqual": true,
+          "actualPidLookupPassed": true,
+          "visible": false
+        }
+      ],
+      "scanCompleteNodes": 1188,
+      "visibleOrOperableProved": false
+    }
+  ],
+  "limits": [
+    "v10 proves actual CF identity of two model checkbox references in its owned process only.",
+    "Neither candidate-only report runs the Goal or proves checkbox visibility/operability.",
+    "Activation checks and keystrokes are not an atomic OS operation."
+  ]
+}

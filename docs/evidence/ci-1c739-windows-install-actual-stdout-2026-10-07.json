@@ -1,0 +1,353 @@
+{
+  "schemaVersion": 1,
+  "kind": "desktop-windows-install-smoke",
+  "platform": "windows",
+  "format": "nsis",
+  "passed": false,
+  "checks": {
+    "hostedRunner": true,
+    "noExistingInstallation": true,
+    "sourceBinaryIsolationProbe": true,
+    "webView2Present": true,
+    "nsisInstall": true,
+    "installedPayload": true,
+    "installedRegistry": true,
+    "nsisUninstall": true,
+    "installedBinaryRemoved": true,
+    "uninstallRegistryRemoved": true
+  },
+  "stages": [
+    "hostedRunner",
+    "noExistingInstallation",
+    "webView2Present",
+    "sourceBinaryIsolationProbe",
+    "nsisInstall",
+    "installedPayload",
+    "installedRegistry",
+    "nsisUninstall",
+    "installedBinaryRemoved",
+    "uninstallRegistryRemoved"
+  ],
+  "launches": [],
+  "payloadBinding": {
+    "strategy": "tauri_cli_2_12_0_nsis_bundle_type_patch",
+    "cliVersion": "2.12.0",
+    "sourceSha256": "5473e800f4142c366ed430c9a8fdd74a8a5645bfed8c1b25899b5f411ed04c54",
+    "expectedNsisSha256": "f53ffcc8ccac58188495b3c7d7d8c80637af7b071019ea90153ece12dba5c367",
+    "installedSha256": "f53ffcc8ccac58188495b3c7d7d8c80637af7b071019ea90153ece12dba5c367",
+    "repairedSha256": null
+  },
+  "startupDiagnostics": [
+    {
+      "cycle": 1,
+      "outcome": "failed",
+      "failureStage": "process_job",
+      "elapsedMs": 4468,
+      "stableWindowPassed": true,
+      "databaseExists": true,
+      "schemaProbeAttempts": 1,
+      "schemaProbeFailures": 1,
+      "schemaProbeState": "failed",
+      "lastProbeFailureStage": "process_job",
+      "rootProcessAlive": true,
+      "rootWindowPresent": true,
+      "jobActiveProcessCount": 8,
+      "startupTrace": {
+        "status": "observed",
+        "reason": "complete",
+        "runId": "a45fea8f-f365-49cc-8c5f-50f9180034d3",
+        "records": [
+          {
+            "seq": 1,
+            "source": "native",
+            "stage": "native_started",
+            "elapsedMs": 0,
+            "frontendSeq": null
+          },
+          {
+            "seq": 2,
+            "source": "native",
+            "stage": "builder_started",
+            "elapsedMs": 0,
+            "frontendSeq": null
+          },
+          {
+            "seq": 3,
+            "source": "native",
+            "stage": "sql_plugin_ready",
+            "elapsedMs": 3,
+            "frontendSeq": null
+          },
+          {
+            "seq": 4,
+            "source": "native",
+            "stage": "plugin_setup_started",
+            "elapsedMs": 3,
+            "frontendSeq": null
+          },
+          {
+            "seq": 5,
+            "source": "native",
+            "stage": "plugin_setup_finished",
+            "elapsedMs": 3,
+            "frontendSeq": null
+          },
+          {
+            "seq": 6,
+            "source": "native",
+            "stage": "builder_finished",
+            "elapsedMs": 5,
+            "frontendSeq": null
+          },
+          {
+            "seq": 7,
+            "source": "native",
+            "stage": "setup_started",
+            "elapsedMs": 2964,
+            "frontendSeq": null
+          },
+          {
+            "seq": 8,
+            "source": "native",
+            "stage": "app_config_path_resolved",
+            "elapsedMs": 2964,
+            "frontendSeq": null
+          },
+          {
+            "seq": 9,
+            "source": "native",
+            "stage": "provider_store_loaded",
+            "elapsedMs": 2964,
+            "frontendSeq": null
+          },
+          {
+            "seq": 10,
+            "source": "native",
+            "stage": "native_state_ready",
+            "elapsedMs": 2966,
+            "frontendSeq": null
+          },
+          {
+            "seq": 11,
+            "source": "native",
+            "stage": "setup_finished",
+            "elapsedMs": 2966,
+            "frontendSeq": null
+          },
+          {
+            "seq": 12,
+            "source": "native",
+            "stage": "page_started",
+            "elapsedMs": 3036,
+            "frontendSeq": null
+          },
+          {
+            "seq": 13,
+            "source": "frontend",
+            "stage": "document_start",
+            "elapsedMs": 3046,
+            "frontendSeq": 1
+          },
+          {
+            "seq": 14,
+            "source": "frontend",
+            "stage": "frontend_entry",
+            "elapsedMs": 3083,
+            "frontendSeq": 2
+          },
+          {
+            "seq": 15,
+            "source": "frontend",
+            "stage": "react_render_called",
+            "elapsedMs": 3084,
+            "frontendSeq": 3
+          },
+          {
+            "seq": 16,
+            "source": "native",
+            "stage": "page_finished",
+            "elapsedMs": 3085,
+            "frontendSeq": null
+          },
+          {
+            "seq": 17,
+            "source": "frontend",
+            "stage": "bootstrap_started",
+            "elapsedMs": 3216,
+            "frontendSeq": 4
+          },
+          {
+            "seq": 18,
+            "source": "frontend",
+            "stage": "backend_tauri",
+            "elapsedMs": 3217,
+            "frontendSeq": 5
+          },
+          {
+            "seq": 19,
+            "source": "frontend",
+            "stage": "backend_init_started",
+            "elapsedMs": 3218,
+            "frontendSeq": 6
+          },
+          {
+            "seq": 20,
+            "source": "frontend",
+            "stage": "app_info_started",
+            "elapsedMs": 3219,
+            "frontendSeq": 7
+          },
+          {
+            "seq": 21,
+            "source": "frontend",
+            "stage": "sql_import_started",
+            "elapsedMs": 3219,
+            "frontendSeq": 8
+          },
+          {
+            "seq": 22,
+            "source": "frontend",
+            "stage": "sql_import_resolved",
+            "elapsedMs": 3230,
+            "frontendSeq": 9
+          },
+          {
+            "seq": 23,
+            "source": "frontend",
+            "stage": "db_load_called",
+            "elapsedMs": 3230,
+            "frontendSeq": 10
+          },
+          {
+            "seq": 24,
+            "source": "native",
+            "stage": "sql_load_entered",
+            "elapsedMs": 3240,
+            "frontendSeq": null
+          },
+          {
+            "seq": 25,
+            "source": "native",
+            "stage": "sql_connect_started",
+            "elapsedMs": 3240,
+            "frontendSeq": null
+          },
+          {
+            "seq": 26,
+            "source": "native",
+            "stage": "get_app_info_received",
+            "elapsedMs": 3240,
+            "frontendSeq": null
+          },
+          {
+            "seq": 27,
+            "source": "frontend",
+            "stage": "app_info_resolved",
+            "elapsedMs": 3242,
+            "frontendSeq": 11
+          },
+          {
+            "seq": 28,
+            "source": "native",
+            "stage": "sql_connect_resolved",
+            "elapsedMs": 3266,
+            "frontendSeq": null
+          },
+          {
+            "seq": 29,
+            "source": "native",
+            "stage": "sql_migration_started",
+            "elapsedMs": 3266,
+            "frontendSeq": null
+          },
+          {
+            "seq": 30,
+            "source": "native",
+            "stage": "sql_migration_resolved",
+            "elapsedMs": 3354,
+            "frontendSeq": null
+          },
+          {
+            "seq": 31,
+            "source": "native",
+            "stage": "sql_load_resolved",
+            "elapsedMs": 3354,
+            "frontendSeq": null
+          },
+          {
+            "seq": 32,
+            "source": "frontend",
+            "stage": "db_load_resolved",
+            "elapsedMs": 3357,
+            "frontendSeq": 12
+          },
+          {
+            "seq": 33,
+            "source": "frontend",
+            "stage": "schema_read_started",
+            "elapsedMs": 3357,
+            "frontendSeq": 13
+          },
+          {
+            "seq": 34,
+            "source": "frontend",
+            "stage": "schema_read_resolved",
+            "elapsedMs": 3361,
+            "frontendSeq": 14
+          },
+          {
+            "seq": 35,
+            "source": "frontend",
+            "stage": "backend_init_resolved",
+            "elapsedMs": 3361,
+            "frontendSeq": 15
+          },
+          {
+            "seq": 36,
+            "source": "frontend",
+            "stage": "frontend_ready",
+            "elapsedMs": 3362,
+            "frontendSeq": 16
+          }
+        ]
+      },
+      "processJobFailure": {
+        "stage": "process_create",
+        "win32Error": 123,
+        "hresult": null,
+        "suspendCount": null
+      }
+    }
+  ],
+  "install": {
+    "mode": "nsis-install-reinstall-uninstall",
+    "isolatedPrefix": true,
+    "isolatedAppDirectories": true,
+    "systemPackageDatabaseChanged": true,
+    "attempts": {
+      "install": true,
+      "reinstall": false,
+      "uninstall": true
+    },
+    "sameVersionReinstall": false,
+    "crossVersionUpgrade": false,
+    "knownFoldersRegistryChanged": false
+  },
+  "errors": [
+    "process_job"
+  ],
+  "evidenceBoundary": {
+    "proven": [],
+    "excluded": [
+      "production default Known Folder storage or migration",
+      "old-version to new-version upgrade",
+      "automatic update or rollback",
+      "MSI or per-machine installation",
+      "normal user machine installation or UAC experience",
+      "UI hydration of the persisted session",
+      "real Provider availability",
+      "tool side-effect recovery",
+      "code signing or SmartScreen reputation"
+    ]
+  }
+}

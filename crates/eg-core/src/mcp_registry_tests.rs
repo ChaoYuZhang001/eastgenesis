@@ -13,21 +13,34 @@ fn only_error(v: Value) -> String {
 
 #[test]
 fn parses_standard_entries_with_extensions() {
+    let command = std::env::current_exe().unwrap().to_string_lossy().into_owned();
+    let cwd = std::env::temp_dir().join("eg-mcp-registry").to_string_lossy().into_owned();
     let r = reg(json!({ "mcpServers": {
-        "fs": { "command": "/opt/homebrew/bin/npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
-                "allowTools": ["read_text_file", "read_text_file", "list_directory"], "cwd": "/tmp" },
+        "fs": { "command": command, "args": ["-y", "@modelcontextprotocol/server-filesystem", cwd.clone()],
+                "allowTools": ["read_text_file", "read_text_file", "list_directory"], "cwd": cwd },
         "gh": { "command": "gh-mcp", "env": { "GITHUB_TOKEN": "${keychain:GITHUB_TOKEN}", "LOG_LEVEL": "info" },
                 "allow_tools": "*", "trust_annotations": true, "disabled": false }
     }}));
     assert!(r.errors.is_empty(), "{:?}", r.errors);
     let fs = &r.entries["fs"];
     assert_eq!(fs.allow_tools, AllowTools::Only(vec!["read_text_file".into(), "list_directory".into()]));
-    assert!(!fs.trust_annotations && fs.cwd.as_deref() == Some("/tmp") && fs.args.len() == 3);
+    assert!(!fs.trust_annotations && fs.cwd.as_deref() == Some(cwd.as_str()) && fs.args.len() == 3);
     let gh = &r.entries["gh"];
     assert!(gh.allow_tools.allows("anything") && gh.trust_annotations);
     assert_eq!(gh.refs(), vec![(RefSource::Keychain, "GITHUB_TOKEN".to_string())]);
     assert_eq!(serde_json::to_value(&gh.allow_tools).unwrap(), json!("*"));
     assert_eq!(serde_json::to_value(&fs.allow_tools).unwrap(), json!(["read_text_file", "list_directory"]));
+}
+
+#[test]
+fn cwd_requires_native_absolute_path() {
+    #[cfg(windows)]
+    let invalid_paths = ["relative/dir", "/tmp/dir", r"\tmp\dir", "C:relative"];
+    #[cfg(not(windows))]
+    let invalid_paths = ["relative/dir", "C:/tmp/dir", r"C:\tmp\dir", "C:relative"];
+    for cwd in invalid_paths {
+        assert!(only_error(json!({ "command": "srv", "cwd": cwd })).contains("绝对路径"), "{cwd}");
+    }
 }
 
 #[test]

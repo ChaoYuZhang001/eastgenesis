@@ -56,6 +56,22 @@ pub fn validate_root(raw: &str, home: Option<&Path>) -> AppResult<String> {
     } else {
         collapsed
     };
+    // 原生目录选择器通常返回绝对路径；如果它位于当前用户 home 下，
+    // 统一保存成 ~/...，这样不会把同一目录同时记录成绝对路径和默认的
+    // ~/Downloads，也不会把机器的 home 前缀写进 file-roots.json。
+    let path = if let Some(home) = home {
+        if let Ok(rest) = Path::new(&path).strip_prefix(home) {
+            if rest.as_os_str().is_empty() {
+                "~".to_string()
+            } else {
+                format!("~/{}", rest.to_string_lossy().replace('\\', "/"))
+            }
+        } else {
+            path
+        }
+    } else {
+        path
+    };
     if path == "/" || path == "//" {
         return Err(invalid("不能把整个磁盘加入允许列表"));
     }
@@ -130,8 +146,10 @@ impl FileRootsStore {
             if self.extra.len() + DEFAULT_ROOTS.len() >= MAX_ROOTS {
                 return Err(invalid(&format!("最多 {MAX_ROOTS} 个目录，请先移除一些")));
             }
-            self.extra.push(p);
-            self.persist()?;
+            let mut next = self.extra.clone();
+            next.push(p);
+            self.persist(&next)?;
+            self.extra = next;
         }
         Ok(self.list())
     }
@@ -142,18 +160,20 @@ impl FileRootsStore {
         if DEFAULT_ROOTS.contains(&p.as_str()) {
             return Err(invalid("~/Downloads 是默认目录，不能移除"));
         }
-        let before = self.extra.len();
-        self.extra.retain(|e| e != &p);
-        let had = self.extra.len() != before;
+        let next: Vec<String> = self.extra.iter().filter(|e| *e != &p).cloned().collect();
+        let had = next.len() != self.extra.len();
         if had {
-            self.persist()?;
+            self.persist(&next)?;
+            self.extra = next;
         }
         Ok(had)
     }
 
-    fn persist(&self) -> AppResult<()> {
+    /// Publish permission changes in memory only after the atomic file replace
+    /// succeeds; an error must preserve the published allowed-root state.
+    fn persist(&self, next: &[String]) -> AppResult<()> {
         let Some(path) = &self.path else { return Ok(()) };
-        let json = serde_json::to_string_pretty(&self.extra).map_err(|e| AppError::internal(e.to_string()))?;
+        let json = serde_json::to_string_pretty(next).map_err(|e| AppError::internal(e.to_string()))?;
         if let Some(dir) = path.parent() {
             std::fs::create_dir_all(dir).map_err(write_err)?;
         }
@@ -167,30 +187,95 @@ impl FileRootsStore {
 mod tests {
     use super::*;
 
-    const HOME: &str = "/home/tester";
+    fn native_path(relative: &str) -> PathBuf {
+        std::env::temp_dir().join("eg-roots-fixtures").join(relative)
+    }
+
+    fn home() -> PathBuf {
+        native_path("home/tester")
+    }
 
     fn store() -> FileRootsStore {
-        FileRootsStore { path: None, extra: Vec::new(), home: Some(PathBuf::from(HOME)) }
+        FileRootsStore { path: None, extra: Vec::new(), home: Some(home()) }
+    }
+
+    struct OwnedTestDirectory(PathBuf);
+
+    impl OwnedTestDirectory {
+        fn new(label: &str) -> Self {
+            let nonce = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+            let path = std::env::temp_dir().join(format!("eg-roots-{label}-{}-{nonce}", std::process::id()));
+            std::fs::create_dir(&path).unwrap();
+            Self(path)
+        }
+
+        fn blocked_destination(&self) -> PathBuf {
+            let blocker = self.0.join("parent-is-a-file");
+            std::fs::write(&blocker, "owned synthetic storage blocker").unwrap();
+            blocker.join("file-roots.json")
+        }
+    }
+
+    impl Drop for OwnedTestDirectory {
+        fn drop(&mut self) { let _ = std::fs::remove_dir_all(&self.0); }
+    }
+
+    #[test]
+    fn failed_persistence_does_not_grant_a_new_root_in_memory() {
+        let owned = OwnedTestDirectory::new("failed-add");
+        let mut s = store();
+        s.path = Some(owned.blocked_destination());
+        let before = s.raw_roots();
+        assert_eq!(s.add("~/Documents/new-access").unwrap_err().code, "config_write_failed");
+        assert_eq!(s.raw_roots(), before, "a rejected permission save must not change the published allowed-root state");
+    }
+
+    #[test]
+    fn failed_persistence_does_not_revoke_a_root_in_memory() {
+        let owned = OwnedTestDirectory::new("failed-remove");
+        let mut s = store();
+        s.add("~/Documents/existing-access").unwrap();
+        s.path = Some(owned.blocked_destination());
+        let before = s.raw_roots();
+        assert_eq!(s.remove("~/Documents/existing-access").unwrap_err().code, "config_write_failed");
+        assert_eq!(s.raw_roots(), before, "a rejected permission save must leave the prior state intact");
     }
 
     #[test]
     fn validate_root_normalizes_and_rejects_dangerous_paths() {
-        let home = Some(Path::new(HOME));
+        let home_path = home();
+        let home = Some(home_path.as_path());
         assert_eq!(validate_root("  ~/Documents/合同  ", home).unwrap(), "~/Documents/合同");
         assert_eq!(validate_root("~/a//b/", home).unwrap(), "~/a/b");
-        assert_eq!(validate_root("/Users/x/Docs", home).unwrap(), "/Users/x/Docs");
+        assert_eq!(validate_root(home_path.join("Documents").to_str().unwrap(), home).unwrap(), "~/Documents");
+        let other = native_path("other/Docs");
+        assert_eq!(validate_root(other.to_str().unwrap(), home).unwrap(), other.to_string_lossy().replace('\\', "/"));
         // 空、控制字符、太长
         assert!(validate_root("   ", home).is_err());
         assert!(validate_root("/tmp/a\u{7}", home).is_err());
         assert!(validate_root(&format!("/tmp/{}", "a".repeat(MAX_ROOT_LEN + 1)), home).is_err());
         // 整个磁盘、整个家目录
         assert!(validate_root("/", home).is_err());
-        assert!(validate_root(HOME, home).is_err());
+        assert!(validate_root(home_path.to_str().unwrap(), home).is_err());
         assert!(validate_root("~", home).is_err());
         // 相对路径、..
         assert!(validate_root("Documents", home).is_err());
         assert!(validate_root("~/Documents/../Secrets", home).is_err());
         assert!(validate_root("/tmp/../etc", home).is_err());
+    }
+
+    #[test]
+    fn validate_root_requires_native_absolute_paths() {
+        let native = native_path("absolute/dir");
+        assert!(validate_root(native.to_str().unwrap(), None).is_ok());
+        #[cfg(windows)]
+        for raw in ["/tmp/dir", r"\tmp\dir", "C:relative"] {
+            assert!(validate_root(raw, None).is_err(), "非绝对路径不应被接受：{raw}");
+        }
+        #[cfg(not(windows))]
+        for raw in ["C:/tmp/dir", r"C:\tmp\dir", "C:relative"] {
+            assert!(validate_root(raw, None).is_err(), "非原生绝对路径不应被接受：{raw}");
+        }
     }
 
     #[test]
@@ -203,6 +288,7 @@ mod tests {
         assert_eq!(s.raw_roots(), vec!["~/Downloads".to_string(), "~/Documents/合同".to_string()]);
         // 再把默认目录加一遍不会重复
         s.add("~/Downloads").unwrap();
+        s.add(home().join("Downloads").to_str().unwrap()).unwrap();
         assert_eq!(s.raw_roots().len(), 2);
         assert!(!s.list()[1].fixed);
     }
@@ -210,10 +296,11 @@ mod tests {
     #[test]
     fn remove_drops_user_roots_but_not_the_default() {
         let mut s = store();
-        s.add("/data/项目").unwrap();
-        assert!(s.remove("/data/项目").unwrap());
+        let root = native_path("data/项目");
+        s.add(root.to_str().unwrap()).unwrap();
+        assert!(s.remove(root.to_str().unwrap()).unwrap());
         assert_eq!(s.raw_roots(), vec!["~/Downloads".to_string()]);
-        assert!(!s.remove("/data/项目").unwrap());
+        assert!(!s.remove(root.to_str().unwrap()).unwrap());
         assert_eq!(s.remove("~/Downloads").unwrap_err().code, "invalid_root");
         assert!(s.add("/").is_err());
     }
@@ -223,10 +310,10 @@ mod tests {
         let mut s = store();
         // 合计不超过 MAX_ROOTS：默认目录占一个名额
         for i in 0..MAX_ROOTS - DEFAULT_ROOTS.len() {
-            s.add(&format!("/data/dir-{i}")).unwrap();
+            s.add(native_path(&format!("data/dir-{i}")).to_str().unwrap()).unwrap();
         }
         assert_eq!(s.raw_roots().len(), MAX_ROOTS);
-        assert!(s.add("/data/one-more").is_err());
+        assert!(s.add(native_path("data/one-more").to_str().unwrap()).is_err());
     }
 
     #[test]
@@ -236,16 +323,16 @@ mod tests {
         let path = dir.join("file-roots.json");
         let _ = std::fs::remove_file(&path);
         // 文件不存在：只有默认目录
-        assert_eq!(FileRootsStore::load(&path, Some(PathBuf::from(HOME))).unwrap().raw_roots(), vec!["~/Downloads"]);
+        assert_eq!(FileRootsStore::load(&path, Some(home())).unwrap().raw_roots(), vec!["~/Downloads"]);
         // 里面有不合法的一条：丢掉那一条，其余保留
         std::fs::write(&path, r#"["~/Documents", "/", "relative/x"]"#).unwrap();
         assert_eq!(
-            FileRootsStore::load(&path, Some(PathBuf::from(HOME))).unwrap().raw_roots(),
+            FileRootsStore::load(&path, Some(home())).unwrap().raw_roots(),
             vec!["~/Downloads".to_string(), "~/Documents".to_string()]
         );
         // 内容不是 JSON 数组：报 config_corrupt（用户看得出文件坏了）
         std::fs::write(&path, "{oops").unwrap();
-        assert_eq!(FileRootsStore::load(&path, Some(PathBuf::from(HOME))).unwrap_err().code, "config_corrupt");
+        assert_eq!(FileRootsStore::load(&path, Some(home())).unwrap_err().code, "config_corrupt");
         let _ = std::fs::remove_file(&path);
     }
 
@@ -255,9 +342,9 @@ mod tests {
         let _ = std::fs::create_dir_all(&dir);
         let path = dir.join("file-roots.json");
         let _ = std::fs::remove_file(&path);
-        let mut s = FileRootsStore::load(&path, Some(PathBuf::from(HOME))).unwrap();
+        let mut s = FileRootsStore::load(&path, Some(home())).unwrap();
         s.add("~/Documents/合同").unwrap();
-        let back = FileRootsStore::load(&path, Some(PathBuf::from(HOME))).unwrap();
+        let back = FileRootsStore::load(&path, Some(home())).unwrap();
         assert_eq!(back.raw_roots(), vec!["~/Downloads".to_string(), "~/Documents/合同".to_string()]);
         // 落盘的是用户加的那部分，默认目录不写进文件
         assert_eq!(std::fs::read_to_string(&path).unwrap().trim(), "[\n  \"~/Documents/合同\"\n]");

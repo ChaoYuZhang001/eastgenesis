@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "phase": "route-transparency-v2",
+  "observedAt": "2026-10-07T03:29:44.234082+00:00",
+  "passed": true,
+  "sourceUnchanged": true,
+  "sourceInputs": 17,
+  "sourceHashes": {
+    "src/decision/router.ts": "1fd6d8a2d0c02b78ce34b0ae4816d0605a227baf06d1731860f1677cebb7fe51",
+    "src/lib/desktop-evidence.ts": "9b7299dfd4b2ba711dae34b9aa6c0ad60dde0d6f1ee29406fc022bfb80e37ca1",
+    "src/agent/llm.ts": "33a2a94ca3a672bbae787573c3294232c2b91dba4a9d7070b56de4a318195203",
+    "tools/desktop-evidence-validate.mjs": "06801adf38e0a1fa66206ff332b8cf3f994280c381008b963f1b976b94cdfe2a",
+    "src/components/chat/RouteLine.tsx": "e0860ef84db6f4281262c63ba49d230f48e49db68e22f9a724a5b41ab276dfd2",
+    "src/lib/route-summary.ts": "cee5dda58a966fea8009e487528385479670dd204ae718b1871f11fa0e2a2033",
+    "tests/route-failure-evidence.test.ts": "61bd7e60e39f8d13e02f7c1142f3e4c783b3c1681aef82c7d0bf27302e084d13",
+    "tests/ui-route-failure.test.tsx": "954551fcb7943cf42362b4f6671fa2568b426f39b816afbc4a48ad9aa0640a2f",
+    "tests/decision-router.test.ts": "3abcfb33bbe8aa7084e0d66714072098d1b10465ed13bb15b3b06c0b95fd2858",
+    "tests/desktop-evidence.test.ts": "d7d4aba32560655fe34d5db6d18a5df2830a15755f772a368b2b00b77962e2c9",
+    "tests/desktop-evidence-validate.test.ts": "21c38c77b260f401216df6e60db31b567762d963ed2460b06abdcf60a8666ae9",
+    "tests/agent-runtime.test.ts": "ed4cc19f8cfff14a49b0f2779defefa41739ab94ad563bb82b020a8d0d0128b6",
+    "tests/chat-helpers.test.ts": "f8e44bca7f89b00bb4d330dadbc8ccd338c6432c423b533370b91c0440b67f88",
+    "tests/ui-assistant-turn.test.tsx": "20b5f7a593dbb367d3c7a077b4dca0fa5a35146481ff0f4fb8fa1b9c50563b40",
+    "src/agent/runtime.ts": "652ca3075647975e309e997fdd1e48ad273ac05f50f39243beed1f886da2d89a",
+    "src/agent/types.ts": "185d66b64f19c5ed68d78a39657c80d03dc36cc1e00dade4e1db2f99941e28bd",
+    "src/lib/timeline.ts": "74fe842f43b589427fd8eae5769b3127bb3b76aa1e74b0c728f3f1302a813ea1"
+  },
+  "sourceEndHashes": {
+    "src/decision/router.ts": "1fd6d8a2d0c02b78ce34b0ae4816d0605a227baf06d1731860f1677cebb7fe51",
+    "src/lib/desktop-evidence.ts": "9b7299dfd4b2ba711dae34b9aa6c0ad60dde0d6f1ee29406fc022bfb80e37ca1",
+    "src/agent/llm.ts": "33a2a94ca3a672bbae787573c3294232c2b91dba4a9d7070b56de4a318195203",
+    "tools/desktop-evidence-validate.mjs": "06801adf38e0a1fa66206ff332b8cf3f994280c381008b963f1b976b94cdfe2a",
+    "src/components/chat/RouteLine.tsx": "e0860ef84db6f4281262c63ba49d230f48e49db68e22f9a724a5b41ab276dfd2",
+    "src/lib/route-summary.ts": "cee5dda58a966fea8009e487528385479670dd204ae718b1871f11fa0e2a2033",
+    "tests/route-failure-evidence.test.ts": "61bd7e60e39f8d13e02f7c1142f3e4c783b3c1681aef82c7d0bf27302e084d13",
+    "tests/ui-route-failure.test.tsx": "954551fcb7943cf42362b4f6671fa2568b426f39b816afbc4a48ad9aa0640a2f",
+    "tests/decision-router.test.ts": "3abcfb33bbe8aa7084e0d66714072098d1b10465ed13bb15b3b06c0b95fd2858",
+    "tests/desktop-evidence.test.ts": "d7d4aba32560655fe34d5db6d18a5df2830a15755f772a368b2b00b77962e2c9",
+    "tests/desktop-evidence-validate.test.ts": "21c38c77b260f401216df6e60db31b567762d963ed2460b06abdcf60a8666ae9",
+    "tests/agent-runtime.test.ts": "ed4cc19f8cfff14a49b0f2779defefa41739ab94ad563bb82b020a8d0d0128b6",
+    "tests/chat-helpers.test.ts": "f8e44bca7f89b00bb4d330dadbc8ccd338c6432c423b533370b91c0440b67f88",
+    "tests/ui-assistant-turn.test.tsx": "20b5f7a593dbb367d3c7a077b4dca0fa5a35146481ff0f4fb8fa1b9c50563b40",
+    "src/agent/runtime.ts": "652ca3075647975e309e997fdd1e48ad273ac05f50f39243beed1f886da2d89a",
+    "src/agent/types.ts": "185d66b64f19c5ed68d78a39657c80d03dc36cc1e00dade4e1db2f99941e28bd",
+    "src/lib/timeline.ts": "74fe842f43b589427fd8eae5769b3127bb3b76aa1e74b0c728f3f1302a813ea1"
+  },
+  "v1OriginalReport": {
+    "path": "/tmp/eastgenesis-route-failure-regression.json",
+    "bytes": 6539,
+    "sha256": "0266c842b3f6ea9be48718ddcdc3bf6741251967cf56bf25649763a0d9390ac1"
+  },
+  "logs": {
+    "initial-fixture-red": {
+      "path": "/tmp/eastgenesis-route-failure-v2-initial-fixture-red.log",
+      "bytes": 17141,
+      "sha256": "9634dfbac58dd16d41c821ff4ef82ba04e8c7233601dd78963687b39147ddd8b"
+    },
+    "red": {
+      "path": "/tmp/eastgenesis-route-failure-v2-red.log",
+      "bytes": 17153,
+      "sha256": "d304d0eb005060d562d5290724ac4a518654c0fb4b0b8e1c2ee7f0605d35842a"
+    },
+    "green": {
+      "path": "/tmp/eastgenesis-route-failure-v2-green.log",
+      "bytes": 668,
+      "sha256": "700213c438099faeed66f8114f476fd07dbb4cb9b855dcf3ce402427d6151f10"
+    },
+    "typecheck": {
+      "path": "/tmp/eastgenesis-route-failure-v2-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "pre-timeline-final-green": {
+      "path": "/tmp/eastgenesis-route-failure-v2-pre-timeline-final-green.log",
+      "bytes": 668,
+      "sha256": "b1a0cd8f72b5dbf3b9edfa00fadb768f5ba31bcd619caec1595c951233fde98f"
+    },
+    "pre-timeline-final-typecheck": {
+      "path": "/tmp/eastgenesis-route-failure-v2-pre-timeline-final-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "timeline-red": {
+      "path": "/tmp/eastgenesis-route-failure-v2-timeline-red.log",
+      "bytes": 9159,
+      "sha256": "e52016fb8c8f9f4cc95b180a07a0dcbe4f5dfb0457ac72f9f50159559a2eae74"
+    },
+    "timeline-expanded-red": {
+      "path": "/tmp/eastgenesis-route-failure-v2-timeline-expanded-red.log",
+      "bytes": 10484,
+      "sha256": "5a04aa488f8fa06ebd3cbfe295ae50be71d05bb71bd69c3fb90a6c7a5a2f5cb1"
+    },
+    "timeline-green": {
+      "path": "/tmp/eastgenesis-route-failure-v2-timeline-green.log",
+      "bytes": 399,
+      "sha256": "6dbd360da83c35130a6b2a2b97f48ae6db3e8ce421658626f8088d1904b54186"
+    },
+    "pre-success-ui-final-green": {
+      "path": "/tmp/eastgenesis-route-failure-v2-pre-success-ui-final-green.log",
+      "bytes": 668,
+      "sha256": "2d3d535d08d0a7648a6995cda614eac00e99bbd038d7e6c4d1701d2081ea740e"
+    },
+    "pre-success-ui-final-typecheck": {
+      "path": "/tmp/eastgenesis-route-failure-v2-pre-success-ui-final-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "success-ui-fixture-error-success-ui-red": {
+      "path": "/tmp/eastgenesis-route-failure-v2-success-ui-fixture-error-success-ui-red.log",
+      "bytes": 3946,
+      "sha256": "55d076dd6d96cc6da13a7ff963098043417db19014d878e312653b9534930a5e"
+    },
+    "success-ui-fixture-error-success-ui-green": {
+      "path": "/tmp/eastgenesis-route-failure-v2-success-ui-fixture-error-success-ui-green.log",
+      "bytes": 4119,
+      "sha256": "1f9d0a30edf9ccb334a379fcd00c45800b4d59a8b3c9a9c008ee03280a13d276"
+    },
+    "success-ui-red": {
+      "path": "/tmp/eastgenesis-route-failure-v2-success-ui-red.log",
+      "bytes": 4083,
+      "sha256": "d9bada4ed9ee592b3fe91e4b75d7adb838d4de180ccef05e806891fd1eb92d35"
+    },
+    "final-green": {
+      "path": "/tmp/eastgenesis-route-failure-v2-final-green.log",
+      "bytes": 669,
+      "sha256": "ed412cb1a2b027340f234179179d8992a9ab459e62406a65841b839940e8321c"
+    },
+    "final-typecheck": {
+      "path": "/tmp/eastgenesis-route-failure-v2-final-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "redSourceBindings": {
+    "core": {
+      "path": "/tmp/eastgenesis-route-failure-v2-red-source-sha.json",
+      "bytes": 819,
+      "sha256": "8f49f4cde011cd4e280dc197b2e5e27ec15f921e64fab093bd66ca00760b22f1"
+    },
+    "timelineExpanded": {
+      "path": "/tmp/eastgenesis-route-failure-v2-timeline-expanded-red-source-sha.json",
+      "bytes": 411,
+      "sha256": "baaea40886c48cb9069dac7bd04cbd43bcbb51bf4a9b3d3811331dc0058d40e2"
+    },
+    "successUi": {
+      "path": "/tmp/eastgenesis-route-failure-v2-success-ui-red-source-sha.json",
+      "bytes": 313,
+      "sha256": "6e53f0d4c59e930fc1cee3a344908b05cc10264044c3d5551dbcea90cb9a1248"
+    }
+  },
+  "intermediateBindings": {
+    "beforeTimeline": {
+      "path": "/tmp/eastgenesis-route-failure-v2-pre-timeline-bound-sha.json",
+      "bytes": 3416,
+      "sha256": "a45f0f552f61c963ccf5bf430143348c639c9ad4eb85629c1e8c6868084eed37"
+    },
+    "beforeSuccessUi": {
+      "path": "/tmp/eastgenesis-route-failure-v2-pre-success-ui-bound-sha.json",
+      "bytes": 3606,
+      "sha256": "8cc9cfb4d5c16ed6b95ab877900b4dcac034c052080eef8bd34cad262c1b95dd"
+    }
+  },
+  "executions": [
+    {
+      "kind": "expected_red",
+      "session": 36407,
+      "exitCode": 1,
+      "files": 2,
+      "failed": 13,
+      "passed": 9,
+      "log": "red"
+    },
+    {
+      "kind": "first_green",
+      "session": 95369,
+      "exitCode": 0,
+      "files": 8,
+      "passed": 152,
+      "failed": 0,
+      "skipped": 0,
+      "log": "green"
+    },
+    {
+      "kind": "first_typecheck",
+      "session": 76269,
+      "exitCode": 0,
+      "log": "typecheck"
+    },
+    {
+      "kind": "bound_green_before_timeline",
+      "session": 99349,
+      "exitCode": 0,
+      "files": 8,
+      "passed": 152,
+      "failed": 0,
+      "skipped": 0,
+      "log": "pre-timeline-final-green"
+    },
+    {
+      "kind": "typecheck_before_timeline",
+      "session": 19161,
+      "exitCode": 0,
+      "log": "pre-timeline-final-typecheck"
+    },
+    {
+      "kind": "expected_timeline_red",
+      "session": 20193,
+      "exitCode": 1,
+      "files": 1,
+      "failed": 6,
+      "passed": 12,
+      "log": "timeline-red"
+    },
+    {
+      "kind": "expected_expanded_timeline_red",
+      "session": 21494,
+      "exitCode": 1,
+      "files": 1,
+      "failed": 7,
+      "passed": 12,
+      "log": "timeline-expanded-red"
+    },
+    {
+      "kind": "timeline_green",
+      "session": 95463,
+      "exitCode": 0,
+      "files": 3,
+      "passed": 50,
+      "failed": 0,
+      "skipped": 0,
+      "log": "timeline-green"
+    },
+    {
+      "kind": "bound_green_before_success_ui",
+      "session": 23018,
+      "exitCode": 0,
+      "files": 8,
+      "passed": 159,
+      "failed": 0,
+      "skipped": 0,
+      "log": "pre-success-ui-final-green"
+    },
+    {
+      "kind": "typecheck_before_success_ui",
+      "session": 7051,
+      "exitCode": 0,
+      "log": "pre-success-ui-final-typecheck"
+    },
+    {
+      "kind": "fixture_error_red_not_intended_regression",
+      "session": 82202,
+      "exitCode": 1,
+      "files": 1,
+      "failed": 2,
+      "passed": 10,
+      "log": "success-ui-fixture-error-success-ui-red"
+    },
+    {
+      "kind": "fixture_error_green_not_success",
+      "session": 1766,
+      "exitCode": 1,
+      "files": 4,
+      "failed": 2,
+      "passed": 60,
+      "log": "success-ui-fixture-error-success-ui-green"
+    },
+    {
+      "kind": "expected_success_ui_red_after_fixture_fix",
+      "session": 58060,
+      "exitCode": 1,
+      "files": 1,
+      "failed": 2,
+      "passed": 10,
+      "log": "success-ui-red"
+    },
+    {
+      "kind": "final_green",
+      "session": 14115,
+      "exitCode": 0,
+      "files": 8,
+      "passed": 161,
+      "failed": 0,
+      "skipped": 0,
+      "command": "pnpm exec vitest run tests/route-failure-evidence.test.ts tests/ui-route-failure.test.tsx tests/desktop-evidence.test.ts tests/desktop-evidence-validate.test.ts tests/decision-router.test.ts tests/agent-runtime.test.ts tests/chat-helpers.test.ts tests/ui-assistant-turn.test.tsx --minWorkers=2 --maxWorkers=2",
+      "log": "final-green"
+    },
+    {
+      "kind": "final_typecheck",
+      "session": 29408,
+      "exitCode": 0,
+      "command": "pnpm exec tsc --noEmit --incremental false",
+      "log": "final-typecheck"
+    }
+  ],
+  "scope": {
+    "edited": [
+      "src/decision/router.ts",
+      "src/lib/desktop-evidence.ts",
+      "src/agent/llm.ts",
+      "tools/desktop-evidence-validate.mjs",
+      "src/components/chat/RouteLine.tsx",
+      "src/lib/route-summary.ts",
+      "src/lib/timeline.ts",
+      "tests/route-failure-evidence.test.ts",
+      "tests/ui-route-failure.test.tsx",
+      "tests/decision-router.test.ts"
+    ],
+    "agentLlmChange": "Two comments only; executor behavior unchanged.",
+    "v1ExistingChatHelperHashUnchanged": true,
+    "newCoreAndTimelineTests": 19,
+    "independentUiAndSummaryTests": 12,
+    "realProvider": false,
+    "nativeApp": false,
+    "build": false,
+    "gitMutation": false
+  },
+  "validatedBehavior": [
+    "Actual routedLlm/emittingLlm partial stream invokes only first candidate, preserves partial marker, and does not imply unused candidates failed.",
+    "Actual response-too-large and repeated bad-request stop early; actual full chain server errors still report exhaustion.",
+    "Actual unhealthy and same-provider auth skip paths exclude uncalled profiles/providers from attempted projection.",
+    "Timeline and default UI distinguish called failures from skipped candidates on failure and success.",
+    "Mixed failed/skip/success UI fallback target is next actual call, not the skipped candidate.",
+    "Optional evidence models.skipped contains only profileId and fixed unhealthy/provider_down codes, emits no raw reason, and validator rejects extra keys/invalid values.",
+    "No-partial legacy failed events and no-skipped legacy summaries/evidence preserve compatible defaults."
+  ],
+  "evidenceLimits": [
+    "All Provider fixtures are synthetic; no real network Provider or native desktop lifecycle is verified.",
+    "Only-skipped error/event cases are compatibility records constructed directly: normal executeWithFallback tries the final candidate.",
+    "DesktopEvidence.models.calls and first/lastCallAt retain existing successful-llm-event meaning; they are not a total HTTP/request-attempt count.",
+    "DesktopEvidence.models.fallbackCount retains its existing unsuccessful-attempt-entry scope, excluding skipped rows; it is not redefined as a complete successful-transition or HTTP count.",
+    "Default folded downgrade count covers failed-call fallback transitions; skipped occurrence count is separately labeled uncalled.",
+    "Same profile may legitimately be in both historical skipped and attempted metadata across separate calls; skip-only entries do not become attempted.",
+    "Full suite, build, private55, public push and native cross-platform CI remain Root-owned next steps."
+  ],
+  "fixtureCorrections": [
+    "Initial v2 metadata it.each rows and provider typing corrected before definitive core red; pilot logs preserved.",
+    "Success UI answer fixtures initially lacked stream and streaming=false; preserved fixture-error red/green, then added full typed nonstreaming Provider. Production bytes were replayed against the pre-success-ui SHA before definitive two-case red, then exact implementation snapshot restored."
+  ]
+}

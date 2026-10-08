@@ -2,10 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Archive, ChevronRight, CircleHelp, Ellipsis, LoaderCircle, Pause, Play, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Menu, MenuItem } from "@/components/ui/menu";
-import { FAIL_CAUSE_LABEL, canTransition, failCause, goalPhase, type Goal, type GoalRound, type RoundVerdict } from "@/decision/goal";
+import { WORK_SURFACE_LABEL } from "@/decision";
+import { FAIL_CAUSE_LABEL, canTransition, failCause, goalPhase, hasUnknownGoalCalls, type Goal, type GoalRound, type RoundVerdict } from "@/decision/goal";
 import { RouteLine } from "@/components/chat/RouteLine";
 import { runGoal } from "@/lib/goal-run";
-import { routeSummary } from "@/lib/route-summary";
+import { latestSurface, routeSummary, surfaceJourneyTextFromEvents } from "@/lib/route-summary";
+import { recoveryCheckpoint, safeRecoveryReason } from "@/lib/recovery";
 import { lastRoute } from "@/lib/timeline";
 import { cn } from "@/lib/utils";
 import { savedText } from "@/lib/savings";
@@ -55,6 +57,7 @@ export function GoalDetail({ id }: { id: string }) {
 
 function GoalView({ goal }: { goal: Goal }) {
   const { start, pause, resolve } = useGoals();
+  const storeError = useGoals((s) => s.error);
   const project = useProjects((s) => (goal.project_id ? s.items.find((p) => p.id === goal.project_id) ?? null : null));
   const ask = useDialogs((s) => s.ask);
   const tasks = useTasks((s) => s.tasks);
@@ -66,6 +69,7 @@ function GoalView({ goal }: { goal: Goal }) {
   const working = phase === "working";
   const active = tasks.find((t) => t.id === goal.rounds.at(-1)?.task_id && t.status === "running") ?? null;
   const cause = goal.status === "failed" ? failCause(goal) : null;
+  const unknownCalls = !goal.quota&&hasUnknownGoalCalls(goal);
   const canAbandon = canTransition(goal.status, "abandoned");
   const run = async (f: () => Promise<string | null>) => setError(await f());
 
@@ -85,7 +89,7 @@ function GoalView({ goal }: { goal: Goal }) {
   const status = [
     goalStatusText(goal),
     goal.rounds.length ? `第 ${goal.rounds.length} 轮` : null,
-    `模型调用 ${goal.used_llm_calls} / ${goal.max_llm_calls}`,
+    goal.quota ? `已占用调用额度 ${goal.quota.consumed} / ${goal.quota.limit}` : unknownCalls ? `历史调用次数未知；旧保存记录 ${goal.used_llm_calls}，原上限 ${goal.max_llm_calls}` : `模型调用 ${goal.used_llm_calls} / ${goal.max_llm_calls}`,
     project ? project.name : null,
     // 路由摘要：这个目标下各轮用了哪些模型、和最强模式比省了多少（每轮都是一张任务卡，从它们的事件里统计）
     mine.length ? [sessionSummary(mine), saved].filter(Boolean).join(" · ") : null,
@@ -120,14 +124,20 @@ function GoalView({ goal }: { goal: Goal }) {
             {status.join(" · ")}
           </p>
           {cause && <p className="text-sm">失败原因：{FAIL_CAUSE_LABEL[cause]}</p>}
+          {goal.quota&&<p role="status" className="text-sm">额度上限创建时固定，涵盖主模型、决策与完成校验；已占用额度包括待确认调用，不代表实际 HTTP 请求数或费用。{Boolean(goal.quota.pending||goal.quota.unknown)&&" 调用结果尚未确认，不能自动重发；已保存成果仍可查看和确认。"}</p>}
+          {unknownCalls && (
+            <p role="status" className="text-sm">
+              历史调用结算尚未完整确认，旧保存记录不能作为实际总量或剩余额度；已有成果仍可查看和确认。
+            </p>
+          )}
           {working && (
             <p role="status" className="text-xs text-muted-foreground">
               正在执行第 {goal.rounds.length} 轮；每轮结束会按执行记录判断目标达成没有，没达成就自动开下一轮。
             </p>
           )}
-          {error && (
+          {(error || storeError) && (
             <p role="alert" className="text-sm">
-              {error}
+              {error || storeError}
             </p>
           )}
         </header>
@@ -182,11 +192,15 @@ function ActiveRound({ card }: { card: TaskCard }) {
   const { respond, respondPlan } = useTasks();
   const steps = useMemo(() => stepProgress(card.events), [card.events]);
   const current = steps.find((s) => s.state === "running") ?? steps.find((s) => s.state === "pending") ?? null;
+  const surface = latestSurface(card.events);
+  const journey = surfaceJourneyTextFromEvents(card.events);
   return (
     <section role="region" aria-label="正在执行的一轮" className="space-y-3 rounded-lg border border-border bg-surface-2 p-4">
       <p role="status" className="flex items-center gap-2 text-sm">
         <LoaderCircle aria-hidden className="size-4 shrink-0 animate-spin" />
         <span className="min-w-0 flex-1 truncate">{current ? current.goal : "正在准备下一步"}</span>
+        {surface && <span className="shrink-0 text-xs text-muted-foreground">· {WORK_SURFACE_LABEL[surface]}</span>}
+        {journey && <span className="shrink-0 text-xs text-muted-foreground">· {journey}</span>}
         <span className="shrink-0 text-xs text-muted-foreground">
           第 {steps.filter((s) => s.state === "done").length} / {steps.length} 步
         </span>
@@ -226,6 +240,8 @@ function RoundItem({ round, defaultOpen, card }: { round: GoalRound; defaultOpen
   // 这一轮的折叠路由行（V3 5.2）：模型、降级、省了多少，点开是路由决策和执行过程
   const events = card?.events ?? [];
   const summary = useMemo(() => routeSummary(lastRoute(events), events), [events]);
+  const recovery = useMemo(() => recoveryCheckpoint(events), [events]);
+  const recoveryReason = useMemo(() => (recovery ? safeRecoveryReason(recovery.reason) : null), [recovery]);
   return (
     <li className="rounded-lg border border-border">
       <button type="button" aria-expanded={open} aria-controls={body} onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm">
@@ -249,10 +265,49 @@ function RoundItem({ round, defaultOpen, card }: { round: GoalRound; defaultOpen
         ) : (
           <p className="text-muted-foreground">这一轮没有记录步骤。</p>
         )}
+        {card && <RoundOutput index={round.index} card={card} />}
+        {round.interruption_reason && <p role="status" className="text-muted-foreground">{round.interruption_reason}</p>}
         {round.verdict && <p className="text-muted-foreground">{verdictText(round.verdict)}</p>}
+        {recovery && round.status !== "running" && (
+          <section role="region" aria-label="恢复本轮" className="space-y-2 rounded-md border border-border bg-surface-2 p-3">
+            <p role="status" className="text-muted-foreground">
+              {recoveryReason ? `恢复原因：${recoveryReason}` : "这一轮没有完成，可以从未完成步骤继续。"}
+            </p>
+            {recovery.uncertainSteps.length > 0 && <p className="text-east-red">有步骤的副作用状态未知，继续前会重新确认。</p>}
+            <p className="text-xs text-muted-foreground">如果目标仍处于暂停状态，点击页面顶部的“继续”会先检查账本，再从这里的未完成步骤恢复。</p>
+          </section>
+        )}
         {summary && card && <RouteLine summary={summary} durationMs={card.endedAt ? card.endedAt - card.startedAt : null} card={card} />}
         {round.status === "running" && <p className="text-xs text-muted-foreground">这一轮还在跑，结束后才有判定。</p>}
       </div>
     </li>
+  );
+}
+
+// 目标任务不进入聊天会话，正文只在所属轮次展示，避免与 ActiveRound 重复。
+function RoundOutput({ index, card }: { index: number; card: TaskCard }) {
+  const running = card.status === "running";
+  const streaming = card.streamingText ?? "";
+  const summary = card.summary ?? "";
+  const showStream = Boolean(streaming.trim()) && card.status !== "completed";
+  const streamLabel = running ? "正在生成" : "部分输出";
+  const resultLabel = card.status === "completed" ? "总结" : "结果";
+  return (
+    <>
+      {showStream && (
+        <section role="region" aria-label={`第 ${index} 轮的${streamLabel}`} className="rounded-md bg-surface-2 p-3">
+          <p aria-hidden className={cn("mb-1 text-xs", running ? "text-muted-foreground" : "text-east-red")}>
+            {running ? "正在生成" : "生成中断，保留已收到的部分输出"}
+          </p>
+          <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{streaming}</p>
+        </section>
+      )}
+      {!running && Boolean(summary.trim()) && (
+        <section role="region" aria-label={`第 ${index} 轮的${resultLabel}`} className="rounded-md bg-surface-2 p-3">
+          <p aria-hidden className="mb-1 text-xs text-muted-foreground">{resultLabel}</p>
+          <p className="whitespace-pre-wrap [overflow-wrap:anywhere]">{summary}</p>
+        </section>
+      )}
+    </>
   );
 }

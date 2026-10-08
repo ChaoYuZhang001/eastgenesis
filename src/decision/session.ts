@@ -3,6 +3,7 @@
 // 调用记录（usage_calls）只存模型和 tokens，不存金额：金额按当前价目表在显示时计算（5.1）。
 import { redact } from "../core/redact";
 import { PROJECT_ID, fail, newId, type ProjectError } from "./project";
+import type { WorkSurface } from "./types";
 
 export const SESSION_ID = /^ses-[a-z0-9-]{1,48}$/;
 export const MAX_SESSIONS = 500;
@@ -19,6 +20,26 @@ export const sessionNotFound = (): ProjectError => fail("session_not_found", "�
 export const invalidSessionId = (): ProjectError => fail("invalid_session_id", "会话 ID 无效");
 export const sessionFull = (): ProjectError => fail("session_full", `最多保存 ${MAX_SESSIONS} 个会话，请先删除一些`);
 export const newSessionId = () => newId("ses");
+
+/** 一次主运行的完整调用计数；非终态只能作为下界，不能据此释放恢复预算。 */
+export interface RecoveryAccounting {
+  version: 1;
+  task_id: string;
+  run_id: string;
+  llm_calls: number;
+  final: boolean;
+}
+export const ACCOUNTING_RUN_ID = /^run-[a-z0-9-]{1,96}$/;
+export const ACCOUNTING_CALL_LIMIT = 500;
+export function normalizeRecoveryAccounting(v: unknown, taskId: string): RecoveryAccounting | null {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+  const a = v as Record<string, unknown>;
+  if (a.version !== 1 || a.task_id !== taskId || !/^task-[a-z0-9-]{1,48}$/.test(taskId)
+    || typeof a.run_id !== "string" || !ACCOUNTING_RUN_ID.test(a.run_id)
+    || !Number.isInteger(a.llm_calls) || (a.llm_calls as number) < 0 || (a.llm_calls as number) > ACCOUNTING_CALL_LIMIT
+    || typeof a.final !== "boolean") return null;
+  return { version: 1, task_id: taskId, run_id: a.run_id, llm_calls: a.llm_calls as number, final: a.final };
+}
 
 /** 存下来的一个回合：和 stores/tasks.ts 的 TaskCard 对应，只留回放需要的字段 */
 export interface StoredTurn {
@@ -38,6 +59,14 @@ export interface StoredTurn {
   mode: string;
   preference: string;
   preferenceSource: string;
+  /** 能力面提示；旧会话没有此字段时按自动判断恢复。 */
+  surfaceHint?: WorkSurface | null;
+  /** 进程在流式输出期间退出时，保存已经收到的有限文本，供重启后回放。 */
+  streamingText?: string;
+  /** 流式输出尚未收到终态；恢复回放时保持「部分输出」提示。 */
+  streamingInterrupted?: boolean;
+  /** null / 缺省：历史调用结算信息未知，不从有界事件或目标总数猜测。 */
+  recovery_accounting?: RecoveryAccounting | null;
 }
 
 export interface StoredSession {
@@ -90,10 +119,20 @@ export function scrub(v: unknown, depth = 0): unknown {
   return null;
 }
 
-function trimEvents(list: readonly unknown[]): unknown[] {
+function trimEvents(list: readonly unknown[], runId?: string): unknown[] {
   if (list.length <= MAX_STORED_EVENTS) return [...list];
   const head = 20;
-  return [...list.slice(0, head), ...list.slice(list.length - (MAX_STORED_EVENTS - head))];
+  const kept = [...list.slice(0, head), ...list.slice(list.length - (MAX_STORED_EVENTS - head))];
+  const isStart = (e: unknown) => !!e && typeof e === "object" && (e as Record<string, unknown>).type === "run_start" && (e as Record<string, unknown>).runId === runId;
+  if (runId && !kept.some(isStart)) {
+    const anchor = list.find(isStart);
+    if (anchor) {
+      const context = kept.findIndex((e, i) => i < head && !!e && typeof e === "object" && ["route", "memory", "skill"].includes(String((e as Record<string, unknown>).type)));
+      const omit = context < 0 ? 0 : context;
+      return [...kept.slice(0, head).filter((_, i) => i !== omit), anchor, ...kept.slice(head)];
+    }
+  }
+  return kept;
 }
 
 export function normalizeTurn(t: Partial<StoredTurn>): StoredTurn {
@@ -103,7 +142,7 @@ export function normalizeTurn(t: Partial<StoredTurn>): StoredTurn {
     goal: str(t.goal, 4000),
     status: str(t.status, 32),
     summary: strOrNull(t.summary, 20000),
-    events: trimEvents(Array.isArray(t.events) ? t.events : []).map((e) => scrub(e)),
+    events: trimEvents(Array.isArray(t.events) ? t.events : [], normalizeRecoveryAccounting(t.recovery_accounting, t.id ?? "")?.run_id).map((e) => scrub(e)),
     lock: strOrNull(t.lock, 200),
     permission: str(t.permission ?? "confirm", 16),
     files: (Array.isArray(t.files) ? t.files : []).slice(0, 20).map((f) => str(f, 200)),
@@ -114,6 +153,10 @@ export function normalizeTurn(t: Partial<StoredTurn>): StoredTurn {
     mode: str(t.mode ?? "quick", 16),
     preference: str(t.preference ?? "balanced", 16),
     preferenceSource: str(t.preferenceSource ?? "global", 16),
+    surfaceHint: t.surfaceHint === "chat" || t.surfaceHint === "work" || t.surfaceHint === "codex" ? t.surfaceHint : null,
+    streamingText: strOrNull(t.streamingText, 200_000) ?? "",
+    streamingInterrupted: t.streamingInterrupted === true,
+    recovery_accounting: normalizeRecoveryAccounting(t.recovery_accounting, t.id ?? ""),
   };
 }
 

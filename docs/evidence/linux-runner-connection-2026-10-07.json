@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "evidenceKind": "github-runner-report-extract",
+  "capturedAt": "2026-10-06T20:54:02.762821+00:00",
+  "source": {
+    "runId": 37527468910,
+    "jobId": 112488011840,
+    "headSha": "e260544227c57f453a41edb6798f77d395117fbf",
+    "platform": "ubuntu-latest",
+    "method": "exact JSON extracted from completed job log",
+    "reportSha256": "80b8b98e7543995f9b4b17810a054660fc742aff76be3b89ecf2a3ae5af76dde"
+  },
+  "report": {
+    "schemaVersion": 1,
+    "kind": "desktop-runner-evidence",
+    "platform": "linux",
+    "passed": true,
+    "checks": {
+      "providerShape": true,
+      "providerPassed": true,
+      "providerScenarios": true,
+      "providerRecovery": true,
+      "controlledShape": true,
+      "controlledPassed": true,
+      "controlledScenarios": true,
+      "controlledRecovery": true,
+      "routingShape": true,
+      "routingPassed": true,
+      "goldenShape": true,
+      "goldenPassed": true,
+      "goldenTasks": true,
+      "goalRecovery": true,
+      "goalValidation": true,
+      "webdriverShape": true,
+      "webdriverPassed": true,
+      "webdriverScenarios": true,
+      "package": true,
+      "installShape": true,
+      "installPassed": true,
+      "installFormat": true,
+      "installMode": true,
+      "installChecks": true,
+      "upgradeShape": true,
+      "upgradePassed": true,
+      "upgradeChecks": true,
+      "upgradeMode": true,
+      "upgradeVersions": true,
+      "upgradeDatabase": true,
+      "upgradeLaunches": true,
+      "windowsInstall": true,
+      "redaction": true
+    },
+    "evidenceBoundary": {
+      "proven": [
+        "required CI evidence files exist and pass their fixed schemas",
+        "platform-specific WebDriver/package evidence is present when applicable",
+        "uploaded JSON passes the shared redaction boundary"
+      ],
+      "excluded": [
+        "real Provider availability or SLA",
+        "real macOS WebView interaction",
+        "installation/upgrade success beyond the recorded package smoke"
+      ]
+    }
+  }
+}

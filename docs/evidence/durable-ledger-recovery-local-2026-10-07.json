@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "kind": "durable-ledger-recovery-local-final-validation",
+  "recordedAt": "2026-10-07T01:50:02.248389+00:00",
+  "localParentRevision": "b781765b3ed346d6da1d91f193f5279aaeb4caff",
+  "formalReleaseBinding": false,
+  "currentInputHashes": {
+    "src/agent/runtime.ts": "4aa6690c6cd8e5571ee07297688ca62f3fa10a4bd3bcfcb568734ffff220fcad",
+    "tests/agent-runtime.test.ts": "ed4cc19f8cfff14a49b0f2779defefa41739ab94ad563bb82b020a8d0d0128b6",
+    "tests/invocation-crash-process.test.ts": "fa290a1f601bca0bb7dd78ab34fe02a63db4b83f3564b48ec84721b48cbf6b97",
+    "tests/invocation-crash-worker.ts": "a1e145455a5d1d3fc67b13264de4155acb81ab24b5526bdbcf8273e91b41b95b",
+    "tests/recovery.test.ts": "648cdce0fcdfff8d34c99c3cd754f5d3cc853d8787b519f7f4399847eecab0a1",
+    "tests/session-recovery.test.ts": "97524030ff6ed20f4b75cec939f6ff3546f19d395e4a4263e954639bbf9c15eb",
+    "tests/invocation-ledger.test.ts": "a264a7cd525f0bc5195cccef049826a3e3d5adc3a02844615bc1d3d5cfb57309",
+    "tests/custom-providers.test.ts": "7351f35c79280bed2c45ebe635b60ab61422925b8633dbd2017d3464a34b328d",
+    "tests/llm.test.ts": "9e50f24c3a1f1f8f6267fc6494ccc0d56a801c6f8f25f08e84369833978952c5",
+    "tests/ui-settings.test.tsx": "e17cf0ba69b7c247b081d90b469ff60eb066fea2152c551a28e3a6b1ccb98d20",
+    ".github/workflows/desktop.yml": "b2091329630d40cc5859fd18619347650314c20882ef3b3064c73824e546df2a"
+  },
+  "inputHashTiming": "captured after tests; not a retrospective run-start manifest",
+  "checks": {
+    "typecheck": {
+      "command": "pnpm typecheck",
+      "execHandle": 46076,
+      "exitCode": 0,
+      "logFile": "eastgenesis-ledger-safe-final-typecheck.log",
+      "logBytes": 82,
+      "logSha256": "52c2d87b1af6c5c74dcf6e45d02b7c2255098879f14ad1a4f60ce69a18c2ffba",
+      "testFilesPassed": null,
+      "testsPassed": null,
+      "testsFailed": 0,
+      "testsSkipped": 0
+    },
+    "narrow": {
+      "command": "pnpm exec vitest run tests/agent-runtime.test.ts tests/recovery.test.ts tests/session-recovery.test.ts tests/invocation-ledger.test.ts tests/invocation-crash-process.test.ts --minWorkers=2 --maxWorkers=2",
+      "execHandle": 82011,
+      "exitCode": 0,
+      "logFile": "eastgenesis-ledger-safe-final-narrow.log",
+      "logBytes": 1231,
+      "logSha256": "82a0499fb4da6f9ebfba0558a7b64fbfbd5483f403b4941f39ad826947039c10",
+      "testFilesPassed": 5,
+      "testsPassed": 78,
+      "testsFailed": 0,
+      "testsSkipped": 0
+    },
+    "full": {
+      "command": "pnpm exec vitest run --minWorkers=2 --maxWorkers=2",
+      "execHandle": 94735,
+      "exitCode": null,
+      "logFile": "eastgenesis-ledger-safe-final-full-tests.log",
+      "logBytes": 46571,
+      "logSha256": "2e310724e0db5becf8d9ca9856b71bc9d1cf6448fbfdedfaf3626bf9dbdec72f",
+      "testFilesPassed": 102,
+      "testsPassed": 998,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "exitEvidence": "First read after compaction returned a closed handle with no exit_code; log proves 998 passed. Superseded by the explicitly bound final run."
+    },
+    "syntheticPrivateSmoke": {
+      "command": "pnpm exec vitest run tests/custom-providers.test.ts tests/llm.test.ts tests/ui-settings.test.tsx --minWorkers=2 --maxWorkers=2",
+      "execHandle": 50910,
+      "exitCode": 0,
+      "logFile": "eastgenesis-ledger-safe-final-private.log",
+      "logBytes": 729,
+      "logSha256": "3d37dae5115113bc5e6275bd7c106f14e57d341e48dcdc585541a6245aab3d92",
+      "testFilesPassed": 3,
+      "testsPassed": 55,
+      "testsFailed": 0,
+      "testsSkipped": 0
+    },
+    "finalBoundFull": {
+      "command": "pnpm exec vitest run --minWorkers=2 --maxWorkers=2",
+      "execHandle": 52612,
+      "exitCode": 0,
+      "logFile": "eastgenesis-ledger-safe-final-bound-tests.log",
+      "logSha256": "68b2ad6c50734d3bb148300e42e206f4ad07163720aa687ede9c6432e79c2624",
+      "logBytes": 45735,
+      "testFilesPassed": 102,
+      "testsPassed": 998,
+      "testsSkipped": 0,
+      "testsFailed": 0,
+      "startedAt": "2026-10-07T01:56:26.103Z",
+      "finishedAt": "2026-10-07T01:57:40.676Z",
+      "sourceInputs": 499,
+      "sourceUnchanged": true,
+      "nativeMcpBinaryBytes": 2709240,
+      "nativeMcpBinarySha256": "90fb4c64cfdfed89bf687e74a18735dccaf9e502f17cdd296ca3767c4a6b29b4",
+      "nativeMcpUnchanged": true,
+      "manifestFile": "durable-ledger-recovery-bound-tests-2026-10-07.json",
+      "manifestSha256": "0f48c3498c9cd23d9f8eed2ae502e7251901e10db185b5397a4c17ead38879b4",
+      "independentPerFileRecount": true,
+      "independentCurrentInputRehash": true
+    }
+  },
+  "redEvidence": [
+    {
+      "scope": "first recovery bug",
+      "recordFile": "eastgenesis-plan-only-ledger-regression.json",
+      "sha256": "6f98ae1a60940f1e0fcef1ac4ced0ae1394939fb19f248f1a05e9492ff69be2a",
+      "record": {
+        "schemaVersion": 1,
+        "kind": "plan-only-durable-ledger-regression",
+        "frozenAt": "2026-10-07T01:25:51.085841+00:00",
+        "sourceBeforeSha256": "7af0a1bf2378f7502719e731c85d75e6ab80d7a1e34757e76495a2a5cbb7de90",
+        "fileHashes": {
+          "src/agent/runtime.ts": "2e4acf01c37b659f1b8a8b58460840138d15f8934d5f6146e6e165b1391cfc29",
+          "tests/agent-runtime.test.ts": "e3fd97246fca5aa0656f2eb3389f3ccdd195ded5e8a5df9b01c366cf9d419631"
+        },
+        "attempts": [
+          {
+            "log": "eastgenesis-plan-only-ledger-before-initial-fixture.log",
+            "sha256": "209a6fe4c338ab0c9a06c0d728096940f8da683471ee0eb86bf845f013936cd5",
+            "execHandle": 98432,
+            "exitCode": 1
+          },
+          {
+            "log": "eastgenesis-plan-only-ledger-before.log",
+            "sha256": "637d9dae99dc2a08bd6a9378acadee7fa2c579fc1a25be9604c99e586432b382",
+            "execHandle": 24018,
+            "exitCode": 1
+          },
+          {
+            "log": "eastgenesis-plan-only-ledger-after.log",
+            "sha256": "2e150e725f8a5d7ba123b932e45e0c10c1dd3ef3f519ea93c2739580db89f630",
+            "execHandle": 56061,
+            "exitCode": 0
+          }
+        ],
+        "before": {
+          "failed": 3,
+          "passed": 1,
+          "skippedExistingTests": 54,
+          "appliedFixtureUsesProductionTerminalClaim": true
+        },
+        "after": {
+          "command": "pnpm exec vitest run tests/agent-runtime.test.ts tests/recovery.test.ts tests/session-recovery.test.ts tests/invocation-ledger.test.ts",
+          "filesPassed": 4,
+          "testsPassed": 74,
+          "testsSkipped": 0,
+          "testsFailed": 0
+        },
+        "initialFixtureCorrection": "First synthetic claim incorrectly returned acquired for applied; initial log retained and not used to claim production applied duplicate execution",
+        "evidenceBoundary": [
+          "Actual AgentRuntime plus recoveryCheckpoint with synthetic in-memory ledger and LLM",
+          "4 existing invocation-ledger tests use isolated SQLite",
+          "No historical native app, GUI, build, Provider, Cargo or production data run"
+        ]
+      }
+    },
+    {
+      "scope": "ledger read bug",
+      "recordFile": "eastgenesis-ledger-read-error-regression.json",
+      "sha256": "5f9b2a4a1d47617633b47ccd435e19e10d52636ff6d9f01fbdcb039347ffb0db",
+      "record": {
+        "schemaVersion": 1,
+        "kind": "ledger-read-error-fail-closed-regression",
+        "frozenAt": "2026-10-07T01:41:02.917648+00:00",
+        "changedFilesOwnedByAgent": [
+          "src/agent/runtime.ts",
+          "tests/agent-runtime.test.ts"
+        ],
+        "fileHashes": {
+          "src/agent/runtime.ts": "4aa6690c6cd8e5571ee07297688ca62f3fa10a4bd3bcfcb568734ffff220fcad",
+          "tests/agent-runtime.test.ts": "ed4cc19f8cfff14a49b0f2779defefa41739ab94ad563bb82b020a8d0d0128b6",
+          "tests/recovery.test.ts": "648cdce0fcdfff8d34c99c3cd754f5d3cc853d8787b519f7f4399847eecab0a1",
+          "tests/session-recovery.test.ts": "97524030ff6ed20f4b75cec939f6ff3546f19d395e4a4263e954639bbf9c15eb",
+          "tests/invocation-ledger.test.ts": "a264a7cd525f0bc5195cccef049826a3e3d5adc3a02844615bc1d3d5cfb57309",
+          "tests/invocation-crash-process.test.ts": "5d3356afc7d366fe916843fd398cab506aa7adcbeb4e53f9f739a0fda1dd275c",
+          "tests/invocation-crash-worker.ts": "740053c2dbedadfcfacb661fe540df4a0ee787b6034539582ebcd91beaef62bd"
+        },
+        "sourceBeforeSha256": "2e4acf01c37b659f1b8a8b58460840138d15f8934d5f6146e6e165b1391cfc29",
+        "red": {
+          "command": "pnpm exec vitest run tests/agent-runtime.test.ts -t '首次账本读取抛错'",
+          "execHandle": 78866,
+          "exitCode": 1,
+          "testsFailed": 1,
+          "otherTestsFiltered": 58,
+          "log": "eastgenesis-ledger-read-error-before.log",
+          "logSha256": "290ed21a5260e7f4cb54d6631f23935bd22d9ac2b70080d24907c971e5457300",
+          "observed": {
+            "status": "completed",
+            "runCalls": 1,
+            "probeCalls": 0,
+            "confirmCalls": 1,
+            "putCalls": 3,
+            "claimCalls": 1
+          }
+        },
+        "green": {
+          "command": "pnpm exec vitest run tests/agent-runtime.test.ts tests/recovery.test.ts tests/session-recovery.test.ts tests/invocation-ledger.test.ts tests/invocation-crash-process.test.ts",
+          "execHandle": 58379,
+          "exitCode": 0,
+          "filesPassed": 5,
+          "testsPassed": 77,
+          "testsSkipped": 0,
+          "testsFailed": 0,
+          "log": "eastgenesis-ledger-read-error-after.log",
+          "logSha256": "663bad9456dd3d7512b0c6599e73ec24caac2e339edc2d84e2a485b42c6813de",
+          "observedReadFailure": {
+            "status": "needs_user",
+            "runCalls": 0,
+            "probeCalls": 0,
+            "confirmCalls": 0,
+            "putCalls": 0,
+            "claimCalls": 0,
+            "rawErrorAbsentFromSummaryAndEvents": true
+          }
+        },
+        "nativeQaExecutedForThisFix": false,
+        "evidenceBoundary": [
+          "Configured ledger read errors stop with a fixed needs_user summary",
+          "Absent ledger and successful null remain allowed",
+          "No GUI, build, Cargo, real Provider, private config or push by this agent"
+        ]
+      },
+      "hashTimingCaveat": "77-test earlier green ran before Root added the third process case; final authoritative current-source count is 78 narrow / 998 full."
+    }
+  ],
+  "proofScope": [
+    "Actual AgentRuntime and recoveryCheckpoint with synthetic ledger and model calls",
+    "Actual separate Node processes, physical SQLite and SIGKILL after marker side effect but before ledger commit",
+    "Persisted synthetic older-shape plan-only checkpoint, durable row unchanged across recovery",
+    "Connection-local TEMP shadow causes actual SQLite SELECT failure and is removed before any later writes",
+    "No private Provider configuration or production profile used"
+  ],
+  "notProven": [
+    "Historical native writer application upgrade",
+    "Native GUI reproduction of plan-only stale checkpoint or new ledger read fault",
+    "Two real Providers or real failover",
+    "Windows workaround until new exact-head CI",
+    "Three-platform performance or signing/notarization"
+  ],
+  "setupCorrections": [
+    {
+      "kind": "synthetic applied claim fixture corrected before runtime fix",
+      "logFile": "eastgenesis-plan-only-ledger-before-initial-fixture.log",
+      "sha256": "209a6fe4c338ab0c9a06c0d728096940f8da683471ee0eb86bf845f013936cd5"
+    },
+    {
+      "kind": "new test SQLite row types corrected after initial typecheck failure",
+      "logFile": "eastgenesis-plan-only-typecheck.log",
+      "sha256": "8dc1ecec68eea2771ac6eb2f992549447b71dc519dc58702ffcfd44a8adff06d"
+    },
+    {
+      "kind": "initial private smoke command used nonexistent guessed filenames; actual three-file smoke then passed",
+      "logFile": "eastgenesis-plan-only-private-config-smoke.log",
+      "sha256": "665bccb00504ca982f26075bc1080136aa80486a0d32834f2ce3cd3dfc3f2283"
+    }
+  ],
+  "independentReview": {
+    "performed": "read-only current source and direct log per-file recount",
+    "finding": "no blocker within current patch/regression scope",
+    "countsVerified": {
+      "narrow": 78,
+      "full": 998,
+      "syntheticPrivateSmoke": 55
+    },
+    "sqlBoundary": "TEMP DDL is injected; main invocation row/count unchanged and runtime stops before put/gate/claim, not a claim of no SQLite writes of any kind"
+  },
+  "finalNativeEvidence": {
+    "reportFile": "macos-ledger-safe-native-2026-10-07.json",
+    "rawReportSha256": "c9917c4de8c8375004f91681af1c79d53b18760519c2a5ef6f2019bf8fc2d035",
+    "binarySha256": "45c7986bd8ab5b201ebcdd4cfa049822dccaa723be0649293f8d5f9277aa5fce",
+    "sourceInputs": 322,
+    "scenariosPassed": 3,
+    "scope": "existing native recovery paths; new stale/read fault cases remain Node/SQLite scope"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "kind": "completed-chat-output-and-reflect-acceptance-local-regression",
+  "localParentRevision": "4fca797429fd66f839a6e4ea83613d6834b108d0",
+  "sourceHashes": {
+    "src/agent/runtime.ts": "652ca3075647975e309e997fdd1e48ad273ac05f50f39243beed1f886da2d89a",
+    "src/agent/types.ts": "185d66b64f19c5ed68d78a39657c80d03dc36cc1e00dade4e1db2f99941e28bd",
+    "src/lib/recovery.ts": "96bd574e9d3b758ded555b7ee35819a40c096037df8eaedc16326cd91fb8058d",
+    "src/lib/steps.ts": "ee1664a175c3be542bb0f16c9e75346efbb047489e941ffab1f0467cb9ee1875",
+    "src/lib/skill.ts": "24addd1ed45fb1797c15bcd8fcba06e5cb98507861a80a9bd1d2caf92681366d",
+    "tests/completed-step-recovery.test.ts": "6eedda565b4ec6cfb8bd6bff3c2c1b9c802199bf634d87c547327de16ff87244"
+  },
+  "rootRehashedSourceAndLogs": true,
+  "independentReadOnlyReviewPassed": true,
+  "logs": {
+    "completed-step-recovery-red": {
+      "bytes": 3541,
+      "sha256": "9a0c672f73217e7acd8a8f086e7df81cb72abc9b34497a72c8e5e357dc97711a"
+    },
+    "rejected-reflect-window-red": {
+      "bytes": 2780,
+      "sha256": "2fa7474da608f2e5f3d8ee172398eeb9bc575306a1f59c586468098613ddba7d"
+    },
+    "rejected-reflect-consumers-red": {
+      "bytes": 5883,
+      "sha256": "64cd150b70f27544996d325d5d5a1a12b17134115a2660b9ca19cfc75df27fd0"
+    },
+    "completed-step-accepted-final-green": {
+      "bytes": 689,
+      "sha256": "4e9bf6d937c5f7e2beff1d0ffa85b582c23c20d7ed68d9aff8299fecf1739e5b"
+    }
+  },
+  "redCases": {
+    "lostCompletedChatBody": 2,
+    "replanAbortOrRunningWindowMisclassified": 2,
+    "progressAndSkillConsumers": {
+      "tests": 2,
+      "failedAssertions": 6
+    }
+  },
+  "finalNarrow": {
+    "files": 9,
+    "passed": 116,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "newTestCases": 10
+  },
+  "recoveryPath": [
+    "AgentRuntime",
+    "taskToStoredTurn",
+    "normalizeSession",
+    "JSON",
+    "parseTurns",
+    "fromStoredTurn",
+    "recoveryCheckpoint",
+    "sameTaskRuntimeSummary"
+  ],
+  "invariants": [
+    "completed files are not replayed",
+    "inode mtimeNs and hash unchanged",
+    "summary receives saved Chat conclusion",
+    "rejected Chat retries from first unfinished step",
+    "accepted decision consumed by recovery progress and both skill extractors",
+    "accepted true may coexist with done false",
+    "public evidence omits body"
+  ],
+  "outputBudget": {
+    "utf16CodeUnits": 4000,
+    "truncationNoticeWithinBudget": true,
+    "surrogateBoundaryPreserved": true
+  },
+  "boundary": {
+    "nativeDesktopExecuted": false,
+    "newCiExecuted": false,
+    "realProvider": false,
+    "legacyMissingBodyReconstructed": false,
+    "legacyMissingAcceptanceReconstructed": false,
+    "arbitrarilyLongBodyLossless": false,
+    "historicalNativeEvidenceReused": false
+  }
+}

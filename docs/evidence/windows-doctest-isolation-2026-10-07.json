@@ -1,0 +1,354 @@
+{
+  "schemaVersion": 1,
+  "kind": "windows-workspace-doctest-native-search-isolation-review",
+  "capturedAt": "2026-10-07T01:36:16.049Z",
+  "conclusion": "failure mechanism supported by CI linker arguments and Cargo/Tauri primary source; isolated plugin doctests passed on macOS; Windows correction unverified",
+  "privateDataPolicy": "Only repository-relative paths, source modules, and local evidence basenames are recorded; native output paths are normalized to crate names and out.",
+  "preFixCi": {
+    "sourceSnapshot": "e7d00dc29f3160b562042809520027989d732544",
+    "runId": 37555825538,
+    "jobId": 112581698276,
+    "platform": "windows-latest",
+    "url": "https://github.com/ChaoYuZhang001/eastgenesis/actions/runs/37555825538/job/112581698276",
+    "rawLog": {
+      "basename": "windows-job-112581698276.log",
+      "bytes": 387574,
+      "sha256": "a6e8c6b323cfba47231000c619119a1a83315af6d88d87e2ac36933945514983",
+      "lines": {
+        "failedDoc": [
+          2406,
+          2406
+        ],
+        "linkCommand": [
+          2413,
+          2413
+        ],
+        "invalidCrtLibrary": [
+          2415,
+          2415
+        ],
+        "undefinedMainCrtStartup": [
+          2416,
+          2416
+        ],
+        "undefinedMemcpy": [
+          2417,
+          2417
+        ]
+      }
+    },
+    "rustcVersion": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "cargoVersion": null,
+    "cargoVersionEvidence": "The existing job log prints rustc but does not print Cargo binary version.",
+    "observed": {
+      "docTarget": "tauri_plugin_sql",
+      "docName": "Builder::build",
+      "docSource": "vendor/tauri-plugin-sql/src/lib.rs",
+      "docSourceLine": 231,
+      "appNativeSearchPath": "eastgenesis-desktop/out",
+      "crtLibrary": "eastgenesis-desktop/out/msvcrt.lib",
+      "linkerDefaultCrtArgument": "/defaultlib:msvcrt",
+      "appNoDefaultMsvcrtArgumentObserved": false,
+      "appStaticCrtDefaultArgumentsObserved": false,
+      "invalidLibraryWarning": "LNK4003",
+      "undefinedSymbols": [
+        "mainCRTStartup",
+        "memcpy"
+      ],
+      "linkerFatalCode": "LNK1120",
+      "unresolvedSymbolCount": 19,
+      "pluginUnitTests": {
+        "passed": 4,
+        "failed": 0
+      },
+      "coreAndDesktopDoctests": {
+        "eachCount": 0
+      },
+      "qaWorkspaceCommandReached": false
+    }
+  },
+  "sourceMechanism": {
+    "cargoNativePaths": "All build-script library_paths in the current compilation are accumulated into a single native_dirs set. Each selected doctest receives this complete set.",
+    "tauriCrtOverride": "tauri-build writes a replacement msvcrt.lib into application OUT_DIR, adds this directory as a native search path, and emits application-target CRT linker arguments.",
+    "inference": "Selecting the application and plugin together lets application native paths reach plugin doctests without the application-target CRT linker arguments. A plugin-only package selection has no application build-script output in its compilation."
+  },
+  "cargoPrimarySources": [
+    {
+      "version": "0.99.0",
+      "revision": "797e8a9bca276c1c9f9f738d2a20f484fa4eea9d",
+      "module": "src/cargo/ops/cargo_test.rs",
+      "basename": "eastgenesis-cargo-0.99-cargo-test.rs",
+      "sha256": "1f2da1eef2bad52277b5f9e73a199f79aab0695969911d4bd381cf3de32244c9",
+      "lines": [
+        231,
+        233
+      ],
+      "url": "https://github.com/rust-lang/cargo/blob/797e8a9bca276c1c9f9f738d2a20f484fa4eea9d/src/cargo/ops/cargo_test.rs#L231"
+    },
+    {
+      "version": "0.99.0",
+      "revision": "797e8a9bca276c1c9f9f738d2a20f484fa4eea9d",
+      "module": "src/cargo/core/compiler/build_runner/mod.rs",
+      "basename": "eastgenesis-cargo-0.99-build-runner.rs",
+      "sha256": "978c30b46c800a6e354eb81b42e6f151649bc97f29feae1decce808bbf8ef2b8",
+      "lines": [
+        301,
+        313
+      ],
+      "url": "https://github.com/rust-lang/cargo/blob/797e8a9bca276c1c9f9f738d2a20f484fa4eea9d/src/cargo/core/compiler/build_runner/mod.rs#L301"
+    },
+    {
+      "version": "0.100.0",
+      "revision": "5f94df4789f005f9a352888e8355ffc645b7ed0e",
+      "module": "src/ops/cargo_test.rs",
+      "basename": "eastgenesis-cargo-0.100-cargo-test.rs",
+      "sha256": "44e84281c6e69acbe559414285ae8f6185ebb74c25b39f30bacfe614abc23c31",
+      "lines": [
+        231,
+        233
+      ],
+      "url": "https://github.com/rust-lang/cargo/blob/5f94df4789f005f9a352888e8355ffc645b7ed0e/src/ops/cargo_test.rs#L231"
+    },
+    {
+      "version": "0.100.0",
+      "revision": "5f94df4789f005f9a352888e8355ffc645b7ed0e",
+      "module": "src/compiler/build_runner/mod.rs",
+      "basename": "eastgenesis-cargo-0.100-build-runner.rs",
+      "sha256": "c16822f3a09cfc769a4e1543a18a7b57712dc0c23a8a975867f85d15acccf05e",
+      "lines": [
+        301,
+        313
+      ],
+      "url": "https://github.com/rust-lang/cargo/blob/5f94df4789f005f9a352888e8355ffc645b7ed0e/src/compiler/build_runner/mod.rs#L301"
+    }
+  ],
+  "cargoVersionBoundary": {
+    "localVersion": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "localRevisionMatchesSource": "797e8a9bca276c1c9f9f738d2a20f484fa4eea9d",
+    "source0100Role": "corroborating source revision; not proven identical to Windows CI Cargo binary"
+  },
+  "tauriPrimarySources": {
+    "package": "tauri-build",
+    "version": "2.7.0",
+    "cargoLockPackageChecksum": "5b5ae674f48836f5dd2eeaf9e221c095bd3e78a8d0439c77ca93b48740a1b644",
+    "cargoLockLines": [
+      4617,
+      4620
+    ],
+    "files": [
+      {
+        "module": "tauri-build-2.7.0/src/static_vcruntime.rs",
+        "sha256": "ec6c013a15d44975e0e07312af564e82c3f2d7bcc3ada00aa2b30fb8d0672f48",
+        "lines": {
+          "crtArguments": [
+            10,
+            25
+          ],
+          "replacementFileAndNativeSearch": [
+            28,
+            57
+          ]
+        },
+        "url": "https://docs.rs/crate/tauri-build/2.7.0/source/src/static_vcruntime.rs"
+      },
+      {
+        "module": "tauri-build-2.7.0/src/lib.rs",
+        "sha256": "111681c4334ecc5b22865887584f7bac484724e3aaee1b7a2f2577ecc98a204c",
+        "lines": [
+          903,
+          905
+        ],
+        "url": "https://docs.rs/crate/tauri-build/2.7.0/source/src/lib.rs"
+      }
+    ],
+    "applicationBuildScript": {
+      "path": "src-tauri/build.rs",
+      "sha256": "487059eaf8a947b80f20a9aacac038a5047b2ad69d2401b827376c67d6fe847f",
+      "lines": [
+        1,
+        3
+      ]
+    },
+    "pluginDoc": {
+      "path": "vendor/tauri-plugin-sql/src/lib.rs",
+      "sha256": "3cc35233a21fabf8d9cbeac85cd9f1cbb13fc7416c9fece054defa38d2ff444f",
+      "lines": [
+        231,
+        248
+      ]
+    }
+  },
+  "localExecutedValidation": {
+    "platform": "darwin",
+    "cargoVersion": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+    "rustcVersion": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "verifiedAt": "2026-10-07T01:27:30.299Z",
+    "frozenReview": {
+      "basename": "eastgenesis-windows-doctest-isolation-review.json",
+      "sha256": "f20460b241cb45db48149fb085cb15dea9eb09ec73399dff60e49b8b0ebe228a"
+    },
+    "runs": [
+      {
+        "mode": "ordinary",
+        "command": "cargo test -p tauri-plugin-sql --features sqlite --doc --locked -vv",
+        "logBasename": "eastgenesis-plugin-independent-doc-normal.log",
+        "logSha256": "ac16e060e2acf813bcbf56bb95d1dd2ed0d9c113801ed51795ac29009dd66e4c",
+        "exitCode": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "rustdocCommandCount": 1,
+        "normalizedNativeSearchPaths": [
+          "libsqlite3-sys/out"
+        ],
+        "appNativeSearchPathPresent": false,
+        "appCompilationPresent": false,
+        "qaObserverFeaturePresent": false
+      },
+      {
+        "mode": "qa",
+        "command": "cargo test -p tauri-plugin-sql --features sqlite,qa-load-observer --doc --locked -vv",
+        "logBasename": "eastgenesis-plugin-independent-doc-qa.log",
+        "logSha256": "e63370d453b9aac4d941c8e57fce9b367a085c287b44100131282358695ae0fb",
+        "exitCode": 0,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "rustdocCommandCount": 1,
+        "normalizedNativeSearchPaths": [
+          "libsqlite3-sys/out"
+        ],
+        "appNativeSearchPathPresent": false,
+        "appCompilationPresent": false,
+        "qaObserverFeaturePresent": true
+      }
+    ]
+  },
+  "candidateWorkflow": {
+    "path": ".github/workflows/desktop.yml",
+    "sha256": "b2091329630d40cc5859fd18619347650314c20882ef3b3064c73824e546df2a",
+    "commands": {
+      "windows": {
+        "ordinary": [
+          "cargo test --workspace --all-targets --locked",
+          "cargo test -p eg-core --doc --locked",
+          "cargo test -p eastgenesis-desktop --doc --locked",
+          "cargo test -p tauri-plugin-sql --features sqlite --doc --locked"
+        ],
+        "qa": [
+          "cargo test --workspace --all-targets --features qa-faults --locked",
+          "cargo test -p eg-core --doc --locked",
+          "cargo test -p eastgenesis-desktop --features qa-faults --doc --locked",
+          "cargo test -p tauri-plugin-sql --features sqlite,qa-load-observer --doc --locked"
+        ]
+      },
+      "unix": [
+        "cargo test --workspace --locked",
+        "cargo test --workspace --features qa-faults --locked"
+      ]
+    },
+    "scope": "Windows only: all non-documentation targets and independent package documentation tests for ordinary and QA feature sets. Unix retains original workspace test commands.",
+    "shippingCrtChanged": false,
+    "doctestsSkipped": false,
+    "windowsExecutedValidation": false
+  },
+  "metadataTargetInventory": [
+    {
+      "name": "eg-core",
+      "targets": [
+        {
+          "name": "eg_core",
+          "kind": [
+            "lib"
+          ],
+          "doctest": true,
+          "test": true
+        },
+        {
+          "name": "eg-mcp-files",
+          "kind": [
+            "bin"
+          ],
+          "doctest": false,
+          "test": true
+        },
+        {
+          "name": "mcp_file_roots_lifecycle",
+          "kind": [
+            "test"
+          ],
+          "doctest": false,
+          "test": true
+        },
+        {
+          "name": "mcp_files_stdio",
+          "kind": [
+            "test"
+          ],
+          "doctest": false,
+          "test": true
+        }
+      ]
+    },
+    {
+      "name": "eastgenesis-desktop",
+      "targets": [
+        {
+          "name": "eastgenesis_desktop_lib",
+          "kind": [
+            "staticlib",
+            "cdylib",
+            "rlib"
+          ],
+          "doctest": true,
+          "test": true
+        },
+        {
+          "name": "eastgenesis-desktop",
+          "kind": [
+            "bin"
+          ],
+          "doctest": false,
+          "test": true
+        },
+        {
+          "name": "build-script-build",
+          "kind": [
+            "custom-build"
+          ],
+          "doctest": false,
+          "test": false
+        }
+      ]
+    },
+    {
+      "name": "tauri-plugin-sql",
+      "targets": [
+        {
+          "name": "tauri_plugin_sql",
+          "kind": [
+            "lib"
+          ],
+          "doctest": true,
+          "test": true
+        },
+        {
+          "name": "build-script-build",
+          "kind": [
+            "custom-build"
+          ],
+          "doctest": false,
+          "test": false
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "macOS plugin-only commands prove compilation-graph isolation and execution of the plugin API doctest, not Windows linker success.",
+    "The generic Builder doctest checks API compilation; it does not start a desktop, connect a database, run migrations, or exercise recovery.",
+    "Package-only plugin docs do not select application-induced Tauri/Wry features; ordinary and QA all-target workspace tests retain that application dependency graph.",
+    "Application and core currently have zero doctest examples in the failing CI log. Future examples require their own successful link and execution evidence.",
+    "This diagnosis concerns the Rust doc-test gate. It does not explain or resolve the prior Windows native Database.load rejection.",
+    "The source correction still needs an actual Windows CI result; no native startup, installation, cross-platform, real-provider, signing, or release completion is claimed."
+  ]
+}

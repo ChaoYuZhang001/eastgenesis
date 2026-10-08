@@ -1,5 +1,6 @@
-import { goalPhase, newGoal, normalizeGoal } from "@/decision/goal";
+import { goalPhase, newGoal, normalizeGoal, RESTART_INTERRUPTION_REASON, wasGoalInterruptedByRestart } from "@/decision/goal";
 import { createMockBackend, getBackend, setBackend, type Backend, type Goal } from "@/platform";
+import type { StoredTurn } from "@/decision/session";
 import { goalsOfProject, useGoals } from "@/stores/goals";
 
 beforeEach(() => {
@@ -25,6 +26,42 @@ describe("目标 store", () => {
     expect(await useGoals.getState().start(g.id)).toBeNull();
     expect(goal(g.id)?.status).toBe("running");
     expect(useGoals.getState().items).toEqual(await getBackend().listGoals());
+  });
+
+  it("启动读回时把没有终态的目标轮次安全暂停，避免没有任务卡的永久进行中", async () => {
+    const g = await create("重启后继续整理文件");
+    await useGoals.getState().start(g.id);
+    await useGoals.getState().apply(g.id, { op: "start_round", plan: { title: "第一轮", items: ["读取文件"] } });
+
+    // 模拟窗口进程退出后重新初始化前端 store；数据库里的目标仍是 running/running。
+    useGoals.setState({ loaded: false, items: [], error: null });
+    await useGoals.getState().load();
+
+    const recovered = useGoals.getState().items.find((x) => x.id === g.id)!;
+    expect(recovered.status).toBe("paused");
+    expect(recovered.rounds[0]).toMatchObject({
+      status: "interrupted",
+      interruption_reason: RESTART_INTERRUPTION_REASON,
+    });
+    expect(wasGoalInterruptedByRestart(recovered)).toBe(true);
+    expect((await getBackend().listGoals()).find((x) => x.id === g.id)).toMatchObject({ status: "paused" });
+  });
+
+  it("目标恢复必须沿用原任务账本；缺少或串目标的 checkpoint 会被拒绝", async () => {
+    const g = await create("重启后继续同一轮");
+    await useGoals.getState().start(g.id);
+    const started = await useGoals.getState().apply(g.id, { op: "start_round", plan: { title: "原轮次", task_id: "task-recovery-round" } });
+    expect(typeof started).toBe("object");
+    const turn: StoredTurn = {
+      id: "task-recovery-round", seq: 1, goal: "重启后继续同一轮", status: "running", summary: null, events: [],
+      lock: null, permission: "confirm", files: [], multi: false, startedAt: 1, endedAt: null,
+      goalId: g.id, mode: "goal", preference: "balanced", preferenceSource: "global", surfaceHint: null,
+    };
+    expect(await useGoals.getState().apply(g.id, { op: "checkpoint_round", task: turn })).toMatchObject({ rounds: [{ task_id: turn.id, task_checkpoint: { id: turn.id } }] });
+    await useGoals.getState().apply(g.id, { op: "recover_after_restart" });
+    expect(await useGoals.getState().start(g.id)).toBeNull();
+    expect(await useGoals.getState().apply(g.id, { op: "resume_round" })).toMatchObject({ status: "running", rounds: [{ status: "running", task_id: turn.id }] });
+    expect(await useGoals.getState().apply(g.id, { op: "checkpoint_round", task: { ...turn, id: "task-other" } })).toBe("任务恢复记录与目标轮次不匹配");
   });
 
   it("非法转换返回状态机的说明，store 和数据库都不变", async () => {
