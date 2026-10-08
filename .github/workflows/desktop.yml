@@ -37,6 +37,14 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Set up pinned Linux Python runtime for owned lifecycle evidence
+        if: runner.os == 'Linux'
+        id: linux-python-runtime
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: '3.12.10'
+          architecture: x64
+
       - name: Set up pinned Windows Python runtime
         if: runner.os == 'Windows'
         id: windows-python-runtime
@@ -60,6 +68,26 @@ jobs:
           name: eastgenesis-windows-python-discovery-diagnostics
           if-no-files-found: warn
           path: windows-python-discovery-quality.json
+
+      - name: Run actual Linux owned process lifecycle evidence
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/owned-lifecycle/linux-native-subprocess.test.mjs \
+            --python "${{ steps.linux-python-runtime.outputs.python-path }}" \
+            --output linux-owned-lifecycle-quality/result.json
+
+      - name: Upload Linux owned lifecycle evidence
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eastgenesis-linux-owned-lifecycle-diagnostics
+          if-no-files-found: error
+          path: |
+            linux-owned-lifecycle-quality/*.json
+            linux-owned-lifecycle-quality/*.jsonl
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -178,6 +206,29 @@ jobs:
       - name: Install Tauri WebDriver
         if: runner.os != 'macOS'
         run: cargo install tauri-driver --version 2.1.0 --locked
+
+      - name: Prove owned Linux Tauri and native WebDriver lifecycle
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          WEBKIT_DISABLE_COMPOSITING_MODE=1 xvfb-run --auto-servernum --server-args="-screen 0 1440x900x24" \
+            node tools/owned-lifecycle/linux-native-driver-probe.mjs \
+              --python "${{ steps.linux-python-runtime.outputs.python-path }}" \
+              --tauri-driver "$HOME/.cargo/bin/tauri-driver" \
+              --native-driver /usr/bin/WebKitWebDriver \
+              --output linux-owned-driver-quality/result.json
+
+      - name: Upload owned Linux driver lifecycle evidence
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eastgenesis-linux-owned-driver-diagnostics
+          if-no-files-found: error
+          path: |
+            linux-owned-driver-quality/*.json
+            linux-owned-driver-quality/*.jsonl
 
       - name: Install matching Edge WebDriver
         if: runner.os == 'Windows'
