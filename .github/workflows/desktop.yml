@@ -69,6 +69,35 @@ jobs:
           if-no-files-found: warn
           path: windows-python-discovery-quality.json
 
+      - name: Run owned lifecycle and Goal policy regressions
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir linux-owned-policy-quality
+          node --test --test-reporter=tap \
+            tools/owned-lifecycle/linux-launch-contract.test.mjs \
+            tools/owned-lifecycle/linux-launch-wrapper-policy.test.mjs \
+            tools/owned-lifecycle/runtime-parser.test.mjs \
+            tools/owned-lifecycle/bootstrap.test.mjs \
+            tools/owned-lifecycle/windows-owned-runtime.test.mjs
+          "${{ steps.linux-python-runtime.outputs.python-path }}" -I -B \
+            tools/owned-lifecycle/physical-snapshot.test.py \
+            --output linux-owned-policy-quality/physical-result.json
+          "${{ steps.linux-python-runtime.outputs.python-path }}" -I -B \
+            tools/owned-lifecycle/runtime-files.test.py > linux-owned-policy-quality/files-result.json
+          "${{ steps.linux-python-runtime.outputs.python-path }}" -I -B \
+            tools/owned-lifecycle/runtime-native-policy.test.py > linux-owned-policy-quality/native-policy-result.json
+
+      - name: Upload owned Goal policy diagnostics
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eastgenesis-owned-goal-policy-diagnostics
+          if-no-files-found: error
+          path: linux-owned-policy-quality/*.json
+
       - name: Run actual Linux owned process lifecycle evidence
         if: runner.os == 'Linux'
         timeout-minutes: 5
@@ -79,6 +108,24 @@ jobs:
             --python "${{ steps.linux-python-runtime.outputs.python-path }}" \
             --output linux-owned-lifecycle-quality/result.json
 
+      - name: Run actual Linux worker thread child lifecycle evidence
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/owned-lifecycle/linux-native-threaded.test.mjs \
+            --python "${{ steps.linux-python-runtime.outputs.python-path }}" \
+            --output linux-owned-threaded-quality/result.json
+
+      - name: Upload Linux worker thread lifecycle evidence
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eastgenesis-linux-owned-threaded-diagnostics
+          if-no-files-found: error
+          path: linux-owned-threaded-quality/*.json
+
       - name: Upload Linux owned lifecycle evidence
         if: always() && runner.os == 'Linux'
         uses: actions/upload-artifact@v4
@@ -88,6 +135,37 @@ jobs:
           path: |
             linux-owned-lifecycle-quality/*.json
             linux-owned-lifecycle-quality/*.jsonl
+
+      # Candidate fragment only. No CI dispatch has been performed by this subagent.
+      # Place before long Rust/build steps on the existing Windows job.
+      - name: Run actual Windows retained-handle owned process lifecycle evidence
+        if: runner.os == 'Windows'
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          foreach ($file in @('windows-native-sixcases.ps1','windows-owned-fixture.ps1','windows-native-faults.ps1')) {
+            $parseTokens=$null; $parseErrors=$null
+            [void][Management.Automation.Language.Parser]::ParseFile((Join-Path 'tools/owned-lifecycle' $file),[ref]$parseTokens,[ref]$parseErrors)
+            if ($parseErrors.Count -ne 0) { throw 'owned_qa_powershell_parse_failed' }
+          }
+          Add-Type -Path tools/owned-lifecycle/windows-owned-kernel.cs
+          node tools/owned-lifecycle/windows-native-cases-cli.mjs --pwsh (Join-Path $PSHOME 'pwsh.exe')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          # Extra expected-RED candidate is a separate runner/report. It is not
+          # invoked by this fragment and cannot change positive six == 12 handles.
+      - name: Upload Windows lifecycle diagnostics only
+        if: always() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-owned-lifecycle-diagnostics
+          path: |
+            ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/native-result/
+            ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/native-helper.stdout
+            ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/native-helper.stderr
+            ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/outer-failure.json
+            ${{ runner.temp }}/eastgenesis-windows-native-sixcases-*/eg-win-owned-*/lifecycle.jsonl
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -229,6 +307,89 @@ jobs:
           path: |
             linux-owned-driver-quality/*.json
             linux-owned-driver-quality/*.jsonl
+
+      # Insert after the existing actual owned driver status probe, in the existing
+      # Linux job where Node/pnpm/Rust/Python3.12.10/WebKit/xvfb/tauri-driver are set up.
+      # This fragment is a candidate, never a record of a completed native run.
+      - name: Bind public source head for actual Linux full Goal
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          EXPECTED_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SOURCE_HEAD" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse --show-toplevel)" = "$GITHUB_WORKSPACE"
+          # A depth-one PR merge checkout can omit the public head commit object.
+          # Fetch this one source head; do not fetch ancestry or another local repo.
+          if ! git cat-file -e "$EXPECTED_SOURCE_HEAD^{commit}" 2>/dev/null; then
+            git fetch --no-tags --depth=1 origin "$EXPECTED_SOURCE_HEAD"
+          fi
+          chmod 700 "$GITHUB_WORKSPACE"
+
+      - name: Compile and probe actual isolated Linux QA App
+        id: linux-full-goal-build
+        if: runner.os == 'Linux'
+        timeout-minutes: 30
+        shell: bash
+        env:
+          EXPECTED_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          node tools/owned-lifecycle/linux-full-goal-bootstrap.mjs \
+              --mode build \
+              --source-root "$GITHUB_WORKSPACE" \
+              --expected-head "$EXPECTED_SOURCE_HEAD" \
+              --runtime-source "$GITHUB_WORKSPACE/tools/owned-lifecycle" \
+              --python "${{ steps.linux-python-runtime.outputs.python-path }}" \
+              --tauri-driver "$HOME/.cargo/bin/tauri-driver" \
+              --native-driver /usr/bin/WebKitWebDriver \
+              --cargo "$(rustup which cargo)" \
+              --rustc "$(rustup which rustc)" \
+              --pnpm "$(command -v pnpm)" \
+              --output-dir "$GITHUB_WORKSPACE/linux-full-goal-build-quality"
+
+      - name: Run actual Linux unified Goal and same profile recovery
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        shell: bash
+        env:
+          EXPECTED_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          WEBKIT_DISABLE_COMPOSITING_MODE=1 xvfb-run --auto-servernum --server-args="-screen 0 1440x900x24" \
+            node tools/owned-lifecycle/linux-full-goal-bootstrap.mjs \
+              --mode run \
+              --source-root "$GITHUB_WORKSPACE" \
+              --expected-head "$EXPECTED_SOURCE_HEAD" \
+              --expected-build-root "${{ steps.linux-full-goal-build.outputs.build-root }}" \
+              --expected-build-id "${{ steps.linux-full-goal-build.outputs.build-id }}" \
+              --expected-build-dev "${{ steps.linux-full-goal-build.outputs.build-dev }}" \
+              --expected-build-ino "${{ steps.linux-full-goal-build.outputs.build-ino }}" \
+              --expected-plan-sha256 "${{ steps.linux-full-goal-build.outputs.plan-sha256 }}" \
+              --expected-node-sha256 "${{ steps.linux-full-goal-build.outputs.node-sha256 }}" \
+              --python "${{ steps.linux-python-runtime.outputs.python-path }}" \
+              --expected-python-sha256 "${{ steps.linux-full-goal-build.outputs.python-sha256 }}" \
+              --tauri-driver "$HOME/.cargo/bin/tauri-driver" \
+              --expected-tauri-driver-sha256 "${{ steps.linux-full-goal-build.outputs.tauri-driver-sha256 }}" \
+              --native-driver /usr/bin/WebKitWebDriver \
+              --expected-native-driver-sha256 "${{ steps.linux-full-goal-build.outputs.native-driver-sha256 }}" \
+              --expected-app-sha256 "${{ steps.linux-full-goal-build.outputs.app-sha256 }}" \
+              --expected-source-manifest-sha256 "${{ steps.linux-full-goal-build.outputs.source-manifest-sha256 }}" \
+              --expected-build-proof-sha256 "${{ steps.linux-full-goal-build.outputs.build-proof-sha256 }}" \
+              --prepared-root "$GITHUB_WORKSPACE/linux-full-goal-build-quality" \
+              --prepared "$GITHUB_WORKSPACE/linux-full-goal-build-quality/prepared.json" \
+              --output-dir "$GITHUB_WORKSPACE/linux-full-goal-quality"
+
+      - name: Upload actual Linux full Goal diagnostics
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eastgenesis-linux-full-goal-diagnostics
+          if-no-files-found: error
+          path: |
+            linux-full-goal-build-quality/*.json
+            linux-full-goal-quality/*.json
 
       - name: Install matching Edge WebDriver
         if: runner.os == 'Windows'

@@ -5,7 +5,7 @@ The /proc/<pid>/exe and fd links are kernel identity interfaces, not accepted
 filesystem symlinks. Executable paths themselves must have no symlink component.
 No process-name scan, /proc glob, user config, database, or environment dump.
 """
-import hashlib, json, os, select, signal, stat, subprocess, sys, time
+import hashlib, json, os, re, select, signal, stat, subprocess, sys, time
 
 class GuardError(Exception): pass
 def need(ok, code):
@@ -27,6 +27,60 @@ def parse_uid(text):
     need(len(rows) == 1 and len(rows[0]) == 4 and all(x.isdigit() for x in rows[0]), 'uid_invalid')
     values = list(map(int, rows[0])); need(len(set(values)) == 1, 'uid_changed'); return values[0]
 
+def parse_task_status(text,tid,tgid,uid):
+    fields={}
+    for name in ('Pid','Tgid'):
+        rows=[line.split()[1:] for line in text.splitlines() if line.startswith(name+':')]
+        need(len(rows)==1 and len(rows[0])==1 and rows[0][0].isdigit(),'task_status_invalid')
+        fields[name]=int(rows[0][0])
+    need(fields['Pid']==tid and fields['Tgid']==tgid and parse_uid(text)==uid,'task_identity_mismatch')
+
+def collect_thread_children(read,list_directory,verify_parent,pid,uid,check):
+    # Only this already birth-bound PID's task directory is listed. No global
+    # /proc scan, signal capability or child registration is created here.
+    check(); before=verify_parent();need(before['pid']==pid and before['uid']==uid,'parent_birth_invalid')
+    directory='/proc/%d/task'%pid
+    def tids():
+        check(); values=list_directory(directory)
+        need(len(values)<=256 and len(values)==len(set(values)) and all(x.isdigit() and positive(int(x)) for x in values) and str(pid) in values,'task_list_invalid')
+        return sorted(map(int,values))
+    first=tids();result=set()
+    for tid in first:
+        check();path=directory+'/%d'%tid
+        a=parse_proc_stat(read(path+'/stat',8192),tid);parse_task_status(read(path+'/status',65536),tid,pid,uid)
+        values=read(path+'/children',8192).split()
+        need(len(values)<=64 and len(values)==len(set(values)) and all(x.isdigit() and positive(int(x)) for x in values),'children_invalid')
+        for value in values:
+            child=int(value);check();c=parse_proc_stat(read('/proc/%d/stat'%child,8192),child)
+            parse_task_status(read('/proc/%d/status'%child,65536),child,child,uid)
+            need(c['parentPid']==pid and c==parse_proc_stat(read('/proc/%d/stat'%child,8192),child),'child_ancestry_raced')
+            result.add(child);need(len(result)<=64,'children_limit_exceeded')
+        b=parse_proc_stat(read(path+'/stat',8192),tid);parse_task_status(read(path+'/status',65536),tid,pid,uid)
+        need(a==b and values==read(path+'/children',8192).split(),'thread_children_raced')
+    need(tids()==first and verify_parent()==before,'parent_threads_raced')
+    check();return sorted(result)
+
+def validate_descendant_environment(actual,inherited,additions,kind):
+    need(isinstance(actual,dict) and isinstance(inherited,dict) and isinstance(additions,dict),'environment_invalid')
+    need(set(additions)<={'TAURI_AUTOMATION','TAURI_WEBVIEW_AUTOMATION'} and all(v=='true' for v in additions.values()),'automation_environment_invalid')
+    need(kind in ('inherited','mcp_builtin','native_spawned_app'),'descendant_environment_kind_invalid')
+    need(set(inherited)<=ENV_KEYS,'inherited_environment_not_fresh')
+    if kind=='mcp_builtin':
+        need(not additions,'mcp_environment_additions_forbidden')
+        expected={k:v for k,v in inherited.items() if k in ('PATH','HOME','LANG','LC_ALL','TMPDIR')}
+        need(set(expected)=={'PATH','HOME','LANG','LC_ALL','TMPDIR'} and actual==expected,'inherited_environment_mismatch')
+        return {'environmentKind':kind}
+    expected=dict(inherited,**additions)
+    if kind=='native_spawned_app':
+        need(additions=={'TAURI_AUTOMATION':'true','TAURI_WEBVIEW_AUTOMATION':'true'},'native_app_automation_required')
+        need(set(actual)==set(expected)|{'WEBKIT_INSPECTOR_SERVER','GTK_OVERLAY_SCROLLING'},'native_app_environment_keys')
+        server=actual.get('WEBKIT_INSPECTOR_SERVER');match=re.fullmatch(r'127\.0\.0\.1:([1-9][0-9]{0,4})',server or '')
+        need(match is not None and 1024<=int(match.group(1))<=65535,'native_app_inspector_invalid')
+        need(actual.get('GTK_OVERLAY_SCROLLING') in ('0','1'),'native_app_gtk_overlay_invalid')
+        need(all(actual.get(k)==v for k,v in expected.items()),'inherited_environment_mismatch')
+        return {'environmentKind':kind,'inspectorServer':server,'inspectorPort':int(match.group(1)),'gtkOverlayScrolling':actual['GTK_OVERLAY_SCROLLING']}
+    need(actual==expected,'inherited_environment_mismatch');return {'environmentKind':kind}
+
 def parse_listening_inodes(text, port):
     need(positive(port) and port <= 65535 and len(text) <= 1048576, 'port_invalid')
     result = []
@@ -38,7 +92,7 @@ def parse_listening_inodes(text, port):
             need(parts[9].isdigit(), 'socket_inode_invalid'); result.append(parts[9])
     need(len(result) <= 1, 'ambiguous_port_listener'); return result
 
-ENV_KEYS = frozenset(['PATH','HOME','TMPDIR','XDG_CONFIG_HOME','XDG_DATA_HOME','XDG_CACHE_HOME','XDG_RUNTIME_DIR','LANG','LC_ALL','DISPLAY','XAUTHORITY','WEBKIT_DISABLE_COMPOSITING_MODE','EASTGENESIS_QA_ISOLATED_PROFILE'])
+ENV_KEYS = frozenset(['PATH','HOME','TMPDIR','XDG_CONFIG_HOME','XDG_DATA_HOME','XDG_CACHE_HOME','XDG_RUNTIME_DIR','LANG','LC_ALL','DISPLAY','XAUTHORITY','WEBKIT_DISABLE_COMPOSITING_MODE','EASTGENESIS_QA_ISOLATED_PROFILE','EASTGENESIS_QA_STARTUP_DIAGNOSTICS','EASTGENESIS_QA_INSTALL_ISOLATION_REQUIRED','EASTGENESIS_QA_STARTUP_RUN_ID','EASTGENESIS_QA_GOAL_OBSERVER'])
 
 class LinuxAuthority:
     def __init__(self, owner_pid, deadline_ms):
@@ -106,11 +160,18 @@ class LinuxAuthority:
     def spawn_driver(self,executable,args,env,cwd):
         raise GuardError('owned_launcher_not_implemented')
     def children(self,pid):
-        before=self.verify(pid)
-        # Kernel's direct child list, never a global /proc or process-name scan.
-        ids=self._read('/proc/%d/task/%d/children'%(pid,pid),8192).split()
-        need(len(ids)<=64 and all(x.isdigit() and positive(int(x)) for x in ids) and len(ids)==len(set(ids)),'children_invalid')
-        self.verify(pid); return list(map(int,ids))
+        need(pid in self.held,'pid_unregistered');anchor=self.held[pid]
+        return self._children_at_bound(pid,anchor['row'],anchor['handle'])
+    def _children_at_bound(self,pid,anchor,handle):
+        need(positive(pid) and isinstance(anchor,dict) and anchor.get('pid')==pid and handle is not None,'parent_birth_invalid')
+        def verify_parent():
+            self.check();need(not select.select([handle],[],[],0)[0],'pid_exited')
+            a=self._stat(pid);status=self._read('/proc/%d/status'%pid,65536)
+            parse_task_status(status,pid,pid,self.uid);b=self._stat(pid)
+            row=dict(**b,uid=self.uid)
+            need(a==b and all(row[k]==anchor[k] for k in ('pid','parentPid','pgid','sid','startTicks','uid')) and not select.select([handle],[],[],0)[0],'parent_birth_changed')
+            return row
+        return collect_thread_children(self._read,os.listdir,verify_parent,pid,self.uid,self.check)
     def pin_child(self,pid,parent,expected): return self._pin(pid,parent,expected)
     def port(self,pid,port):
         before=self.verify(pid); owned=set()

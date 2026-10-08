@@ -32,6 +32,11 @@ class Supervisor(base.LinuxAuthority):
         self.entries={}; self.roles={}; self.pending={}; self.attempted_roles=set(); self.sequence=0
         self.root=root; self.python_spec=python_spec; self.environment=dict(os.environ)
         need(set(self.environment) <= base.ENV_KEYS and self.environment.get('EASTGENESIS_QA_ISOLATED_PROFILE')=='1','environment_not_fresh')
+        qa_keys={'EASTGENESIS_QA_STARTUP_DIAGNOSTICS','EASTGENESIS_QA_INSTALL_ISOLATION_REQUIRED','EASTGENESIS_QA_STARTUP_RUN_ID','EASTGENESIS_QA_GOAL_OBSERVER'}
+        configured=qa_keys & set(self.environment); need(not configured or configured==qa_keys,'qa_flags_incomplete')
+        if configured:
+            need(all(self.environment[k]=='1' for k in qa_keys if k!='EASTGENESIS_QA_STARTUP_RUN_ID'),'qa_flags_invalid')
+            need(re.fullmatch(r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}',self.environment['EASTGENESIS_QA_STARTUP_RUN_ID']),'qa_run_id_invalid')
         self._directory(root, owned=True)
         for key in ('HOME','TMPDIR','XDG_CONFIG_HOME','XDG_DATA_HOME','XDG_CACHE_HOME','XDG_RUNTIME_DIR'):
             need(self.environment.get(key,'').startswith(root+'/'),'environment_outside_owned_root'); self._directory(self.environment[key],owned=True)
@@ -63,15 +68,26 @@ class Supervisor(base.LinuxAuthority):
                 n=os.open(part,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=fd); os.close(fd); fd=n
             row=os.fstat(fd); need(stat.S_ISDIR(row.st_mode) and (not owned or row.st_uid==os.getuid() and row.st_mode&0o777==0o700),'directory_not_owned')
         finally: os.close(fd)
-    def _environment(self,pid,expected):
+    def _read_environment(self,pid):
         self.check()
         with open('/proc/%d/environ'%pid,'rb') as f: raw=f.read(131073)
         need(len(raw)<=131072,'environment_too_large')
         pairs=raw.rstrip(b'\0').split(b'\0'); value={}
         for pair in pairs:
             key,sep,data=pair.partition(b'='); need(sep and key.decode() not in value,'environment_invalid'); value[key.decode()]=data.decode()
-        need(set(value)<=base.ENV_KEYS | {'TAURI_AUTOMATION','TAURI_WEBVIEW_AUTOMATION'},'inherited_environment_not_fresh')
+        return value
+    def _environment(self,pid,expected,kind='inherited'):
+        value=self._read_environment(pid)
+        if kind=='native_spawned_app':
+            base.validate_descendant_environment(value,self.environment,{'TAURI_AUTOMATION':'true','TAURI_WEBVIEW_AUTOMATION':'true'},kind)
+        elif kind=='mcp_builtin':base.validate_descendant_environment(value,self.environment,{},kind)
+        else:need(kind=='inherited' and set(value)<=base.ENV_KEYS | {'TAURI_AUTOMATION','TAURI_WEBVIEW_AUTOMATION'},'inherited_environment_not_fresh')
         if expected is not None: need(value==expected,'inherited_environment_mismatch')
+        return value
+    def _descendant_environment(self,pid,proof):
+        value=self._read_environment(pid)
+        metadata=base.validate_descendant_environment(value,self.environment,proof.get('environmentAdditions',{}),proof.get('environmentKind','inherited'))
+        return value,metadata
     def _journal(self,event,**fields):
         self.check(); need(self.journal_fd is not None,'journal_unavailable')
         a=os.fstat(self.journal_fd); b=self.journal_anchor
@@ -87,14 +103,14 @@ class Supervisor(base.LinuxAuthority):
         item=self.entries.get(pid) or self.pending[pid]
         return bool(select.select([item['handle']],[],[],0)[0])
     def _raw_children(self,pid):
-        text=self._read('/proc/%d/task/%d/children'%(pid,pid),8192)
-        ids=text.split(); need(len(ids)<=64 and len(ids)==len(set(ids)) and all(x.isdigit() and positive(int(x)) for x in ids),'children_invalid')
-        return list(map(int,ids))
+        item=self.entries.get(pid) or self.pending.get(pid) or self.held.get(pid)
+        need(item is not None,'pid_unregistered')
+        return self._children_at_bound(pid,item.get('row'),item.get('handle'))
     def verify(self,pid):
         if pid not in self.entries: return super().verify(pid)
         item=self.entries[pid]; row=self._snapshot(pid,item['handle'])
         need(row==item['row'],'process_identity_changed')
-        self._environment(pid,item['environment'])
+        self._environment(pid,item['environment'],item.get('environmentKind','inherited'))
         if item.get('argvHash') is not None:
             with open('/proc/%d/cmdline'%pid,'rb') as f: argv=f.read(262145)
             need(len(argv)<=262144 and sha(argv)==item['argvHash'],'inherited_argv_changed')
@@ -205,9 +221,9 @@ class Supervisor(base.LinuxAuthority):
                 self._journal('provisional_descendant_pinned',role=item['role'],pid=pid,startTicks=row['startTicks'],parentPid=row['parentPid'],parentStartTicks=item['birthParentStartTicks'],cleanupOnly=True)
                 self.entries[pid]=item; self.roles[item['role']]=pid
                 self._collect_cleanup_descendants(item,depth+1)
-            except GuardError as error:
+            except GuardError:
                 if pid not in self.entries: os.close(handle)
-                if str(error)!='pid_exited': raise
+                raise
             except BaseException:
                 if pid not in self.entries: os.close(handle)
                 raise
@@ -225,16 +241,21 @@ class Supervisor(base.LinuxAuthority):
             self.entries[pid]=item; self.roles[role]=pid
             row=self._snapshot(pid,handle)
             need(row['exe']['path']==executable['path'] and row['exe']['sha256']==executable['sha256'],'unexpected_executable')
-            need(isinstance(proof,dict) and set(proof)<= {'args','cwd','environmentAdditions'} and isinstance(proof.get('args'),list),'descendant_proof_invalid')
+            need(isinstance(proof,dict) and set(proof)<= {'args','cwd','environmentAdditions','environmentKind'} and isinstance(proof.get('args'),list),'descendant_proof_invalid')
             expected_args=proof['args']; need(len(expected_args)<=64 and all(isinstance(x,str) and '\0' not in x and len(x)<=4096 for x in expected_args),'argv_invalid')
-            additions=proof.get('environmentAdditions',{}); need(isinstance(additions,dict) and set(additions)<={'TAURI_AUTOMATION','TAURI_WEBVIEW_AUTOMATION'} and all(value=='true' for value in additions.values()),'automation_environment_invalid')
-            env=dict(self.environment,**additions); self._environment(pid,env)
+            kind=proof.get('environmentKind','inherited');env,environment_evidence=self._descendant_environment(pid,proof)
             cwd=proof.get('cwd'); need(isinstance(cwd,str) and cwd.startswith(self.root+'/'),'cwd_outside_owned_root'); self._directory(cwd,owned=True)
             need(os.readlink('/proc/%d/cwd'%pid)==cwd,'inherited_cwd_mismatch')
             with open('/proc/%d/cmdline'%pid,'rb') as f: argv=f.read(262145)
             need(len(argv)<=262144 and argv==b'\0'.join(x.encode() for x in [executable['path'],*expected_args])+b'\0','inherited_argv_mismatch')
             self.verify(parent)
-            item.update(row=row,birthRow=dict(row),proof='registered',environment=env,cwd=cwd,argvHash=sha(argv))
+            item.update(row=row,birthRow=dict(row),environment=env,environmentKind=kind,environmentEvidence=environment_evidence,cwd=cwd,argvHash=sha(argv))
+            if kind=='native_spawned_app':
+                # Socket ownership is proved using this retained App birth;
+                # no inspector HTTP is sent and no generic extras are allowed.
+                item['inspectorListener']=self.port(pid,environment_evidence['inspectorPort'])
+                self._journal('native_app_environment_bound',role=role,pid=pid,startTicks=row['startTicks'],safeValues=environment_evidence,inspectorListener=item['inspectorListener'])
+            item['proof']='registered'
             self.held[pid]=dict(handle=handle,row=row)
             self._journal('descendant_pinned',role=role,pid=pid,startTicks=row['startTicks'],parentPid=parent,parentStartTicks=before['startTicks'],executableHash=row['exe']['sha256'])
             return self.record(pid)
@@ -247,7 +268,8 @@ class Supervisor(base.LinuxAuthority):
         need(isinstance(proof,dict) and isinstance(proof.get('args'),list),'descendant_proof_invalid')
         args=proof['args']; additions=proof.get('environmentAdditions',{})
         need(isinstance(additions,dict) and set(additions)<={'TAURI_AUTOMATION','TAURI_WEBVIEW_AUTOMATION'} and all(x=='true' for x in additions.values()),'automation_environment_invalid')
-        expected_env=dict(self.environment,**additions)
+        kind=proof.get('environmentKind','inherited'); need(kind in ('inherited','mcp_builtin','native_spawned_app'),'descendant_environment_kind_invalid')
+        need(kind!='mcp_builtin' or not additions,'mcp_environment_additions_forbidden')
         for pid in children:
             handle=os.pidfd_open(pid,0)
             try:
@@ -258,7 +280,7 @@ class Supervisor(base.LinuxAuthority):
                 with open('/proc/%d/cmdline'%pid,'rb') as f: argv=f.read(262145)
                 if len(argv)>262144 or argv!=b'\0'.join(x.encode() for x in [executable['path'],*args])+b'\0': continue
                 if os.readlink('/proc/%d/cwd'%pid)!=proof.get('cwd'): continue
-                self._environment(pid,expected_env); self.verify(parent); matches.append(pid)
+                self._descendant_environment(pid,proof); self.verify(parent); matches.append(pid)
             finally: os.close(handle)
         need(len(matches)==1,'ambiguous_descendants' if len(matches)>1 else 'owned_descendant_missing')
         self.verify(parent)
@@ -268,7 +290,8 @@ class Supervisor(base.LinuxAuthority):
         result=self._raw_children(pid); self.verify(pid); return result
     def record(self,pid):
         item=self.entries.get(pid) or self.pending.get(pid); need(item is not None,'pid_unregistered')
-        return dict(role=item['role'],pid=pid,startTicks=item.get('row',{}).get('startTicks'),parentPid=item.get('row',{}).get('parentPid'),birthParentPid=item.get('birthRow',{}).get('parentPid'),birthParentStartTicks=item.get('birthParentStartTicks'),proof=item.get('proof','pending'),reaped=item.get('reaped',False),adopted=item.get('adopted',False),exited=self._exited(pid) if item['handle'] is not None else False)
+        exited=self._exited(pid) if item['handle'] is not None else False
+        return dict(role=item['role'],pid=pid,startTicks=item.get('row',{}).get('startTicks'),parentPid=item.get('row',{}).get('parentPid'),birthParentPid=item.get('birthRow',{}).get('parentPid'),birthParentStartTicks=item.get('birthParentStartTicks'),proof=item.get('proof','pending'),executionIdentityValidated=item.get('proof')=='registered',executionAuthority=item.get('proof')=='registered' and not exited and not item.get('reaped',False),cleanupAuthority=item.get('handle') is not None and item.get('row') is not None,environmentEvidence=item.get('environmentEvidence'),inspectorListener=item.get('inspectorListener'),reaped=item.get('reaped',False),exitCode=item.get('exitCode'),adopted=item.get('adopted',False),exited=exited)
     def signal_owned(self,role,kind):
         need(role in self.roles,'role_unregistered'); pid=self.roles[role]
         need(self.entries[pid]['proof']=='registered','target_authority_missing')
@@ -285,7 +308,7 @@ class Supervisor(base.LinuxAuthority):
         need(p['row']['startTicks']==item['birthParentStartTicks'] and self._exited(parent),'adoption_parent_exit_unverified')
         row=self._snapshot(pid,item['handle']) if item['proof']=='registered' else self._minimal(pid,item['handle']); old=item['row']; expected=dict(old,parentPid=os.getpid())
         need(row==expected,'adoption_identity_mismatch')
-        if item['environment'] is not None: self._environment(pid,item['environment'])
+        if item['environment'] is not None: self._environment(pid,item['environment'],item.get('environmentKind','inherited'))
         need(pid in self._raw_children(os.getpid()),'adoption_not_direct_child')
         self._journal('adoption_bound',role=role,pid=pid,startTicks=row['startTicks'],birthParentPid=parent,birthParentStartTicks=item['birthParentStartTicks'],parentPid=os.getpid())
         item['row']=row; item['adopted']=True;

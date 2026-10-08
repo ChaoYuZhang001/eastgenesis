@@ -7,7 +7,7 @@ export const digest = value => createHash('sha256').update(typeof value === 'str
 const pid = n => Number.isSafeInteger(n) && n > 0 && n <= 2147483647;
 const sha = x => typeof x === 'string' && /^[a-f0-9]{64}$/.test(x);
 const ticks = x => typeof x === 'string' && /^[1-9][0-9]{0,19}$/.test(x);
-export const ENV_KEYS = Object.freeze(['PATH', 'HOME', 'TMPDIR', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'XDG_CACHE_HOME', 'XDG_RUNTIME_DIR', 'LANG', 'LC_ALL', 'DISPLAY', 'XAUTHORITY', 'WEBKIT_DISABLE_COMPOSITING_MODE', 'EASTGENESIS_QA_ISOLATED_PROFILE']);
+export const ENV_KEYS = Object.freeze(['PATH', 'HOME', 'TMPDIR', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'XDG_CACHE_HOME', 'XDG_RUNTIME_DIR', 'LANG', 'LC_ALL', 'DISPLAY', 'XAUTHORITY', 'WEBKIT_DISABLE_COMPOSITING_MODE', 'EASTGENESIS_QA_ISOLATED_PROFILE', 'EASTGENESIS_QA_STARTUP_DIAGNOSTICS', 'EASTGENESIS_QA_INSTALL_ISOLATION_REQUIRED', 'EASTGENESIS_QA_STARTUP_RUN_ID', 'EASTGENESIS_QA_GOAL_OBSERVER']);
 
 // The caller supplies literal, owned values. This never spreads process.env.
 export function freshEnvironment(values) {
@@ -17,6 +17,13 @@ export function freshEnvironment(values) {
   for (const [key, value] of Object.entries(env)) need(typeof value === 'string' && value.length > 0 && !value.includes('\0') && value.length <= 4096, 'environment_value_invalid');
   for (const key of ['HOME', 'TMPDIR', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'XDG_CACHE_HOME', 'XDG_RUNTIME_DIR']) need(typeof env[key] === 'string' && env[key].startsWith('/') && !env[key].split('/').includes('..'), 'owned_environment_missing');
   need(env.EASTGENESIS_QA_ISOLATED_PROFILE === '1', 'qa_environment_missing');
+  const qaKeys = ['EASTGENESIS_QA_STARTUP_DIAGNOSTICS','EASTGENESIS_QA_INSTALL_ISOLATION_REQUIRED','EASTGENESIS_QA_STARTUP_RUN_ID','EASTGENESIS_QA_GOAL_OBSERVER'];
+  const configured = qaKeys.filter(k=>Object.hasOwn(env,k));
+  need(configured.length===0 || configured.length===4, 'qa_flags_incomplete');
+  if(configured.length){
+    need(qaKeys.filter(k=>k!=='EASTGENESIS_QA_STARTUP_RUN_ID').every(k=>env[k]==='1'),'qa_flags_invalid');
+    need(/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(env.EASTGENESIS_QA_STARTUP_RUN_ID),'qa_run_id_invalid');
+  }
   return Object.freeze(env);
 }
 
@@ -87,7 +94,7 @@ export function classifyCommand(method, path, body, session, readScripts) {
   need(typeof session === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(session), 'session_unbound');
   const base = `/session/${session}`;
   if (method === 'GET' && (path === `${base}/title` || /^\/session\/[A-Za-z0-9_-]+\/element\/[A-Za-z0-9_-]+\/attribute\/[A-Za-z0-9_-]+$/.test(path))) { need(path.startsWith(`${base}/`), 'session_identity_mismatch'); return 'read'; }
-  if (method === 'POST' && path === `${base}/execute/sync`) {
+  if (method === 'POST' && (path === `${base}/execute/sync` || path === `${base}/execute/async`)) {
     need(body && typeof body.script === 'string' && Array.isArray(body.args) && readScripts.has(digest(body.script)), 'script_not_read_allowlisted'); return 'read';
   }
   if (method === 'DELETE' && path === base) return 'session_delete';
@@ -168,7 +175,7 @@ export class JournaledTransport {
         catch (error) {
           need(!this.#tainted, 'transport_ambiguous_outcome');
           // Only allowlisted read operations can be retried by observation.
-          if (!['webdriver_error_response','observation_not_ready','owned_descendant_missing','transport_connection_refused'].includes(error?.fixedCode)) throw error;
+          if (!['webdriver_error_response','observation_not_ready','owned_descendant_missing','transport_connection_refused','expected_text_missing'].includes(error?.fixedCode)) throw error;
           this.budget.assertBefore(end); await this.sleep(Math.min(100, end - this.budget.last));
         }
       }

@@ -72,7 +72,10 @@ export async function createLinuxProcessLifecycle(config){
   assertLinuxLaunchHost(); // before config getters, filesystem, proc, spawn, network.
   const {ownedRoot,python,supervisor,identityBase,journalPath,totalMs=30000,cleanupMs=5000}=config;
   need(Number.isSafeInteger(totalMs)&&totalMs>=10000&&totalMs<=300000&&Number.isSafeInteger(cleanupMs)&&cleanupMs>=2000&&cleanupMs<=10000&&cleanupMs<totalMs,'budget_invalid');
-  const origin=process.hrtime.bigint();const hardEnd=origin+BigInt(totalMs)*1000000n;const activeEnd=hardEnd-BigInt(cleanupMs)*1000000n;
+  const now=process.hrtime.bigint();const absolute=config.absoluteOriginNs!==undefined||config.absoluteHardEndNs!==undefined;
+  need(!absolute||(typeof config.absoluteOriginNs==='string'&&/^[0-9]+$/.test(config.absoluteOriginNs)&&typeof config.absoluteHardEndNs==='string'&&/^[0-9]+$/.test(config.absoluteHardEndNs)),'absolute_deadline_invalid');
+  const origin=absolute?BigInt(config.absoluteOriginNs):now;const hardEnd=absolute?BigInt(config.absoluteHardEndNs):origin+BigInt(totalMs)*1000000n;
+  need(origin<=now&&now<hardEnd&&hardEnd-origin<=300000000000n&&hardEnd-now>=10000000000n,'absolute_deadline_invalid');const activeEnd=hardEnd-BigInt(cleanupMs)*1000000n;
   const env=freshEnvironment(config.environment);assertControllerEnvironment(process.env,env);
   need(await realpath(ownedRoot)===ownedRoot,'owned_root_link');const root=await lstat(ownedRoot);need(root.isDirectory()&&root.uid===process.getuid()&&(root.mode&0o777)===0o700,'owned_root_invalid');
   need(supervisor.path.startsWith(`${ownedRoot}/`)&&identityBase.path===`${dirname(supervisor.path)}/linux-identity-helper.py`&&journalPath.startsWith(`${ownedRoot}/`),'source_outside_owned_root');
